@@ -1,49 +1,27 @@
-package com.onmm.backend.entity;
+package com.onmm.backend.dto;
 
-import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "demande_experience")
-public class DemandeExperience {
+@Data
+public class DemandeExperienceRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
     private String poste;
 
-    @Column(nullable = false)
-    private String  nomEtablissement;
+    private String nomEtablissement;
 
-    @Column(nullable = false)
-    private  String ville;
-
-    @Column(nullable = false)
     private String pays;
 
-    @Column(nullable = false)
+    private String ville;
+
     private LocalDate dateDebut;
 
-    @Column(nullable = false)
     private LocalDate dateFin;
 
-    @Column(nullable = false)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "demande_id", nullable = false)
-    private DemandeAdhesion demandeAdhesion;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getPoste() {
         return poste;
@@ -101,10 +79,4 @@ public class DemandeExperience {
         this.description = description;
     }
 
-    public DemandeAdhesion getDemandeAdhesion() {
-        return demandeAdhesion;
-    }
-    public void setDemandeAdhesion(DemandeAdhesion demandeAdhesion) {
-        this.demandeAdhesion = demandeAdhesion;
-    }
 }

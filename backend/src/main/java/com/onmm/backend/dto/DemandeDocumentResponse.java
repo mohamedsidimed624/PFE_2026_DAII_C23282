@@ -1,41 +1,22 @@
-package com.onmm.backend.entity;
+package com.onmm.backend.dto;
 
 import com.onmm.backend.entity.enums.TypeDocument;
-import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-@Entity
-@Table(name = "demande_document")
-public class DemandeDocument {
+public class DemandeDocumentResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String  typeDocument;
+    private String typeDocument;
 
-    @Column(nullable = false)
     private String categorie;
 
-    @Column(nullable = false)
-    private  String fileName;
+    private String fileName;
 
-    @Column(nullable = false)
-    private String filePath;
-
-    @Column(nullable = false)
     private Long size;
 
-    @Column(nullable = false)
     private LocalDateTime uploadDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "demande_id", nullable = false)
-    private DemandeAdhesion demandeAdhesion;
 
     public Long getId() {
         return id;
@@ -69,13 +50,7 @@ public class DemandeDocument {
         this.fileName = fileName;
     }
 
-    public String getFilePath() {
-        return filePath;
-    }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
 
     public Long getSize() {
         return size;
@@ -92,14 +67,4 @@ public class DemandeDocument {
     public void setUploadDate(LocalDateTime uploadDate) {
         this.uploadDate = uploadDate;
     }
-
-    public DemandeAdhesion getDemandeAdhesion() {
-        return demandeAdhesion;
-    }
-    public void setDemandeAdhesion(DemandeAdhesion demandeAdhesion) {
-        this.demandeAdhesion = demandeAdhesion;
-    }
-
 }
-
-

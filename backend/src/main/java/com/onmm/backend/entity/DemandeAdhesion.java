@@ -1,8 +1,9 @@
 package com.onmm.backend.entity;
 
 import com.onmm.backend.entity.enums.ApplicationStatus;
-import com.onmm.backend.entity.enums.Sexe;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "demande_adhesion")
 public class DemandeAdhesion {
 
@@ -27,7 +30,7 @@ public class DemandeAdhesion {
     private String prenom;
 
     @Column(nullable = false)
-    private Sexe sexe;
+    private String sexe;
 
     @Column(nullable = false)
     private String nationalite;
@@ -36,7 +39,7 @@ public class DemandeAdhesion {
     private LocalDate dateNaissance;
 
     @Column(nullable = false)
-    private LocalDate email;
+    private String email;
 
     @Column(nullable = false)
     private String telephone;
@@ -51,7 +54,7 @@ public class DemandeAdhesion {
     @Column(nullable = false)
     private LocalDateTime submissionDate;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime decisionDate;
 
     @Column(length = 1000)
@@ -114,11 +117,11 @@ public class DemandeAdhesion {
         this.prenom = prenom;
     }
 
-    public Sexe getSexe() {
+    public String getSexe() {
         return sexe;
     }
 
-    public void setSexe(Sexe sexe) {
+    public void setSexe(String sexe) {
         this.sexe = sexe;
     }
 
@@ -138,11 +141,11 @@ public class DemandeAdhesion {
         this.dateNaissance = dateNaissance;
     }
 
-    public LocalDate getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(LocalDate email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 

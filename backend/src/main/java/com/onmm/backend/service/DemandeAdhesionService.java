@@ -1,4 +1,9 @@
 package com.onmm.backend.service;
 
-public class DemandeAdhesionService {
+import com.onmm.backend.entity.DemandeAdhesion;
+
+public interface DemandeAdhesionService {
+
+    DemandeAdhesion createDemande(DemandeAdhesion demande);
+
 }

@@ -1,42 +1,20 @@
-package com.onmm.backend.entity;
+package com.onmm.backend.dto;
 
-import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-@Entity
-@Table(name = "demande_education")
-public class DemandeEducation {
+@Data
+public class DemandeEducationRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String specialite;
-
-    @Column(nullable = false)
     private String sousSpecialite;
-
-    @Column(nullable = false)
     private String diplome;
-
-    @Column(nullable = false)
     private Integer anneeObtention;
-
-    @Column(nullable = false)
     private String pays;
-
-    @Column(nullable = false)
     private String ville;
-
-    @Column(nullable = false)
     private String universite;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "demande_id", nullable = false)
-    private DemandeAdhesion demandeAdhesion;
 
     public Long getId() {
         return id;
@@ -102,10 +80,4 @@ public class DemandeEducation {
         this.universite = universite;
     }
 
-    public DemandeAdhesion getDemandeAdhesion() {
-        return demandeAdhesion;
-    }
-    public void setDemandeAdhesion(DemandeAdhesion demandeAdhesion) {
-        this.demandeAdhesion = demandeAdhesion;
-    }
 }
