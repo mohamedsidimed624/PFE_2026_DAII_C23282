@@ -7,7 +7,7 @@ import java.time.LocalDate;
 @Data
 public class DemandeAdhesionRequest {
 
-    private String NNI;
+    private String nni;
     private String nom;
     private String prenom;
     private String sexe;

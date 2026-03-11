@@ -1,49 +1,35 @@
-import React, { useState } from 'react';
-import { User, Menu, X } from 'lucide-react';
-
-export default function NavBar() {
-  const [isOpen, setIsOpen] = useState(false);
-
+import { Link } from "react-router-dom";
+import logo from "../assets/logo.png";
+function Navbar() {
   return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          {/* logo */}
-          <div className="flex items-center h-16">
-            ONMM
-          </div>
+    <>
+    <nav className="bg-white shadow">
 
-          {/* liens : cachés en mobile, visibles sur md+ */}
-          <div className="hidden md:flex space-x-8 items-center">
-            <a className="text-gray-700 hover:text-blue-600" href="">Acceuil</a>
-            <a className="text-gray-700 hover:text-blue-600" href="">Annonces</a>
-            <a className="text-gray-700 hover:text-blue-600" href="">A propos</a>
-            <a className="text-gray-700 hover:text-blue-600" href="">Contact</a>
-            <a className="text-gray-700 hover:text-blue-600" href="">annuaire</a>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-4xl">
-              <User size={20} /> Connexion
-            </button>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
 
-          {/* bouton hamburger visible uniquement en mobile */}
-          <div className="md:hidden flex items-center">
-            <button onClick={() => setIsOpen(!isOpen)}>
-              {isOpen ? <X size={28} /> : <Menu size={28} />}
-            </button>
-          </div>
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="logo" className="w-10 h-10"/>
+          <span className="font-bold text-lg">
+            Ordre des Médecins
+          </span>
         </div>
+
+        <div className="flex gap-6">
+
+          <Link to="/">Accueil</Link>
+          <Link to="/annuaire">Annuaire</Link>
+          <Link to="/annonces">Annonces</Link>
+          <Link to="/contact">Contact</Link>
+          <Link className="bg-green-600 text-white px-4 py-2 rounded-lg" to="/login">Connexion</Link>
+
+        </div>
+
       </div>
+      
 
-      {/* menu mobile déroulant */}
-      {isOpen && (
-        <div className="md:hidden bg-gray-50 border-t border-gray-200">
-          <a className="block px-4 py-3 text-sm hover:bg-blue-50" href="">Acceuil</a>
-          <a className="block px-4 py-3 text-sm hover:bg-blue-50" href="">Annonces</a>
-          <a className="block px-4 py-3 text-sm hover:bg-blue-50" href="">A propos</a>
-          <a className="block px-4 py-3 text-sm hover:bg-blue-50" href="">Contact</a>
-          <a className="block px-4 py-3 text-sm hover:bg-blue-50" href="">annuaire</a>
-        </div>
-      )}
     </nav>
+    </>
   );
 }
+
+export default Navbar;
