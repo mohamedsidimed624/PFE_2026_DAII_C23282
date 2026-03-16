@@ -1,0 +1,17 @@
+export const postes = [
+  "Interne en médecine",
+  "Médecin généraliste",
+  "Médecin spécialiste",
+  "Cardiologue",
+  "Chirurgien",
+  "Pédiatre",
+  "Gynécologue",
+  "Anesthésiste",
+  "Radiologue",
+  "Urgentiste",
+  "Chef de service",
+  "Directeur médical",
+  "Assistant médical",
+  "Consultant médical",
+  "Autre",
+];

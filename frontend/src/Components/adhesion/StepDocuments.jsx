@@ -230,7 +230,11 @@ function StepDocuments({ nextStep, prevStep }) {
 
         <button
           onClick={prevStep}
-          className="border px-6 py-3 rounded-lg"
+          className="border
+          px-6 py-3
+          rounded-lg
+          hover:bg-gray-100
+          transition"
         >
           Retour
         </button>

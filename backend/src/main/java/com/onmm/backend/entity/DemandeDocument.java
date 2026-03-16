@@ -15,22 +15,22 @@ public class DemandeDocument {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "type_document", nullable = false)
     private String  typeDocument;
 
     @Column(nullable = false)
     private String categorie;
 
-    @Column(nullable = false)
+    @Column(name = "file_name", nullable = false)
     private  String fileName;
 
-    @Column(nullable = false)
+    @Column(name = "file_path", nullable = false)
     private String filePath;
 
     @Column(nullable = false)
     private Long size;
 
-    @Column(nullable = false)
+    @Column(name = "upload_date", nullable = false)
     private LocalDateTime uploadDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -42,13 +42,17 @@ export const personalSchema = z.object({
 ========================= */
 
 export const educationSchema = z.object({
-  specialite: z.string().min(2, "Spécialité requise"),
+  specialite: z.string().min(1, "Spécialité requise"),
 
-  sousSpecialite: z.string().min(2, "Sous-spécialité requise"),
+  sousSpecialite: z.string().min(1, "Sous-spécialité requise"),
 
-  diplome: z.string().min(2, "Diplôme requis"),
+  diplome: z.string().min(1, "Diplôme requis"),
 
-  annee: z.string().regex(/^[0-9]{4}$/, "Année invalide"),
+  annee: z.string().refine((value) => {
+    const year = parseInt(value, 10);
+    const currentYear = new Date().getFullYear();
+    return year >= 1900 && year <= currentYear;
+  }, "Année invalide"),
 
   pays: z.string().min(2, "Pays requis"),
 
@@ -61,21 +65,72 @@ export const educationSchema = z.object({
    EXPERIENCE
 ========================= */
 
-export const experienceSchema = z.object({
-  poste: z.string().min(2, "Poste requis"),
+export const experienceSchema = z
+  .object({
+    poste: z.string().min(2, "Poste requis"),
 
-  etablissement: z.string().min(2, "Établissement requis"),
+    etablissement: z.string().min(2, "Établissement requis"),
 
-  dateDebut: z.string().min(1, "Date de début requise"),
+    dateDebut: z.string().min(1, "Date de début requise"),
 
-  dateFin: z.string().min(1, "Date de fin requise"),
+    dateFin: z.string().optional(),
 
-  pays: z.string().min(2, "Pays requis"),
+    posteActuel: z.boolean().optional(),
 
-  ville: z.string().min(2, "Ville requise"),
+    pays: z.string().min(2, "Pays requis"),
 
-  description: z.string().min(10, "Description trop courte"),
-});
+    ville: z.string().min(2, "Ville requise"),
+
+    description: z.string().min(10, "Description trop courte"),
+  })
+
+  /* 1️⃣ vérifier date début <= aujourd'hui */
+
+  .refine(
+    (data) => {
+      const today = new Date();
+      const debut = new Date(data.dateDebut);
+
+      return debut <= today;
+    },
+    {
+      message: "La date de début ne peut pas être dans le futur",
+      path: ["dateDebut"],
+    },
+  )
+
+  /* 2️⃣ vérifier date fin <= aujourd'hui */
+
+  .refine(
+    (data) => {
+      if (!data.dateFin) return true;
+
+      const today = new Date();
+      const fin = new Date(data.dateFin);
+
+      return fin <= today;
+    },
+    {
+      message: "La date de fin ne peut pas être dans le futur",
+      path: ["dateFin"],
+    },
+  )
+
+  /* 3️⃣ vérifier dateFin >= dateDebut */
+
+  .refine(
+    (data) => {
+      if (data.posteActuel) return true;
+
+      if (!data.dateFin) return false;
+
+      return new Date(data.dateFin) >= new Date(data.dateDebut);
+    },
+    {
+      message: "La date de fin doit être après la date de début",
+      path: ["dateFin"],
+    },
+  );
 
 export const documentsSchema = z.object({
   diplomes: z.array(z.any()).min(1, "Au moins un diplôme est requis"),

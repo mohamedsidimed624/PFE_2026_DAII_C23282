@@ -15,7 +15,7 @@ public class DemandeExperience {
     @Column(nullable = false)
     private String poste;
 
-    @Column(nullable = false)
+    @Column(name = "nom_etablissement", nullable = false)
     private String  nomEtablissement;
 
     @Column(nullable = false)
@@ -24,10 +24,10 @@ public class DemandeExperience {
     @Column(nullable = false)
     private String pays;
 
-    @Column(nullable = false)
+    @Column(name = "date_debut",nullable = false)
     private LocalDate dateDebut;
 
-    @Column(nullable = false)
+    @Column(name = "date_fin", nullable = true)
     private LocalDate dateFin;
 
     @Column(nullable = false)

@@ -2,6 +2,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormData } from "../../context/FormContext";
 import { experienceSchema } from "../../validation/validationSchemas";
+import { experienceData } from "../../data/experienceData";
+import { useState, useEffect } from "react";
+import { postes } from "../../data/postes";
 
 import {
   Briefcase,
@@ -10,6 +13,7 @@ import {
   MapPin,
   FileText
 } from "lucide-react";
+// import { set } from "zod";
 
 function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
 
@@ -24,6 +28,7 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(experienceSchema),
@@ -50,6 +55,37 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
 
   };
 
+  const [villes, setVilles] = useState([]);
+  const [etablissements, setEtablissements] = useState([]);
+
+  const selectedPays = watch("pays");
+  const selectedVille = watch("ville");
+
+  useEffect(() => {
+    if (!selectedPays) {
+      setVilles([]);
+      setEtablissements([]);
+      return;
+    }
+
+    const villesPays = Object.keys(experienceData[selectedPays]) || [];
+
+    setVilles(villesPays);
+    setEtablissements([]);
+  }, [selectedPays]);
+
+  useEffect(() => {
+    if (!selectedPays || !selectedVille) {
+      setEtablissements([]);
+      return;
+    }
+    setEtablissements(experienceData[selectedPays][selectedVille] || []);
+  }, [selectedVille, selectedPays]);
+
+
+  const isCurrent = watch("posteActuel");
+
+
   return (
 
     <form
@@ -69,11 +105,18 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
             size={18}
           />
 
-          <input
+          <select
             {...register("poste")}
-            placeholder="Médecin généraliste"
-            className="w-full border rounded-lg p-3 pl-10"
-          />
+            className="w-full border rounded-lg p-3 pl-10 focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">Sélectionner un poste</option>
+            {postes.map((poste) => (
+              <option key={poste} value={poste}>
+                {poste}
+              </option>
+            ))}
+          </select>
+
 
           <p className="text-red-500 text-sm">
           {errors.poste?.message}
@@ -81,6 +124,70 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
         </div>
 
         
+
+      </div>
+
+
+      {/* Pays */}
+
+      <div>
+        <label className="text-sm font-medium">
+          Pays
+        </label>
+
+        <div className="relative">
+
+          <MapPin
+            className="absolute left-3 top-4 text-gray-400"
+            size={18}
+          />
+
+          <select
+            {...register("pays")}
+            className="w-full border rounded-lg p-3 pl-10 focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">Sélectionner un pays</option>
+            {Object.keys(experienceData).map((pays) => (
+              <option key={pays} value={pays}>
+                {pays}
+              </option>
+            ))}
+          </select>
+
+
+          <p className="text-red-500 text-sm">
+            {errors.pays?.message}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      {/* Ville */}
+
+      <div>
+        <label className="text-sm font-medium">
+          Ville
+        </label>
+
+        <select
+          {...register("ville")}
+          className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+          disabled={!selectedPays}
+        >
+          <option value="">Sélectionner une ville</option>
+          {villes.map((ville) => (
+            <option key={ville} value={ville}>
+              {ville}
+            </option>
+          ))}
+        </select>
+
+
+        <p className="text-red-500 text-sm">
+          {errors.ville?.message}
+        </p>
 
       </div>
 
@@ -99,11 +206,19 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
             size={18}
           />
 
-          <input
+          <select
             {...register("etablissement")}
-            placeholder="Clinique XYZ"
-            className="w-full border rounded-lg p-3 pl-10"
-          />
+            className="w-full border rounded-lg p-3 pl-10 focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+            disabled={!selectedPays || !selectedVille}
+          >
+            <option value="">Sélectionner un établissement</option>
+            {etablissements.map((etablissement) => (
+              <option key={etablissement} value={etablissement}>
+                {etablissement}
+              </option>
+            ))}
+          </select>
+
 
           <p className="text-red-500 text-sm">
           {errors.etablissement?.message}
@@ -160,6 +275,7 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
           <input
             type="date"
             {...register("dateFin")}
+            disabled={isCurrent}
             className="w-full border rounded-lg p-3 pl-10"
           />
           <p className="text-red-500 text-sm">
@@ -167,56 +283,22 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
         </p>
         </div>
 
-      </div>
-
-
-      {/* Pays */}
-
-      <div>
-        <label className="text-sm font-medium">
-          Pays
-        </label>
-
-        <div className="relative">
-
-          <MapPin
-            className="absolute left-3 top-4 text-gray-400"
-            size={18}
-          />
-
+        <label className="inline-flex items-center mt-2">
           <input
-            {...register("pays")}
-            placeholder="Mauritanie"
-            className="w-full border rounded-lg p-3 pl-10"
+            type="checkbox"
+            {...register("posteActuel")}
+            className="form-checkbox h-5 w-5 text-green-600"
           />
-
-          <p className="text-red-500 text-sm">
-            {errors.pays?.message}
-          </p>
-
-        </div>
-
-      </div>
-
-
-      {/* Ville */}
-
-      <div>
-        <label className="text-sm font-medium">
-          Ville
+          <span className="ml-2 text-sm font-medium">
+            Poste actuel
+          </span>
         </label>
 
-        <input
-          {...register("ville")}
-          placeholder="Nouakchott"
-          className="w-full border rounded-lg p-3"
-        />
-
-        <p className="text-red-500 text-sm">
-          {errors.ville?.message}
-        </p>
 
       </div>
+
+
+      
 
 
       {/* Description */}

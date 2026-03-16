@@ -43,6 +43,8 @@ public class DemandeDocumentServiceImpl implements DemandeDocumentService {
             DemandeAdhesion demande = demandeRepository.findById(demandeId)
                     .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
+            System.out.println("UPLOAD DOCUMENT APPELLE");
+
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
             Path path = Paths.get(uploadDir + fileName);
@@ -50,6 +52,8 @@ public class DemandeDocumentServiceImpl implements DemandeDocumentService {
             Files.createDirectories(path.getParent());
 
             Files.write(path, file.getBytes());
+
+            System.out.println("FILE NAME = " + file.getOriginalFilename());
 
             DemandeDocument document = new DemandeDocument();
 

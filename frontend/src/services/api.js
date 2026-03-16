@@ -5,16 +5,12 @@ const API = axios.create({
 });
 
 export const createDemande = async (personalData) => {
-  try {
-    const response = await API.post("/demandes", personalData);
-    return response.data;
-  } catch (error) {
-    if (error.response) {
-      throw new Error(error.response.data.message);
-    }
+  const response = await axios.post(
+    "http://localhost:8080/api/demandes",
+    personalData,
+  );
 
-    throw new Error("Erreur creation demande");
-  }
+  return response.data;
 };
 
 export const checkUnique = async ({ nni, email, telephone }) => {
@@ -24,5 +20,15 @@ export const checkUnique = async ({ nni, email, telephone }) => {
       email,
       telephone,
     },
+  });
+};
+
+export const getSpecialites = () => {
+  return API.get("/reference/specialites");
+};
+
+export const getSousSpecialites = (specialiteId) => {
+  return API.get("/reference/sous_specialites", {
+    params: { specialiteId },
   });
 };

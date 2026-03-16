@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useFormData } from "../../context/FormContext";
 import { createDemande } from "../../services/api";
-
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   User,
   GraduationCap,
@@ -16,25 +17,142 @@ function ConsentStep({ prevStep }) {
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
 
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
   const handleSubmit = async () => {
 
-    if (!consent) {
-      setError("Veuillez accepter la déclaration.");
-      return;
-    }
+  if (!consent) {
+    setError("Veuillez accepter la déclaration.");
+    return;
+  }
 
-    try {
-      await createDemande(formData.personal);
-      console.log("Demande cree :");
-    } catch (error) {
-      setError(error.message);
-    }
+  try {
 
-    console.log("Form data :", formData);
+    setLoading(true);
+    setError("");
 
+    console.log("DATA ENVOYEE :", formData);
+
+    // 1️⃣ créer demande
+    const demande = await createDemande(formData.personal);
+    console.log("DEMANDE CREEE :", demande);
+    const demandeId = demande.id;
+    console.log("ID DEMANDE :", demandeId);
     
-  };
+    // 2️⃣ envoyer  
+    for (const edu of formData.education) {
+      await axios.post(
+        `http://localhost:8080/api/demandes/${demandeId}/educations`,
+        {
+          specialite: edu.specialite,
+          sousSpecialite: edu.sousSpecialite,
+          diplome: edu.diplome,
+          anneeObtention: edu.annee,
+          pays: edu.pays,
+          ville: edu.ville,
+          universite: edu.universite
+        }
 
+      );
+    }
+
+    // 3️⃣ envoyer experience
+    for (const exp of formData.experience) {
+
+  const experiencePayload = {
+    poste: exp.poste,
+    nomEtablissement: exp.etablissement,
+    ville: exp.ville,
+    pays: exp.pays,
+    dateDebut: exp.dateDebut,
+    dateFin: exp.dateFin || null,
+    description: exp.description
+  };
+  console.log("PAYLOAD EXPERIENCE :", experiencePayload);
+
+  await axios.post(
+    `http://localhost:8080/api/demandes/${demandeId}/experiences`,
+    experiencePayload
+  );
+  console.log("PAYLOAD EXPERIENCE :", experiencePayload);
+
+}
+
+    // 4️⃣ function upload document
+    const uploadDocument = async (type, categorie, file) => {
+
+      const data = new FormData();
+
+      data.append("typeDocument", type);
+      data.append("categorie", categorie);
+      data.append("file", file);
+
+      await axios.post(
+        `http://localhost:8080/api/demandes/${demandeId}/documents`,
+        data
+      );
+    };
+
+    // 5️⃣ upload diplômes
+    for (const doc of formData.documents.diplomes) {
+      await uploadDocument("DIPLOME", "diplome", doc.file);
+    }
+
+    // 6️⃣ upload certificats
+    for (const doc of formData.documents.certificats) {
+      await uploadDocument("CERTIFICAT", "certificat", doc.file);
+    }
+
+    // 7️⃣ upload autres
+    for (const doc of formData.documents.autres) {
+      await uploadDocument("AUTRE", "autre", doc.file);
+    }
+
+    // succès
+    setSuccess(true);
+
+  } catch (error) {
+
+    console.error(error);
+    setError(error.message || "Erreur lors de la soumission.");
+
+  } finally {
+
+    setLoading(false);
+
+  }
+    
+
+};
+  if (success) {
+  return (
+    <div className="text-center space-y-6 p-10">
+
+      <h2 className="text-2xl font-semibold mb-4">
+        Demande soumise avec succès !
+      </h2>
+
+      <p className="text-gray-600">
+        Votre demande a été soumise avec succès. Nous vous contacterons bientôt.
+      </p>
+
+      <p className="text-gray-500 text-sm">
+        Vous recevrez un email de confirmation
+      </p>
+
+      <button
+        onClick={() => navigate("/")}
+        className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+      >
+        Retour à l'accueil
+      </button>
+
+    </div>
+  );
+}
   return (
 
     <div className="space-y-8">
@@ -206,16 +324,21 @@ function ConsentStep({ prevStep }) {
 
         <button
           onClick={prevStep}
-          className="border px-6 py-3 rounded-lg"
+          className="border
+          px-6 py-3
+          rounded-lg
+          hover:bg-gray-100
+          transition"
         >
           Retour
         </button>
 
         <button
           onClick={handleSubmit}
-          className="bg-green-600 text-white px-8 py-3 rounded-lg"
+          disabled={loading}
+          className="bg-green-600 text-white px-8 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          Soumettre la demande
+          {loading ? "Envoi en cours..." : "Soumettre la demande"}
         </button>
         
       </div>

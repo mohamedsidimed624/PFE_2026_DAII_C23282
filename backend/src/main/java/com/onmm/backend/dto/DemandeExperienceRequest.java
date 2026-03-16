@@ -1,5 +1,6 @@
 package com.onmm.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -15,8 +16,10 @@ public class DemandeExperienceRequest {
 
     private String ville;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateDebut;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateFin;
 
     private String description;

@@ -1,5 +1,6 @@
 package com.onmm.backend.service.impl;
 
+import com.onmm.backend.dto.DemandeAdhesionRequest;
 import com.onmm.backend.entity.DemandeAdhesion;
 import com.onmm.backend.entity.enums.ApplicationStatus;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
@@ -23,35 +24,50 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
     }
 
     @Override
-    public DemandeAdhesion createDemande(DemandeAdhesion demande) {
+    public DemandeAdhesion createDemande(DemandeAdhesionRequest request) {
 
         boolean NNIConflit = demandeAdhesionRepository
-                .existsByNNIAndStatut(demande.getNNI(), ApplicationStatus.PENDING);
+                .existsByNNIAndStatut(request.getNni(), ApplicationStatus.PENDING);
 
         boolean EmailConflit = demandeAdhesionRepository
-                .existsByEmailAndStatut(demande.getEmail(), ApplicationStatus.PENDING);
+                .existsByEmailAndStatut(request.getEmail(), ApplicationStatus.PENDING);
 
         boolean TelephoneConflit = demandeAdhesionRepository
-                .existsByTelephoneAndStatut(demande.getTelephone(), ApplicationStatus.PENDING);
+                .existsByTelephoneAndStatut(request.getTelephone(), ApplicationStatus.PENDING);
+
+
         if (NNIConflit) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Une demande existe déjà pour ce NNI"
             );
         }
+
         if (EmailConflit) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Une demande existe déjà pour ce email"
+                    "Une demande existe déjà pour cet email"
             );
         }
 
         if (TelephoneConflit) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Une demande existe déjà pour cette numero du telephone"
+                    "Une demande existe déjà pour ce numéro de téléphone"
             );
         }
+
+        DemandeAdhesion demande = new DemandeAdhesion();
+
+        demande.setNNI(request.getNni());
+        demande.setNom(request.getNom());
+        demande.setPrenom(request.getPrenom());
+        demande.setSexe(request.getSexe());
+        demande.setNationalite(request.getNationalite());
+        demande.setDateNaissance(request.getDateNaissance());
+        demande.setEmail(request.getEmail());
+        demande.setTelephone(request.getTelephone());
+        demande.setAdresse(request.getAdresse());
 
         demande.setStatut(ApplicationStatus.PENDING);
         demande.setSubmissionDate(LocalDateTime.now());

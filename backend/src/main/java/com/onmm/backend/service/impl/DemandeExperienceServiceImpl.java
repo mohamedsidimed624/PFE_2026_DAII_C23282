@@ -23,15 +23,21 @@ public class DemandeExperienceServiceImpl implements DemandeExperienceService {
 
     @Override
     public DemandeExperienceResponse addExperience(Long demandeId, DemandeExperienceRequest request) {
+
+        System.out.println("SERVICE APPELE");
+        System.out.println("DemandeID = " + demandeId);
         DemandeAdhesion demande = demandeRepository.findById(demandeId)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+
+
+        System.out.println("DEMANDE TROUVEE " + demande.getId());
 
         DemandeExperience exp = DemandeExperienceMapper.toEntity(request);
 
         exp.setDemandeAdhesion(demande);
 
         DemandeExperience saved = experienceRepository.save(exp);
-
+        System.out.println("EXPERIENCE SAVED ID = " + saved.getId());
         return DemandeExperienceMapper.toResponse(saved);
     }
 }

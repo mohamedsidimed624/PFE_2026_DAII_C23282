@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { personalSchema } from "../../validation/validationSchemas";
 import { useFormData } from "../../context/FormContext";
 import { checkUnique } from "../../services/api";
-
+import { useEffect } from "react";
 import {
   User,
   Mail,
@@ -21,12 +21,48 @@ function StepPersonal({ nextStep }) {
   const {
     register,
     handleSubmit,
+    watch,
     setError,
+    clearErrors,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(personalSchema),
     defaultValues: formData.personal
   });
+
+  const nni = watch("nni");
+  const email = watch("email");
+  const telephone = watch("telephone");
+
+  useEffect(() => {
+    const check = async () => {
+
+      if (!nni && !email && !telephone) 
+        return;
+      
+      try {
+
+        await checkUnique({ nni, email, telephone });
+        clearErrors(["nni", "email", "telephone"]);
+      } catch (err) {
+
+        const apiErrors = err.response?.data;
+        if (!apiErrors) return;
+
+        if (apiErrors.nni) {
+          setError("nni", { message: apiErrors.nni });
+        }
+        if (apiErrors.email) {
+          setError("email", { message: apiErrors.email });
+        }
+        if (apiErrors.telephone) {
+          setError("telephone", { message: apiErrors.telephone });
+        }
+      }
+    };
+
+    check();
+  }, [nni, email, telephone, setError, clearErrors]);
 
   const onSubmit = async (data) => {
 
