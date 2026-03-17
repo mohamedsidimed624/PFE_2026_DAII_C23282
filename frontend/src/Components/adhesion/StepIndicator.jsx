@@ -20,7 +20,7 @@ const steps = [
 
 function StepIndicator() {
 
-  const { step, setStep } = useFormData();
+  const { step, setStep, submitted } = useFormData();
 
   useEffect(() => {
     window.scrollTo({
@@ -28,6 +28,8 @@ function StepIndicator() {
       behavior: "smooth"
     });
   }, [step]);
+
+  if (submitted) return null;
 
   return (
     

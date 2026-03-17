@@ -10,6 +10,8 @@ import ConsentStep from "../components/adhesion/ConsentStep";
 import { FormProvider, useFormData } from "../context/FormContext";
 
 function ApplicationSteps() {
+  const { submitted } = useFormData(); 
+  {!submitted && <StepIndicator />}
 
   const { step, setStep } = useFormData();
 
@@ -19,7 +21,7 @@ function ApplicationSteps() {
   return (
 
     <div className="max-w-6xl mx-auto mt-10 bg-white p-8 rounded shadow">
-
+      
       <StepIndicator />
 
       {step === 1 && <StepPersonal nextStep={nextStep} />}

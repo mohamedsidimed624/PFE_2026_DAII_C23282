@@ -5,6 +5,7 @@ import com.onmm.backend.entity.DemandeAdhesion;
 import com.onmm.backend.entity.enums.ApplicationStatus;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
 import com.onmm.backend.service.DemandeAdhesionService;
+import com.onmm.backend.service.email.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,11 @@ import java.util.Map;
 public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
 
     private final DemandeAdhesionRepository demandeAdhesionRepository;
+    private final EmailService emailService;
 
-    public DemandeAdhesionServiceImpl(DemandeAdhesionRepository demandeAdhesionRepository) {
+    public DemandeAdhesionServiceImpl(DemandeAdhesionRepository demandeAdhesionRepository, EmailService emailService) {
         this.demandeAdhesionRepository = demandeAdhesionRepository;
+        this.emailService = emailService;
     }
 
     @Override
@@ -72,8 +75,17 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
         demande.setStatut(ApplicationStatus.PENDING);
         demande.setSubmissionDate(LocalDateTime.now());
 
-        return demandeAdhesionRepository.save(demande);
+        DemandeAdhesion saved = demandeAdhesionRepository.save(demande);
+
+        // Email accusé de réception
+        emailService.sendSubmissionEmail(
+                saved.getEmail(),
+                saved.getNom()
+        );
+
+        return saved;
     }
+
 
     @Override
     public ResponseEntity<?> checkUnique(String nni, String email, String telephone) {

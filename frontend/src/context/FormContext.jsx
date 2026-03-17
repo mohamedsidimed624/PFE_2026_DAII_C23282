@@ -4,6 +4,8 @@ const FormContext = createContext();
 
 export const FormProvider = ({ children }) => {
 
+  const [submitted, setSubmitted] = useState(false);
+
   const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
@@ -11,9 +13,9 @@ export const FormProvider = ({ children }) => {
     education: [],
     experience: [],
     documents: {
-        diplomes: [],
-        certificats: [],
-        autres: []
+      diplomes: [],
+      certificats: [],
+      autres: []
     }
   });
 
@@ -37,13 +39,29 @@ export const FormProvider = ({ children }) => {
       [section]: data
     }));
   };
-  
+
+  const resetForm = () => {
+    setFormData({
+      personal: {},
+      education: [],
+      experience: [],
+      documents: {
+        diplomes: [],
+        certificats: [],
+        autres: []
+      }
+    });
+    setStep(1);
+  };
+
 
   return (
     <FormContext.Provider
       value={{
         step,
         setStep,
+        submitted,
+        setSubmitted,
         formData,
         updateSection
       }}

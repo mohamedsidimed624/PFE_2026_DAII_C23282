@@ -12,7 +12,7 @@ import {
 
 function ConsentStep({ prevStep }) {
 
-  const { formData } = useFormData();
+  const { formData , setSubmitted} = useFormData();
 
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
@@ -112,7 +112,10 @@ function ConsentStep({ prevStep }) {
     }
 
     // succès
+    localStorage.removeItem("adhesionForm");
+    
     setSuccess(true);
+    setSubmitted(true);
 
   } catch (error) {
 

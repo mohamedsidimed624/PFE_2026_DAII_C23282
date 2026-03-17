@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -62,13 +63,13 @@ public class DemandeAdhesion {
 
 
     @OneToMany(mappedBy = "demandeAdhesion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<DemandeEducation> educations = new ArrayList<>();
+    private Set<DemandeEducation> educations;
 
     @OneToMany(mappedBy = "demandeAdhesion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<DemandeExperience> experiences = new ArrayList<>();
+    private Set<DemandeExperience> experiences;
 
     @OneToMany(mappedBy = "demandeAdhesion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<DemandeDocument> documents = new ArrayList<>();
+    private Set<DemandeDocument> documents;
 
     public DemandeAdhesion() {
     }
@@ -197,27 +198,27 @@ public class DemandeAdhesion {
         this.adminComment = adminComment;
     }
 
-    public List<DemandeEducation> getEducations() {
+    public Set<DemandeEducation> getEducations() {
         return educations;
     }
 
-    public void setEducations(List<DemandeEducation> educations) {
+    public void setEducations(Set<DemandeEducation> educations) {
         this.educations = educations;
     }
 
-    public List<DemandeExperience> getExperiences() {
+    public Set<DemandeExperience> getExperiences() {
         return experiences;
     }
 
-    public void setExperiences(List<DemandeExperience> experiences) {
+    public void setExperiences(Set<DemandeExperience> experiences) {
         this.experiences = experiences;
     }
 
-    public List<DemandeDocument> getDocuments() {
+    public Set<DemandeDocument> getDocuments() {
         return documents;
     }
 
-    public void setDocuments(List<DemandeDocument> documents) {
+    public void setDocuments(Set<DemandeDocument> documents) {
         this.documents = documents;
     }
 }
