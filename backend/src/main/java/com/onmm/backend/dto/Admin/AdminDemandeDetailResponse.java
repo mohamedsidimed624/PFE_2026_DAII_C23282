@@ -1,5 +1,9 @@
 package com.onmm.backend.dto.Admin;
 
+import com.onmm.backend.dto.DemandeDocumentResponse;
+import com.onmm.backend.dto.DemandeEducationResponse;
+import com.onmm.backend.dto.DemandeExperienceResponse;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,11 +28,11 @@ public class AdminDemandeDetailResponse {
 
     private LocalDateTime submissionDate;
 
-    private List<String> educations;
+    private List<DemandeEducationResponse> educations;
 
-    private List<String> experiences;
+    private List<DemandeExperienceResponse> experiences;
 
-    private List<String> documents;
+    private List<DemandeDocumentResponse> documents;
 
     public Long getId() {
         return id;
@@ -54,20 +58,20 @@ public class AdminDemandeDetailResponse {
         this.prenom = prenom;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getTelephone() {
         return telephone;
     }
 
     public void setTelephone(String telephone) {
         this.telephone = telephone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getNationalite() {
@@ -102,27 +106,27 @@ public class AdminDemandeDetailResponse {
         this.submissionDate = submissionDate;
     }
 
-    public List<String> getEducations() {
-        return educations;
-    }
-
-    public void setEducations(List<String> educations) {
-        this.educations = educations;
-    }
-
-    public List<String> getExperiences() {
+    public List<DemandeExperienceResponse> getExperiences() {
         return experiences;
     }
 
-    public void setExperiences(List<String> experiences) {
+    public void setExperiences(List<DemandeExperienceResponse> experiences) {
         this.experiences = experiences;
     }
 
-    public List<String> getDocuments() {
+    public List<DemandeEducationResponse> getEducations() {
+        return educations;
+    }
+
+    public void setEducations(List<DemandeEducationResponse> educations) {
+        this.educations = educations;
+    }
+
+    public List<DemandeDocumentResponse> getDocuments() {
         return documents;
     }
 
-    public void setDocuments(List<String> documents) {
+    public void setDocuments(List<DemandeDocumentResponse> documents) {
         this.documents = documents;
     }
 }

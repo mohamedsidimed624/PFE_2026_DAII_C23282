@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/demandes")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AdminDemandeController {
 
     private final AdminDemandeService adminService;

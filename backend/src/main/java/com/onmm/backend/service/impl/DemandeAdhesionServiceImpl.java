@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -30,13 +31,13 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
     public DemandeAdhesion createDemande(DemandeAdhesionRequest request) {
 
         boolean NNIConflit = demandeAdhesionRepository
-                .existsByNNIAndStatut(request.getNni(), ApplicationStatus.PENDING);
+                .existsByNNIAndStatutIn(request.getNni(), List.of(ApplicationStatus.PENDING, ApplicationStatus.APPROUVED ));
 
         boolean EmailConflit = demandeAdhesionRepository
-                .existsByEmailAndStatut(request.getEmail(), ApplicationStatus.PENDING);
+                .existsByEmailAndStatutIn(request.getEmail(), List.of(ApplicationStatus.PENDING, ApplicationStatus.APPROUVED));
 
         boolean TelephoneConflit = demandeAdhesionRepository
-                .existsByTelephoneAndStatut(request.getTelephone(), ApplicationStatus.PENDING);
+                .existsByTelephoneAndStatutIn(request.getTelephone(), List.of(ApplicationStatus.PENDING, ApplicationStatus.APPROUVED));
 
 
         if (NNIConflit) {
@@ -92,15 +93,15 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
 
         Map<String,String> errors = new HashMap<>();
 
-        if(demandeAdhesionRepository.existsByNNIAndStatut(nni, ApplicationStatus.PENDING)){
+        if(demandeAdhesionRepository.existsByNNIAndStatutIn(nni, List.of(ApplicationStatus.PENDING, ApplicationStatus.APPROUVED))){
             errors.put("nni","NNI déjà utilisé");
         }
 
-        if(demandeAdhesionRepository.existsByEmailAndStatut(email, ApplicationStatus.PENDING)){
+        if(demandeAdhesionRepository.existsByEmailAndStatutIn(email, List.of(ApplicationStatus.PENDING, ApplicationStatus.APPROUVED))){
             errors.put("email","Email déjà utilisé");
         }
 
-        if(demandeAdhesionRepository.existsByTelephoneAndStatut(telephone, ApplicationStatus.PENDING)){
+        if(demandeAdhesionRepository.existsByTelephoneAndStatutIn(telephone, List.of(ApplicationStatus.PENDING, ApplicationStatus.APPROUVED))){
             errors.put("telephone","Téléphone déjà utilisé");
         }
 

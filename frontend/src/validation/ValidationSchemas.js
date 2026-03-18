@@ -101,21 +101,6 @@ export const experienceSchema = z
 
   /* 2️⃣ vérifier date fin <= aujourd'hui */
 
-  .refine(
-    (data) => {
-      if (!data.dateFin) return true;
-
-      const today = new Date();
-      const fin = new Date(data.dateFin);
-
-      return fin <= today;
-    },
-    {
-      message: "La date de fin ne peut pas être dans le futur",
-      path: ["dateFin"],
-    },
-  )
-
   /* 3️⃣ vérifier dateFin >= dateDebut */
 
   .refine(

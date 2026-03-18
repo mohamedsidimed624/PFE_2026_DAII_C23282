@@ -14,6 +14,8 @@ public class DemandeDocumentResponse {
 
     private String fileName;
 
+    private String filePath;
+
     private Long size;
 
     private LocalDateTime uploadDate;
@@ -50,7 +52,13 @@ public class DemandeDocumentResponse {
         this.fileName = fileName;
     }
 
+    public String getFilePath() {
+        return filePath;
+    }
 
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 
     public Long getSize() {
         return size;

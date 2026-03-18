@@ -2,6 +2,9 @@ package com.onmm.backend.service.impl.Admin;
 
 import com.onmm.backend.dto.Admin.AdminDemandeDetailResponse;
 import com.onmm.backend.dto.Admin.AdminDemandeResponse;
+import com.onmm.backend.dto.DemandeDocumentResponse;
+import com.onmm.backend.dto.DemandeEducationResponse;
+import com.onmm.backend.dto.DemandeExperienceResponse;
 import com.onmm.backend.entity.DemandeAdhesion;
 import com.onmm.backend.entity.enums.ApplicationStatus;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
@@ -66,26 +69,60 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         dto.setEducations(
                 demande.getEducations()
                         .stream()
-                        .map(e -> e.getDiplome())
+                        .map(e -> {
+                            DemandeEducationResponse res = new DemandeEducationResponse();
+                            res.setId(e.getId());
+                            res.setDiplome(e.getDiplome());
+                            res.setUniversite(e.getUniversite());
+                            res.setPays(e.getPays());
+                            res.setVille(e.getVille());
+                            res.setSpecialite(e.getSpecialite());
+                            res.setSousSpecialite(e.getSousSpecialite());
+                            res.setAnneeObtention(e.getAnneeObtention());
+                            return res;
+                        })
                         .toList()
         );
 
         dto.setExperiences(
                 demande.getExperiences()
                         .stream()
-                        .map(e -> e.getPoste())
+                        .map(e -> {
+                            DemandeExperienceResponse res = new DemandeExperienceResponse();
+                            res.setId(e.getId());
+                            res.setPoste(e.getPoste());
+                            res.setNomEtablissement(e.getNomEtablissement());
+                            res.setPays(e.getPays());
+                            res.setVille(e.getVille());
+                            res.setDateDebut(e.getDateDebut());
+                            res.setDateFin(e.getDateFin());
+                            res.setDescription(e.getDescription());
+                            return res;
+                        })
                         .toList()
-        );
 
+        );
         dto.setDocuments(
                 demande.getDocuments()
                         .stream()
-                        .map(d -> d.getFileName())
+                        .map(d -> {
+                            DemandeDocumentResponse res = new DemandeDocumentResponse();
+                            res.setId(d.getId());
+                            res.setFileName(d.getFileName());
+                            res.setFilePath(d.getFilePath().replace("\\", "/"));
+                            System.out.println("File path :" + d.getFilePath());
+                            System.out.println("After Fix :" + d.getFilePath().replace("\\", "/"));
+                            res.setTypeDocument(d.getTypeDocument());
+                            res.setCategorie(d.getCategorie());
+                            res.setSize(d.getSize());
+                            res.setUploadDate(d.getUploadDate());
+                            return res;
+                        })
                         .toList()
         );
-
         return dto;
     }
+
 
     @Override
     public void approveDemande(Long id) {
