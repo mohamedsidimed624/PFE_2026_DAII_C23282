@@ -17,6 +17,8 @@ function AdminDemandeDetail() {
   const [rejectComment, setRejectComment] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
 
+  const isPending = demande?.statut === "PENDING";
+
   const getStatusStyle = (status) => {
     switch (status) {
       case "APPROVED":
@@ -46,13 +48,28 @@ function AdminDemandeDetail() {
   }, [id]);
 
   const handleApprove = async () => {
-    await approveDemande(id);
-    navigate("/admin/demandes");
+    try {
+        await approveDemande(id);
+        alert("Demande approuvée !");
+        navigate("/admin/demandes");
+    } catch (error) {
+        console.error(error);
+
+        const message = error.response?.data?.message || "Erreur lors de l'approbation.";
+        alert(message);
+    }
+    
   };
 
   const handleReject = async () => {
-    await rejectDemande(id, rejectComment);
-    navigate("/admin/demandes");
+    try {
+        await rejectDemande(id, rejectComment);
+        navigate("/admin/demandes");
+    } catch (error) {
+        console.error(error);
+        const message = error.response?.data?.message || "Erreur lors du rejet.";
+        alert(message);
+    }
   };
 
   if (loading) return <p className="p-6">Chargement...</p>;
@@ -154,19 +171,31 @@ function AdminDemandeDetail() {
       {/* ACTIONS */}
       <div className="flex gap-4">
 
+        {isPending && (
+            <>
         <button
-          onClick={handleApprove}
-          className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
-        >
-          Approuver
+            onClick={handleApprove}
+            disabled={!isPending}
+            className={`px-4 py-2 rounded text-white ${
+                isPending ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
+            }`}
+            >
+            Approuver
         </button>
 
         <button
           onClick={() => setShowRejectModal(true)}
-          className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg"
+            disabled={!isPending}
+          className={`px-4 py-2 rounded text-white ${
+            isPending ? "bg-red-600 hover:bg-red-700" : "bg-gray-400 cursor-not-allowed"
+          }`}
         >
           Rejeter
         </button>
+
+        
+            </>
+        )}
 
       </div>
 

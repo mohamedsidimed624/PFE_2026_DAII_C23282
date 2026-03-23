@@ -1,13 +1,19 @@
 package com.onmm.backend.service.impl.Admin;
-
+import java.util.UUID;
 import com.onmm.backend.dto.Admin.AdminDemandeDetailResponse;
 import com.onmm.backend.dto.Admin.AdminDemandeResponse;
 import com.onmm.backend.dto.DemandeDocumentResponse;
 import com.onmm.backend.dto.DemandeEducationResponse;
 import com.onmm.backend.dto.DemandeExperienceResponse;
+import com.onmm.backend.entity.ActivationToken;
 import com.onmm.backend.entity.DemandeAdhesion;
+import com.onmm.backend.entity.User;
 import com.onmm.backend.entity.enums.ApplicationStatus;
+import com.onmm.backend.entity.enums.Role;
+import com.onmm.backend.entity.enums.TokenType;
+import com.onmm.backend.repository.ActivationTokenRepository;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
+import com.onmm.backend.repository.UserRepository;
 import com.onmm.backend.service.Admin.AdminDemandeService;
 import org.springframework.stereotype.Service;
 import com.onmm.backend.entity.enums.ApplicationStatus;
@@ -15,16 +21,21 @@ import com.onmm.backend.service.email.EmailService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AdminDemandeServiceImpl implements AdminDemandeService {
 
     private final DemandeAdhesionRepository repository;
     private final EmailService emailService;
+    private final UserRepository userRepository;
+    private final ActivationTokenRepository tokenRepository;
 
-    public AdminDemandeServiceImpl(DemandeAdhesionRepository repository, EmailService emailService) {
+    public AdminDemandeServiceImpl(DemandeAdhesionRepository repository, EmailService emailService, UserRepository userRepository, ActivationTokenRepository tokenRepository) {
         this.repository = repository;
         this.emailService = emailService;
+        this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
     }
 
     @Override
@@ -110,8 +121,6 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
                             res.setId(d.getId());
                             res.setFileName(d.getFileName());
                             res.setFilePath(d.getFilePath().replace("\\", "/"));
-                            System.out.println("File path :" + d.getFilePath());
-                            System.out.println("After Fix :" + d.getFilePath().replace("\\", "/"));
                             res.setTypeDocument(d.getTypeDocument());
                             res.setCategorie(d.getCategorie());
                             res.setSize(d.getSize());
@@ -121,33 +130,6 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
                         .toList()
         );
         return dto;
-    }
-
-
-    @Override
-    public void approveDemande(Long id) {
-
-        DemandeAdhesion demande = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
-
-        // Vérification métier
-        if (!demande.isPending()) {
-            throw new RuntimeException("Demande déjà traitée");
-        }
-
-        demande.setStatut(ApplicationStatus.APPROUVED);
-        demande.setDecisionDate(LocalDateTime.now());
-
-        repository.save(demande);
-
-        // Email activation (simple pour maintenant)
-        String activationLink = "http://localhost:5173/activate-account";
-
-        emailService.sendApprovalEmail(
-                demande.getEmail(),
-                demande.getNom(),
-                activationLink
-        );
     }
 
     @Override
@@ -172,4 +154,49 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
                 comment
         );
     }
+
+    @Override
+    public void approveDemande(Long id) {
+
+        DemandeAdhesion demande = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+
+        if (!demande.isPending()) {
+            throw new RuntimeException("Cette demande a déjà été traitée");
+        }
+
+        Optional<User> existingUser = userRepository.findByEmail(demande.getEmail());
+        if (existingUser.isPresent()) {
+            throw new RuntimeException("Un utilisateur existe déjà avec cet email");
+        }
+
+        demande.setStatut(ApplicationStatus.APPROUVED);
+        demande.setDecisionDate(LocalDateTime.now());
+        repository.save(demande);
+
+        User user = new User();
+        user.setEmail(demande.getEmail());
+        user.setRole(Role.MEDECIN);
+        user.setEnabled(false);
+        user.setDemandeApprouvee(demande);
+        userRepository.save(user);
+
+        ActivationToken passwordToken = new ActivationToken();
+        passwordToken.setToken(UUID.randomUUID().toString());
+        passwordToken.setUser(user);
+        passwordToken.setType(TokenType.SET_PASSWORD);
+        passwordToken.setUsed(false);
+        passwordToken.setExpirationDate(LocalDateTime.now().plusHours(24));
+        tokenRepository.save(passwordToken);
+
+        String setPasswordLink =
+                "http://localhost:5173/set-password?token=" + passwordToken.getToken();
+
+        emailService.sendApprovalEmail(
+                demande.getEmail(),
+                demande.getNom(),
+                setPasswordLink
+        );
+    }
+
 }
