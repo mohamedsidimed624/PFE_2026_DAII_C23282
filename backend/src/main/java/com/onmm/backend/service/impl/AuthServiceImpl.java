@@ -9,6 +9,9 @@ import com.onmm.backend.repository.UserRepository;
 import com.onmm.backend.service.AuthService;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.onmm.backend.dto.auth.LoginRequest;
+import com.onmm.backend.dto.auth.LoginResponse;
+import com.onmm.backend.service.JwtService;
 
 import java.time.LocalDateTime;
 
@@ -18,13 +21,16 @@ public class AuthServiceImpl implements AuthService {
     private final ActivationTokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AuthServiceImpl(ActivationTokenRepository tokenRepository,
                            UserRepository userRepository,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           JwtService jwtService) {
         this.tokenRepository = tokenRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -78,5 +84,34 @@ public class AuthServiceImpl implements AuthService {
 
         token.setUsed(true);
         tokenRepository.save(token);
+    }
+
+    @Override
+    public LoginResponse login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Email ou mot de passe invalide"));
+
+        if (!user.isEnabled()) {
+            throw new RuntimeException("Votre compte n'est pas encore activé");
+        }
+
+        boolean passwordMatches = passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword()
+        );
+
+        if (!passwordMatches) {
+            throw new RuntimeException("Email ou mot de passe invalide");
+        }
+
+        // JWT viendra à l’étape suivante
+        String token = jwtService.generateToken(user);
+
+        return new LoginResponse(
+                token,
+                user.getRole().name(),
+                user.getEmail()
+        );
     }
 }

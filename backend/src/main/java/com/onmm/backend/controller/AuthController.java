@@ -3,6 +3,8 @@ package com.onmm.backend.controller;
 import com.onmm.backend.dto.auth.SetPasswordRequest;
 import com.onmm.backend.service.AuthService;
 import org.springframework.web.bind.annotation.*;
+import com.onmm.backend.dto.auth.LoginResponse;
+import com.onmm.backend.dto.auth.LoginRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,5 +26,10 @@ public class AuthController {
     public String setPassword(@RequestBody SetPasswordRequest request) {
         authService.setPassword(request);
         return "Mot de passe defini avec succes";
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 }
