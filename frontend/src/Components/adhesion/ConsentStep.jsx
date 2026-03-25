@@ -20,17 +20,17 @@ function ConsentStep({ prevStep }) {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [submissionResult, setSubmissionResult] = useState(null);
+
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-
   if (!consent) {
     setError("Veuillez accepter la déclaration.");
     return;
   }
 
   try {
-
     setLoading(true);
     setError("");
 
@@ -38,11 +38,17 @@ function ConsentStep({ prevStep }) {
 
     // 1️⃣ créer demande
     const demande = await createDemande(formData.personal);
-    console.log("DEMANDE CREEE :", demande);
+    console.log("REPONSE DEMANDE :", demande);
+
     const demandeId = demande.id;
+
     console.log("ID DEMANDE :", demandeId);
-    
-    // 2️⃣ envoyer  
+
+    if (!demandeId) {
+      throw new Error("ID de la demande introuvable après création.");
+    }
+
+    // 2️⃣ envoyer education
     for (const edu of formData.education) {
       await axios.post(
         `http://localhost:8080/api/demandes/${demandeId}/educations`,
@@ -55,35 +61,29 @@ function ConsentStep({ prevStep }) {
           ville: edu.ville,
           universite: edu.universite
         }
-
       );
     }
 
     // 3️⃣ envoyer experience
     for (const exp of formData.experience) {
+      const experiencePayload = {
+        poste: exp.poste,
+        nomEtablissement: exp.etablissement,
+        ville: exp.ville,
+        pays: exp.pays,
+        dateDebut: exp.dateDebut,
+        dateFin: exp.dateFin || null,
+        description: exp.description
+      };
 
-  const experiencePayload = {
-    poste: exp.poste,
-    nomEtablissement: exp.etablissement,
-    ville: exp.ville,
-    pays: exp.pays,
-    dateDebut: exp.dateDebut,
-    dateFin: exp.dateFin || null,
-    description: exp.description
-  };
-  console.log("PAYLOAD EXPERIENCE :", experiencePayload);
+      await axios.post(
+        `http://localhost:8080/api/demandes/${demandeId}/experiences`,
+        experiencePayload
+      );
+    }
 
-  await axios.post(
-    `http://localhost:8080/api/demandes/${demandeId}/experiences`,
-    experiencePayload
-  );
-  console.log("PAYLOAD EXPERIENCE :", experiencePayload);
-
-}
-
-    // 4️⃣ function upload document
+    // 4️⃣ upload document
     const uploadDocument = async (type, categorie, file) => {
-
       const data = new FormData();
 
       data.append("typeDocument", type);
@@ -111,48 +111,63 @@ function ConsentStep({ prevStep }) {
       await uploadDocument("AUTRE", "autre", doc.file);
     }
 
-    // succès
     localStorage.removeItem("adhesionForm");
-    
+
+    setSubmissionResult(demande);
     setSuccess(true);
     setSubmitted(true);
 
   } catch (error) {
-
     console.error(error);
-    setError(error.message || "Erreur lors de la soumission.");
-
+    setError(error.response?.data?.message || error.message || "Erreur lors de la soumission.");
   } finally {
-
     setLoading(false);
-
   }
-    
-
 };
-  if (success) {
+  if (success && submissionResult) {
   return (
     <div className="text-center space-y-6 p-10">
-
       <h2 className="text-2xl font-semibold mb-4">
         Demande soumise avec succès !
       </h2>
 
       <p className="text-gray-600">
-        Votre demande a été soumise avec succès. Nous vous contacterons bientôt.
+        Votre demande a été enregistrée avec succès.
+      </p>
+
+      <div className="bg-green-50 border border-green-200 rounded-xl p-5 max-w-md mx-auto">
+        <p className="text-sm text-gray-500 mb-2">
+          Numéro de dossier
+        </p>
+
+        <p className="text-xl font-bold text-green-700">
+          {submissionResult.numeroDossier}
+        </p>
+      </div>
+
+      <p className="text-gray-500 text-sm">
+        Conservez ce numéro pour suivre l’état de votre dossier.
       </p>
 
       <p className="text-gray-500 text-sm">
-        Vous recevrez un email de confirmation
+        Vous recevrez également un email de confirmation.
       </p>
 
-      <button
-        onClick={() => navigate("/")}
-        className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-      >
-        Retour à l'accueil
-      </button>
+      <div className="flex justify-center gap-4">
+        <button
+          onClick={() => navigate("/")}
+          className="mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+        >
+          Retour à l'accueil
+        </button>
 
+        <button
+          onClick={() => navigate("/suivi-dossier")}
+          className="mt-4 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+        >
+          Suivre mon dossier
+        </button>
+      </div>
     </div>
   );
 }

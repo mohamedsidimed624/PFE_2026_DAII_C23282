@@ -1,56 +1,121 @@
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import "./App.css";
+
 import Home from "./pages/Home";
 import SubmitApplication from "./pages/SubmitApplication";
 import LoginPage from "./pages/LoginPage";
 import SetPasswordPage from "./pages/SetPasswordPages";
+
 import AdminRoutes from "./routes/AdminRoutes";
-import MedecinDashboard from "./pages/medecin/MedecinDahboard";
-import MedecinRoute from "./routes/MedecinRoute";
 import AdminRoute from "./routes/AdminRoute";
+import MedecinRoute from "./routes/MedecinRoute";
+
+import MedecinDashboard from "./pages/medecin/MedecinDashboard";
+import PlaceholderPage from "./pages/medecin/PlaceholderPage";
+
 // import Contact from "./pages/Contact";
-// import Login from "./pages/Login";
 // import Annuaire from "./pages/Annuaire";
 // import Annonces from "./pages/Annonces";
 
 function App() {
   return (
+    <Routes>
+      {/* Routes publiques */}
+      <Route path="/" element={<Home />} />
+      <Route path="/adhesion" element={<SubmitApplication />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/set-password" element={<SetPasswordPage />} />
 
-      
-      <Routes>
+      {/* Routes admin protégées */}
+      <Route
+        path="/admin/*"
+        element={
+          <AdminRoute>
+            <AdminRoutes />
+          </AdminRoute>
+        }
+      />
 
-        <Route path="/" element={<Home />} />
+      {/* Routes médecin protégées */}
+      <Route
+        path="/medecin/dashboard"
+        element={
+          <MedecinRoute>
+            <MedecinDashboard />
+          </MedecinRoute>
+        }
+      />
 
-        <Route path="/adhesion" element={<SubmitApplication />} />
+      <Route
+        path="/medecin/profil"
+        element={
+          <MedecinRoute>
+            <PlaceholderPage title="Mon profil" />
+          </MedecinRoute>
+        }
+      />
 
-        <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/medecin/documents"
+        element={
+          <MedecinRoute>
+            <PlaceholderPage title="Mes documents" />
+          </MedecinRoute>
+        }
+      />
 
-        <Route path="/medecin/dashboard" element={<MedecinDashboard />} />
+      <Route
+        path="/medecin/notifications"
+        element={
+          <MedecinRoute>
+            <PlaceholderPage title="Notifications" />
+          </MedecinRoute>
+        }
+      />
 
-        {/* <Route path="/contact" element={<Contact />} />
+      <Route
+        path="/medecin/reclamations"
+        element={
+          <MedecinRoute>
+            <PlaceholderPage title="Réclamation" />
+          </MedecinRoute>
+        }
+      />
 
-        <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/medecin/sondages"
+        element={
+          <MedecinRoute>
+            <PlaceholderPage title="Sondage" />
+          </MedecinRoute>
+        }
+      />
 
-        <Route path="/annuaire" element={<Annuaire />} />
+      <Route
+        path="/medecin/elections"
+        element={
+          <MedecinRoute>
+            <PlaceholderPage title="Élection" />
+          </MedecinRoute>
+        }
+      />
 
-        <Route path="/annonces" element={<Annonces />} /> */}
+      <Route
+        path="/medecin/parametres"
+        element={
+          <MedecinRoute>
+            <PlaceholderPage title="Paramètres" />
+          </MedecinRoute>
+        }
+      />
 
-        <Route path="/admin/*" 
-          element={
-            <AdminRoute>
-              <AdminRoutes />
-            </AdminRoute>
-          } 
-          />
-
-        <Route path="/set-password" element={<SetPasswordPage />} />
-
-
-      </Routes>
-
-
-    
-
+      {/* Routes futures */}
+      {/*
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/annuaire" element={<Annuaire />} />
+      <Route path="/annonces" element={<Annonces />} />
+      */}
+    </Routes>
   );
 }
 

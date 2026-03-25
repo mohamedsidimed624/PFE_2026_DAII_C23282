@@ -2,7 +2,7 @@ package com.onmm.backend.service.email;
 
 public interface EmailService {
 
-    void sendSubmissionEmail(String to, String nom);
+    void sendSubmissionEmail(String to, String nom, String numeroDossier);
 
     void sendApprovalEmail(String to, String nom, String activationLink);
 

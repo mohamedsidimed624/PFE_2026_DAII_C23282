@@ -5,9 +5,7 @@ import com.onmm.backend.dto.Admin.AdminDemandeResponse;
 import com.onmm.backend.dto.DemandeDocumentResponse;
 import com.onmm.backend.dto.DemandeEducationResponse;
 import com.onmm.backend.dto.DemandeExperienceResponse;
-import com.onmm.backend.entity.ActivationToken;
-import com.onmm.backend.entity.DemandeAdhesion;
-import com.onmm.backend.entity.User;
+import com.onmm.backend.entity.*;
 import com.onmm.backend.entity.enums.ApplicationStatus;
 import com.onmm.backend.entity.enums.Role;
 import com.onmm.backend.entity.enums.TokenType;
@@ -18,6 +16,7 @@ import com.onmm.backend.service.Admin.AdminDemandeService;
 import org.springframework.stereotype.Service;
 import com.onmm.backend.entity.enums.ApplicationStatus;
 import com.onmm.backend.service.email.EmailService;
+import com.onmm.backend.repository.MedecinRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,12 +29,18 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final ActivationTokenRepository tokenRepository;
+    private final MedecinRepository medecinRepository;
 
-    public AdminDemandeServiceImpl(DemandeAdhesionRepository repository, EmailService emailService, UserRepository userRepository, ActivationTokenRepository tokenRepository) {
+    private String genererNumeroInscription() {
+        return "OM-" + java.time.Year.now().getValue() + "-" + System.currentTimeMillis();
+    }
+
+    public AdminDemandeServiceImpl(DemandeAdhesionRepository repository, EmailService emailService, UserRepository userRepository, ActivationTokenRepository tokenRepository, MedecinRepository medecinRepository) {
         this.repository = repository;
         this.emailService = emailService;
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
+        this.medecinRepository = medecinRepository;
     }
 
     @Override
@@ -158,7 +163,11 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
     @Override
     public void approveDemande(Long id) {
 
+
         DemandeAdhesion demande = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+
+        DemandeAdhesion demande_edu = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
         if (!demande.isPending()) {
@@ -180,6 +189,26 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         user.setEnabled(false);
         user.setDemandeApprouvee(demande);
         userRepository.save(user);
+
+        Medecin medecin = new Medecin();
+        medecin.setNom(demande.getNom());
+        medecin.setPrenom(demande.getPrenom());
+        medecin.setEmail(demande.getEmail());
+        medecin.setTelephone(demande.getTelephone());
+        medecin.setNni(demande.getNNI());
+        medecin.setSexe(demande.getSexe());
+        medecin.setNationalite(demande.getNationalite());
+        medecin.setAdresse(demande.getAdresse());
+        medecin.setNumeroInscription(genererNumeroInscription());
+        medecin.setStatut("ACTIF");
+        if (demande.getEducations() != null && !demande.getEducations().isEmpty()) {
+            DemandeEducation educationPrincipale = demande.getEducations().iterator().next();
+            medecin.setSpecialite(educationPrincipale.getSpecialite());
+        }
+
+        medecin.setUser(user);
+
+        medecinRepository.save(medecin);
 
         ActivationToken passwordToken = new ActivationToken();
         passwordToken.setToken(UUID.randomUUID().toString());

@@ -21,6 +21,9 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
 
     private final DemandeAdhesionRepository demandeAdhesionRepository;
     private final EmailService emailService;
+    private String genererNumeroDossier() {
+        return "DOS-" + java.time.Year.now().getValue() + "-" + System.currentTimeMillis();
+    }
 
     public DemandeAdhesionServiceImpl(DemandeAdhesionRepository demandeAdhesionRepository, EmailService emailService) {
         this.demandeAdhesionRepository = demandeAdhesionRepository;
@@ -38,6 +41,8 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
 
         boolean TelephoneConflit = demandeAdhesionRepository
                 .existsByTelephoneAndStatutIn(request.getTelephone(), List.of(ApplicationStatus.PENDING, ApplicationStatus.APPROUVED));
+
+
 
 
         if (NNIConflit) {
@@ -63,6 +68,8 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
 
         DemandeAdhesion demande = new DemandeAdhesion();
 
+
+
         demande.setNNI(request.getNni());
         demande.setNom(request.getNom());
         demande.setPrenom(request.getPrenom());
@@ -72,6 +79,7 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
         demande.setEmail(request.getEmail());
         demande.setTelephone(request.getTelephone());
         demande.setAdresse(request.getAdresse());
+        demande.setNumeroDossier(genererNumeroDossier());
 
         demande.setStatut(ApplicationStatus.PENDING);
         demande.setSubmissionDate(LocalDateTime.now());
@@ -81,7 +89,8 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
         // Email accusé de réception
         emailService.sendSubmissionEmail(
                 saved.getEmail(),
-                saved.getNom()
+                saved.getNom(),
+                saved.getNumeroDossier()
         );
 
         return saved;

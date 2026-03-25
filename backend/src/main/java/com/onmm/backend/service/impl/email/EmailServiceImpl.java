@@ -17,7 +17,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Async
-    public void sendSubmissionEmail(String to, String name) {
+    public void sendSubmissionEmail(String to, String name, String numeroDossier) {
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -25,6 +25,8 @@ public class EmailServiceImpl implements EmailService {
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                         "Votre demande a été reçue avec succès.\n" +
+                        "Numéro de dossier : " + numeroDossier + "\n" +
+                        "Veuillez conserver ce numéro pour suivre l’état de votre dossier.\n" +
                         "Nous la traiterons bientôt.\n\n" +
                         "ONMM"
         );

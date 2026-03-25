@@ -48,6 +48,8 @@ public class DemandeAdhesion {
     @Column(nullable = false)
     private String adresse;
 
+    private String numeroDossier;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ApplicationStatus statut;
@@ -220,5 +222,14 @@ public class DemandeAdhesion {
 
     public void setDocuments(Set<DemandeDocument> documents) {
         this.documents = documents;
+    }
+
+
+    public String getNumeroDossier() {
+        return numeroDossier;
+    }
+
+    public void setNumeroDossier(String numeroDossier) {
+        this.numeroDossier = numeroDossier;
     }
 }

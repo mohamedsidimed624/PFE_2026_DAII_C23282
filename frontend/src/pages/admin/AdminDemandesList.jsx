@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllDemandes } from "../../services/adminApi";
 import { useNavigate } from "react-router-dom";
+import NavbarDashboard from "../../components/NavbarDashboard";
 
 function AdminDemandesList() {
 
@@ -32,7 +33,7 @@ function AdminDemandesList() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case "APPROVED":
+      case "APPROUVED":
         return "bg-green-100 text-green-700";
       case "REJECTED":
         return "bg-red-100 text-red-700";
@@ -43,67 +44,72 @@ function AdminDemandesList() {
 
   return (
 
-    <div className="p-6 max-w-6xl mx-auto">
+    <>
 
-      <h1 className="text-2xl font-semibold mb-6">
-        Liste des demandes
-      </h1>
+        <NavbarDashboard />
 
-      <div className="bg-white shadow rounded-xl overflow-hidden">
+        <div className="p-6 max-w-6xl mx-auto">
 
-        <table className="w-full">
+        <h1 className="text-2xl font-semibold mb-6">
+            Liste des demandes
+        </h1>
 
-          <thead className="bg-gray-50 text-left text-sm text-gray-600">
-            <tr>
-              <th className="p-4">Nom</th>
-              <th className="p-4">Email</th>
-              <th className="p-4">Statut</th>
-              <th className="p-4">Action</th>
-            </tr>
-          </thead>
+        <div className="bg-white shadow rounded-xl overflow-hidden">
 
-          <tbody>
+            <table className="w-full">
 
-            {demandes.map((d) => (
+            <thead className="bg-gray-50 text-left text-sm text-gray-600">
+                <tr>
+                <th className="p-4">Nom</th>
+                <th className="p-4">Email</th>
+                <th className="p-4">Statut</th>
+                <th className="p-4">Action</th>
+                </tr>
+            </thead>
 
-              <tr key={d.id} className="border-t hover:bg-gray-50 transition">
+            <tbody>
 
-                <td className="p-4 font-medium">
-                  {d.nom} {d.prenom}
-                </td>
+                {demandes.map((d) => (
 
-                <td className="p-4 text-gray-600">
-                  {d.email}
-                </td>
+                <tr key={d.id} className="border-t hover:bg-gray-50 transition">
 
-                <td className="p-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(d.statut)}`}>
-                    {d.statut}
-                  </span>
-                </td>
+                    <td className="p-4 font-medium">
+                    {d.nom} {d.prenom}
+                    </td>
 
-                <td className="p-4">
+                    <td className="p-4 text-gray-600">
+                    {d.email}
+                    </td>
 
-                  <button
-                    onClick={() => navigate(`/admin/demandes/${d.id}`)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm"
-                  >
-                    Voir
-                  </button>
+                    <td className="p-4">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(d.statut)}`}>
+                        {d.statut}
+                    </span>
+                    </td>
 
-                </td>
+                    <td className="p-4">
 
-              </tr>
+                    <button
+                        onClick={() => navigate(`/admin/demandes/${d.id}`)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm"
+                    >
+                        Voir
+                    </button>
 
-            ))}
+                    </td>
 
-          </tbody>
+                </tr>
 
-        </table>
+                ))}
 
-      </div>
+            </tbody>
 
-    </div>
+            </table>
+
+        </div>
+
+        </div>
+    </>
   );
 }
 
