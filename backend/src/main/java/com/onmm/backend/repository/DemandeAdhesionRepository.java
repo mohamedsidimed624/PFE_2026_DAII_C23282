@@ -5,6 +5,7 @@ import com.onmm.backend.entity.enums.ApplicationStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +23,14 @@ public interface DemandeAdhesionRepository extends JpaRepository<DemandeAdhesion
     WHERE d.id = :id
     """)
     Optional<DemandeAdhesion> findWithDetailsById(Long id);
+
+    Optional<DemandeAdhesion> findByNumeroDossier(String numeroDossier);
+
+    @Query("""
+        select distinct d
+        from DemandeAdhesion d
+        left join fetch d.educations
+        where d.id = :id
+    """)
+    Optional<DemandeAdhesion> findByIdWithEducations(@Param("id") Long id);
 }

@@ -46,6 +46,8 @@ import com.onmm.backend.entity.DemandeAdhesion;
 import com.onmm.backend.service.DemandeAdhesionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.onmm.backend.dto.demande.SuiviDossierResponse;
+import com.onmm.backend.dto.demande.RepriseDemandeResponse;
 
 @RestController
 @RequestMapping("/api/demandes")
@@ -81,4 +83,18 @@ public class DemandeAdhesionController {
     ) {
         return demandeAdhesionService.checkUnique(nni, email, telephone);
     }
+
+    @GetMapping("/suivi/{numeroDossier}")
+    public ResponseEntity<SuiviDossierResponse> getSuiviDossier(@PathVariable String numeroDossier) {
+        SuiviDossierResponse response = demandeAdhesionService.getSuiviByNumeroDossier(numeroDossier);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reprise/{numeroDossier}")
+    public ResponseEntity<RepriseDemandeResponse> getDemandePourReprise(@PathVariable String numeroDossier) {
+        return ResponseEntity.ok(demandeAdhesionService.getDemandePourReprise(numeroDossier));
+    }
+
+
 }

@@ -87,7 +87,7 @@ public class MedecinProfileResponse {
         this.adresse = adresse;
     }
 
-    public String getNumreoInscription() {
+    public String getNumeroInscription() {
         return numeroInscription;
     }
 

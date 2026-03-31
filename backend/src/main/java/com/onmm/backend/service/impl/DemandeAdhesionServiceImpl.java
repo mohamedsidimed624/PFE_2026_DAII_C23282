@@ -1,33 +1,49 @@
 package com.onmm.backend.service.impl;
 
 import com.onmm.backend.dto.DemandeAdhesionRequest;
+import com.onmm.backend.dto.demande.RepriseDemandeResponse;
+import com.onmm.backend.dto.demande.SuiviDossierResponse;
+import com.onmm.backend.entity.ActivationToken;
 import com.onmm.backend.entity.DemandeAdhesion;
+import com.onmm.backend.entity.User;
 import com.onmm.backend.entity.enums.ApplicationStatus;
+import com.onmm.backend.entity.enums.TokenType;
+import com.onmm.backend.repository.ActivationTokenRepository;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
+import com.onmm.backend.repository.UserRepository;
 import com.onmm.backend.service.DemandeAdhesionService;
 import com.onmm.backend.service.email.EmailService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
 
     private final DemandeAdhesionRepository demandeAdhesionRepository;
     private final EmailService emailService;
+    private final UserRepository userRepository;
+    private final ActivationTokenRepository activationTokenRepository;
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
     private String genererNumeroDossier() {
         return "DOS-" + java.time.Year.now().getValue() + "-" + System.currentTimeMillis();
     }
 
-    public DemandeAdhesionServiceImpl(DemandeAdhesionRepository demandeAdhesionRepository, EmailService emailService) {
+    public DemandeAdhesionServiceImpl(DemandeAdhesionRepository demandeAdhesionRepository, EmailService emailService, UserRepository userRepository, ActivationTokenRepository activationTokenRepository) {
         this.demandeAdhesionRepository = demandeAdhesionRepository;
         this.emailService = emailService;
+        this.userRepository = userRepository;
+        this.activationTokenRepository = activationTokenRepository;
     }
 
     @Override
@@ -121,5 +137,142 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
         return ResponseEntity.ok("OK");
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public SuiviDossierResponse getSuiviByNumeroDossier(String numeroDossier) {
+
+        DemandeAdhesion demande = demandeAdhesionRepository.findByNumeroDossier(numeroDossier)
+                .orElseThrow(() -> new RuntimeException("Dossier introuvable"));
+
+        SuiviDossierResponse response = new SuiviDossierResponse();
+
+        // Informations principales
+        response.setNumeroDossier(demande.getNumeroDossier());
+        response.setNom(demande.getNom());
+        response.setPrenom(demande.getPrenom());
+        response.setEmail(demande.getEmail());
+        response.setStatut(demande.getStatut().toString());
+        response.setDateSoumission(demande.getSubmissionDate());
+        response.setDateDecision(demande.getDecisionDate());
+        response.setCommentaireAdmin(demande.getAdminComment());
+
+        // Valeurs par défaut
+        response.setCompteCree(false);
+        response.setCompteActive(false);
+        response.setPeutActiverCompte(false);
+        response.setPeutCompleterDossier(false);
+        response.setActivationLink(null);
+
+        // Cas PENDING
+        if (demande.isPending()) {
+            return response;
+        }
+
+        // Cas REJECTED
+        if (demande.isRejected()) {
+            response.setPeutCompleterDossier(true);
+            return response;
+        }
+
+        // Cas APPROUVED
+        if (demande.isApproved()) {
+            User user = userRepository.findByDemandeApprouvee(demande).orElse(null);
+
+            if (user != null) {
+                response.setCompteCree(true);
+                response.setCompteActive(user.isEnabled());
+
+                if (!user.isEnabled()) {
+                    response.setPeutActiverCompte(true);
+                    response.setActivationLink(getOrCreateActivationLink(user));
+                }
+            }
+
+            return response;
+        }
+
+        return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RepriseDemandeResponse getDemandePourReprise(String numeroDossier) {
+
+        DemandeAdhesion demande = demandeAdhesionRepository.findByNumeroDossier(numeroDossier)
+                .orElseThrow(() -> new RuntimeException("Dossier introuvable"));
+
+        if (!demande.isRejected()) {
+            throw new RuntimeException("Seuls les dossiers rejetés peuvent être repris");
+        }
+
+        RepriseDemandeResponse response = new RepriseDemandeResponse();
+
+        // personal
+        RepriseDemandeResponse.PersonalData personal = new RepriseDemandeResponse.PersonalData();
+        personal.setNom(demande.getNom());
+        personal.setPrenom(demande.getPrenom());
+        personal.setEmail(demande.getEmail());
+        personal.setTelephone(demande.getTelephone());
+        personal.setNni(demande.getNNI());
+        personal.setSexe(demande.getSexe());
+        personal.setNationalite(demande.getNationalite());
+        personal.setDateNaissance(demande.getDateNaissance());
+        personal.setAdresse(demande.getAdresse());
+
+        response.setPersonal(personal);
+
+        // education
+        response.setEducation(
+                demande.getEducations().stream().map(edu -> {
+                    RepriseDemandeResponse.EducationData e = new RepriseDemandeResponse.EducationData();
+                    e.setSpecialite(edu.getSpecialite());
+                    e.setSousSpecialite(edu.getSousSpecialite());
+                    e.setDiplome(edu.getDiplome());
+                    e.setAnnee(edu.getAnneeObtention());
+                    e.setPays(edu.getPays());
+                    e.setVille(edu.getVille());
+                    e.setUniversite(edu.getUniversite());
+                    return e;
+                }).toList()
+        );
+
+        // experience
+        response.setExperience(
+                demande.getExperiences().stream().map(exp -> {
+                    RepriseDemandeResponse.ExperienceData e = new RepriseDemandeResponse.ExperienceData();
+                    e.setPoste(exp.getPoste());
+                    e.setEtablissement(exp.getNomEtablissement());
+                    e.setVille(exp.getVille());
+                    e.setPays(exp.getPays());
+                    e.setDateDebut(exp.getDateDebut());
+                    e.setDateFin(exp.getDateFin());
+                    e.setDescription(exp.getDescription());
+                    return e;
+                }).toList()
+        );
+
+        return response;
+    }
+
+    private String getOrCreateActivationLink(User user) {
+
+        ActivationToken token = activationTokenRepository
+                .findFirstByUserAndTypeAndUsedFalseAndExpirationDateAfterOrderByExpirationDateDesc(
+                        user,
+                        TokenType.SET_PASSWORD,
+                        LocalDateTime.now()
+                )
+                .orElseGet(() -> {
+                    ActivationToken newToken = new ActivationToken();
+                    newToken.setUser(user);
+                    newToken.setToken(UUID.randomUUID().toString());
+                    newToken.setType(TokenType.SET_PASSWORD);
+                    newToken.setUsed(false);
+                    newToken.setExpirationDate(LocalDateTime.now().plusHours(24));
+                    return activationTokenRepository.save(newToken);
+                });
+
+        return frontendUrl + "/set-password?token=" + token.getToken();
+    }
 
 }

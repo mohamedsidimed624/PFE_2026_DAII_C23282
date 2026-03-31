@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.onmm.backend.entity.enums.ApplicationStatus;
 import com.onmm.backend.service.email.EmailService;
 import com.onmm.backend.repository.MedecinRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -161,13 +162,10 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
     }
 
     @Override
+    @Transactional
     public void approveDemande(Long id) {
 
-
-        DemandeAdhesion demande = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
-
-        DemandeAdhesion demande_edu = repository.findById(id)
+        DemandeAdhesion demande = repository.findByIdWithEducations(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
         if (!demande.isPending()) {
@@ -181,7 +179,6 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
 
         demande.setStatut(ApplicationStatus.APPROUVED);
         demande.setDecisionDate(LocalDateTime.now());
-        repository.save(demande);
 
         User user = new User();
         user.setEmail(demande.getEmail());
@@ -201,13 +198,13 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         medecin.setAdresse(demande.getAdresse());
         medecin.setNumeroInscription(genererNumeroInscription());
         medecin.setStatut("ACTIF");
+
         if (demande.getEducations() != null && !demande.getEducations().isEmpty()) {
             DemandeEducation educationPrincipale = demande.getEducations().iterator().next();
             medecin.setSpecialite(educationPrincipale.getSpecialite());
         }
 
         medecin.setUser(user);
-
         medecinRepository.save(medecin);
 
         ActivationToken passwordToken = new ActivationToken();

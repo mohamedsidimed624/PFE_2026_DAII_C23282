@@ -12,7 +12,7 @@ import {
 
 function ConsentStep({ prevStep }) {
 
-  const { formData , setSubmitted} = useFormData();
+  const { formData , setSubmitted, resetForm } = useFormData();
 
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
@@ -126,6 +126,7 @@ function ConsentStep({ prevStep }) {
 };
   if (success && submissionResult) {
   return (
+
     <div className="text-center space-y-6 p-10">
       <h2 className="text-2xl font-semibold mb-4">
         Demande soumise avec succès !
@@ -155,14 +156,20 @@ function ConsentStep({ prevStep }) {
 
       <div className="flex justify-center gap-4">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => {
+            navigate("/");
+            resetForm();
+          }}
           className="mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
         >
           Retour à l'accueil
         </button>
 
         <button
-          onClick={() => navigate("/suivi-dossier")}
+          onClick={() => {
+            navigate("/suivi-dossier");
+            resetForm();
+          }}
           className="mt-4 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
         >
           Suivre mon dossier
@@ -352,7 +359,10 @@ function ConsentStep({ prevStep }) {
         </button>
 
         <button
-          onClick={handleSubmit}
+          
+          onClick={() => {
+            handleSubmit();
+          }}
           disabled={loading}
           className="bg-green-600 text-white px-8 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
         >

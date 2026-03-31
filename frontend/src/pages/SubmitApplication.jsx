@@ -7,7 +7,7 @@ import StepExperience from "../components/adhesion/StepExperience";
 import StepDocuments from "../components/adhesion/StepDocuments";
 import ConsentStep from "../components/adhesion/ConsentStep";
 
-import { FormProvider, useFormData } from "../context/FormContext";
+import { useFormData } from "../context/FormContext";
 
 function ApplicationSteps() {
   const { submitted } = useFormData(); 
@@ -62,13 +62,13 @@ function SubmitApplication() {
 
   return (
 
-    <FormProvider>
+    <>
 
       <Navbar />
 
       <ApplicationSteps />
 
-    </FormProvider>
+    </>
 
   );
 

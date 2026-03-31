@@ -3,6 +3,8 @@ package com.onmm.backend.config;
 import com.onmm.backend.entity.User;
 import com.onmm.backend.repository.UserRepository;
 import com.onmm.backend.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,23 +42,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String jwt = authHeader.substring(7);
-        String userEmail = jwtService.extractEmail(jwt);
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        try {
+            String userEmail = jwtService.extractEmail(jwt);
 
-            User user = userRepository.findByEmail(userEmail).orElse(null);
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            if (user != null && jwtService.isTokenValid(jwt, user)) {
+                User user = userRepository.findByEmail(userEmail).orElse(null);
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                user,
-                                null,
-                                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-                        );
+                if (user != null && jwtService.isTokenValid(jwt, user)) {
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    user,
+                                    null,
+                                    List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                            );
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+
+        } catch (ExpiredJwtException e) {
+            SecurityContextHolder.clearContext();
+        } catch (JwtException | IllegalArgumentException e) {
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
