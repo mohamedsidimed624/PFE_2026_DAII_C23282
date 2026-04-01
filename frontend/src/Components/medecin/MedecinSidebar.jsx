@@ -12,6 +12,65 @@ import {
   Stethoscope,
 } from "lucide-react";
 
+const NAV_ITEMS = [
+  {
+    section: "Principal",
+    links: [
+      {
+        to: "/medecin/dashboard",
+        icon: LayoutDashboard,
+        label: "Dashboard",
+      },
+      {
+        to: "/medecin/profil",
+        icon: User,
+        label: "Mon profil",
+      },
+      {
+        to: "/medecin/documents",
+        icon: FileText,
+        label: "Mes documents",
+      },
+      {
+        to: "/medecin/notifications",
+        icon: Bell,
+        label: "Notifications",
+        badge: 3,
+      },
+    ],
+  },
+  {
+    section: "Services",
+    links: [
+      {
+        to: "/medecin/reclamations",
+        icon: TriangleAlert,
+        label: "Réclamations",
+      },
+      {
+        to: "/medecin/sondages",
+        icon: BarChart3,
+        label: "Sondages",
+      },
+      {
+        to: "/medecin/elections",
+        icon: Vote,
+        label: "Élections",
+      },
+    ],
+  },
+  {
+    section: "Compte",
+    links: [
+      {
+        to: "/medecin/parametres",
+        icon: Settings,
+        label: "Paramètres",
+      },
+    ],
+  },
+];
+
 function MedecinSidebar() {
   const navigate = useNavigate();
 
@@ -22,78 +81,89 @@ function MedecinSidebar() {
     navigate("/login");
   };
 
-  const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-2xl transition font-medium ${
+  const navClass = ({ isActive }) =>
+    [
+      "group flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-medium transition",
       isActive
-        ? "bg-green-50 text-green-700 border border-green-200"
-        : "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
-    }`;
+        ? "border-green-100 bg-green-50 text-green-700"
+        : "border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-800",
+    ].join(" ");
 
   return (
-    <aside className="w-full lg:w-72 bg-white border-r border-slate-200 shadow-sm lg:min-h-screen">
-      <div className="p-6 border-b border-slate-100">
+    <div className="sticky top-0 flex h-screen w-64 flex-col border-r border-slate-200 bg-white">
+      {/* Logo */}
+      <div className="border-b border-slate-100 px-5 py-5">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-green-600 text-white flex items-center justify-center shadow">
-            <Stethoscope size={24} />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-green-700 to-green-500 text-white shadow-sm">
+            <Stethoscope size={20} />
           </div>
 
           <div>
-            <h2 className="text-lg font-bold text-slate-800">Espace Médecin</h2>
-            <p className="text-sm text-slate-500">Ordre des Médecins</p>
+            <h2 className="text-sm font-bold text-slate-900">Espace Médecin</h2>
+            <p className="text-xs font-medium text-slate-400">
+              Ordre des Médecins
+            </p>
           </div>
         </div>
       </div>
 
-      <nav className="p-4 space-y-2">
-        <NavLink to="/medecin/dashboard" className={linkClass}>
-          <LayoutDashboard size={18} />
-          <span>Dashboard</span>
-        </NavLink>
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        {NAV_ITEMS.map((section) => (
+          <div key={section.section} className="mb-5">
+            <p className="px-3 pb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-300">
+              {section.section}
+            </p>
 
-        <NavLink to="/medecin/profil" className={linkClass}>
-          <User size={18} />
-          <span>Mon profil</span>
-        </NavLink>
+            <div className="space-y-1">
+              {section.links.map((link) => {
+                const Icon = link.icon;
 
-        <NavLink to="/medecin/documents" className={linkClass}>
-          <FileText size={18} />
-          <span>Mes documents</span>
-        </NavLink>
+                return (
+                  <NavLink key={link.to} to={link.to} className={navClass}>
+                    {({ isActive }) => (
+                      <>
+                        <span
+                          className={[
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition",
+                            isActive
+                              ? "bg-green-100 text-green-600"
+                              : "bg-transparent text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600",
+                          ].join(" ")}
+                        >
+                          <Icon size={17} />
+                        </span>
 
-        <NavLink to="/medecin/notifications" className={linkClass}>
-          <Bell size={18} />
-          <span>Notifications</span>
-        </NavLink>
+                        <span className="truncate">{link.label}</span>
 
-        <NavLink to="/medecin/reclamations" className={linkClass}>
-          <TriangleAlert size={18} />
-          <span>Réclamation</span>
-        </NavLink>
+                        {link.badge ? (
+                          <span className="ml-auto inline-flex min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[11px] font-bold text-white">
+                            {link.badge}
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
 
-        <NavLink to="/medecin/sondages" className={linkClass}>
-          <BarChart3 size={18} />
-          <span>Sondage</span>
-        </NavLink>
-
-        <NavLink to="/medecin/elections" className={linkClass}>
-          <Vote size={18} />
-          <span>Élection</span>
-        </NavLink>
-
-        <NavLink to="/medecin/parametres" className={linkClass}>
-          <Settings size={18} />
-          <span>Paramètres</span>
-        </NavLink>
-
+      {/* Footer */}
+      <div className="border-t border-slate-100 p-3">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-600 hover:bg-red-50 transition font-medium"
+          className="group flex w-full items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-red-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
         >
-          <LogOut size={18} />
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition group-hover:bg-red-100">
+            <LogOut size={17} />
+          </span>
           <span>Déconnexion</span>
         </button>
-      </nav>
-    </aside>
+      </div>
+    </div>
   );
 }
 

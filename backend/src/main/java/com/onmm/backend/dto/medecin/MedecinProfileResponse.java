@@ -14,6 +14,7 @@ public class MedecinProfileResponse {
     private String numeroInscription;
     private String statut;
     private String specialite;
+    private String photoProfilPath;
 
     public Long getId() {
         return id;
@@ -109,5 +110,13 @@ public class MedecinProfileResponse {
 
     public void setSpecialite(String specialite) {
         this.specialite = specialite;
+    }
+
+    public String getPhotoProfilPath() {
+        return photoProfilPath;
+    }
+
+    public void setPhotoProfilPath(String photoProfilPath) {
+        this.photoProfilPath = photoProfilPath;
     }
 }

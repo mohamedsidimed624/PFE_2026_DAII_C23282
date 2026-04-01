@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { getMyProfile } from "../../services/medecinApi";
 import {
@@ -12,13 +13,21 @@ import {
   IdCard,
   MapPin,
   Globe,
-  BadgeCheck,
+  Stethoscope,
+  ChevronRight,
+  Activity,
+  CheckCircle2,
+  Key,
+  LogIn,
+  ArrowUpRight,
+  TrendingUp,
 } from "lucide-react";
 
 function MedecinDashboard() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -36,13 +45,47 @@ function MedecinDashboard() {
     loadProfile();
   }, []);
 
+  const p = profile || {};
+
+  const completion = useMemo(() => {
+    const fields = [
+      "nom",
+      "prenom",
+      "email",
+      "telephone",
+      "nni",
+      "sexe",
+      "nationalite",
+      "adresse",
+      "numeroInscription",
+      "statut",
+      "specialite",
+    ];
+
+    const filled = fields.filter(
+      (field) => p[field] && String(p[field]).trim() !== ""
+    ).length;
+
+    return Math.round((filled / fields.length) * 100);
+  }, [p]);
+
+  const statusIsActive = useMemo(() => {
+    return ["ACTIF", "ACTIVE", "APPROVED"].includes(
+      (p.statut || "").toUpperCase()
+    );
+  }, [p.statut]);
+
+  const statusBadgeClass = statusIsActive
+    ? "bg-green-50 text-green-700 border-green-200"
+    : "bg-slate-50 text-slate-700 border-slate-200";
+
   if (loading) {
     return (
       <MedecinLayout
         title="Dashboard"
         subtitle="Chargement des informations de votre espace médecin."
       >
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-slate-600">Chargement du tableau de bord...</p>
         </div>
       </MedecinLayout>
@@ -55,7 +98,7 @@ function MedecinDashboard() {
         title="Dashboard"
         subtitle="Une erreur est survenue lors du chargement."
       >
-        <div className="bg-red-50 border border-red-200 text-red-600 rounded-2xl p-4">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-600">
           {error}
         </div>
       </MedecinLayout>
@@ -63,265 +106,371 @@ function MedecinDashboard() {
   }
 
   return (
-  <MedecinLayout
-    title="Dashboard"
-    subtitle="Vue d’ensemble de votre espace médecin."
-  >
-    {/* Hero principal */}
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-green-700 to-emerald-600 text-white p-8 shadow-lg">
-      <div className="relative z-10 max-w-3xl">
-        <p className="text-sm uppercase tracking-wider text-green-100 mb-2">
-          Tableau de bord médecin
-        </p>
-
-        <h1 className="text-3xl md:text-4xl font-bold leading-tight">
-          Bonjour Dr. {profile?.prenom} {profile?.nom}
-        </h1>
-
-        <p className="mt-3 text-green-50 text-base md:text-lg">
-          Bienvenue dans votre espace personnel. Vous pouvez consulter votre
-          profil, suivre vos informations et accéder rapidement aux services
-          essentiels.
-        </p>
-
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <span className="px-4 py-2 rounded-full bg-white/15 border border-white/20 text-sm font-medium">
-            Compte activé
-          </span>
-
-          <span className="px-4 py-2 rounded-full bg-white/15 border border-white/20 text-sm font-medium">
-            Profil disponible
-          </span>
-        </div>
-      </div>
-
-      <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/10" />
-      <div className="absolute right-20 bottom-0 w-28 h-28 rounded-full bg-white/10" />
-    </section>
-
-    {/* Ligne de contenu principale */}
-    <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-      {/* Colonne gauche */}
-      <div className="xl:col-span-2 space-y-6">
-        {/* Aperçu profil */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-800">
-                Aperçu du profil
-              </h2>
-              <p className="text-sm text-slate-500 mt-1">
-                Informations principales de votre compte médecin
-              </p>
-            </div>
-
-            <button className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition">
-              Voir le profil
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <InfoItem
-              icon={<User size={18} />}
-              label="Nom complet"
-              value={`${profile?.prenom || ""} ${profile?.nom || ""}`}
-            />
-
-            <InfoItem
-              icon={<Mail size={18} />}
-              label="Email"
-              value={profile?.email}
-            />
-
-            <InfoItem
-              icon={<Phone size={18} />}
-              label="Téléphone"
-              value={profile?.telephone}
-            />
-
-            <InfoItem
-              icon={<IdCard size={18} />}
-              label="NNI"
-              value={profile?.nni}
-            />
-
-            <InfoItem
-              icon={<ShieldCheck size={18} />}
-              label="Sexe"
-              value={profile?.sexe || "Non renseigné"}
-            />
-
-            <InfoItem
-              icon={<Globe size={18} />}
-              label="Nationalité"
-              value={profile?.nationalite || "Non renseignée"}
-            />
-
-            <div className="md:col-span-2">
-              <InfoItem
-                icon={<MapPin size={18} />}
-                label="Adresse"
-                value={profile?.adresse || "Non renseignée"}
-              />
-            </div>
-            <InfoItem
-              icon={<IdCard size={18} />}
-              label="Numéro d’inscription"
-              value={profile?.numero_inscription}
-            />
-
-          <InfoItem
-            icon={<ShieldCheck size={18} />}
-            label="Statut"
-            value={profile?.statut}
-          />
-
-          <InfoItem
-            icon={<User size={18} />}
-            label="Spécialité"
-            value={profile?.specialite}
-          />
-          </div>
-        </div>
-
-        {/* Activité récente */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-          <h2 className="text-xl font-bold text-slate-800 mb-2">
-            Activité récente
-          </h2>
-
-          <p className="text-sm text-slate-500 mb-6">
-            Historique rapide des dernières actions liées à votre compte.
-          </p>
-
-          <div className="space-y-4">
-            <ActivityItem
-              title="Compte activé"
-              subtitle="Votre espace médecin a été activé avec succès."
-            />
-
-            <ActivityItem
-              title="Mot de passe défini"
-              subtitle="Votre mot de passe a été enregistré en toute sécurité."
-            />
-
-            <ActivityItem
-              title="Connexion réussie"
-              subtitle="Dernière connexion à votre espace personnel."
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Colonne droite */}
+    <MedecinLayout
+      title="Dashboard"
+      subtitle="Vue d’ensemble de votre espace médecin."
+    >
       <div className="space-y-6">
-        {/* Statut */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-          <h2 className="text-lg font-bold text-slate-800 mb-4">
-            État du compte
-          </h2>
+        {/* HERO */}
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-green-900 to-green-700 p-8 text-white shadow-sm">
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:40px_40px]" />
+          <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/5" />
+          <div className="absolute bottom-0 right-24 h-32 w-32 rounded-full bg-white/5" />
 
-          <div className="space-y-4">
-            <div className="rounded-2xl bg-green-50 border border-green-200 p-4">
-              <p className="text-sm text-green-700 font-medium">Statut</p>
-              <p className="text-xl font-bold text-green-800 mt-1">Actif</p>
+          <div className="relative z-10">
+            <div className="mb-3 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-white/60">
+              <span className="h-2 w-2 rounded-full bg-green-400" />
+              Tableau de bord médecin
             </div>
 
-            <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4">
-              <p className="text-sm text-slate-500 font-medium">Espace</p>
-              <p className="text-lg font-semibold text-slate-800 mt-1">
-                Médecin
-              </p>
+            <h1 className="text-3xl font-bold leading-tight md:text-4xl">
+              Bonjour, Dr. {p.prenom} {p.nom} 👋
+            </h1>
+
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/75 md:text-base">
+              Bienvenue dans votre espace personnel. Consultez votre profil,
+              suivez votre statut et accédez rapidement aux services essentiels
+              de l’Ordre.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur-sm">
+                <span className="h-2 w-2 rounded-full bg-green-400" />
+                {statusIsActive ? "Compte actif" : p.statut || "Statut inconnu"}
+              </span>
+
+              {p.specialite && (
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur-sm">
+                  <Stethoscope size={14} />
+                  {p.specialite}
+                </span>
+              )}
+
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur-sm">
+                <TrendingUp size={14} />
+                Profil à {completion}%
+              </span>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Actions rapides */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-          <h2 className="text-lg font-bold text-slate-800 mb-2">
-            Actions rapides
-          </h2>
+        {/* STATS */}
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <StatCard
+            icon={<ShieldCheck size={18} />}
+            iconClassName="bg-green-50 text-green-600"
+            label="Statut"
+            value={p.statut || "—"}
+          />
 
-          <p className="text-sm text-slate-500 mb-5">
-            Accès direct aux sections essentielles.
-          </p>
+          <StatCard
+            icon={<Stethoscope size={18} />}
+            iconClassName="bg-blue-50 text-blue-600"
+            label="Spécialité"
+            value={p.specialite || "—"}
+          />
 
-          <div className="space-y-3">
-            <ActionCard
-              icon={<User size={20} />}
-              title="Mon profil"
-              description="Consulter mes informations"
-            />
+          <StatCard
+            icon={<Activity size={18} />}
+            iconClassName="bg-purple-50 text-purple-600"
+            label="Profil complété"
+            value={`${completion}%`}
+            progress={completion}
+          />
+        </section>
 
-            <ActionCard
-              icon={<FileText size={20} />}
-              title="Mes documents"
-              description="Accéder à mes pièces"
-            />
+        {/* MAIN GRID */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+          {/* LEFT */}
+          <div className="space-y-6">
+            {/* APERÇU PROFIL */}
+            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">
+                    Aperçu du profil
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Informations principales de votre compte médecin
+                  </p>
+                </div>
 
-            <ActionCard
-              icon={<Bell size={20} />}
-              title="Notifications"
-              description="Voir les alertes récentes"
-            />
+                <button
+                  onClick={() => navigate("/medecin/profil")}
+                  className="inline-flex items-center gap-2 self-start rounded-xl border border-green-100 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-100"
+                >
+                  Voir tout
+                  <ArrowUpRight size={15} />
+                </button>
+              </div>
 
-            <ActionCard
-              icon={<Settings size={20} />}
-              title="Paramètres"
-              description="Gérer mon compte"
-            />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <InfoCard
+                  icon={<User size={16} />}
+                  label="Nom complet"
+                  value={`${p.prenom || ""} ${p.nom || ""}`.trim()}
+                />
+                <InfoCard
+                  icon={<Mail size={16} />}
+                  label="Email"
+                  value={p.email}
+                />
+                <InfoCard
+                  icon={<Phone size={16} />}
+                  label="Téléphone"
+                  value={p.telephone}
+                />
+                <InfoCard
+                  icon={<IdCard size={16} />}
+                  label="NNI"
+                  value={p.nni}
+                />
+                <InfoCard
+                  icon={<ShieldCheck size={16} />}
+                  label="Sexe"
+                  value={p.sexe}
+                />
+                <InfoCard
+                  icon={<Globe size={16} />}
+                  label="Nationalité"
+                  value={p.nationalite}
+                />
+                <InfoCard
+                  icon={<IdCard size={16} />}
+                  label="Numéro d’inscription"
+                  value={p.numeroInscription}
+                />
+                <InfoCard
+                  icon={<Stethoscope size={16} />}
+                  label="Spécialité"
+                  value={p.specialite}
+                />
+
+                <div className="md:col-span-2">
+                  <InfoCard
+                    icon={<MapPin size={16} />}
+                    label="Adresse"
+                    value={p.adresse}
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* ACTIVITÉ */}
+            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-slate-800">
+                  Activité récente
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Historique des dernières actions sur votre compte
+                </p>
+              </div>
+
+              <div className="space-y-0">
+                <ActivityRow
+                  icon={<CheckCircle2 size={15} />}
+                  iconClassName="bg-green-50 text-green-600"
+                  title="Compte activé"
+                  desc="Votre espace médecin a été activé avec succès."
+                  showLine
+                />
+
+                <ActivityRow
+                  icon={<Key size={15} />}
+                  iconClassName="bg-blue-50 text-blue-600"
+                  title="Mot de passe défini"
+                  desc="Votre mot de passe a été enregistré en toute sécurité."
+                  showLine
+                />
+
+                <ActivityRow
+                  icon={<LogIn size={15} />}
+                  iconClassName="bg-purple-50 text-purple-600"
+                  title="Connexion réussie"
+                  desc="Dernière connexion à votre espace personnel."
+                />
+              </div>
+            </section>
+          </div>
+
+          {/* RIGHT */}
+          <div className="space-y-6">
+            {/* ETAT COMPTE */}
+            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="mb-4 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
+                État du compte
+              </p>
+
+              <div
+                className={`mb-4 flex items-center gap-3 rounded-2xl border p-4 ${statusIsActive ? "border-green-200 bg-green-50" : "border-slate-200 bg-slate-50"}`}
+              >
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${statusIsActive ? "bg-green-100 text-green-600" : "bg-slate-100 text-slate-500"}`}
+                >
+                  <ShieldCheck size={18} />
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Statut
+                  </p>
+                  <p
+                    className={`text-base font-bold ${statusIsActive ? "text-green-700" : "text-slate-700"}`}
+                  >
+                    {p.statut || "Inconnu"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                  <Stethoscope size={18} />
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Espace
+                  </p>
+                  <p className="text-base font-bold text-slate-800">Médecin</p>
+                </div>
+              </div>
+            </section>
+
+            {/* ACTIONS RAPIDES */}
+            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="mb-4 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
+                Actions rapides
+              </p>
+
+              <div className="space-y-3">
+                <ActionCard
+                  icon={<User size={16} />}
+                  iconClassName="bg-green-50 text-green-600"
+                  title="Mon profil"
+                  desc="Consulter mes informations"
+                  onClick={() => navigate("/medecin/profil")}
+                />
+
+                <ActionCard
+                  icon={<FileText size={16} />}
+                  iconClassName="bg-blue-50 text-blue-600"
+                  title="Mes documents"
+                  desc="Accéder à mes pièces"
+                  onClick={() => navigate("/medecin/documents")}
+                />
+
+                <ActionCard
+                  icon={<Bell size={16} />}
+                  iconClassName="bg-orange-50 text-orange-600"
+                  title="Notifications"
+                  desc="Voir les alertes récentes"
+                  onClick={() => navigate("/medecin/notifications")}
+                />
+
+                <ActionCard
+                  icon={<Settings size={16} />}
+                  iconClassName="bg-purple-50 text-purple-600"
+                  title="Paramètres"
+                  desc="Gérer mon compte"
+                  onClick={() => navigate("/medecin/parametres")}
+                />
+              </div>
+            </section>
           </div>
         </div>
       </div>
-    </section>
-  </MedecinLayout>
-);
+    </MedecinLayout>
+  );
 }
 
-function InfoItem({ icon, label, value }) {
+function StatCard({ icon, iconClassName, label, value, progress }) {
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-      <div className="flex items-center gap-2 text-slate-500 mb-2">
-        <span>{icon}</span>
-        <span className="text-sm font-medium">{label}</span>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+      <div className="flex items-start gap-4">
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${iconClassName}`}
+        >
+          {icon}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            {label}
+          </p>
+          <p className="truncate text-xl font-bold text-slate-900">{value}</p>
+
+          {typeof progress === "number" && (
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-green-500 to-green-700 transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InfoCard({ icon, label, value }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-green-200 hover:bg-green-50">
+      <div className="mb-2 flex items-center gap-2 text-slate-500">
+        <span className="text-green-600">{icon}</span>
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          {label}
+        </span>
       </div>
 
-      <p className="text-slate-800 font-semibold break-words">
+      <p className={`break-words text-sm font-semibold ${value ? "text-slate-800" : "text-slate-300 font-normal"}`}>
         {value || "Non renseigné"}
       </p>
     </div>
   );
 }
 
-function ActionCard({ icon, title, description }) {
+function ActivityRow({ icon, iconClassName, title, desc, showLine = false }) {
   return (
-    <button
-      type="button"
-      className="w-full text-left bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl p-4 transition"
-    >
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+    <div className="flex gap-4 border-b border-slate-100 py-4 last:border-b-0 last:pb-0 first:pt-0">
+      <div className="flex w-8 shrink-0 flex-col items-center">
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconClassName}`}
+        >
           {icon}
         </div>
-
-        <div>
-          <h3 className="font-semibold text-slate-800">{title}</h3>
-          <p className="text-sm text-slate-500 mt-1">{description}</p>
-        </div>
+        {showLine && <div className="mt-2 w-px flex-1 bg-slate-200" />}
       </div>
-    </button>
+
+      <div className="pt-1">
+        <p className="text-sm font-semibold text-slate-800">{title}</p>
+        <p className="mt-1 text-sm leading-6 text-slate-500">{desc}</p>
+      </div>
+    </div>
   );
 }
 
-function ActivityItem({ title, subtitle }) {
+function ActionCard({ icon, iconClassName, title, desc, onClick }) {
   return (
-    <div className="flex items-start gap-4 p-4 rounded-2xl border border-slate-200 bg-slate-50">
-      <div className="w-3 h-3 mt-2 rounded-full bg-green-500 shrink-0" />
-      <div>
-        <h3 className="font-semibold text-slate-800">{title}</h3>
-        <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-green-200 hover:bg-white hover:shadow-sm"
+    >
+      <div
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconClassName}`}
+      >
+        {icon}
       </div>
-    </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-slate-800">{title}</p>
+        <p className="mt-1 text-xs text-slate-500">{desc}</p>
+      </div>
+
+      <ChevronRight size={16} className="text-slate-300" />
+    </button>
   );
 }
 

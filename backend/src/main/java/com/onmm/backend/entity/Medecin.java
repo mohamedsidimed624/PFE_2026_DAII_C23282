@@ -25,6 +25,9 @@ public class Medecin {
     @Column(nullable = false, unique = true)
     private String nni;
 
+    @Column(name = "photo_profil_path")
+    private String photoProfilPath;
+
     private String sexe;
 
     private String nationalite;
@@ -36,6 +39,8 @@ public class Medecin {
     private String statut;
 
     private String specialite;
+
+
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -139,6 +144,15 @@ public class Medecin {
 
     public void setSpecialite(String specialite) {
         this.specialite = specialite;
+    }
+
+
+    public String getPhotoProfilPath() {
+        return photoProfilPath;
+    }
+
+    public void setPhotoProfilPath(String photoProfilPath) {
+        this.photoProfilPath = photoProfilPath;
     }
 
     public User getUser() {

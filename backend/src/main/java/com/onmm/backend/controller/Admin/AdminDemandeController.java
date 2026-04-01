@@ -42,11 +42,3 @@ public class AdminDemandeController {
         adminService.rejectDemande(id, request.getAdminComment());
     }
 }
-
-
-
-
-
-
-
-
