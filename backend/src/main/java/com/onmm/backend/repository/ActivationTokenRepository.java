@@ -18,4 +18,6 @@ public interface ActivationTokenRepository extends JpaRepository<ActivationToken
             TokenType type,
             LocalDateTime now
     );
+
+    void deleteByUser(User user);
 }

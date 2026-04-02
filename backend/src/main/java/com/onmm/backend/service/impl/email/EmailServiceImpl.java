@@ -70,4 +70,23 @@ public class EmailServiceImpl implements EmailService {
 
         mailSender.send(message);
     }
+
+    @Override
+    @Async
+    public void sendSuspensionEmail(String to, String name, String comment) {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Suspension de votre compte médecin");
+
+        message.setText(
+                "Bonjour " + name + ",\n\n" +
+                        "Votre compte médecin a été suspendu par l’administration.\n\n" +
+                        "Motif : " + comment + "\n\n" +
+                        "Pour toute information complémentaire, veuillez contacter l’administration.\n\n" +
+                        "ONMM"
+        );
+
+        mailSender.send(message);
+    }
 }

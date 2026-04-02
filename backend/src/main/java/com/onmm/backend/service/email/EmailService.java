@@ -8,4 +8,6 @@ public interface EmailService {
 
     void sendRejectionEmail(String to, String nom, String comment);
 
+    void sendSuspensionEmail(String to, String name, String comment);
+
 }

@@ -1,58 +1,28 @@
-package com.onmm.backend.entity;
-
-import jakarta.persistence.*;
+package com.onmm.backend.dto.Admin;
 
 import java.time.LocalDate;
+import java.util.List;
 
-@Entity
-@Table(name = "medecins")
-public class Medecin {
+public class AdminMedecinDetailResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String nom;
-
-    @Column(nullable = false)
     private String prenom;
-
-    @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(nullable = false, unique = true)
     private String telephone;
-
-    @Column(nullable = false, unique = true)
     private String nni;
-
-    @Column(name = "photo_profil_path")
-    private String photoProfilPath;
-
     private String sexe;
-
     private String nationalite;
-
     private String adresse;
-
     private String numeroInscription;
-
     private String statut;
-
     private String specialite;
-
+    private String photoProfilPath;
     private LocalDate dateNaissance;
 
-
-
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
-
-    public Medecin() {
-
-    }
+    private List<AdminMedecinEducationResponse> educations;
+    private List<AdminMedecinExperienceResponse> experiences;
+    private List<AdminMedecinDocumentResponse> documents;
 
     public Long getId() {
         return id;
@@ -150,14 +120,6 @@ public class Medecin {
         this.specialite = specialite;
     }
 
-    public LocalDate getDateNaissance() {
-        return dateNaissance;
-    }
-
-    public void setDateNaissance(LocalDate dateNaissance) {
-        this.dateNaissance = dateNaissance;
-    }
-
     public String getPhotoProfilPath() {
         return photoProfilPath;
     }
@@ -166,11 +128,35 @@ public class Medecin {
         this.photoProfilPath = photoProfilPath;
     }
 
-    public User getUser() {
-        return user;
+    public LocalDate getDateNaissance() {
+        return dateNaissance;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setDateNaissance(LocalDate dateNaissance) {
+        this.dateNaissance = dateNaissance;
+    }
+
+    public List<AdminMedecinEducationResponse> getEducations() {
+        return educations;
+    }
+
+    public void setEducations(List<AdminMedecinEducationResponse> educations) {
+        this.educations = educations;
+    }
+
+    public List<AdminMedecinExperienceResponse> getExperiences() {
+        return experiences;
+    }
+
+    public void setExperiences(List<AdminMedecinExperienceResponse> experiences) {
+        this.experiences = experiences;
+    }
+
+    public List<AdminMedecinDocumentResponse> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(List<AdminMedecinDocumentResponse> documents) {
+        this.documents = documents;
     }
 }

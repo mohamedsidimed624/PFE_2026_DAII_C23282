@@ -198,6 +198,7 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         medecin.setAdresse(demande.getAdresse());
         medecin.setNumeroInscription(genererNumeroInscription());
         medecin.setStatut("ACTIF");
+        medecin.setDateNaissance(demande.getDateNaissance());
 
         if (demande.getEducations() != null && !demande.getEducations().isEmpty()) {
             DemandeEducation educationPrincipale = demande.getEducations().iterator().next();

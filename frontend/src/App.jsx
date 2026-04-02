@@ -1,4 +1,4 @@
-import { Routes, Route, Form } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import "./App.css";
 
 import Home from "./pages/Home";
@@ -18,97 +18,96 @@ import MedecinProfilPage from "./pages/medecin/MedecinProfilPage.jsx";
 import { FormProvider } from "./context/FormContext.jsx";
 
 function App() {
-  return(
+  return (
     <FormProvider>
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/adhesion" element={<SubmitApplication />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/set-password" element={<SetPasswordPage />} />
-      <Route path="/suivi-dossier" element={<SuiviDossierPage />} />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/adhesion" element={<SubmitApplication />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/set-password" element={<SetPasswordPage />} />
+        <Route path="/suivi-dossier" element={<SuiviDossierPage />} />
 
-      <Route
-        path="/admin/*"
-        element={
-          <AdminRoute>
-            <AdminRoutes />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/admin/*"
+          element={
+            <AdminRoute>
+              <AdminRoutes />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/medecin/dashboard"
-        element={
-          <MedecinRoute>
-            <MedecinDashboard />
-          </MedecinRoute>
-        }
-      />
+        <Route
+          path="/medecin/dashboard"
+          element={
+            <MedecinRoute>
+              <MedecinDashboard />
+            </MedecinRoute>
+          }
+        />
 
-      
-      <Route
-        path="/medecin/profil"
-        element={
-          <MedecinRoute>
-            <MedecinProfilPage />
-          </MedecinRoute>
-        }
-      />
+        <Route
+          path="/medecin/profil"
+          element={
+            <MedecinRoute>
+              <MedecinProfilPage />
+            </MedecinRoute>
+          }
+        />
 
-      <Route
-        path="/medecin/documents"
-        element={
-          <MedecinRoute>
-            <PlaceholderPage title="Mes documents" />
-          </MedecinRoute>
-        }
-      />
+        <Route
+          path="/medecin/documents"
+          element={
+            <MedecinRoute>
+              <PlaceholderPage title="Mes documents" />
+            </MedecinRoute>
+          }
+        />
 
-      <Route
-        path="/medecin/notifications"
-        element={
-          <MedecinRoute>
-            <PlaceholderPage title="Notifications" />
-          </MedecinRoute>
-        }
-      />
+        <Route
+          path="/medecin/notifications"
+          element={
+            <MedecinRoute>
+              <PlaceholderPage title="Notifications" />
+            </MedecinRoute>
+          }
+        />
 
-      <Route
-        path="/medecin/reclamations"
-        element={
-          <MedecinRoute>
-            <PlaceholderPage title="Réclamation" />
-          </MedecinRoute>
-        }
-      />
+        <Route
+          path="/medecin/reclamations"
+          element={
+            <MedecinRoute>
+              <PlaceholderPage title="Réclamation" />
+            </MedecinRoute>
+          }
+        />
 
-      <Route
-        path="/medecin/sondages"
-        element={
-          <MedecinRoute>
-            <PlaceholderPage title="Sondage" />
-          </MedecinRoute>
-        }
-      />
+        <Route
+          path="/medecin/sondages"
+          element={
+            <MedecinRoute>
+              <PlaceholderPage title="Sondage" />
+            </MedecinRoute>
+          }
+        />
 
-      <Route
-        path="/medecin/elections"
-        element={
-          <MedecinRoute>
-            <PlaceholderPage title="Élection" />
-          </MedecinRoute>
-        }
-      />
+        <Route
+          path="/medecin/elections"
+          element={
+            <MedecinRoute>
+              <PlaceholderPage title="Élection" />
+            </MedecinRoute>
+          }
+        />
 
-      <Route
-        path="/medecin/parametres"
-        element={
-          <MedecinRoute>
-            <PlaceholderPage title="Paramètres" />
-          </MedecinRoute>
-        }
-      />
-    </Routes> 
+        <Route
+          path="/medecin/parametres"
+          element={
+            <MedecinRoute>
+              <PlaceholderPage title="Paramètres" />
+            </MedecinRoute>
+          }
+        />
+      </Routes>
     </FormProvider>
   );
 }
