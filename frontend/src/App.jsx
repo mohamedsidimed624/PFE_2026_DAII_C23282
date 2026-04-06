@@ -15,6 +15,9 @@ import MedecinDashboard from "./pages/medecin/MedecinDashboard";
 import PlaceholderPage from "./pages/medecin/PlaceholderPage";
 import MedecinProfilPage from "./pages/medecin/MedecinProfilPage.jsx";
 
+import AnnuaireMedecinDetailPage from "./pages/AnnuaireMedecinDetailPage.jsx";
+import AnnuairePage from "./pages/AnnuairePage.jsx";
+
 import { FormProvider } from "./context/FormContext.jsx";
 
 function App() {
@@ -26,7 +29,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/set-password" element={<SetPasswordPage />} />
         <Route path="/suivi-dossier" element={<SuiviDossierPage />} />
-
+        <Route path="/annuaire" element={<AnnuairePage />} />
+        <Route path="/annuaire/:id" element={<AnnuaireMedecinDetailPage />} />
         <Route
           path="/admin/*"
           element={
