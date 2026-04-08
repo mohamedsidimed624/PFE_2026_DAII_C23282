@@ -18,7 +18,6 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendSubmissionEmail(String to, String name, String numeroDossier) {
-
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject("Demande reçue");
@@ -37,11 +36,9 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendApprovalEmail(String to, String name, String link) {
-
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject("Demande approuvée");
-
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                         "Votre demande a été approuvée.\n" +
@@ -56,11 +53,9 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendRejectionEmail(String to, String name, String comment) {
-
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject("Demande rejetée");
-
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                         "Votre demande a été rejetée.\n" +
@@ -74,16 +69,65 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendSuspensionEmail(String to, String name, String comment) {
-
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject("Suspension de votre compte médecin");
-
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                         "Votre compte médecin a été suspendu par l’administration.\n\n" +
                         "Motif : " + comment + "\n\n" +
                         "Pour toute information complémentaire, veuillez contacter l’administration.\n\n" +
+                        "ONMM"
+        );
+
+        mailSender.send(message);
+    }
+
+    @Override
+    @Async
+    public void sendPublicReclamationSubmissionEmail(
+            String to,
+            String name,
+            String numeroReclamation,
+            String objet
+    ) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Accusé de réception de votre réclamation");
+        message.setText(
+                "Bonjour " + name + ",\n\n" +
+                        "Votre réclamation a bien été reçue par l’administration.\n\n" +
+                        "Numéro de réclamation : " + numeroReclamation + "\n" +
+                        "Objet : " + objet + "\n\n" +
+                        "Veuillez conserver ce numéro pour toute référence future.\n" +
+                        "Votre demande sera examinée dans les meilleurs délais.\n\n" +
+                        "Cordialement,\n" +
+                        "ONMM"
+        );
+
+        mailSender.send(message);
+    }
+
+    @Override
+    @Async
+    public void sendReclamationClosedEmail(
+            String to,
+            String name,
+            String numeroReclamation,
+            String objet,
+            String adminResponse
+    ) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Clôture de votre réclamation");
+        message.setText(
+                "Bonjour " + name + ",\n\n" +
+                        "Votre réclamation a été clôturée.\n\n" +
+                        "Numéro de réclamation : " + numeroReclamation + "\n" +
+                        "Objet : " + objet + "\n\n" +
+                        "Réponse de l’administration :\n" +
+                        adminResponse + "\n\n" +
+                        "Cordialement,\n" +
                         "ONMM"
         );
 

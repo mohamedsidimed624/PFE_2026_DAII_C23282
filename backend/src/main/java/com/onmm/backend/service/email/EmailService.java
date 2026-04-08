@@ -10,4 +10,8 @@ public interface EmailService {
 
     void sendSuspensionEmail(String to, String name, String comment);
 
+    void sendPublicReclamationSubmissionEmail(String to, String name, String numeroReclamation, String objet);
+
+    void sendReclamationClosedEmail(String to, String name, String numeroReclamation, String objet, String adminResponse);
+
 }

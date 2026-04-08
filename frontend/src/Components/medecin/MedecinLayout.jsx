@@ -1,27 +1,28 @@
 import MedecinSidebar from "./MedecinSidebar";
 import MedecinTopbar from "./MedecinTopbar";
 
-function MedecinLayout({ title, subtitle, children }) {
+function MedecinLayout({ title, subtitle, children, profile }) {
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Sidebar desktop */}
-      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 lg:block">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+
+      {/* Sidebar — fixed height, no scroll */}
+      <aside className="hidden w-64 shrink-0 lg:block">
         <MedecinSidebar />
       </aside>
 
-      {/* Main area */}
-      <div className="lg:ml-64">
-        {/* Topbar fixed */}
-        <div className="fixed left-0 right-0 top-0 z-30 lg:left-64 border-b border-slate-200 bg-slate-50">
-          
-              <MedecinTopbar title={title} subtitle={subtitle} />
-            
+      {/* Right column — topbar + content */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+
+        {/* Topbar — stays at top naturally */}
+        <div className="shrink-0 border-b border-slate-200 bg-white">
+          <MedecinTopbar title={title} subtitle={subtitle} profile={profile} />
         </div>
 
-        {/* Page content */}
-        <main className="px-4 pb-8 pt-28 sm:px-6 lg:px-8">
+        {/* Scrollable content */}
+        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
           {children}
         </main>
+
       </div>
     </div>
   );

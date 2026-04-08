@@ -18,6 +18,12 @@ import MedecinProfilPage from "./pages/medecin/MedecinProfilPage.jsx";
 import AnnuaireMedecinDetailPage from "./pages/AnnuaireMedecinDetailPage.jsx";
 import AnnuairePage from "./pages/AnnuairePage.jsx";
 
+import PublicReclamationPage from "./pages/PublicReclamationPage.jsx";
+import MedecinReclamationCreatePage from "./pages/medecin/MedecinReclamationCreatePage.jsx";
+import MedecinReclamationsPage from "./pages/medecin/MedecinReclamationsPage.jsx";
+
+import MedecinReclamationDetailPage from "./pages/medecin/MedecinReclamationDetailPage.jsx";
+
 import { FormProvider } from "./context/FormContext.jsx";
 
 function App() {
@@ -31,6 +37,35 @@ function App() {
         <Route path="/suivi-dossier" element={<SuiviDossierPage />} />
         <Route path="/annuaire" element={<AnnuairePage />} />
         <Route path="/annuaire/:id" element={<AnnuaireMedecinDetailPage />} />
+        <Route path="/reclamations" element={<PublicReclamationPage />} />
+
+        <Route
+          path="/medecin/reclamations"
+          element={
+            <MedecinRoute>
+              <MedecinReclamationsPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/reclamations/nouvelle"
+          element={
+            <MedecinRoute>
+              <MedecinReclamationCreatePage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/reclamations/:id"
+          element={
+            <MedecinRoute>
+              <MedecinReclamationDetailPage />
+            </MedecinRoute>
+          }
+        />
+
         <Route
           path="/admin/*"
           element={

@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import {
   LayoutDashboard,
   User,
@@ -9,70 +10,22 @@ import {
   Vote,
   Settings,
   LogOut,
-  Stethoscope,
+  ChevronDown,
 } from "lucide-react";
 
 const NAV_ITEMS = [
-  {
-    section: "Principal",
-    links: [
-      {
-        to: "/medecin/dashboard",
-        icon: LayoutDashboard,
-        label: "Dashboard",
-      },
-      {
-        to: "/medecin/profil",
-        icon: User,
-        label: "Mon profil",
-      },
-      {
-        to: "/medecin/documents",
-        icon: FileText,
-        label: "Mes documents",
-      },
-      {
-        to: "/medecin/notifications",
-        icon: Bell,
-        label: "Notifications",
-        badge: 3,
-      },
-    ],
-  },
-  {
-    section: "Services",
-    links: [
-      {
-        to: "/medecin/reclamations",
-        icon: TriangleAlert,
-        label: "Réclamations",
-      },
-      {
-        to: "/medecin/sondages",
-        icon: BarChart3,
-        label: "Sondages",
-      },
-      {
-        to: "/medecin/elections",
-        icon: Vote,
-        label: "Élections",
-      },
-    ],
-  },
-  {
-    section: "Compte",
-    links: [
-      {
-        to: "/medecin/parametres",
-        icon: Settings,
-        label: "Paramètres",
-      },
-    ],
-  },
+  { label: "Dashboard",     icon: LayoutDashboard, to: "/medecin/dashboard" },
+  { label: "Mon profil",    icon: User,            to: "/medecin/profil" },
+  { label: "Mes documents", icon: FileText,        to: "/medecin/documents" },
+  { label: "Notifications", icon: Bell,            to: "/medecin/notifications", badge: 3 },
+  { label: "Réclamations",  icon: TriangleAlert,   to: "/medecin/reclamations" },
+  { label: "Sondages",      icon: BarChart3,       to: "/medecin/sondages" },
+  { label: "Élections",     icon: Vote,            to: "/medecin/elections" },
 ];
 
 function MedecinSidebar() {
   const navigate = useNavigate();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -81,89 +34,94 @@ function MedecinSidebar() {
     navigate("/login");
   };
 
-  const navClass = ({ isActive }) =>
-    [
-      "group flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-medium transition",
-      isActive
-        ? "border-green-100 bg-green-50 text-green-700"
-        : "border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-800",
-    ].join(" ");
-
   return (
-    <div className="sticky top-0 flex h-screen w-64 flex-col border-r border-slate-200 bg-white">
-      {/* Logo */}
-      <div className="border-b border-slate-100 px-5 py-5">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-green-700 to-green-500 text-white shadow-sm">
-            <Stethoscope size={20} />
-          </div>
+    <aside className="w-56 shrink-0 bg-white border-r border-slate-100 min-h-screen flex flex-col">
 
-          <div>
-            <h2 className="text-sm font-bold text-slate-900">Espace Médecin</h2>
-            <p className="text-xs font-medium text-slate-400">
-              Ordre des Médecins
-            </p>
-          </div>
-        </div>
+      {/* ── Logo centré — identique à AdminSidebar ── */}
+      <div className="flex items-center justify-center py-5 border-b border-slate-100">
+        <img
+          src="/logo.png"
+          alt="Ordre des Médecins"
+          className="h-14 w-14 object-contain"
+        />
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
-        {NAV_ITEMS.map((section) => (
-          <div key={section.section} className="mb-5">
-            <p className="px-3 pb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-300">
-              {section.section}
-            </p>
+      {/* ── Navigation ── */}
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
 
-            <div className="space-y-1">
-              {section.links.map((link) => {
-                const Icon = link.icon;
-
-                return (
-                  <NavLink key={link.to} to={link.to} className={navClass}>
-                    {({ isActive }) => (
-                      <>
-                        <span
-                          className={[
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition",
-                            isActive
-                              ? "bg-green-100 text-green-600"
-                              : "bg-transparent text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600",
-                          ].join(" ")}
-                        >
-                          <Icon size={17} />
-                        </span>
-
-                        <span className="truncate">{link.label}</span>
-
-                        {link.badge ? (
-                          <span className="ml-auto inline-flex min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[11px] font-bold text-white">
-                            {link.badge}
-                          </span>
-                        ) : null}
-                      </>
-                    )}
-                  </NavLink>
-                );
-              })}
-            </div>
-          </div>
+        {NAV_ITEMS.map(({ label, icon: Icon, to, badge }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-green-50 text-green-700"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <Icon
+                  size={17}
+                  className={isActive ? "text-green-600" : "text-slate-400"}
+                />
+                <span className="flex-1 leading-none">{label}</span>
+                {badge ? (
+                  <span className="min-w-[18px] h-[18px] inline-flex items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white leading-none">
+                    {badge}
+                  </span>
+                ) : null}
+              </>
+            )}
+          </NavLink>
         ))}
+
+        {/* ── Paramètres avec sous-menu collapsible ── */}
+        <div>
+          <button
+            onClick={() => setSettingsOpen((o) => !o)}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+          >
+            <Settings size={17} className="text-slate-400" />
+            <span className="flex-1 text-left leading-none">Paramètres</span>
+            <ChevronDown
+              size={14}
+              className={`text-slate-400 transition-transform duration-200 ${settingsOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {settingsOpen && (
+            <div className="ml-6 mt-0.5 space-y-0.5">
+              <NavLink
+                to="/medecin/parametres/compte"
+                className="flex items-center px-3 py-2 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+              >
+                Mon compte
+              </NavLink>
+              <NavLink
+                to="/medecin/parametres/securite"
+                className="flex items-center px-3 py-2 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+              >
+                Sécurité
+              </NavLink>
+            </div>
+          )}
+        </div>
       </nav>
 
-      {/* Footer */}
+      {/* ── Déconnexion — bas de sidebar ── */}
       <div className="border-t border-slate-100 p-3">
         <button
           onClick={handleLogout}
-          className="group flex w-full items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-red-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+          className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition group-hover:bg-red-100">
-            <LogOut size={17} />
-          </span>
-          <span>Déconnexion</span>
+          <LogOut size={17} className="shrink-0" />
+          <span className="leading-none">Déconnexion</span>
         </button>
       </div>
-    </div>
+    </aside>
   );
 }
 

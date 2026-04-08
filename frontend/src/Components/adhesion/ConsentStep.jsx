@@ -157,13 +157,13 @@ function ConsentStep({ prevStep }) {
             <Home size={15} />
             Retour à l'accueil
           </button>
-          <button
+          {/* <button
             onClick={() => { navigate("/suivi-dossier"); resetForm(); }}
             className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all shadow-sm"
           >
             <FolderSearch size={15} />
             Suivre mon dossier
-          </button>
+          </button> */}
         </div>
       </div>
     );

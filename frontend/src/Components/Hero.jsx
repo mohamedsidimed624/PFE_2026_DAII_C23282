@@ -80,7 +80,7 @@ function Hero() {
                   onClick={handleSearch}
                   type="button"
                   disabled={loadingSearch}
-                  className="flex items-center justify-center h-10 w-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition disabled:opacity-60"
+                  className="group flex items-center justify-center h-10 w-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition disabled:opacity-60 focus-within:border-green-400 focus-within:shadow-md"
                   aria-label="Rechercher un dossier"
                 >
                   <Search size={18} />
@@ -96,7 +96,7 @@ function Hero() {
 
             <Link
               to="/adhesion"
-              className="inline-flex items-center justify-center gap-2 h-14 px-7 rounded-full bg-green-600 text-white font-medium shadow-sm hover:bg-green-700 transition"
+              className="inline-flex items-center justify-center gap-2 h-14 w-110 px-7 rounded-full bg-green-600 text-white font-medium shadow-sm hover:bg-green-700 transition"
             >
               Soumettre votre dossier
               <ArrowRight size={18} />
