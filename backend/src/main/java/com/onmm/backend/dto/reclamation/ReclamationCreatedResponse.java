@@ -4,7 +4,16 @@ public class ReclamationCreatedResponse {
 
     private Long id;
     private String numeroReclamation;
+    private String categorie;
     private String statut;
+
+    public String getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(String categorie) {
+        this.categorie = categorie;
+    }
 
     public Long getId() {
         return id;

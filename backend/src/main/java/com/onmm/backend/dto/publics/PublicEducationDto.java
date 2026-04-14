@@ -9,6 +9,8 @@ public class PublicEducationDto {
     private String ville;
     private Integer anneeObtention;
 
+
+
     public String getSpecialite() {
         return specialite;
     }

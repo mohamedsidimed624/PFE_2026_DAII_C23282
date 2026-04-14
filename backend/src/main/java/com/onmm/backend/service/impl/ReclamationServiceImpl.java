@@ -1,8 +1,13 @@
 package com.onmm.backend.service.impl;
 
 import com.onmm.backend.dto.reclamation.*;
-import com.onmm.backend.entity.*;
+import com.onmm.backend.entity.Medecin;
+import com.onmm.backend.entity.Reclamation;
+import com.onmm.backend.entity.User;
 import com.onmm.backend.entity.enums.ReclamationAuteurType;
+import com.onmm.backend.entity.enums.ReclamationCategory;
+import com.onmm.backend.entity.enums.ReclamationModule;
+import com.onmm.backend.entity.enums.ReclamationPriorite;
 import com.onmm.backend.entity.enums.ReclamationStatus;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.repository.ReclamationRepository;
@@ -38,14 +43,21 @@ public class ReclamationServiceImpl implements ReclamationService {
     @Override
     @Transactional
     public ReclamationCreatedResponse createPublicReclamation(CreatePublicReclamationRequest request, String pieceJointePath) {
+        ReclamationCategory categorie = parseCategory(request.getCategorie());
+        LocalDateTime now = LocalDateTime.now();
+
         Reclamation reclamation = new Reclamation();
         reclamation.setNumeroReclamation(generateNumeroReclamation());
         reclamation.setTypeAuteur(ReclamationAuteurType.CITOYEN);
+        reclamation.setCategorie(categorie);
+        reclamation.setPriorite(ReclamationPriorite.MEDIUM);
+        reclamation.setModuleConcerne(mapCategoryToModule(categorie));
         reclamation.setObjet(request.getObjet());
         reclamation.setMessage(request.getMessage());
         reclamation.setPieceJointePath(pieceJointePath);
         reclamation.setStatut(ReclamationStatus.SUBMITTED);
-        reclamation.setDateCreation(LocalDateTime.now());
+        reclamation.setDateCreation(now);
+        reclamation.setDateDerniereMiseAJour(now);
 
         reclamation.setNomCitoyen(request.getNom());
         reclamation.setPrenomCitoyen(request.getPrenom());
@@ -75,14 +87,21 @@ public class ReclamationServiceImpl implements ReclamationService {
         Medecin medecin = medecinRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
+        ReclamationCategory categorie = parseCategory(request.getCategorie());
+        LocalDateTime now = LocalDateTime.now();
+
         Reclamation reclamation = new Reclamation();
         reclamation.setNumeroReclamation(generateNumeroReclamation());
         reclamation.setTypeAuteur(ReclamationAuteurType.MEDECIN);
+        reclamation.setCategorie(categorie);
+        reclamation.setPriorite(ReclamationPriorite.MEDIUM);
+        reclamation.setModuleConcerne(mapCategoryToModule(categorie));
         reclamation.setObjet(request.getObjet());
         reclamation.setMessage(request.getMessage());
         reclamation.setPieceJointePath(pieceJointePath);
         reclamation.setStatut(ReclamationStatus.SUBMITTED);
-        reclamation.setDateCreation(LocalDateTime.now());
+        reclamation.setDateCreation(now);
+        reclamation.setDateDerniereMiseAJour(now);
         reclamation.setMedecin(medecin);
 
         reclamationRepository.save(reclamation);
@@ -148,8 +167,11 @@ public class ReclamationServiceImpl implements ReclamationService {
             throw new RuntimeException("Seule une réclamation soumise peut être prise en charge");
         }
 
+        LocalDateTime now = LocalDateTime.now();
+
         reclamation.setStatut(ReclamationStatus.IN_PROGRESS);
-        reclamation.setDatePriseEnCharge(LocalDateTime.now());
+        reclamation.setDatePriseEnCharge(now);
+        reclamation.setDateDerniereMiseAJour(now);
 
         reclamationRepository.save(reclamation);
     }
@@ -167,13 +189,16 @@ public class ReclamationServiceImpl implements ReclamationService {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User currentAdmin = (User) principal;
 
+        LocalDateTime now = LocalDateTime.now();
+
         reclamation.setStatut(ReclamationStatus.CLOSED);
-        reclamation.setDateCloture(LocalDateTime.now());
+        reclamation.setDateCloture(now);
         reclamation.setAdminResponse(request.getAdminResponse());
         reclamation.setAdminTraiteur(currentAdmin);
+        reclamation.setDateDerniereMiseAJour(now);
 
         if (reclamation.getDatePriseEnCharge() == null) {
-            reclamation.setDatePriseEnCharge(LocalDateTime.now());
+            reclamation.setDatePriseEnCharge(now);
         }
 
         reclamationRepository.save(reclamation);
@@ -202,10 +227,45 @@ public class ReclamationServiceImpl implements ReclamationService {
         return "REC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
+    private ReclamationCategory parseCategory(String rawCategory) {
+        if (rawCategory == null || rawCategory.isBlank()) {
+            throw new RuntimeException("La catégorie de réclamation est obligatoire");
+        }
+
+        try {
+            return ReclamationCategory.valueOf(rawCategory.toUpperCase().trim());
+        } catch (IllegalArgumentException ex) {
+            throw new RuntimeException("Catégorie de réclamation invalide");
+        }
+    }
+
+    private ReclamationModule mapCategoryToModule(ReclamationCategory category) {
+        return switch (category) {
+            case RETARD_TRAITEMENT, ERREUR_DOSSIER, DEMANDE_INFORMATION ->
+                    ReclamationModule.ADMINISTRATIF;
+
+            case QUALITE_SOINS ->
+                    ReclamationModule.EXERCICE_PROFESSIONNEL;
+
+            case SECRET_PROFESSIONNEL, CONFRATERNITE, PUBLICITE_CHARLATANISME, DECONSIDERATION_PROFESSION ->
+                    ReclamationModule.ETHIQUE_DEONTOLOGIE;
+
+            case INFORMATION_CONSENTEMENT, COMPORTEMENT_INAPPROPRIE ->
+                    ReclamationModule.RELATION_PATIENT;
+
+            case CERTIFICAT_MEDICAL, PRESCRIPTION_ABUSIVE ->
+                    ReclamationModule.DOCUMENT_MEDICAL;
+
+            case AUTRE ->
+                    ReclamationModule.AUTRE;
+        };
+    }
+
     private ReclamationCreatedResponse toCreatedResponse(Reclamation reclamation) {
         ReclamationCreatedResponse response = new ReclamationCreatedResponse();
         response.setId(reclamation.getId());
         response.setNumeroReclamation(reclamation.getNumeroReclamation());
+        response.setCategorie(reclamation.getCategorie() != null ? reclamation.getCategorie().name() : null);
         response.setStatut(reclamation.getStatut().name());
         return response;
     }
@@ -215,9 +275,21 @@ public class ReclamationServiceImpl implements ReclamationService {
         response.setId(reclamation.getId());
         response.setNumeroReclamation(reclamation.getNumeroReclamation());
         response.setTypeAuteur(reclamation.getTypeAuteur().name());
+        response.setCategorie(reclamation.getCategorie() != null ? reclamation.getCategorie().name() : null);
+        response.setPriorite(reclamation.getPriorite() != null ? reclamation.getPriorite().name() : null);
+        response.setModuleConcerne(reclamation.getModuleConcerne() != null ? reclamation.getModuleConcerne().name() : null);
         response.setObjet(reclamation.getObjet());
         response.setStatut(reclamation.getStatut().name());
         response.setDateCreation(reclamation.getDateCreation() != null ? reclamation.getDateCreation().toString() : null);
+        response.setDateDerniereMiseAJour(
+                reclamation.getDateDerniereMiseAJour() != null
+                        ? reclamation.getDateDerniereMiseAJour().toString()
+                        : null
+        );
+
+        if (reclamation.getAdminTraiteur() != null) {
+            response.setAdminTraiteurNom(reclamation.getAdminTraiteur().getEmail());
+        }
 
         if (reclamation.getTypeAuteur() == ReclamationAuteurType.MEDECIN && reclamation.getMedecin() != null) {
             response.setAuteurNom(reclamation.getMedecin().getNom() + " " + reclamation.getMedecin().getPrenom());
@@ -236,6 +308,9 @@ public class ReclamationServiceImpl implements ReclamationService {
         response.setId(reclamation.getId());
         response.setNumeroReclamation(reclamation.getNumeroReclamation());
         response.setTypeAuteur(reclamation.getTypeAuteur().name());
+        response.setCategorie(reclamation.getCategorie() != null ? reclamation.getCategorie().name() : null);
+        response.setPriorite(reclamation.getPriorite() != null ? reclamation.getPriorite().name() : null);
+        response.setModuleConcerne(reclamation.getModuleConcerne() != null ? reclamation.getModuleConcerne().name() : null);
         response.setObjet(reclamation.getObjet());
         response.setMessage(reclamation.getMessage());
         response.setPieceJointePath(reclamation.getPieceJointePath());
@@ -243,7 +318,17 @@ public class ReclamationServiceImpl implements ReclamationService {
         response.setDateCreation(reclamation.getDateCreation() != null ? reclamation.getDateCreation().toString() : null);
         response.setDatePriseEnCharge(reclamation.getDatePriseEnCharge() != null ? reclamation.getDatePriseEnCharge().toString() : null);
         response.setDateCloture(reclamation.getDateCloture() != null ? reclamation.getDateCloture().toString() : null);
+        response.setDateDerniereMiseAJour(
+                reclamation.getDateDerniereMiseAJour() != null
+                        ? reclamation.getDateDerniereMiseAJour().toString()
+                        : null
+        );
         response.setAdminResponse(reclamation.getAdminResponse());
+
+        if (reclamation.getAdminTraiteur() != null) {
+            response.setAdminTraiteurId(reclamation.getAdminTraiteur().getId());
+            response.setAdminTraiteurNom(reclamation.getAdminTraiteur().getEmail());
+        }
 
         if (reclamation.getTypeAuteur() == ReclamationAuteurType.MEDECIN && reclamation.getMedecin() != null) {
             response.setNomAuteur(reclamation.getMedecin().getNom());

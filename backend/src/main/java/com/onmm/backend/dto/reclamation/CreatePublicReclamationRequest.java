@@ -8,6 +8,8 @@ public class CreatePublicReclamationRequest {
     private String adresse;
     private String telephone;
     private String email;
+
+    private String categorie;
     private String objet;
     private String message;
 
@@ -57,6 +59,14 @@ public class CreatePublicReclamationRequest {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(String categorie) {
+        this.categorie = categorie;
     }
 
     public String getObjet() {

@@ -1,6 +1,9 @@
 package com.onmm.backend.entity;
 
 import com.onmm.backend.entity.enums.ReclamationAuteurType;
+import com.onmm.backend.entity.enums.ReclamationCategory;
+import com.onmm.backend.entity.enums.ReclamationModule;
+import com.onmm.backend.entity.enums.ReclamationPriorite;
 import com.onmm.backend.entity.enums.ReclamationStatus;
 import jakarta.persistence.*;
 
@@ -20,6 +23,18 @@ public class Reclamation {
     @Enumerated(EnumType.STRING)
     @Column(name = "type_auteur", nullable = false)
     private ReclamationAuteurType typeAuteur;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "categorie", nullable = false)
+    private ReclamationCategory categorie;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "priorite", nullable = false)
+    private ReclamationPriorite priorite;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "module_concerne", nullable = false)
+    private ReclamationModule moduleConcerne;
 
     @Column(nullable = false)
     private String objet;
@@ -42,6 +57,9 @@ public class Reclamation {
 
     @Column(name = "date_cloture")
     private LocalDateTime dateCloture;
+
+    @Column(name = "date_derniere_mise_a_jour")
+    private LocalDateTime dateDerniereMiseAJour;
 
     // Cas médecin
     @ManyToOne(fetch = FetchType.LAZY)
@@ -98,6 +116,30 @@ public class Reclamation {
         this.typeAuteur = typeAuteur;
     }
 
+    public ReclamationCategory getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(ReclamationCategory categorie) {
+        this.categorie = categorie;
+    }
+
+    public ReclamationPriorite getPriorite() {
+        return priorite;
+    }
+
+    public void setPriorite(ReclamationPriorite priorite) {
+        this.priorite = priorite;
+    }
+
+    public ReclamationModule getModuleConcerne() {
+        return moduleConcerne;
+    }
+
+    public void setModuleConcerne(ReclamationModule moduleConcerne) {
+        this.moduleConcerne = moduleConcerne;
+    }
+
     public String getObjet() {
         return objet;
     }
@@ -152,6 +194,14 @@ public class Reclamation {
 
     public void setDateCloture(LocalDateTime dateCloture) {
         this.dateCloture = dateCloture;
+    }
+
+    public LocalDateTime getDateDerniereMiseAJour() {
+        return dateDerniereMiseAJour;
+    }
+
+    public void setDateDerniereMiseAJour(LocalDateTime dateDerniereMiseAJour) {
+        this.dateDerniereMiseAJour = dateDerniereMiseAJour;
     }
 
     public Medecin getMedecin() {

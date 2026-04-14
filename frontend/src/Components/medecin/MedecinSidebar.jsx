@@ -23,7 +23,7 @@ const NAV_ITEMS = [
   { label: "Élections",     icon: Vote,            to: "/medecin/elections" },
 ];
 
-function MedecinSidebar() {
+function MedecinSidebar({ isCollapsed = false }) {
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -35,74 +35,87 @@ function MedecinSidebar() {
   };
 
   return (
-    <aside className="w-56 shrink-0 bg-white border-r border-slate-100 min-h-screen flex flex-col">
-
-      {/* ── Logo centré — identique à AdminSidebar ── */}
-      <div className="flex items-center justify-center py-5 border-b border-slate-100">
+    <div className="flex flex-col h-full bg-white dark:bg-slate-950 transition-colors duration-300">
+      {/* ── Logo centré ── */}
+      <div className={`flex items-center justify-center py-5 border-b border-slate-200 dark:border-slate-800 transition-colors ${isCollapsed ? 'px-2' : 'px-4'}`}>
         <img
-          src="/logo.png"
+          src="./assets/logo.png"
           alt="Ordre des Médecins"
-          className="h-14 w-14 object-contain"
+          className={`object-contain transition-all duration-300 ${isCollapsed ? 'h-10 w-10' : 'h-14 w-14'}`}
         />
       </div>
 
       {/* ── Navigation ── */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-
+      <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
         {NAV_ITEMS.map(({ label, icon: Icon, to, badge }) => (
           <NavLink
             key={to}
             to={to}
+            title={isCollapsed ? label : ""}
             className={({ isActive }) =>
-              `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? "bg-green-50 text-green-700"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-              }`
+                  ? "bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-green-600 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-green-400"
+              } ${isCollapsed ? 'justify-center' : 'justify-start'}`
             }
           >
             {({ isActive }) => (
               <>
-                <Icon
-                  size={17}
-                  className={isActive ? "text-green-600" : "text-slate-400"}
-                />
-                <span className="flex-1 leading-none">{label}</span>
-                {badge ? (
-                  <span className="min-w-[18px] h-[18px] inline-flex items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white leading-none">
-                    {badge}
-                  </span>
-                ) : null}
+                <div className="relative flex items-center justify-center">
+                  <Icon
+                    size={20}
+                    className={`transition-colors ${isActive ? "text-green-600 dark:text-green-400" : "text-slate-400 dark:text-slate-500"}`}
+                  />
+                  {badge && isCollapsed && (
+                    <span className="absolute -top-1.5 -right-1.5 h-3 w-3 rounded-full bg-red-500 border-2 border-white dark:border-slate-950" />
+                  )}
+                </div>
+                {!isCollapsed && (
+                  <div className="flex flex-1 items-center justify-between overflow-hidden">
+                    <span className="leading-none whitespace-nowrap">{label}</span>
+                    {badge ? (
+                      <span className="min-w-[20px] h-[20px] inline-flex items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white leading-none shadow-sm">
+                        {badge}
+                      </span>
+                    ) : null}
+                  </div>
+                )}
               </>
             )}
           </NavLink>
         ))}
 
-        {/* ── Paramètres avec sous-menu collapsible ── */}
+        {/* ── Paramètres ── */}
         <div>
           <button
             onClick={() => setSettingsOpen((o) => !o)}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+            title={isCollapsed ? "Paramètres" : ""}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200 text-slate-600 hover:bg-slate-50 hover:text-green-600 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-green-400 ${isCollapsed ? 'justify-center' : 'justify-start'}`}
           >
-            <Settings size={17} className="text-slate-400" />
-            <span className="flex-1 text-left leading-none">Paramètres</span>
-            <ChevronDown
-              size={14}
-              className={`text-slate-400 transition-transform duration-200 ${settingsOpen ? "rotate-180" : ""}`}
-            />
+            <Settings size={20} className="text-slate-400 dark:text-slate-500 shrink-0" />
+            {!isCollapsed && (
+              <>
+                <span className="flex-1 text-left leading-none whitespace-nowrap">Paramètres</span>
+                <ChevronDown
+                  size={16}
+                  className={`text-slate-400 transition-transform duration-200 ${settingsOpen ? "rotate-180" : ""}`}
+                />
+              </>
+            )}
           </button>
 
-          {settingsOpen && (
-            <div className="ml-6 mt-0.5 space-y-0.5">
+          {!isCollapsed && settingsOpen && (
+            <div className="ml-9 mt-1 space-y-1">
               <NavLink
                 to="/medecin/parametres/compte"
-                className="flex items-center px-3 py-2 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+                className={({ isActive }) => `flex items-center px-4 py-2 rounded-lg text-xs font-medium transition-colors ${isActive ? 'text-green-600 dark:text-green-400 bg-green-50/50 dark:bg-green-900/20' : 'text-slate-500 hover:text-green-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-green-400 dark:hover:bg-slate-800/50'}`}
               >
                 Mon compte
               </NavLink>
               <NavLink
                 to="/medecin/parametres/securite"
-                className="flex items-center px-3 py-2 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+                className={({ isActive }) => `flex items-center px-4 py-2 rounded-lg text-xs font-medium transition-colors ${isActive ? 'text-green-600 dark:text-green-400 bg-green-50/50 dark:bg-green-900/20' : 'text-slate-500 hover:text-green-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-green-400 dark:hover:bg-slate-800/50'}`}
               >
                 Sécurité
               </NavLink>
@@ -111,17 +124,18 @@ function MedecinSidebar() {
         </div>
       </nav>
 
-      {/* ── Déconnexion — bas de sidebar ── */}
-      <div className="border-t border-slate-100 p-3">
+      {/* ── Déconnexion ── */}
+      <div className="border-t border-slate-200 dark:border-slate-800 p-3 transition-colors">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+          title={isCollapsed ? "Déconnexion" : ""}
+          className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200 text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-950/30 ${isCollapsed ? 'justify-center' : 'justify-start'}`}
         >
-          <LogOut size={17} className="shrink-0" />
-          <span className="leading-none">Déconnexion</span>
+          <LogOut size={20} className="shrink-0" />
+          {!isCollapsed && <span className="leading-none whitespace-nowrap">Déconnexion</span>}
         </button>
       </div>
-    </aside>
+    </div>
   );
 }
 

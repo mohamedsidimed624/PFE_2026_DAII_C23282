@@ -63,8 +63,8 @@ function MedecinDashboard() {
   if (loading) {
     return (
       <MedecinLayout title="Dashboard" subtitle="Chargement…">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-slate-500">Chargement du tableau de bord...</p>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-colors">
+          <p className="text-slate-500 dark:text-slate-400">Chargement du tableau de bord...</p>
         </div>
       </MedecinLayout>
     );
@@ -73,7 +73,7 @@ function MedecinDashboard() {
   if (error) {
     return (
       <MedecinLayout title="Dashboard" subtitle="Une erreur est survenue.">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-600">
+        <div className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4 text-red-600 dark:text-red-400 transition-colors">
           {error}
         </div>
       </MedecinLayout>
@@ -85,125 +85,131 @@ function MedecinDashboard() {
       title="Dashboard"
       subtitle="Vue d'ensemble de votre espace médecin."
     >
-      <div className="space-y-5">
+      <div className="space-y-6">
 
         {/* GREETING */}
-        <section className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-          <h1 className="text-xl font-semibold text-slate-800">
-            Bonjour, Dr. {p.prenom} {p.nom} 👋
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {p.specialite || "Médecin"} · N° {p.numeroInscription || "—"}
-          </p>
-          <span
-            className={`mt-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-              statusIsActive
-                ? "border-green-200 bg-green-50 text-green-700"
-                : "border-slate-200 bg-white text-slate-600"
-            }`}
-          >
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/50 p-6 backdrop-blur-sm shadow-sm transition-colors relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+            <Stethoscope size={200} className="text-green-600 dark:text-green-400 -mt-10 -mr-10" />
+          </div>
+          <div className="relative z-10">
+            <h1 className="text-2xl justify-center font-bold text-slate-900 dark:text-white transition-colors">
+              Bonjour, Dr. {p.prenom} {p.nom} 👋
+            </h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {p.specialite || "Médecin"} · N° {p.numeroInscription || "—"}
+            </p>
             <span
-              className={`h-1.5 w-1.5 rounded-full ${
-                statusIsActive ? "bg-green-500" : "bg-slate-400"
-              }`}
-            />
-            {statusIsActive ? "Compte actif" : p.statut || "Statut inconnu"}
-          </span>
+              className={`mt-4 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors ${statusIsActive
+                ? "border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                }`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full animate-pulse ${statusIsActive ? "bg-green-500 dark:bg-green-400" : "bg-slate-400 dark:bg-slate-500"
+                  }`}
+              />
+              {statusIsActive ? "Compte actif" : p.statut || "Statut inconnu"}
+            </span>
+          </div>
         </section>
 
         {/* STATS */}
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <StatCard
-            icon={<ShieldCheck size={16} />}
-            iconClassName="bg-green-50 text-green-600"
+            icon={<ShieldCheck size={20} />}
+            iconClassName="bg-green-50 dark:bg-green-900/40 text-green-600 dark:text-green-400"
             label="Statut"
             value={p.statut || "—"}
           />
           <StatCard
-            icon={<Stethoscope size={16} />}
-            iconClassName="bg-blue-50 text-blue-600"
+            icon={<Stethoscope size={20} />}
+            iconClassName="bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"
             label="Spécialité"
             value={p.specialite || "—"}
           />
           <StatCard
-            icon={<Activity size={16} />}
-            iconClassName="bg-purple-50 text-purple-600"
+            icon={<Activity size={20} />}
+            iconClassName="bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400"
             label="Profil complété"
             value={`${completion}%`}
             progress={completion}
           />
         </section>
 
-        {/* PROFIL */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold text-slate-800">Profil</h2>
-            <button
-              onClick={() => navigate("/medecin/profil")}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-green-700 hover:underline"
-            >
-              Voir tout
-              <ArrowUpRight size={14} />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <InfoCard
-              icon={<User size={14} />}
-              label="Nom complet"
-              value={`${p.prenom || ""} ${p.nom || ""}`.trim()}
-            />
-            <InfoCard icon={<Mail size={14} />} label="Email" value={p.email} />
-            <InfoCard icon={<Phone size={14} />} label="Téléphone" value={p.telephone} />
-            <InfoCard icon={<IdCard size={14} />} label="NNI" value={p.nni} />
-            <InfoCard icon={<Globe size={14} />} label="Nationalité" value={p.nationalite} />
-            <InfoCard icon={<ShieldCheck size={14} />} label="Sexe" value={p.sexe} />
-            <InfoCard
-              icon={<IdCard size={14} />}
-              label="N° inscription"
-              value={p.numeroInscription}
-            />
-            <InfoCard icon={<Stethoscope size={14} />} label="Spécialité" value={p.specialite} />
-            <div className="sm:col-span-2">
-              <InfoCard icon={<MapPin size={14} />} label="Adresse" value={p.adresse} />
+        {/* PROFIL & ACTIONS (Grid) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* PROFIL */}
+          <section className="lg:col-span-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-colors">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Profil</h2>
+              <button
+                onClick={() => navigate("/medecin/profil")}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 hover:underline transition-colors"
+              >
+                Voir tout
+                <ArrowUpRight size={15} />
+              </button>
             </div>
-          </div>
-        </section>
 
-        {/* ACTIONS */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 className="mb-4 font-semibold text-slate-800">Actions rapides</h2>
-          <div className="space-y-2">
-            <ActionCard
-              icon={<User size={15} />}
-              iconClassName="bg-green-50 text-green-600"
-              title="Mon profil"
-              desc="Consulter mes informations"
-              onClick={() => navigate("/medecin/profil")}
-            />
-            <ActionCard
-              icon={<FileText size={15} />}
-              iconClassName="bg-blue-50 text-blue-600"
-              title="Mes documents"
-              desc="Accéder à mes pièces"
-              onClick={() => navigate("/medecin/documents")}
-            />
-            <ActionCard
-              icon={<Bell size={15} />}
-              iconClassName="bg-orange-50 text-orange-600"
-              title="Notifications"
-              desc="Voir les alertes récentes"
-              onClick={() => navigate("/medecin/notifications")}
-            />
-            <ActionCard
-              icon={<Settings size={15} />}
-              iconClassName="bg-purple-50 text-purple-600"
-              title="Paramètres"
-              desc="Gérer mon compte"
-              onClick={() => navigate("/medecin/parametres")}
-            />
-          </div>
-        </section>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <InfoCard
+                icon={<User size={16} />}
+                label="Nom complet"
+                value={`${p.prenom || ""} ${p.nom || ""}`.trim()}
+              />
+              <InfoCard icon={<Mail size={16} />} label="Email" value={p.email} />
+              <InfoCard icon={<Phone size={16} />} label="Téléphone" value={p.telephone} />
+              <InfoCard icon={<IdCard size={16} />} label="NNI" value={p.nni} />
+              <InfoCard icon={<Globe size={16} />} label="Nationalité" value={p.nationalite} />
+              <InfoCard icon={<ShieldCheck size={16} />} label="Sexe" value={p.sexe} />
+              <InfoCard
+                icon={<IdCard size={16} />}
+                label="N° inscription"
+                value={p.numeroInscription}
+              />
+              <InfoCard icon={<Stethoscope size={16} />} label="Spécialité" value={p.specialite} />
+              <div className="sm:col-span-2">
+                <InfoCard icon={<MapPin size={16} />} label="Adresse" value={p.adresse} />
+              </div>
+            </div>
+          </section>
+
+          {/* ACTIONS */}
+          <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-colors flex flex-col">
+            <h2 className="text-lg mb-5 font-bold text-slate-800 dark:text-slate-100">Actions rapides</h2>
+            <div className="flex-1 space-y-3">
+              <ActionCard
+                icon={<User size={18} />}
+                iconClassName="bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                title="Mon profil"
+                desc="Consulter mes informations"
+                onClick={() => navigate("/medecin/profil")}
+              />
+              <ActionCard
+                icon={<FileText size={18} />}
+                iconClassName="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                title="Mes documents"
+                desc="Accéder à mes pièces"
+                onClick={() => navigate("/medecin/documents")}
+              />
+              <ActionCard
+                icon={<Bell size={18} />}
+                iconClassName="bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                title="Notifications"
+                desc="Voir les alertes récentes"
+                onClick={() => navigate("/medecin/notifications")}
+              />
+              <ActionCard
+                icon={<Settings size={18} />}
+                iconClassName="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                title="Paramètres"
+                desc="Gérer mon compte"
+                onClick={() => navigate("/medecin/parametres")}
+              />
+            </div>
+          </section>
+        </div>
 
       </div>
     </MedecinLayout>
@@ -214,24 +220,26 @@ function MedecinDashboard() {
 
 function StatCard({ icon, iconClassName, label, value, progress }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="flex items-center gap-3">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm hover:shadow-md transition-all duration-300 group">
+      <div className="flex items-center gap-4">
         <div
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconClassName}`}
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${iconClassName}`}
         >
           {icon}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
             {label}
           </p>
-          <p className="truncate text-base font-semibold text-slate-900">{value}</p>
+          <p className="mt-1 truncate text-lg font-extrabold text-slate-900 dark:text-white transition-colors">
+            {value}
+          </p>
         </div>
       </div>
       {typeof progress === "number" && (
-        <div className="mt-3 h-1 overflow-hidden rounded-full bg-slate-100">
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
           <div
-            className="h-full rounded-full bg-green-500 transition-all duration-500"
+            className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600 dark:from-green-500 dark:to-green-400 transition-all duration-1000 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -242,15 +250,14 @@ function StatCard({ icon, iconClassName, label, value, progress }) {
 
 function InfoCard({ icon, label, value }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-      <div className="mb-1 flex items-center gap-1.5 text-slate-400">
-        <span className="text-green-600">{icon}</span>
-        <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
+    <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 px-4 py-3 hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm transition-all duration-200">
+      <div className="mb-1.5 flex items-center gap-2 text-slate-500 dark:text-slate-400">
+        <span className="text-green-600 dark:text-green-500 opacity-80">{icon}</span>
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</span>
       </div>
       <p
-        className={`text-sm ${
-          value ? "font-medium text-slate-800" : "text-slate-300"
-        }`}
+        className={`text-sm ${value ? "font-semibold text-slate-800 dark:text-slate-200" : "text-slate-400 dark:text-slate-600 italic"
+          }`}
       >
         {value || "Non renseigné"}
       </p>
@@ -263,18 +270,18 @@ function ActionCard({ icon, iconClassName, title, desc, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left transition hover:border-green-200 hover:bg-white"
+      className="flex w-full items-center gap-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-transparent px-4 py-3 text-left transition-all hover:border-green-300 dark:hover:border-green-700 hover:bg-green-50/50 dark:hover:bg-green-900/20 group"
     >
       <div
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconClassName}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105 ${iconClassName}`}
       >
         {icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-slate-800">{title}</p>
-        <p className="text-xs text-slate-500">{desc}</p>
+        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">{title}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors">{desc}</p>
       </div>
-      <ChevronRight size={15} className="text-slate-300" />
+      <ChevronRight size={18} className="text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-green-600 dark:group-hover:text-green-500" />
     </button>
   );
 }

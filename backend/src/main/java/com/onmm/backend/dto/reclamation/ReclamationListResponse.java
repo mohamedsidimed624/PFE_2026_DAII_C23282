@@ -9,6 +9,11 @@ public class ReclamationListResponse {
     private String objet;
     private String statut;
     private String dateCreation;
+    private String categorie;
+    private String priorite;
+    private String moduleConcerne;
+    private String dateDerniereMiseAJour;
+    private String adminTraiteurNom;
 
     public Long getId() {
         return id;
@@ -64,5 +69,45 @@ public class ReclamationListResponse {
 
     public void setDateCreation(String dateCreation) {
         this.dateCreation = dateCreation;
+    }
+
+    public String getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(String categorie) {
+        this.categorie = categorie;
+    }
+
+    public String getModuleConcerne() {
+        return moduleConcerne;
+    }
+
+    public void setModuleConcerne(String moduleConcerne) {
+        this.moduleConcerne = moduleConcerne;
+    }
+
+    public String getPriorite() {
+        return priorite;
+    }
+
+    public void setPriorite(String priorite) {
+        this.priorite = priorite;
+    }
+
+    public String getDateDerniereMiseAJour() {
+        return dateDerniereMiseAJour;
+    }
+
+    public void setDateDerniereMiseAJour(String dateDerniereMiseAJour) {
+        this.dateDerniereMiseAJour = dateDerniereMiseAJour;
+    }
+
+    public String getAdminTraiteurNom() {
+        return adminTraiteurNom;
+    }
+
+    public void setAdminTraiteurNom(String adminTraiteurNom) {
+        this.adminTraiteurNom = adminTraiteurNom;
     }
 }

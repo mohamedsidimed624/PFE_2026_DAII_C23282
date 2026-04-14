@@ -12,6 +12,7 @@ public class ReclamationDetailResponse {
     private String dateCreation;
     private String datePriseEnCharge;
     private String dateCloture;
+    private String dateDerniereMiseAJour;
 
     private String nomAuteur;
     private String prenomAuteur;
@@ -20,7 +21,14 @@ public class ReclamationDetailResponse {
     private String villeAuteur;
     private String adresseAuteur;
 
+    private String categorie;
+    private String priorite;
+    private String moduleConcerne;
+
     private String adminResponse;
+    private String adminTraiteurNom;
+    private Long adminTraiteurId;
+
 
     public Long getId() {
         return id;
@@ -142,6 +150,30 @@ public class ReclamationDetailResponse {
         this.villeAuteur = villeAuteur;
     }
 
+    public String getAdminTraiteurNom() {
+        return adminTraiteurNom;
+    }
+
+    public void setAdminTraiteurNom(String adminTraiteurNom) {
+        this.adminTraiteurNom = adminTraiteurNom;
+    }
+
+    public String getDateDerniereMiseAJour() {
+        return dateDerniereMiseAJour;
+    }
+
+    public void setDateDerniereMiseAJour(String dateDerniereMiseAJour) {
+        this.dateDerniereMiseAJour = dateDerniereMiseAJour;
+    }
+
+    public Long getAdminTraiteurId() {
+        return adminTraiteurId;
+    }
+
+    public void setAdminTraiteurId(Long adminTraiteurId) {
+        this.adminTraiteurId = adminTraiteurId;
+    }
+
     public String getAdresseAuteur() {
         return adresseAuteur;
     }
@@ -156,5 +188,29 @@ public class ReclamationDetailResponse {
 
     public void setAdminResponse(String adminResponse) {
         this.adminResponse = adminResponse;
+    }
+
+    public String getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(String categorie) {
+        this.categorie = categorie;
+    }
+
+    public String getPriorite() {
+        return priorite;
+    }
+
+    public void setPriorite(String priorite) {
+        this.priorite = priorite;
+    }
+
+    public String getModuleConcerne() {
+        return moduleConcerne;
+    }
+
+    public void setModuleConcerne(String moduleConcerne) {
+        this.moduleConcerne = moduleConcerne;
     }
 }
