@@ -13,7 +13,6 @@ import {
   Briefcase,
   BadgeCheck,
   CreditCard,
-  Calendar,
   CheckCircle2,
   Sparkles,
   Building2,
@@ -73,6 +72,16 @@ function AnnuaireMedecinDetailPage() {
     fetchMedecin();
   }, [id]);
 
+  const specialiteDisplay = useMemo(() => {
+    if (!medecin) return "Spécialité non renseignée";
+
+    if (medecin.specialiteLibelle && medecin.sousSpecialiteLibelle) {
+      return `${medecin.specialiteLibelle} — ${medecin.sousSpecialiteLibelle}`;
+    }
+
+    return medecin.specialiteLibelle || "Spécialité non renseignée";
+  }, [medecin]);
+
   const profileSummary = useMemo(() => {
     if (!medecin) return [];
 
@@ -80,7 +89,7 @@ function AnnuaireMedecinDetailPage() {
       {
         icon: <Stethoscope size={16} className="text-green-600" />,
         label: "Spécialité",
-        value: medecin.specialite || "Non renseignée",
+        value: specialiteDisplay,
       },
       {
         icon: <CreditCard size={16} className="text-green-600" />,
@@ -93,7 +102,7 @@ function AnnuaireMedecinDetailPage() {
         value: medecin.adresse || medecin.ville || "Non renseignée",
       },
     ];
-  }, [medecin]);
+  }, [medecin, specialiteDisplay]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -147,7 +156,7 @@ function AnnuaireMedecinDetailPage() {
         )}
 
         {!loading && !error && medecin && (() => {
-          const statusKey = (medecin.statut || "ACTIF").toUpperCase();
+          const statusKey = String(medecin.statut || "ACTIF").toUpperCase();
           const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.ACTIF;
           const isActif = statusKey === "ACTIF";
 
@@ -182,7 +191,7 @@ function AnnuaireMedecinDetailPage() {
 
                         <p className="mt-3 inline-flex items-center gap-2 text-base font-medium text-green-100">
                           <Stethoscope size={16} />
-                          {medecin.specialite || "Spécialité non renseignée"}
+                          {specialiteDisplay}
                         </p>
 
                         <div className="mt-5 flex flex-wrap gap-3">
@@ -242,15 +251,38 @@ function AnnuaireMedecinDetailPage() {
                     icon={<BadgeCheck size={17} className="text-green-600" />}
                   >
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <InfoBox label="Nom complet" value={`Dr. ${medecin.prenom} ${medecin.nom}`} />
-                      <InfoBox label="Spécialité principale" value={medecin.specialite} />
-                      <InfoBox label="Numéro d'inscription" value={medecin.numeroInscription} />
-                      <InfoBox label="Adresse" value={medecin.adresse} icon={<MapPin size={13} />} />
+                      <InfoBox
+                        label="Nom complet"
+                        value={`Dr. ${medecin.prenom} ${medecin.nom}`}
+                      />
+                      <InfoBox
+                        label="Spécialité principale"
+                        value={medecin.specialiteLibelle}
+                      />
+                      <InfoBox
+                        label="Sous-spécialité"
+                        value={medecin.sousSpecialiteLibelle}
+                      />
+                      <InfoBox
+                        label="Numéro d'inscription"
+                        value={medecin.numeroInscription}
+                      />
+                      <InfoBox
+                        label="Adresse"
+                        value={medecin.adresse}
+                        icon={<MapPin size={13} />}
+                      />
                       <InfoBox label="Ville" value={medecin.ville} />
                       {medecin.nationalite && (
-                        <InfoBox label="Nationalité" value={medecin.nationalite} icon={<Globe size={13} />} />
+                        <InfoBox
+                          label="Nationalité"
+                          value={medecin.nationalite}
+                          icon={<Globe size={13} />}
+                        />
                       )}
-                      {medecin.sexe && <InfoBox label="Genre" value={medecin.sexe} />}
+                      {medecin.sexe && (
+                        <InfoBox label="Genre" value={medecin.sexe} />
+                      )}
                     </div>
                   </Section>
 
@@ -261,22 +293,23 @@ function AnnuaireMedecinDetailPage() {
                       icon={<GraduationCap size={17} className="text-green-600" />}
                     >
                       <div className="space-y-4">
-                        {medecin.educations.map((edu, i) => (
-                          <TimelineCard
-                            key={edu.id || i}
-                            title={edu.diplome || "Diplôme"}
-                            badge={edu.anneeObtention || ""}
-                            subtitle={edu.specialite || "Spécialité non renseignée"}
-                            meta={[
-                              edu.sousSpecialite,
-                              edu.universite,
-                              edu.ville,
-                              edu.pays,
-                            ]
-                              .filter(Boolean)
-                              .join(" • ")}
-                          />
-                        ))}
+                        {medecin.educations.map((edu, i) => {
+                          const eduSpecialite = edu.sousSpecialiteLibelle
+                            ? `${edu.specialiteLibelle} — ${edu.sousSpecialiteLibelle}`
+                            : edu.specialiteLibelle || "Spécialité non renseignée";
+
+                          return (
+                            <TimelineCard
+                              key={edu.id || i}
+                              title={edu.diplome || "Diplôme"}
+                              badge={edu.anneeObtention || ""}
+                              subtitle={eduSpecialite}
+                              meta={[edu.universite, edu.ville, edu.pays]
+                                .filter(Boolean)
+                                .join(" • ")}
+                            />
+                          );
+                        })}
                       </div>
                     </Section>
                   )}
@@ -315,7 +348,7 @@ function AnnuaireMedecinDetailPage() {
                       text="Le praticien figure dans le registre public officiel."
                     />
                     <TrustItem
-                      ok={Boolean(medecin.specialite)}
+                      ok={Boolean(medecin.specialiteLibelle)}
                       title="Spécialité déclarée"
                       text="La spécialité affichée provient des données validées dans le registre."
                     />
@@ -331,9 +364,12 @@ function AnnuaireMedecinDetailPage() {
                     icon={<FileBadge size={17} className="text-green-600" />}
                   >
                     <MiniRow label="Statut public" value={status.label} />
-                    <MiniRow label="Numéro d'inscription" value={medecin.numeroInscription || "—"} />
+                    <MiniRow
+                      label="Numéro d'inscription"
+                      value={medecin.numeroInscription || "—"}
+                    />
                     <MiniRow label="Ville" value={medecin.ville || "—"} />
-                    <MiniRow label="Spécialité" value={medecin.specialite || "—"} />
+                    <MiniRow label="Spécialité" value={specialiteDisplay || "—"} />
                   </SidePanel>
 
                   <div className="rounded-3xl border border-green-200 bg-green-50 p-5">

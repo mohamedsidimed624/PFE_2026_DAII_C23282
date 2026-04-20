@@ -3,7 +3,6 @@ import { useFormData } from "../../context/FormContext";
 import { createDemande } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { getSpecialites, getSousSpecialites } from "../../services/api";
 import {
   User,
   GraduationCap,
@@ -46,30 +45,12 @@ function ConsentStep({ prevStep }) {
       if (!demandeId) throw new Error("ID de la demande introuvable après création.");
 
       // 2. Éducations
-      
-      const specialitesRes = await getSpecialites();
-      const specialites = specialitesRes.data || [];
-
       for (const edu of formData.education) {
-        const selectedSpecialite = specialites.find(
-          (s) => String(s.id) === String(edu.specialite)
-        );
-
-        let sousSpecialites = [];
-        if (edu.specialite) {
-          const sousSpecialitesRes = await getSousSpecialites(edu.specialite);
-          sousSpecialites = sousSpecialitesRes.data || [];
-        }
-
-        const selectedSousSpecialite = sousSpecialites.find(
-          (ss) => String(ss.id) === String(edu.sousSpecialite)
-        );
-
         await axios.post(`http://localhost:8080/api/demandes/${demandeId}/educations`, {
-          specialite: selectedSpecialite?.nom || edu.specialite,
-          sousSpecialite: selectedSousSpecialite?.nom || edu.sousSpecialite,
+          specialiteId: edu.specialiteId ? Number(edu.specialiteId) : null,
+          sousSpecialiteId: edu.sousSpecialiteId ? Number(edu.sousSpecialiteId) : null,
           diplome: edu.diplome,
-          anneeObtention: edu.annee,
+          anneeObtention: edu.anneeObtention ? Number(edu.anneeObtention) : null,
           pays: edu.pays,
           ville: edu.ville,
           universite: edu.universite,
@@ -194,7 +175,16 @@ function ConsentStep({ prevStep }) {
             <div className="space-y-3">
               {formData.education.map((edu, i) => (
                 <div key={i} className={i > 0 ? "pt-3 border-t border-slate-100" : ""}>
-                  <p className="text-sm font-semibold text-slate-800">{edu.specialite}</p>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {edu.specialiteLibelle || "—"}
+                  </p>
+
+                  {edu.sousSpecialiteLibelle && (
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {edu.sousSpecialiteLibelle}
+                    </p>
+                  )}
+
                   <p className="text-xs text-slate-400 mt-0.5">
                     {edu.universite}{edu.pays ? ` — ${edu.pays}` : ""}
                   </p>

@@ -1,9 +1,6 @@
 package com.onmm.backend.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "demande_education")
@@ -13,30 +10,35 @@ public class DemandeEducation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String specialite;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specialite_id")
+    private Specialite specialite;
 
-    @Column(nullable = false)
-    private String sousSpecialite;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sous_specialite_id")
+    private SousSpecialite sousSpecialite;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 150)
     private String diplome;
 
-    @Column(nullable = false)
+    @Column(name = "annee_obtention", nullable = false)
     private Integer anneeObtention;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String pays;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String ville;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 150)
     private String universite;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "demande_id", nullable = false)
     private DemandeAdhesion demandeAdhesion;
+
+    public DemandeEducation() {
+    }
 
     public Long getId() {
         return id;
@@ -46,19 +48,19 @@ public class DemandeEducation {
         this.id = id;
     }
 
-    public String getSpecialite() {
+    public Specialite getSpecialite() {
         return specialite;
     }
 
-    public void setSpecialite(String specialite) {
+    public void setSpecialite(Specialite specialite) {
         this.specialite = specialite;
     }
 
-    public String getSousSpecialite() {
+    public SousSpecialite getSousSpecialite() {
         return sousSpecialite;
     }
 
-    public void setSousSpecialite(String sousSpecialite) {
+    public void setSousSpecialite(SousSpecialite sousSpecialite) {
         this.sousSpecialite = sousSpecialite;
     }
 
@@ -105,7 +107,10 @@ public class DemandeEducation {
     public DemandeAdhesion getDemandeAdhesion() {
         return demandeAdhesion;
     }
+
     public void setDemandeAdhesion(DemandeAdhesion demandeAdhesion) {
         this.demandeAdhesion = demandeAdhesion;
     }
+
+
 }

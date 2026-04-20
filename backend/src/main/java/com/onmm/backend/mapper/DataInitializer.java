@@ -1,4 +1,4 @@
-package com.onmm.backend.config;
+package com.onmm.backend.mapper;
 
 import com.onmm.backend.entity.User;
 import com.onmm.backend.entity.enums.Role;

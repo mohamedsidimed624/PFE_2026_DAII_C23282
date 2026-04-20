@@ -743,7 +743,7 @@ function MedecinProfilPage() {
     adresse: "",
     numeroInscription: "",
     statut: "",
-    specialite: "",
+    specialiteLibelle: "",
     photoProfilPath: "",
   });
 
@@ -772,7 +772,7 @@ function MedecinProfilPage() {
           adresse: d.adresse || "",
           numeroInscription: d.numeroInscription || "",
           statut: d.statut || "",
-          specialite: d.specialite || "",
+          specialiteLibelle: d.specialiteLibelle || "",
           photoProfilPath: d.photoProfilPath || "",
         };
 
@@ -1018,7 +1018,7 @@ function MedecinProfilPage() {
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-500 dark:text-slate-400 transition-colors">
                   <span className="inline-flex items-center gap-2">
                     <Stethoscope size={16} className="text-green-600 dark:text-green-500" />
-                    {form.specialite || "Spécialité non renseignée"}
+                    {form.specialiteLibelle || "Spécialité non renseignée"}
                   </span>
 
                   {form.email && (
@@ -1126,7 +1126,7 @@ function MedecinProfilPage() {
                   />
                   <ReadOnlyItem
                     label="Spécialité"
-                    value={form.specialite}
+                    value={form.specialiteLibelle}
                     icon={<Stethoscope size={18} />}
                   />
                   <ReadOnlyItem
@@ -1227,7 +1227,7 @@ function MedecinProfilPage() {
                         value={form.numeroInscription}
                       />
                       <MiniReadOnly label="Statut" value={form.statut} />
-                      <MiniReadOnly label="Spécialité" value={form.specialite} />
+                      <MiniReadOnly label="Spécialité" value={form.specialiteLibelle} />
                     </div>
                   </div>
 
@@ -1280,7 +1280,7 @@ function MedecinProfilPage() {
                 <AdminRow
                   icon={<Stethoscope size={16} />}
                   label="Spécialité"
-                  value={form.specialite}
+                  value={form.specialiteLibelle}
                 />
                 <AdminRow
                   icon={<ShieldCheck size={16} />}

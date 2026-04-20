@@ -1,5 +1,8 @@
 package com.onmm.backend.dto.publics;
 
+import lombok.Data;
+
+@Data
 public class PublicMedecinSearchRequest {
 
     private String nom;

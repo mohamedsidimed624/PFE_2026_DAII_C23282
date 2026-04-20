@@ -22,13 +22,13 @@ export const checkUnique = async ({ nni, email, telephone }) => {
     },
   });
 };
+const api = axios.create({
+  baseURL: "http://localhost:8080/api",
+});
 
-export const getSpecialites = () => {
-  return API.get("/reference/specialites");
-};
+export const getSpecialites = () => api.get("/reference/specialites");
 
-export const getSousSpecialites = (specialiteId) => {
-  return API.get("/reference/sous_specialites", {
-    params: { specialiteId },
-  });
-};
+export const getSousSpecialites = (specialiteId) =>
+  api.get(`/reference/specialites/${specialiteId}/sous-specialites`);
+
+export default api;

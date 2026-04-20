@@ -9,4 +9,12 @@ public interface DemandeEducationRepository extends JpaRepository<DemandeEducati
 
     List<DemandeEducation> findByDemandeAdhesionId(Long demandeId);
 
+    boolean existsBySpecialiteId(Long specialiteId);
+
+    boolean existsBySousSpecialiteId(Long sousSpecialiteId);
+
+    long countBySpecialiteId(Long specialiteId);
+
+    long countBySousSpecialiteId(Long sousSpecialiteId);
+
 }

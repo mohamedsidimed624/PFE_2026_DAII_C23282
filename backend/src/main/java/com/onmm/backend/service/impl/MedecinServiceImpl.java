@@ -35,12 +35,13 @@ public class MedecinServiceImpl implements MedecinService {
     }
 
     @Override
+    @Transactional
     public MedecinProfileResponse getMyProfile(String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        Medecin medecin = medecinRepository.findByUser(user)
+        Medecin medecin = medecinRepository.findProfileByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Profil médecin introuvable"));
 
         return mapToResponse(medecin);
@@ -53,7 +54,7 @@ public class MedecinServiceImpl implements MedecinService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        Medecin medecin = medecinRepository.findByUser(user)
+        Medecin medecin = medecinRepository.findProfileByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
         medecin.setNom(request.getNom());
@@ -69,6 +70,7 @@ public class MedecinServiceImpl implements MedecinService {
 
     private MedecinProfileResponse mapToResponse(Medecin medecin) {
         MedecinProfileResponse response = new MedecinProfileResponse();
+
         response.setId(medecin.getId());
         response.setNom(medecin.getNom());
         response.setPrenom(medecin.getPrenom());
@@ -79,9 +81,19 @@ public class MedecinServiceImpl implements MedecinService {
         response.setNationalite(medecin.getNationalite());
         response.setAdresse(medecin.getAdresse());
         response.setNumeroInscription(medecin.getNumeroInscription());
-        response.setStatut(medecin.getStatut());
-        response.setSpecialite(medecin.getSpecialite());
+        response.setStatut(medecin.getStatut() != null ? medecin.getStatut().name() : null);
         response.setPhotoProfilPath(medecin.getPhotoProfilPath());
+
+        if (medecin.getSpecialite() != null) {
+            response.setSpecialiteId(medecin.getSpecialite().getId());
+            response.setSpecialiteLibelle(medecin.getSpecialite().getLibelle());
+        }
+
+        if (medecin.getSousSpecialite() != null) {
+            response.setSousSpecialiteId(medecin.getSousSpecialite().getId());
+            response.setSousSpecialiteLibelle(medecin.getSousSpecialite().getLibelle());
+        }
+
         return response;
     }
 

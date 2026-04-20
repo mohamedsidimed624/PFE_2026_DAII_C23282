@@ -189,6 +189,8 @@ function AdminDemandeDetail() {
                 {demande.educations.map((edu) => (
                   <div key={edu.id} className="py-3 first:pt-0 last:pb-0">
                     <p className="text-sm font-semibold text-slate-800">{edu.diplome}</p>
+                    <p className="text-sm text-slate-600">{edu.specialiteLibelle || "—"}</p>
+                    <p className="text-sm text-slate-600">{edu.sousSpecialiteLibelle || "—"}</p>
                     <p className="text-xs text-slate-400 mt-0.5">
                       {edu.universite} {edu.pays ? `— ${edu.pays}` : ""}
                     </p>

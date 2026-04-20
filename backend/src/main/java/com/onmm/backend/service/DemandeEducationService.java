@@ -7,7 +7,5 @@ import com.onmm.backend.entity.DemandeEducation;
 
 public interface DemandeEducationService {
 
-    DemandeEducation addEducation(Long demandeId, DemandeAdhesionRequest request);
-
     DemandeEducationResponse addEducation(Long demandeId, DemandeEducationRequest request);
 }

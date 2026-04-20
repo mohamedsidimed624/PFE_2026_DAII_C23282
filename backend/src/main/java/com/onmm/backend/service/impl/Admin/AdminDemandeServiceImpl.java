@@ -6,9 +6,7 @@ import com.onmm.backend.dto.DemandeDocumentResponse;
 import com.onmm.backend.dto.DemandeEducationResponse;
 import com.onmm.backend.dto.DemandeExperienceResponse;
 import com.onmm.backend.entity.*;
-import com.onmm.backend.entity.enums.ApplicationStatus;
-import com.onmm.backend.entity.enums.Role;
-import com.onmm.backend.entity.enums.TokenType;
+import com.onmm.backend.entity.enums.*;
 import com.onmm.backend.repository.ActivationTokenRepository;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
 import com.onmm.backend.repository.UserRepository;
@@ -34,6 +32,13 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
 
     private String genererNumeroInscription() {
         return "OM-" + java.time.Year.now().getValue() + "-" + System.currentTimeMillis();
+    }
+
+    private SectionOrdre determineSectionOrdre(Specialite specialite) {
+        if (specialite != null && "Médecine Générale".equalsIgnoreCase(specialite.getLibelle())) {
+            return SectionOrdre.GENERALISTE;
+        }
+        return SectionOrdre.SPECIALISTE;
     }
 
     public AdminDemandeServiceImpl(DemandeAdhesionRepository repository, EmailService emailService, UserRepository userRepository, ActivationTokenRepository tokenRepository, MedecinRepository medecinRepository) {
@@ -65,6 +70,7 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         }).toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public AdminDemandeDetailResponse getDemandeDetail(Long id) {
 
@@ -93,8 +99,16 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
                             res.setUniversite(e.getUniversite());
                             res.setPays(e.getPays());
                             res.setVille(e.getVille());
-                            res.setSpecialite(e.getSpecialite());
-                            res.setSousSpecialite(e.getSousSpecialite());
+                            if (e.getSpecialite() != null) {
+                                res.setSpecialiteId(e.getSpecialite().getId());
+                                res.setSpecialiteLibelle(e.getSpecialite().getLibelle());
+                            }
+
+                            if (e.getSousSpecialite() != null) {
+                                res.setSousSpecialiteId(e.getSousSpecialite().getId());
+                                res.setSousSpecialiteLibelle(e.getSousSpecialite().getLibelle());
+                            }
+
                             res.setAnneeObtention(e.getAnneeObtention());
                             return res;
                         })
@@ -197,15 +211,20 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         medecin.setNationalite(demande.getNationalite());
         medecin.setAdresse(demande.getAdresse());
         medecin.setNumeroInscription(genererNumeroInscription());
-        medecin.setStatut("ACTIF");
+        medecin.setStatut(StatutMedecin.ACTIF);
         medecin.setDateNaissance(demande.getDateNaissance());
+        medecin.setUser(user);
 
-        if (demande.getEducations() != null && !demande.getEducations().isEmpty()) {
-            DemandeEducation educationPrincipale = demande.getEducations().iterator().next();
-            medecin.setSpecialite(educationPrincipale.getSpecialite());
+        if (demande.getEducations() == null || demande.getEducations().isEmpty()) {
+            throw new RuntimeException("Impossible d'approuver une demande sans éducation");
         }
 
-        medecin.setUser(user);
+        DemandeEducation educationPrincipale = demande.getEducations().iterator().next();
+
+        medecin.setSpecialite(educationPrincipale.getSpecialite());
+        medecin.setSousSpecialite(educationPrincipale.getSousSpecialite());
+        medecin.setSectionOrdre(determineSectionOrdre(educationPrincipale.getSpecialite()));
+
         medecinRepository.save(medecin);
 
         ActivationToken passwordToken = new ActivationToken();

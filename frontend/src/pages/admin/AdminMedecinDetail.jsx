@@ -246,11 +246,11 @@ function AdminMedecinDetail() {
                 <div key={edu.id || i}>
                   {i > 0 && <div className="border-t border-slate-100 dark:border-slate-800" />}
                   <InfoGrid>
-                    <InfoCell label="SPÉCIALITÉ"                  value={edu.specialite} />
+                    <InfoCell label="SPÉCIALITÉ"                  value={edu.specialiteLibelle} />
                     <InfoCell label="PAYS"                        value={edu.pays} />
                     <InfoCell label="VILLE"                       value={edu.ville} />
                     <InfoCell label="UNIVERSITÉ"                  value={edu.universite} />
-                    <InfoCell label="SOUS-SPÉCIALITÉ"             value={edu.sousSpecialite} />
+                    <InfoCell label="SOUS-SPÉCIALITÉ"             value={edu.sousSpecialiteLibelle} />
                     <InfoCell label="DIPLÔME OBTENU"              value={edu.diplome} />
                     <InfoCell label="ANNÉE D'OBTENTION DE DIPLÔME" value={edu.anneeObtention} />
                     <InfoCell label="VILLE"                       value={edu.ville} />

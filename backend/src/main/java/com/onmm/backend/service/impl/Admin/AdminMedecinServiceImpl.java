@@ -7,6 +7,7 @@ import com.onmm.backend.entity.DemandeEducation;
 import com.onmm.backend.entity.DemandeExperience;
 import com.onmm.backend.entity.Medecin;
 import com.onmm.backend.entity.User;
+import com.onmm.backend.entity.enums.StatutMedecin;
 import com.onmm.backend.repository.ActivationTokenRepository;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.repository.UserRepository;
@@ -39,6 +40,7 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
     }
 
     @Override
+    @Transactional
     public List<AdminMedecinListResponse> getAllMedecins() {
         return medecinRepository.findAll().stream().map(medecin -> {
             AdminMedecinListResponse response = new AdminMedecinListResponse();
@@ -51,7 +53,15 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
             response.setNni(medecin.getNni());
             response.setSexe(medecin.getSexe());
             response.setDateNaissance(medecin.getDateNaissance());
-            response.setSpecialite(medecin.getSpecialite());
+            if (medecin.getSpecialite() != null) {
+                response.setSpecialiteId(medecin.getSpecialite().getId());
+                response.setSpecialiteLibelle(medecin.getSpecialite().getLibelle());
+            }
+
+            if (medecin.getSousSpecialite() != null) {
+                response.setSousSpecialiteId(medecin.getSousSpecialite().getId());
+                response.setSousSpecialiteLibelle(medecin.getSousSpecialite().getLibelle());
+            }
             response.setStatut(medecin.getStatut());
             return response;
         }).toList();
@@ -75,9 +85,18 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
         response.setAdresse(medecin.getAdresse());
         response.setNumeroInscription(medecin.getNumeroInscription());
         response.setStatut(medecin.getStatut());
-        response.setSpecialite(medecin.getSpecialite());
         response.setPhotoProfilPath(medecin.getPhotoProfilPath());
         response.setDateNaissance(medecin.getDateNaissance());
+
+        if (medecin.getSpecialite() != null) {
+            response.setSpecialiteId(medecin.getSpecialite().getId());
+            response.setSpecialiteLibelle(medecin.getSpecialite().getLibelle());
+        }
+
+        if (medecin.getSousSpecialite() != null) {
+            response.setSousSpecialiteId(medecin.getSousSpecialite().getId());
+            response.setSousSpecialiteLibelle(medecin.getSousSpecialite().getLibelle());
+        }
 
         User user = medecin.getUser();
         DemandeAdhesion demande = null;
@@ -119,7 +138,7 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
         Medecin medecin = medecinRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
-        medecin.setStatut("SUSPENDU");
+        medecin.setStatut(StatutMedecin.SUSPENDU);
         medecinRepository.save(medecin);
 
         emailService.sendSuspensionEmail(
@@ -135,7 +154,7 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
         Medecin medecin = medecinRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
-        medecin.setStatut("ACTIF");
+        medecin.setStatut(StatutMedecin.ACTIF);
         medecinRepository.save(medecin);
     }
 
@@ -161,13 +180,22 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
     private AdminMedecinEducationResponse mapEducation(DemandeEducation edu) {
         AdminMedecinEducationResponse response = new AdminMedecinEducationResponse();
         response.setId(edu.getId());
-        response.setSpecialite(edu.getSpecialite());
-        response.setSousSpecialite(edu.getSousSpecialite());
         response.setDiplome(edu.getDiplome());
         response.setAnneeObtention(edu.getAnneeObtention());
         response.setPays(edu.getPays());
         response.setVille(edu.getVille());
         response.setUniversite(edu.getUniversite());
+
+        if (edu.getSpecialite() != null) {
+            response.setSpecialiteId(edu.getSpecialite().getId());
+            response.setSpecialiteLibelle(edu.getSpecialite().getLibelle());
+        }
+
+        if (edu.getSousSpecialite() != null) {
+            response.setSousSpecialiteId(edu.getSousSpecialite().getId());
+            response.setSousSpecialiteLibelle(edu.getSousSpecialite().getLibelle());
+        }
+
         return response;
     }
 

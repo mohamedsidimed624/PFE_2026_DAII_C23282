@@ -42,16 +42,16 @@ export const personalSchema = z.object({
 ========================= */
 
 export const educationSchema = z.object({
-  specialite: z.string().min(1, "Spécialité requise"),
+  specialiteId: z.string().min(1, "Spécialité requise"),
 
-  sousSpecialite: z.string().min(1, "Sous-spécialité requise"),
+  sousSpecialiteId: z.string().optional(),
 
   diplome: z.string().min(1, "Diplôme requis"),
 
-  annee: z.string().refine((value) => {
+  anneeObtention: z.string().refine((value) => {
     const year = parseInt(value, 10);
     const currentYear = new Date().getFullYear();
-    return year >= 1900 && year <= currentYear;
+    return !isNaN(year) && year >= 1900 && year <= currentYear;
   }, "Année invalide"),
 
   pays: z.string().min(2, "Pays requis"),

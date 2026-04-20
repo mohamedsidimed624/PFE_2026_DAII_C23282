@@ -1,176 +1,84 @@
 package com.onmm.backend.entity;
 
+import com.onmm.backend.entity.enums.SectionOrdre;
+import com.onmm.backend.entity.enums.StatutMedecin;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 
+@Data
 @Entity
-@Table(name = "medecins")
+@Table(
+        name = "medecins",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_medecin_email", columnNames = "email"),
+                @UniqueConstraint(name = "uk_medecin_telephone", columnNames = "telephone"),
+                @UniqueConstraint(name = "uk_medecin_nni", columnNames = "nni"),
+                @UniqueConstraint(name = "uk_medecin_numero_inscription", columnNames = "numero_inscription"),
+                @UniqueConstraint(name = "uk_medecin_user_id", columnNames = "user_id")
+        }
+)
 public class Medecin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String nom;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String prenom;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 30)
     private String telephone;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 30)
     private String nni;
 
-    @Column(name = "photo_profil_path")
+    @Column(name = "photo_profil_path", length = 500)
     private String photoProfilPath;
 
+    @Column(length = 20)
     private String sexe;
 
+    @Column(length = 100)
     private String nationalite;
 
+    @Column(length = 255)
     private String adresse;
 
+    @Column(name = "numero_inscription", unique = true, length = 100)
     private String numeroInscription;
 
-    private String statut;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private StatutMedecin statut;
 
-    private String specialite;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "section_ordre", nullable = false, length = 50)
+    private SectionOrdre sectionOrdre;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specialite_id")
+    private Specialite specialite;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sous_specialite_id")
+    private SousSpecialite sousSpecialite;
+
+    @Column(name = "date_naissance")
     private LocalDate dateNaissance;
 
-
-
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
     public Medecin() {
-
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNom() {
-        return nom;
-    }
-
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
-
-    public String getPrenom() {
-        return prenom;
-    }
-
-    public void setPrenom(String prenom) {
-        this.prenom = prenom;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getTelephone() {
-        return telephone;
-    }
-
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public String getNni() {
-        return nni;
-    }
-
-    public void setNni(String nni) {
-        this.nni = nni;
-    }
-
-    public String getSexe() {
-        return sexe;
-    }
-
-    public void setSexe(String sexe) {
-        this.sexe = sexe;
-    }
-
-    public String getNationalite() {
-        return nationalite;
-    }
-
-    public void setNationalite(String nationalite) {
-        this.nationalite = nationalite;
-    }
-
-    public String getAdresse() {
-        return adresse;
-    }
-
-    public void setAdresse(String adresse) {
-        this.adresse = adresse;
-    }
-
-    public String getNumeroInscription() {
-        return numeroInscription;
-    }
-
-    public void setNumeroInscription(String numeroInscription) {
-        this.numeroInscription = numeroInscription;
-    }
-
-    public String getStatut() {
-        return statut;
-    }
-
-    public void setStatut(String statut) {
-        this.statut = statut;
-    }
-
-    public String getSpecialite() {
-        return specialite;
-    }
-
-    public void setSpecialite(String specialite) {
-        this.specialite = specialite;
-    }
-
-    public LocalDate getDateNaissance() {
-        return dateNaissance;
-    }
-
-    public void setDateNaissance(LocalDate dateNaissance) {
-        this.dateNaissance = dateNaissance;
-    }
-
-    public String getPhotoProfilPath() {
-        return photoProfilPath;
-    }
-
-    public void setPhotoProfilPath(String photoProfilPath) {
-        this.photoProfilPath = photoProfilPath;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 }

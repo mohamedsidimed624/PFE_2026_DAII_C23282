@@ -82,6 +82,7 @@ function AnnuairePage() {
         setMedecins(data.content || []);
         setTotalPages(data.totalPages || 1);
         setTotalElements(data.totalElements || 0);
+        console.log("Fetched medecins:", data);
       } catch (err) {
         console.error(err);
         setError("Impossible de charger l'annuaire.");
@@ -95,11 +96,13 @@ function AnnuairePage() {
 
   const specialitesOptions = useMemo(() => {
     const vals = [
-      ...new Set(medecins.map((m) => m.specialite).filter(Boolean)),
+      ...new Set(medecins.map((m) => m.specialiteLibelle).filter(Boolean)),
     ].sort((a, b) => a.localeCompare(b));
 
     return ["Toutes spécialités", ...vals];
   }, [medecins]);
+
+  
 
   const villesOptions = useMemo(() => {
     const vals = [...new Set(medecins.map((m) => m.ville).filter(Boolean))].sort(
@@ -487,7 +490,7 @@ function AnnuairePage() {
                 <ChevronLeft size={15} />
               </button>
 
-                 {pageNumbers.map((item, idx) =>
+              {pageNumbers.map((item, idx) =>
                 item === "..." ? (
                   <span
                     key={`dot-${idx}`}
@@ -635,12 +638,17 @@ function MedecinCard({ medecin, onClick }) {
   const statusKey = (medecin.statut || "ACTIF").toUpperCase();
   const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.ACTIF;
 
+  const specialiteDisplay = medecin.sousSpecialiteLibelle
+    ? `${medecin.specialiteLibelle} — ${medecin.sousSpecialiteLibelle}`
+    : medecin.specialiteLibelle || "Spécialité non renseignée";
+
   return (
     <div className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-      <div className={`absolute inset-0 bg-gradient-to-br ${status.cardGlow} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
+      <div
+        className={`absolute inset-0 bg-gradient-to-br ${status.cardGlow} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
+      />
 
       <div className="relative p-5">
-        {/* Header */}
         <div className="flex items-start gap-4">
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
             {medecin.photoProfilPath ? (
@@ -659,7 +667,9 @@ function MedecinCard({ medecin, onClick }) {
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${status.badge}`}>
+              <span
+                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${status.badge}`}
+              >
                 {status.label}
               </span>
 
@@ -675,17 +685,20 @@ function MedecinCard({ medecin, onClick }) {
 
             <p className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-green-700">
               <Stethoscope size={15} />
-              {medecin.specialite || "Spécialité non renseignée"}
+              {specialiteDisplay}
             </p>
           </div>
         </div>
 
-        {/* Content */}
         <div className="mt-5 space-y-3">
           <CardInfoRow
             icon={<MapPin size={15} className="text-slate-400" />}
             label="Localisation"
-            value={medecin.ville ? `${medecin.ville}, Mauritanie` : "Ville non renseignée"}
+            value={
+              medecin.ville
+                ? `${medecin.ville}, Mauritanie`
+                : "Ville non renseignée"
+            }
           />
 
           <CardInfoRow
@@ -702,7 +715,6 @@ function MedecinCard({ medecin, onClick }) {
           />
         </div>
 
-        {/* Bottom */}
         <div className="mt-6 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
           <div className="flex items-center gap-2 text-xs text-slate-400">
             <Sparkles size={13} />

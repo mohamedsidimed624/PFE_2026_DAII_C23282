@@ -1,5 +1,8 @@
 package com.onmm.backend.dto.demande;
 
+import com.onmm.backend.entity.SousSpecialite;
+import com.onmm.backend.entity.Specialite;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -118,27 +121,27 @@ public class RepriseDemandeResponse {
     }
 
     public static class EducationData {
-        private String specialite;
-        private String sousSpecialite;
+        private Specialite specialite;
+        private SousSpecialite sousSpecialite;
         private String diplome;
         private Integer annee;
         private String pays;
         private String ville;
         private String universite;
 
-        public String getSpecialite() {
+        public Specialite getSpecialite() {
             return specialite;
         }
 
-        public void setSpecialite(String specialite) {
+        public void setSpecialite(Specialite specialite) {
             this.specialite = specialite;
         }
 
-        public String getSousSpecialite() {
+        public SousSpecialite getSousSpecialite() {
             return sousSpecialite;
         }
 
-        public void setSousSpecialite(String sousSpecialite) {
+        public void setSousSpecialite(SousSpecialite sousSpecialite) {
             this.sousSpecialite = sousSpecialite;
         }
 

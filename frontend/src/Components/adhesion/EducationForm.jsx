@@ -11,12 +11,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getSousSpecialites, getSpecialites } from "../../services/api";
-// import { set } from "zod";
-
-
 
 function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
-
   const { formData, updateSection } = useFormData();
 
   const {
@@ -24,109 +20,186 @@ function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
     handleSubmit,
     reset,
     watch,
-    formState: { errors }
+    setValue,
+    formState: { errors },
   } = useForm({
-    resolver: zodResolver(educationSchema)
+    resolver: zodResolver(educationSchema),
+    defaultValues: {
+      specialiteId: "",
+      sousSpecialiteId: "",
+      diplome: "",
+      anneeObtention: "",
+      pays: "",
+      ville: "",
+      universite: "",
+    },
   });
 
   const [specialites, setSpecialites] = useState([]);
   const [sousSpecialites, setSousSpecialites] = useState([]);
+  const [villes, setVilles] = useState([]);
+  const [universites, setUniversites] = useState([]);
+  const [loadingSpecialites, setLoadingSpecialites] = useState(true);
+  const [loadingSousSpecialites, setLoadingSousSpecialites] = useState(false);
 
-  const selectedSpecialite = watch("specialite");
+  const selectedSpecialiteId = watch("specialiteId");
+  const selectedPays = watch("pays");
+  const selectedVille = watch("ville");
 
-  // charger spécialités
+  const diplomes = [
+    "Doctorat en médecine",
+    "Diplôme d'études spécialisées (DES)",
+    "Diplôme d'études spécialisées complémentaires",
+    "Master",
+    "Doctorat / PhD",
+    "Licence",
+    "Certificat / Attestation",
+    "Autre",
+  ];
+
   useEffect(() => {
-
-    const load = async () => {
-      const res = await getSpecialites();
-      setSpecialites(res.data);
+    const loadSpecialites = async () => {
+      try {
+        setLoadingSpecialites(true);
+        const res = await getSpecialites();
+        setSpecialites(res.data || []);
+      } catch (error) {
+        console.error("Erreur lors du chargement des spécialités :", error);
+        setSpecialites([]);
+      } finally {
+        setLoadingSpecialites(false);
+      }
     };
 
-    load();
-
+    loadSpecialites();
   }, []);
 
-  // charger sous spécialités quand spécialité change
   useEffect(() => {
-
-    if (!selectedSpecialite) return;
-
-    const loadSous = async () => {
-
-      try {
-        const res = await getSousSpecialites(selectedSpecialite);
-        setSousSpecialites(res.data);
-      } catch (error) {
-        console.error(error);
+    const loadSousSpecialites = async () => {
+      if (!selectedSpecialiteId) {
+        setSousSpecialites([]);
+        setValue("sousSpecialiteId", "");
+        return;
       }
 
+      try {
+        setLoadingSousSpecialites(true);
+        const res = await getSousSpecialites(selectedSpecialiteId);
+        setSousSpecialites(res.data || []);
+        setValue("sousSpecialiteId", "");
+      } catch (error) {
+        console.error("Erreur lors du chargement des sous-spécialités :", error);
+        setSousSpecialites([]);
+        setValue("sousSpecialiteId", "");
+      } finally {
+        setLoadingSousSpecialites(false);
+      }
     };
 
-    loadSous();
-
-  }, [selectedSpecialite]);
+    loadSousSpecialites();
+  }, [selectedSpecialiteId, setValue]);
 
   useEffect(() => {
-
-    if (editingIndex === null) {
-      reset({});
+    if (!selectedPays) {
+      setVilles([]);
+      setUniversites([]);
+      setValue("ville", "");
+      setValue("universite", "");
       return;
     }
 
-    const edu = formData.education[editingIndex];
+    const villesPays = Object.keys(educationData[selectedPays] || {});
+    setVilles(villesPays);
+    setUniversites([]);
+    setValue("ville", "");
+    setValue("universite", "");
+  }, [selectedPays, setValue]);
+
+  useEffect(() => {
+    if (!selectedPays || !selectedVille) {
+      setUniversites([]);
+      setValue("universite", "");
+      return;
+    }
+
+    setUniversites(educationData[selectedPays]?.[selectedVille] || []);
+    setValue("universite", "");
+  }, [selectedPays, selectedVille, setValue]);
+
+  useEffect(() => {
+    if (editingIndex === null) {
+      reset({
+        specialiteId: "",
+        sousSpecialiteId: "",
+        diplome: "",
+        anneeObtention: "",
+        pays: "",
+        ville: "",
+        universite: "",
+      });
+      setSousSpecialites([]);
+      setVilles([]);
+      setUniversites([]);
+      return;
+    }
+
+    const edu = formData.education?.[editingIndex];
     if (!edu) return;
 
-    const loadData = async () => {
+    const loadEditData = async () => {
+      try {
+        if (edu.specialiteId) {
+          const res = await getSousSpecialites(edu.specialiteId);
+          setSousSpecialites(res.data || []);
+        } else {
+          setSousSpecialites([]);
+        }
 
-      // charger sous spécialités
-      const res = await getSousSpecialites(edu.specialite);
-      setSousSpecialites(res.data);
+        const villesPays = Object.keys(educationData[edu.pays] || {});
+        setVilles(villesPays);
 
-      // charger villes
-      const villesPays = Object.keys(educationData[edu.pays] || {});
-      setVilles(villesPays);
+        const univs = educationData[edu.pays]?.[edu.ville] || [];
+        setUniversites(univs);
 
-      // charger universités
-      const univs =
-        educationData[edu.pays]?.[edu.ville] || [];
-      setUniversites(univs);
-
-      // reset APRÈS chargement
-      reset({
-        specialite: String(edu.specialite),
-        sousSpecialite: String(edu.sousSpecialite),
-        diplome: edu.diplome,
-        annee: edu.annee,
-        pays: edu.pays,
-        ville: edu.ville,
-        universite: edu.universite
-      });
-
+        reset({
+          specialiteId: edu.specialiteId || "",
+          sousSpecialiteId: edu.sousSpecialiteId || "",
+          diplome: edu.diplome || "",
+          anneeObtention: edu.anneeObtention || "",
+          pays: edu.pays || "",
+          ville: edu.ville || "",
+          universite: edu.universite || "",
+        });
+      } catch (error) {
+        console.error("Erreur lors du chargement des données d'édition :", error);
+      }
     };
 
-    loadData();
-
-  }, [editingIndex]);
+    loadEditData();
+  }, [editingIndex, formData.education, reset]);
 
   const onSubmit = (data) => {
-
     const specialiteObj = specialites.find(
-      s => String(s.id) === data.specialite
+      (s) => String(s.id) === String(data.specialiteId)
     );
 
     const sousSpecialiteObj = sousSpecialites.find(
-      s => String(s.id) === data.sousSpecialite
+      (s) => String(s.id) === String(data.sousSpecialiteId)
     );
 
     const formattedData = {
-      ...data,
-      specialite: data.specialite,
-      sousSpecialite: data.sousSpecialite,
-      specialiteNom: specialiteObj?.nom || "",
-      sousSpecialiteNom: sousSpecialiteObj?.nom || ""
+      specialiteId: data.specialiteId,
+      sousSpecialiteId: data.sousSpecialiteId || "",
+      specialiteLibelle: specialiteObj?.libelle || "",
+      sousSpecialiteLibelle: sousSpecialiteObj?.libelle || "",
+      diplome: data.diplome,
+      anneeObtention: data.anneeObtention,
+      pays: data.pays,
+      ville: data.ville,
+      universite: data.universite,
     };
 
-    let updated = [...(formData.education || [])];
+    const updated = [...(formData.education || [])];
 
     if (editingIndex !== null) {
       updated[editingIndex] = formattedData;
@@ -136,186 +209,93 @@ function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
 
     updateSection("education", updated);
 
-    reset();
+    reset({
+      specialiteId: "",
+      sousSpecialiteId: "",
+      diplome: "",
+      anneeObtention: "",
+      pays: "",
+      ville: "",
+      universite: "",
+    });
 
+    setSousSpecialites([]);
+    setVilles([]);
+    setUniversites([]);
     setEditingIndex(null);
     setIsAdding(false);
-
-
-    console.log(formData.education);
   };
 
-
-  const [villes, setVilles] = useState([]);
-  const [universites, setUniversites] = useState([]);
-
-
-
-  const selectedPays = watch("pays");
-  const selectedVille = watch("ville");
-
-  useEffect(() => {
-    if (!selectedPays) {
-      setVilles([]);
-      setUniversites([]);
-      return;
-    }
-
-    const villePays = Object.keys(educationData[selectedPays]);
-
-    setVilles(villePays);
-    setUniversites([]);
-  }, [selectedPays]);
-
-  useEffect(() => {
-    if (!selectedPays || !selectedVille) {
-      setUniversites([]);
-      return;
-    }
-
-    setUniversites(educationData[selectedPays][selectedVille] || []);
-  }, [selectedVille, selectedPays]);
-
-    
-
-    const diplomes = [
-        "Doctorat médecine",
-        "Master en sciences de la santé",
-        "Licence en sciences de la santé",
-        "Diplôme d'études spécialisées (DES)",
-        "Diplôme d'études approfondies (DEA)",
-        "Diplôme d'études supérieures spécialisées (DESS)",
-        "Diplôme de spécialisation en médecine",
-        "Diplôme de spécialisation en chirurgie",
-        "Diplôme de spécialisation en pédiatrie",
-        "Diplôme de spécialisation en gynécologie",
-        "Diplôme de spécialisation en psychiatrie",
-        "Diplôme de spécialisation en dermatologie",
-        "Diplôme de spécialisation en ophtalmologie",
-        "Diplôme de spécialisation en ORL",
-        "Diplôme de spécialisation en radiologie",
-        "Diplôme de spécialisation en anesthésiologie",
-        "Diplôme de spécialisation en oncologie",
-        "Diplôme de spécialisation en endocrinologie",
-        "Diplôme de spécialisation en gastro-entérologie",
-        "Diplôme de spécialisation en néphrologie",
-        "Diplôme de spécialisation en rhumatologie",
-        "Diplôme de spécialisation en hématologie",
-        "Diplôme de spécialisation en infectiologie",
-        "Diplôme de spécialisation en médecine du travail",
-        "Diplôme de spécialisation en médecine légale",
-        "Diplôme de spécialisation en médecine d'urgence",
-        "Diplôme de spécialisation en médecine sportive",
-        "Diplôme de spécialisation en médecine palliative",
-        "Diplôme de spécialisation en médecine nucléaire",
-        "Diplôme de spécialisation en médecine physique et de réadaptation",
-        "Diplôme de spécialisation en médecine tropicale",
-        "Diplôme de spécialisation en médecine vasculaire",
-        "Diplôme de spécialisation en médecine aéronautique",
-        "Diplôme de spécialisation en médecine spatiale",
-        "Diplôme de spécialisation en médecine maritime",
-        "Diplôme de spécialisation en médecine rurale",
-        "Diplôme de spécialisation en médecine communautaire",
-        "Diplôme de spécialisation en médecine de famille",
-        "Diplôme de spécialisation en médecine interne",
-        "Diplôme de spécialisation en médecine préventive",
-        "Diplôme de spécialisation en médecine alternative",
-        "Autre"
-    ];
-
-
   return (
-
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="grid grid-cols-1 md:grid-cols-2 gap-6"
     >
-
-      {/* Spécialité */}
-
       <div>
         <label className="text-sm font-medium">Spécialité</label>
 
         <div className="relative">
-
           <GraduationCap
             className="absolute left-3 top-4 text-gray-400"
             size={18}
           />
 
-          {/* <input
-            {...register("specialite")}
-            placeholder="Médecine générale"
-            className="w-full border rounded-lg p-3 pl-10 focus:ring-2 focus:ring-green-500"
-          /> */}
-
           <select
-            {...register("specialite")}
+            {...register("specialiteId")}
             className="w-full border rounded-lg p-3 pl-10 focus:ring-2 focus:ring-green-500"
+            disabled={loadingSpecialites}
           >
             <option value="">Sélectionnez une spécialité</option>
             {specialites.map((s) => (
               <option key={s.id} value={String(s.id)}>
-                {s.nom}
+                {s.libelle}
               </option>
             ))}
           </select>
-
         </div>
 
-        <p className="text-red-500 text-sm">
-          {errors.specialite?.message}
+        <p className="text-red-500 text-sm mt-1">
+          {errors.specialiteId?.message}
         </p>
-
       </div>
-
-
-      {/* Sous spécialité */}
 
       <div>
         <label className="text-sm font-medium">Sous-spécialité</label>
 
-        {/* <input
-          {...register("sousSpecialite")}
-          placeholder="Cardiologie"
-          className="w-full border rounded-lg p-3"
-        /> */}
-
         <select
-          {...register("sousSpecialite")}
-          disabled={!selectedSpecialite}
+          {...register("sousSpecialiteId")}
+          disabled={!selectedSpecialiteId || loadingSousSpecialites}
           className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
         >
           <option value="">Sélectionnez une sous-spécialité</option>
           {sousSpecialites.map((s) => (
             <option key={s.id} value={String(s.id)}>
-              {s.nom}
+              {s.libelle}
             </option>
           ))}
         </select>
 
-        <p className="text-red-500 text-sm">
-          {errors.sousSpecialite?.message}
+        {selectedSpecialiteId &&
+          !loadingSousSpecialites &&
+          sousSpecialites.length === 0 && (
+            <p className="text-gray-500 text-sm mt-1">
+              Aucune sous-spécialité disponible pour cette spécialité.
+            </p>
+          )}
+
+        <p className="text-red-500 text-sm mt-1">
+          {errors.sousSpecialiteId?.message}
         </p>
-
       </div>
-
-
-      {/* Diplôme */}
 
       <div>
         <label className="text-sm font-medium">Diplôme</label>
 
-        {/* <input
-          {...register("diplome")}
-          placeholder="Doctorat médecine"
-          className="w-full border rounded-lg p-3"
-        /> */}
         <select
           {...register("diplome")}
           className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500"
         >
-          <option value="">Sélectionnez une diplome</option>
+          <option value="">Sélectionnez un diplôme</option>
           {diplomes.map((diplome) => (
             <option key={diplome} value={diplome}>
               {diplome}
@@ -323,90 +303,61 @@ function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
           ))}
         </select>
 
-
-        <p className="text-red-500 text-sm">
+        <p className="text-red-500 text-sm mt-1">
           {errors.diplome?.message}
         </p>
-
       </div>
 
-
-      {/* Année */}
-
       <div>
-        <label className="text-sm font-medium">Année</label>
+        <label className="text-sm font-medium">Année d'obtention</label>
 
         <div className="relative">
-
           <Calendar
             className="absolute left-3 top-4 text-gray-400"
             size={18}
           />
 
           <input
-            {...register("annee")}
+            {...register("anneeObtention")}
             placeholder="2022"
             className="w-full border rounded-lg p-3 pl-10"
           />
-
-          <p className="text-red-500 text-sm">
-          {errors.annee?.message}
-        </p>
-
         </div>
 
+        <p className="text-red-500 text-sm mt-1">
+          {errors.anneeObtention?.message}
+        </p>
       </div>
-
-
-      {/* Pays */}
 
       <div>
         <label className="text-sm font-medium">Pays</label>
 
         <div className="relative">
-
           <MapPin
             className="absolute left-1 top-4 text-gray-400"
             size={18}
           />
 
-          {/* <input
-            {...register("pays")}
-            placeholder="Mauritanie"
-            className="w-full border rounded-lg p-3 pl-10"
-          /> */}
-
           <select
-          {...register("pays")}
-          className="w-full border rounded-lg p-3 pl-5 focus:ring-2 focus:ring-green-500"
-        >
-          <option value="">Sélectionnez une pays</option>
-          {Object.keys(educationData).map((pays) => (
-            <option key={pays} value={pays}>
-              {pays}
-            </option>
-          ))}
-        </select>
-
-          <p className="text-red-500 text-sm">
-            {errors.pays?.message}
-          </p>
-
+            {...register("pays")}
+            className="w-full border rounded-lg p-3 pl-5 focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">Sélectionnez un pays</option>
+            {Object.keys(educationData).map((pays) => (
+              <option key={pays} value={pays}>
+                {pays}
+              </option>
+            ))}
+          </select>
         </div>
 
+        <p className="text-red-500 text-sm mt-1">
+          {errors.pays?.message}
+        </p>
       </div>
-
-
-      {/* Ville */}
 
       <div>
         <label className="text-sm font-medium">Ville</label>
-
-        {/* <input
-          {...register("ville")}
-          placeholder="Nouakchott"
-          className="w-full border rounded-lg p-3"
-        /> */}
 
         <select
           {...register("ville")}
@@ -421,60 +372,42 @@ function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
           ))}
         </select>
 
-        <p className="text-red-500 text-sm">
+        <p className="text-red-500 text-sm mt-1">
           {errors.ville?.message}
         </p>
-
       </div>
 
-
-      {/* Université */}
-
       <div className="md:col-span-2">
-
         <label className="text-sm font-medium">
           Université / établissement
         </label>
 
         <div className="relative">
-
           <Building
             className="absolute left-1 top-4 text-gray-400"
             size={18}
           />
 
-          {/* <input
-            {...register("universite")}
-            placeholder="Université de Nouakchott"
-            className="w-full border rounded-lg p-3 pl-10"
-          /> */}
-
           <select
-          {...register("universite")}
-          className="w-full border rounded-lg p-3 pl-5 focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
-          disabled={!selectedPays || !selectedVille}
-        >
-          <option value="">Sélectionnez une universite</option>
-          {universites.map((u) => (
-            <option key={u} value={u}>
-              {u}
-            </option>
-          ))}
-        </select>
-
-          <p className="text-red-500 text-sm">
-          {errors.universite?.message}
-        </p>
-
+            {...register("universite")}
+            className="w-full border rounded-lg p-3 pl-5 focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+            disabled={!selectedPays || !selectedVille}
+          >
+            <option value="">Sélectionnez une université</option>
+            {universites.map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+          </select>
         </div>
 
+        <p className="text-red-500 text-sm mt-1">
+          {errors.universite?.message}
+        </p>
       </div>
 
-
-      {/* Boutons */}
-
       <div className="md:col-span-2 flex justify-between mt-6">
-
         <button
           type="button"
           onClick={() => {
@@ -492,13 +425,9 @@ function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
         >
           Enregistrer
         </button>
-
       </div>
-
     </form>
-
   );
-
 }
 
 export default EducationForm;

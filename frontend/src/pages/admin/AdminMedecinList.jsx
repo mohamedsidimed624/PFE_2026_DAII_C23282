@@ -247,7 +247,7 @@ function AdminMedecinsList() {
               <select
                 value={pageSize}
                 onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 outline-none focus:border-green-500 transition-all"
+                className="border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-600 bg-white outline-none focus:border-green-500 transition-all"
               >
                 {PAGE_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>

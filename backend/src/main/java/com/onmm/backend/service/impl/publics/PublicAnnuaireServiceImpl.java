@@ -7,6 +7,7 @@ import com.onmm.backend.dto.publics.PublicMedecinResponse;
 import com.onmm.backend.entity.DemandeEducation;
 import com.onmm.backend.entity.DemandeExperience;
 import com.onmm.backend.entity.Medecin;
+import com.onmm.backend.entity.enums.StatutMedecin;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.service.publics.PublicAnnuaireService;
 import com.onmm.backend.specification.MedecinSpecification;
@@ -28,6 +29,7 @@ public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
     }
 
     @Override
+    @Transactional
     public Page<PublicMedecinResponse> searchMedecins(
             String nom,
             String prenom,
@@ -57,10 +59,10 @@ public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
     @Override
     @Transactional
     public PublicMedecinDetailResponse getPublicMedecinById(Long id) {
-        Medecin medecin = medecinRepository.findById(id)
+        Medecin medecin = medecinRepository.findPublicDetailById(id)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
-        if (!"ACTIF".equalsIgnoreCase(medecin.getStatut())) {
+        if (medecin.getStatut() != StatutMedecin.ACTIF) {
             throw new RuntimeException("Médecin non disponible dans l'annuaire public");
         }
 
@@ -85,33 +87,52 @@ public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
 
     private PublicMedecinResponse toDto(Medecin medecin) {
         PublicMedecinResponse dto = new PublicMedecinResponse();
+
         dto.setId(medecin.getId());
         dto.setNom(medecin.getNom());
         dto.setPrenom(medecin.getPrenom());
-        dto.setSpecialite(medecin.getSpecialite());
         dto.setNumeroInscription(medecin.getNumeroInscription());
         dto.setVille(medecin.getAdresse());
         dto.setPhotoProfilPath(medecin.getPhotoProfilPath());
+
+        if (medecin.getSpecialite() != null) {
+            dto.setSpecialiteId(medecin.getSpecialite().getId());
+            dto.setSpecialiteLibelle(medecin.getSpecialite().getLibelle());
+        }
+
+        if (medecin.getSousSpecialite() != null) {
+            dto.setSousSpecialiteId(medecin.getSousSpecialite().getId());
+            dto.setSousSpecialiteLibelle(medecin.getSousSpecialite().getLibelle());
+        }
+
         return dto;
     }
 
     private PublicMedecinDetailResponse toDetailDto(Medecin medecin) {
         PublicMedecinDetailResponse dto = new PublicMedecinDetailResponse();
+
         dto.setId(medecin.getId());
         dto.setNom(medecin.getNom());
         dto.setPrenom(medecin.getPrenom());
-        dto.setSpecialite(medecin.getSpecialite());
         dto.setNumeroInscription(medecin.getNumeroInscription());
         dto.setVille(medecin.getAdresse());
         dto.setPhotoProfilPath(medecin.getPhotoProfilPath());
-        dto.setStatut(medecin.getStatut());
+        dto.setStatut(medecin.getStatut() != null ? medecin.getStatut().name() : null);
         dto.setAdresse(medecin.getAdresse());
         dto.setNationalite(medecin.getNationalite());
         dto.setSexe(medecin.getSexe());
 
-        if (medecin.getUser() != null
-                && medecin.getUser().getDemandeApprouvee() != null) {
+        if (medecin.getSpecialite() != null) {
+            dto.setSpecialiteId(medecin.getSpecialite().getId());
+            dto.setSpecialiteLibelle(medecin.getSpecialite().getLibelle());
+        }
 
+        if (medecin.getSousSpecialite() != null) {
+            dto.setSousSpecialiteId(medecin.getSousSpecialite().getId());
+            dto.setSousSpecialiteLibelle(medecin.getSousSpecialite().getLibelle());
+        }
+
+        if (medecin.getUser() != null && medecin.getUser().getDemandeApprouvee() != null) {
             List<PublicEducationDto> educations = medecin.getUser()
                     .getDemandeApprouvee()
                     .getEducations()
@@ -135,13 +156,23 @@ public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
 
     private PublicEducationDto toEducationDto(DemandeEducation education) {
         PublicEducationDto dto = new PublicEducationDto();
+
         dto.setDiplome(education.getDiplome());
-        dto.setSpecialite(education.getSpecialite());
-        dto.setSousSpecialite(education.getSousSpecialite());
         dto.setUniversite(education.getUniversite());
         dto.setPays(education.getPays());
         dto.setVille(education.getVille());
         dto.setAnneeObtention(education.getAnneeObtention());
+
+        if (education.getSpecialite() != null) {
+            dto.setSpecialiteId(education.getSpecialite().getId());
+            dto.setSpecialiteLibelle(education.getSpecialite().getLibelle());
+        }
+
+        if (education.getSousSpecialite() != null) {
+            dto.setSousSpecialiteId(education.getSousSpecialite().getId());
+            dto.setSousSpecialiteLibelle(education.getSousSpecialite().getLibelle());
+        }
+
         return dto;
     }
 

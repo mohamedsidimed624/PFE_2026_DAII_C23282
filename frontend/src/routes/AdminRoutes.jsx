@@ -6,6 +6,7 @@ import AdminMedecinsList from "../pages/admin/AdminMedecinList";
 import AdminMedecinDetail from "../pages/admin/AdminMedecinDetail";
 import AdminReclamationsList from "../pages/admin/AdminReclamationList";
 import AdminReclamationDetail from "../pages/admin/AdminReclamationDetail";
+import AdminSpecialitesPage from "../pages/admin/AdminSpecialitesPage";
 
 function AdminRoutes() {
   return (
@@ -18,6 +19,8 @@ function AdminRoutes() {
 
       <Route path="reclamations" element={<AdminReclamationsList />} />
       <Route path="reclamations/:id" element={<AdminReclamationDetail />}/>
+
+      <Route path="specialites" element={<AdminSpecialitesPage />} />
     </Routes>
   );
 }
