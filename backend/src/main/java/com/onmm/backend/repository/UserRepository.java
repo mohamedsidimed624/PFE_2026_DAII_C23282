@@ -1,6 +1,7 @@
 package com.onmm.backend.repository;
 
 import com.onmm.backend.entity.DemandeAdhesion;
+import com.onmm.backend.entity.Medecin;
 import com.onmm.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,5 +11,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
-    Optional<User> findByDemandeApprouvee(DemandeAdhesion demande);
+
+
+
 }

@@ -44,12 +44,22 @@ function MedecinDashboard() {
 
   const p = profile || {};
 
-  const specialiteDisplay = useMemo(() => {
-    if (p.specialiteLibelle && p.sousSpecialiteLibelle) {
-      return `${p.specialiteLibelle} — ${p.sousSpecialiteLibelle}`;
-    }
-    return p.specialiteLibelle || "Médecin";
-  }, [p.specialiteLibelle, p.sousSpecialiteLibelle]);
+  const educations = Array.isArray(p.educations) ? p.educations : [];
+
+const specialitesDisplay = useMemo(() => {
+  if (educations.length === 0) return "Médecin";
+
+  return educations
+    .map((e) => {
+      if (e.specialiteLibelle && e.sousSpecialiteLibelle) {
+        return `${e.specialiteLibelle} — ${e.sousSpecialiteLibelle}`;
+      }
+      return e.specialiteLibelle;
+    })
+    .filter(Boolean)
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .join(", ");
+}, [educations]);
 
   const completion = useMemo(() => {
     const fields = [
@@ -63,15 +73,17 @@ function MedecinDashboard() {
       "adresse",
       "numeroInscription",
       "statut",
-      "specialiteLibelle",
+      "educations",
     ];
 
     const filled = fields.filter(
       (field) => p[field] && String(p[field]).trim() !== ""
     ).length;
 
-    return Math.round((filled / fields.length) * 100);
-  }, [p]);
+    const hasEducation = educations.length > 0 ? 1 : 0;
+
+    return Math.round(((filled + hasEducation) / (fields.length + 1)) * 100);
+  }, [p, educations]);
 
   const statusIsActive = useMemo(() => {
     return ["ACTIF", "ACTIVE", "APPROVED"].includes(
@@ -122,7 +134,7 @@ function MedecinDashboard() {
             </h1>
 
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {specialiteDisplay} · N° {p.numeroInscription || "—"}
+              {specialitesDisplay} · N° {p.numeroInscription || "—"}
             </p>
 
             <span
@@ -157,7 +169,7 @@ function MedecinDashboard() {
             icon={<Stethoscope size={20} />}
             iconClassName="bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"
             label="Spécialité"
-            value={specialiteDisplay || "—"}
+            value={specialitesDisplay || "—"}
           />
 
           <StatCard
@@ -230,17 +242,13 @@ function MedecinDashboard() {
                 value={p.numeroInscription}
               />
 
-              <InfoCard
-                icon={<Stethoscope size={16} />}
-                label="Spécialité"
-                value={p.specialiteLibelle}
-              />
-
-              <InfoCard
-                icon={<Stethoscope size={16} />}
-                label="Sous-spécialité"
-                value={p.sousSpecialiteLibelle}
-              />
+              <div className="sm:col-span-2">
+                <InfoCard
+                  icon={<Stethoscope size={16} />}
+                  label="Spécialités"
+                  value={specialitesDisplay}
+                />
+              </div>
 
               <div className="sm:col-span-2">
                 <InfoCard

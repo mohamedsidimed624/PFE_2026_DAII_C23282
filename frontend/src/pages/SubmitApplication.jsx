@@ -64,9 +64,12 @@ function SubmitApplication() {
 
     <>
 
-      <Navbar />
-
-      <ApplicationSteps />
+      <div className='min-h-screen bg-base-100'> 
+        <Navbar />
+        <main className='pt-24 md:pt-28'>
+          <ApplicationSteps />
+        </main>
+        </div>
 
     </>
 

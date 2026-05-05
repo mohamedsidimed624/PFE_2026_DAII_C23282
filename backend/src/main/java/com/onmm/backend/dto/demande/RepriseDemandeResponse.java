@@ -121,28 +121,46 @@ public class RepriseDemandeResponse {
     }
 
     public static class EducationData {
-        private Specialite specialite;
-        private SousSpecialite sousSpecialite;
+        private Long specialiteId;
+        private String specialiteLibelle;
+        private Long sousSpecialiteId;
+        private String sousSpecialiteLibelle;
         private String diplome;
-        private Integer annee;
+        private Integer anneeObtention;
         private String pays;
         private String ville;
         private String universite;
 
-        public Specialite getSpecialite() {
-            return specialite;
+        public Long getSpecialiteId() {
+            return specialiteId;
         }
 
-        public void setSpecialite(Specialite specialite) {
-            this.specialite = specialite;
+        public void setSpecialiteId(Long specialiteId) {
+            this.specialiteId = specialiteId;
         }
 
-        public SousSpecialite getSousSpecialite() {
-            return sousSpecialite;
+        public Long getSousSpecialiteId() {
+            return sousSpecialiteId;
         }
 
-        public void setSousSpecialite(SousSpecialite sousSpecialite) {
-            this.sousSpecialite = sousSpecialite;
+        public void setSousSpecialiteId(Long sousSpecialiteId) {
+            this.sousSpecialiteId = sousSpecialiteId;
+        }
+
+        public String getSpecialiteLibelle() {
+            return specialiteLibelle;
+        }
+
+        public void setSpecialiteLibelle(String specialiteLibelle) {
+            this.specialiteLibelle = specialiteLibelle;
+        }
+
+        public String getSousSpecialiteLibelle() {
+            return sousSpecialiteLibelle;
+        }
+
+        public void setSousSpecialiteLibelle(String sousSpecialiteLibelle) {
+            this.sousSpecialiteLibelle = sousSpecialiteLibelle;
         }
 
         public String getDiplome() {
@@ -153,12 +171,12 @@ public class RepriseDemandeResponse {
             this.diplome = diplome;
         }
 
-        public Integer getAnnee() {
-            return annee;
+        public Integer getAnneeObtention() {
+            return anneeObtention;
         }
 
-        public void setAnnee(Integer annee) {
-            this.annee = annee;
+        public void setAnneeObtention(Integer anneeObtention) {
+            this.anneeObtention = anneeObtention;
         }
 
         public String getPays() {

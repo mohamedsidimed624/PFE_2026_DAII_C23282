@@ -35,4 +35,15 @@ public interface DemandeAdhesionRepository extends JpaRepository<DemandeAdhesion
         where d.id = :id
     """)
     Optional<DemandeAdhesion> findByIdWithEducations(@Param("id") Long id);
+
+    @Query("""
+    SELECT DISTINCT d FROM DemandeAdhesion d
+    LEFT JOIN FETCH d.educations e
+    LEFT JOIN FETCH e.specialite
+    LEFT JOIN FETCH e.sousSpecialite
+    LEFT JOIN FETCH d.experiences
+    LEFT JOIN FETCH d.documents
+    WHERE d.email = :email
+""")
+    Optional<DemandeAdhesion> findByEmailWithDetails(@Param("email") String email);
 }

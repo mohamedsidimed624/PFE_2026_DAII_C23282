@@ -3,15 +3,21 @@ package com.onmm.backend.service.impl;
 import com.onmm.backend.dto.auth.SetPasswordRequest;
 import com.onmm.backend.entity.ActivationToken;
 import com.onmm.backend.entity.User;
+import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.entity.enums.TokenType;
 import com.onmm.backend.repository.ActivationTokenRepository;
 import com.onmm.backend.repository.UserRepository;
 import com.onmm.backend.service.AuthService;
+import com.onmm.backend.service.JWTService;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.onmm.backend.dto.auth.LoginRequest;
 import com.onmm.backend.dto.auth.LoginResponse;
-import com.onmm.backend.service.JwtService;
+//import com.onmm.backend.service.JwtService;
 
 import java.time.LocalDateTime;
 
@@ -20,16 +26,18 @@ public class AuthServiceImpl implements AuthService {
 
     private final ActivationTokenRepository tokenRepository;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    private final AuthenticationManager authManager;
+    private final JWTService jwtService;
 
     public AuthServiceImpl(ActivationTokenRepository tokenRepository,
                            UserRepository userRepository,
-                           PasswordEncoder passwordEncoder,
-                           JwtService jwtService) {
+                           AuthenticationManager authManager,
+                           JWTService jwtService
+    ) {
         this.tokenRepository = tokenRepository;
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.authManager = authManager;
         this.jwtService = jwtService;
     }
 
@@ -77,7 +85,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = token.getUser();
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(encoder.encode(request.getPassword()));
         user.setEnabled(true);
 
         userRepository.save(user);
@@ -89,24 +97,20 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email ou mot de passe invalide"));
-
-        if (!user.isEnabled()) {
-            throw new RuntimeException("Votre compte n'est pas encore activé");
-        }
-
-        boolean passwordMatches = passwordEncoder.matches(
-                request.getPassword(),
-                user.getPassword()
+        Authentication authentication = authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
         );
 
-        if (!passwordMatches) {
-            throw new RuntimeException("Email ou mot de passe invalide");
-        }
 
-        // JWT viendra à l’étape suivante
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User user = userPrincipal.getUser();
+
+
         String token = jwtService.generateToken(user);
+
 
         return new LoginResponse(
                 token,
@@ -114,4 +118,30 @@ public class AuthServiceImpl implements AuthService {
                 user.getEmail()
         );
     }
+
+//        User user = userRepository.findByEmail(request.getEmail())
+//                .orElseThrow(() -> new RuntimeException("Email ou mot de passe invalide"));
+//
+//        if (!user.isEnabled()) {
+//            throw new RuntimeException("Votre compte n'est pas encore activé");
+//        }
+//
+//        boolean passwordMatches = encoder.matches(
+//                request.getPassword(),
+//                user.getPassword()
+//        );
+//
+//        if (!passwordMatches) {
+//            throw new RuntimeException("Email ou mot de passe invalide");
+//        }
+//
+//        // JWT viendra à l’étape suivante
+//       // String token = jwtService.generateToken(user);
+//
+//        return new LoginResponse(
+//               // token,
+//                user.getRole().name(),
+//                user.getEmail()
+//        );
+//    }
 }

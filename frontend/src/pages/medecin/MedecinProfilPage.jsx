@@ -743,7 +743,7 @@ function MedecinProfilPage() {
     adresse: "",
     numeroInscription: "",
     statut: "",
-    specialiteLibelle: "",
+    educations: [],
     photoProfilPath: "",
   });
 
@@ -762,18 +762,18 @@ function MedecinProfilPage() {
         const d = res.data;
 
         const normalized = {
-          nom: d.nom || "",
-          prenom: d.prenom || "",
-          email: d.email || "",
-          telephone: d.telephone || "",
-          nni: d.nni || "",
-          sexe: d.sexe || "",
-          nationalite: d.nationalite || "",
-          adresse: d.adresse || "",
-          numeroInscription: d.numeroInscription || "",
-          statut: d.statut || "",
-          specialiteLibelle: d.specialiteLibelle || "",
-          photoProfilPath: d.photoProfilPath || "",
+            nom: d.nom || "",
+            prenom: d.prenom || "",
+            email: d.email || "",
+            telephone: d.telephone || "",
+            nni: d.nni || "",
+            sexe: d.sexe || "",
+            nationalite: d.nationalite || "",
+            adresse: d.adresse || "",
+            numeroInscription: d.numeroInscription || "",
+            statut: d.statut || "",
+            educations: Array.isArray(d.educations) ? d.educations : [],
+            photoProfilPath: d.photoProfilPath || "",
         };
 
         setForm(normalized);
@@ -801,14 +801,15 @@ function MedecinProfilPage() {
       "adresse",
       "numeroInscription",
       "statut",
-      "specialite",
     ];
 
     const filled = fields.filter(
       (field) => form[field] && String(form[field]).trim() !== ""
     ).length;
 
-    return Math.round((filled / fields.length) * 100);
+    const hasEducations = form.educations?.length > 0 ? 1 : 0;
+
+    return Math.round(((filled + hasEducations) / (fields.length + 1)) * 100);
   }, [form]);
 
   const initials = useMemo(() => {
@@ -834,6 +835,23 @@ function MedecinProfilPage() {
 
     return "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
   }, [form.statut]);
+
+  const specialitesDisplay = useMemo(() => {
+  if (!form.educations || form.educations.length === 0) {
+    return "Spécialité non renseignée";
+  }
+
+  return form.educations
+    .map((e) => {
+      if (e.specialiteLibelle && e.sousSpecialiteLibelle) {
+        return `${e.specialiteLibelle} — ${e.sousSpecialiteLibelle}`;
+      }
+      return e.specialiteLibelle;
+    })
+    .filter(Boolean)
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .join(", ");
+}, [form.educations]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -884,6 +902,7 @@ function MedecinProfilPage() {
         telephone: d.telephone || "",
         nationalite: d.nationalite || "",
         adresse: d.adresse || "",
+        educations: form.educations || [],
       };
 
       setForm(updated);
@@ -1018,7 +1037,7 @@ function MedecinProfilPage() {
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-500 dark:text-slate-400 transition-colors">
                   <span className="inline-flex items-center gap-2">
                     <Stethoscope size={16} className="text-green-600 dark:text-green-500" />
-                    {form.specialiteLibelle || "Spécialité non renseignée"}
+                    {specialitesDisplay}
                   </span>
 
                   {form.email && (
@@ -1125,8 +1144,8 @@ function MedecinProfilPage() {
                     icon={<Globe size={18} />}
                   />
                   <ReadOnlyItem
-                    label="Spécialité"
-                    value={form.specialiteLibelle}
+                    label="Spécialités"
+                    value={specialitesDisplay}
                     icon={<Stethoscope size={18} />}
                   />
                   <ReadOnlyItem
@@ -1227,7 +1246,7 @@ function MedecinProfilPage() {
                         value={form.numeroInscription}
                       />
                       <MiniReadOnly label="Statut" value={form.statut} />
-                      <MiniReadOnly label="Spécialité" value={form.specialiteLibelle} />
+                      <MiniReadOnly label="Spécialités" value={specialitesDisplay} />
                     </div>
                   </div>
 
@@ -1279,8 +1298,8 @@ function MedecinProfilPage() {
                 />
                 <AdminRow
                   icon={<Stethoscope size={16} />}
-                  label="Spécialité"
-                  value={form.specialiteLibelle}
+                  label="Spécialités"
+                  value={specialitesDisplay}
                 />
                 <AdminRow
                   icon={<ShieldCheck size={16} />}

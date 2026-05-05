@@ -81,10 +81,8 @@ public class ReclamationServiceImpl implements ReclamationService {
     @Override
     @Transactional
     public ReclamationCreatedResponse createMedecinReclamation(String userEmail, CreateMedecinReclamationRequest request, String pieceJointePath) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        Medecin medecin = medecinRepository.findByUser(user)
+        Medecin medecin = medecinRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
         ReclamationCategory categorie = parseCategory(request.getCategorie());
@@ -112,10 +110,8 @@ public class ReclamationServiceImpl implements ReclamationService {
     @Override
     @Transactional
     public List<ReclamationListResponse> getMedecinReclamations(String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        Medecin medecin = medecinRepository.findByUser(user)
+        Medecin medecin = medecinRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
         return reclamationRepository.findByMedecinOrderByDateCreationDesc(medecin)
@@ -145,10 +141,8 @@ public class ReclamationServiceImpl implements ReclamationService {
     @Override
     @Transactional
     public ReclamationDetailResponse getMedecinReclamationDetail(Long id, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        Medecin medecin = medecinRepository.findByUser(user)
+        Medecin medecin = medecinRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
         Reclamation reclamation = reclamationRepository.findByIdAndMedecin(id, medecin)

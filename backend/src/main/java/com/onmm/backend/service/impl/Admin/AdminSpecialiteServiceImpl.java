@@ -8,18 +8,14 @@ import com.onmm.backend.entity.Specialite;
 import com.onmm.backend.mapper.SpecialiteAdminMapper;
 import com.onmm.backend.mapper.SousSpecialiteAdminMapper;
 import com.onmm.backend.repository.DemandeEducationRepository;
-import com.onmm.backend.repository.MedecinRepository;
+import com.onmm.backend.repository.MedecinEducationRepository;
 import com.onmm.backend.repository.SousSpecialiteRepository;
 import com.onmm.backend.repository.SpecialiteRepository;
 import com.onmm.backend.service.Admin.AdminSpecialiteService;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -28,18 +24,18 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
 
     private final SpecialiteRepository specialiteRepository;
     private final SousSpecialiteRepository sousSpecialiteRepository;
-    private final MedecinRepository medecinRepository;
+    private final MedecinEducationRepository medecinEducationRepository;
     private final DemandeEducationRepository demandeEducationRepository;
 
     public AdminSpecialiteServiceImpl(
             SpecialiteRepository specialiteRepository,
             SousSpecialiteRepository sousSpecialiteRepository,
-            MedecinRepository medecinRepository,
+            MedecinEducationRepository medecinEducationRepository,
             DemandeEducationRepository demandeEducationRepository
     ) {
         this.specialiteRepository = specialiteRepository;
         this.sousSpecialiteRepository = sousSpecialiteRepository;
-        this.medecinRepository = medecinRepository;
+        this.medecinEducationRepository = medecinEducationRepository;
         this.demandeEducationRepository = demandeEducationRepository;
     }
 
@@ -47,19 +43,15 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
         if ("libelle_desc".equalsIgnoreCase(sortBy)) {
             return Sort.by(Sort.Direction.DESC, "libelle");
         }
-
         if ("libelle_asc".equalsIgnoreCase(sortBy)) {
             return Sort.by(Sort.Direction.ASC, "libelle");
         }
-
         if ("ordre_asc".equalsIgnoreCase(sortBy)) {
             return Sort.by(Sort.Direction.ASC, "ordreAffichage", "libelle");
         }
-
         if ("ordre_desc".equalsIgnoreCase(sortBy)) {
             return Sort.by(Sort.Direction.DESC, "ordreAffichage", "libelle");
         }
-
         return Sort.by(Sort.Direction.ASC, "libelle");
     }
 
@@ -103,7 +95,7 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
                 .orElseThrow(() -> new RuntimeException("Spécialité introuvable"));
 
         long nombreSousSpecialites = sousSpecialiteRepository.countBySpecialiteId(id);
-        long nombreMedecins = medecinRepository.countBySpecialiteId(id);
+        long nombreMedecins = medecinEducationRepository.countBySpecialiteId(id);
         long nombreDemandes = demandeEducationRepository.countBySpecialiteId(id);
         boolean canDelete = canDeleteSpecialite(id);
 
@@ -112,7 +104,7 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
                 .stream()
                 .map(ss -> SousSpecialiteAdminMapper.toResponse(
                         ss,
-                        medecinRepository.countBySousSpecialiteId(ss.getId()),
+                        medecinEducationRepository.countBySousSpecialiteId(ss.getId()),
                         demandeEducationRepository.countBySousSpecialiteId(ss.getId()),
                         canDeleteSousSpecialite(ss.getId())
                 ))
@@ -147,8 +139,7 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
         specialite.setOrdreAffichage(request.getOrdreAffichage());
         specialite.setActive(request.getActive() == null || request.getActive());
 
-        Specialite saved = specialiteRepository.save(specialite);
-        return mapSpecialiteResponse(saved);
+        return mapSpecialiteResponse(specialiteRepository.save(specialite));
     }
 
     @Override
@@ -175,8 +166,7 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
             specialite.setActive(request.getActive());
         }
 
-        Specialite saved = specialiteRepository.save(specialite);
-        return mapSpecialiteResponse(saved);
+        return mapSpecialiteResponse(specialiteRepository.save(specialite));
     }
 
     @Override
@@ -202,7 +192,7 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
 
     private AdminSpecialiteResponse mapSpecialiteResponse(Specialite specialite) {
         long nombreSousSpecialites = sousSpecialiteRepository.countBySpecialiteId(specialite.getId());
-        long nombreMedecins = medecinRepository.countBySpecialiteId(specialite.getId());
+        long nombreMedecins = medecinEducationRepository.countBySpecialiteId(specialite.getId());
         long nombreDemandes = demandeEducationRepository.countBySpecialiteId(specialite.getId());
         boolean canDelete = canDeleteSpecialite(specialite.getId());
 
@@ -216,31 +206,14 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
     }
 
     private boolean canDeleteSpecialite(Long specialiteId) {
-        return !medecinRepository.existsBySpecialiteId(specialiteId)
+        return !medecinEducationRepository.existsBySpecialiteId(specialiteId)
                 && !demandeEducationRepository.existsBySpecialiteId(specialiteId)
                 && sousSpecialiteRepository.countBySpecialiteId(specialiteId) == 0;
     }
 
     private boolean canDeleteSousSpecialite(Long sousSpecialiteId) {
-        return !medecinRepository.existsBySousSpecialiteId(sousSpecialiteId)
+        return !medecinEducationRepository.existsBySousSpecialiteId(sousSpecialiteId)
                 && !demandeEducationRepository.existsBySousSpecialiteId(sousSpecialiteId);
-    }
-
-    private boolean matchesSearch(Specialite specialite, String search) {
-        if (search == null || search.isBlank()) {
-            return true;
-        }
-
-        String value = search.trim().toLowerCase();
-        return (specialite.getCode() != null && specialite.getCode().toLowerCase().contains(value))
-                || (specialite.getLibelle() != null && specialite.getLibelle().toLowerCase().contains(value));
-    }
-
-    private boolean matchesActive(Specialite specialite, Boolean active) {
-        if (active == null) {
-            return true;
-        }
-        return specialite.isActive() == active;
     }
 
     private void validateSpecialiteRequest(SpecialiteRequest request) {
@@ -293,8 +266,4 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
 
         return !specialiteRepository.existsByLibelleIgnoreCaseAndIdNot(value, excludeId);
     }
-
-
-
-
 }

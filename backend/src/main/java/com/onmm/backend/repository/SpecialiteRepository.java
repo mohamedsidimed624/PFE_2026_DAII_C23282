@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,5 +28,5 @@ public interface SpecialiteRepository extends JpaRepository<Specialite, Long> {
     Page<Specialite> findByLibelleContainingIgnoreCaseAndActive(String libelle, boolean active, Pageable pageable);
 
 
-
+    List<Specialite> findByActiveTrueOrderByLibelleAsc();
 }

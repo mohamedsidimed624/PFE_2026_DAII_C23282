@@ -1,4 +1,5 @@
 package com.onmm.backend.service.impl.Admin;
+import java.util.Set;
 import java.util.UUID;
 import com.onmm.backend.dto.Admin.AdminDemandeDetailResponse;
 import com.onmm.backend.dto.Admin.AdminDemandeResponse;
@@ -30,14 +31,22 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
     private final ActivationTokenRepository tokenRepository;
     private final MedecinRepository medecinRepository;
 
+
+
     private String genererNumeroInscription() {
         return "OM-" + java.time.Year.now().getValue() + "-" + System.currentTimeMillis();
     }
 
-    private SectionOrdre determineSectionOrdre(Specialite specialite) {
-        if (specialite != null && "Médecine Générale".equalsIgnoreCase(specialite.getLibelle())) {
+    private SectionOrdre determineSectionOrdreFromEducations(Set<DemandeEducation> educations) {
+
+        boolean hasGeneralMedicine = educations.stream()
+                .anyMatch(e -> e.getSpecialite() != null
+                        && "Médecine Générale".equalsIgnoreCase(e.getSpecialite().getLibelle()));
+
+        if (hasGeneralMedicine) {
             return SectionOrdre.GENERALISTE;
         }
+
         return SectionOrdre.SPECIALISTE;
     }
 
@@ -179,7 +188,7 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
     @Transactional
     public void approveDemande(Long id) {
 
-        DemandeAdhesion demande = repository.findByIdWithEducations(id)
+        DemandeAdhesion demande = repository.findWithDetailsById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
         if (!demande.isPending()) {
@@ -191,20 +200,26 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
             throw new RuntimeException("Un utilisateur existe déjà avec cet email");
         }
 
+        if (demande.getEducations() == null || demande.getEducations().isEmpty()) {
+            throw new RuntimeException("Impossible d'approuver une demande sans formation");
+        }
+
         demande.setStatut(ApplicationStatus.APPROUVED);
         demande.setDecisionDate(LocalDateTime.now());
-
-        User user = new User();
-        user.setEmail(demande.getEmail());
-        user.setRole(Role.MEDECIN);
-        user.setEnabled(false);
-        user.setDemandeApprouvee(demande);
-        userRepository.save(user);
+        repository.save(demande);
 
         Medecin medecin = new Medecin();
+
+        // Partie User héritée
+        medecin.setEmail(demande.getEmail());
+        medecin.setRole(Role.MEDECIN);
+        medecin.setEnabled(false);
+        medecin.setPassword(null);
+
+        // Partie métier médecin
+        medecin.setDemandeOrigine(demande);
         medecin.setNom(demande.getNom());
         medecin.setPrenom(demande.getPrenom());
-        medecin.setEmail(demande.getEmail());
         medecin.setTelephone(demande.getTelephone());
         medecin.setNni(demande.getNNI());
         medecin.setSexe(demande.getSexe());
@@ -213,35 +228,98 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         medecin.setNumeroInscription(genererNumeroInscription());
         medecin.setStatut(StatutMedecin.ACTIF);
         medecin.setDateNaissance(demande.getDateNaissance());
-        medecin.setUser(user);
 
-        if (demande.getEducations() == null || demande.getEducations().isEmpty()) {
-            throw new RuntimeException("Impossible d'approuver une demande sans éducation");
+        // Section ordre : règle simple basée sur les formations
+        medecin.setSectionOrdre(determineSectionOrdreFromEducations(demande.getEducations()));
+
+        DemandeExperience experienceActuelle = demande.getExperiences()
+                .stream()
+                .filter(exp -> exp.getDateFin() == null)
+                .findFirst()
+                .orElse(null);
+
+        if (experienceActuelle != null) {
+            medecin.setVilleExercice(experienceActuelle.getVille());
+            medecin.setStructureExercice(experienceActuelle.getNomEtablissement());
         }
 
-        DemandeEducation educationPrincipale = demande.getEducations().iterator().next();
+        long nombreExperiencesActuelles = demande.getExperiences()
+                .stream()
+                .filter(exp -> exp.getDateFin() == null)
+                .count();
 
-        medecin.setSpecialite(educationPrincipale.getSpecialite());
-        medecin.setSousSpecialite(educationPrincipale.getSousSpecialite());
-        medecin.setSectionOrdre(determineSectionOrdre(educationPrincipale.getSpecialite()));
+        if (nombreExperiencesActuelles > 1) {
+            throw new RuntimeException("Une seule expérience professionnelle actuelle est autorisée");
+        }
+
+        // Copier les formations
+        for (DemandeEducation edu : demande.getEducations()) {
+            MedecinEducation medEdu = new MedecinEducation();
+
+            medEdu.setMedecin(medecin);
+            medEdu.setDiplome(edu.getDiplome());
+            medEdu.setUniversite(edu.getUniversite());
+            medEdu.setPays(edu.getPays());
+            medEdu.setVille(edu.getVille());
+            medEdu.setAnneeObtention(edu.getAnneeObtention());
+            medEdu.setSpecialite(edu.getSpecialite());
+            medEdu.setSousSpecialite(edu.getSousSpecialite());
+
+            medecin.getEducations().add(medEdu);
+        }
+
+        // Copier les expériences
+        if (demande.getExperiences() != null) {
+            for (DemandeExperience exp : demande.getExperiences()) {
+                MedecinExperience medExp = new MedecinExperience();
+
+                medExp.setMedecin(medecin);
+                medExp.setNomEtablissement(exp.getNomEtablissement());
+                medExp.setPoste(exp.getPoste());
+                medExp.setPays(exp.getPays());
+                medExp.setVille(exp.getVille());
+                medExp.setDateDebut(exp.getDateDebut());
+                medExp.setDateFin(exp.getDateFin());
+                medExp.setDescription(exp.getDescription());
+
+                medecin.getExperiences().add(medExp);
+            }
+        }
+
+        // Copier les documents
+        if (demande.getDocuments() != null) {
+            for (DemandeDocument doc : demande.getDocuments()) {
+                MedecinDocument medDoc = new MedecinDocument();
+
+                medDoc.setMedecin(medecin);
+                medDoc.setFileName(doc.getFileName());
+                medDoc.setFilePath(doc.getFilePath());
+                medDoc.setTypeDocument(doc.getTypeDocument());
+                medDoc.setCategorie(doc.getCategorie());
+                medDoc.setSize(doc.getSize());
+                medDoc.setUploadDate(doc.getUploadDate());
+
+                medecin.getDocuments().add(medDoc);
+            }
+        }
 
         medecinRepository.save(medecin);
 
-        ActivationToken passwordToken = new ActivationToken();
-        passwordToken.setToken(UUID.randomUUID().toString());
-        passwordToken.setUser(user);
-        passwordToken.setType(TokenType.SET_PASSWORD);
-        passwordToken.setUsed(false);
-        passwordToken.setExpirationDate(LocalDateTime.now().plusHours(24));
-        tokenRepository.save(passwordToken);
+        ActivationToken token = new ActivationToken();
+        token.setToken(UUID.randomUUID().toString());
+        token.setUser(medecin);
+        token.setType(TokenType.SET_PASSWORD);
+        token.setUsed(false);
+        token.setExpirationDate(LocalDateTime.now().plusHours(24));
 
-        String setPasswordLink =
-                "http://localhost:5173/set-password?token=" + passwordToken.getToken();
+        tokenRepository.save(token);
+
+        String link = "http://localhost:5173/set-password?token=" + token.getToken();
 
         emailService.sendApprovalEmail(
                 demande.getEmail(),
                 demande.getNom(),
-                setPasswordLink
+                link
         );
     }
 

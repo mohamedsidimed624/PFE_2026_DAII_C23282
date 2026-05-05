@@ -1,5 +1,8 @@
 package com.onmm.backend.dto;
 
+import lombok.Data;
+
+@Data
 public class SousSpecialiteResponse {
 
     private Long id;
@@ -12,15 +15,5 @@ public class SousSpecialiteResponse {
         this.libelle = libelle;
     }
 
-    public Long getId() {
-        return id;
-    }
 
-    public String getCode() {
-        return code;
-    }
-
-    public String getLibelle() {
-        return libelle;
-    }
 }

@@ -3,36 +3,32 @@ package com.onmm.backend.entity;
 import com.onmm.backend.entity.enums.SectionOrdre;
 import com.onmm.backend.entity.enums.StatutMedecin;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(
         name = "medecins",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_medecin_email", columnNames = "email"),
                 @UniqueConstraint(name = "uk_medecin_telephone", columnNames = "telephone"),
                 @UniqueConstraint(name = "uk_medecin_nni", columnNames = "nni"),
-                @UniqueConstraint(name = "uk_medecin_numero_inscription", columnNames = "numero_inscription"),
-                @UniqueConstraint(name = "uk_medecin_user_id", columnNames = "user_id")
+                @UniqueConstraint(name = "uk_medecin_numero_inscription", columnNames = "numero_inscription")
         }
 )
-public class Medecin {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@PrimaryKeyJoinColumn(name = "user_id")
+public class Medecin extends User {
 
     @Column(nullable = false, length = 100)
     private String nom;
 
     @Column(nullable = false, length = 100)
     private String prenom;
-
-    @Column(nullable = false, unique = true, length = 150)
-    private String email;
 
     @Column(nullable = false, unique = true, length = 30)
     private String telephone;
@@ -63,22 +59,25 @@ public class Medecin {
     @Column(name = "section_ordre", nullable = false, length = 50)
     private SectionOrdre sectionOrdre;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "specialite_id")
-    private Specialite specialite;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sous_specialite_id")
-    private SousSpecialite sousSpecialite;
-
     @Column(name = "date_naissance")
     private LocalDate dateNaissance;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
+    @Column(name = "ville_exercice", length = 100)
+    private String villeExercice;
 
-    public Medecin() {
-    }
+    @Column(name = "structure_exercice", length = 100)
+    private String structureExercice;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "demande_id")
+    private DemandeAdhesion demandeOrigine;
+
+    @OneToMany(mappedBy = "medecin", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MedecinEducation> educations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "medecin", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MedecinExperience> experiences = new ArrayList<>();
+
+    @OneToMany(mappedBy = "medecin", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MedecinDocument> documents = new ArrayList<>();
 }

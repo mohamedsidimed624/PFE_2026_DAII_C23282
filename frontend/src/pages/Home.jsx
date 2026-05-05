@@ -1,26 +1,25 @@
 import React from 'react'
 import { Link } from "react-router-dom";
-import Hero from '../Components/Hero'
-import Services from '../Components/Services'
-import Footer from '../Components/Footer'
-import Navbar from '../Components/Navbar'
-import About from '../Components/About'
-import Contact from '../Components/Contact'
+import Hero from '../components/Hero'
+import Services from '../components/Services'
+import Footer from '../components/Footer'
+import Navbar from '../components/Navbar'
+import About from '../components/About'
+import Contact from '../components/Contact'
+import Teams from '../components/Teams';
 
 export default function Home() {
-  return (
-    <div> 
-        <Navbar />
-
-        <Hero />
-
-        <About />
-
-        <Services />
-
-        <Contact />
-
-        <Footer />
-    </div>
-  )
+    return (
+        <div className="bg-slate-50 min-h-screen">
+            <Navbar />
+            <main>
+                <Hero />
+                <Services />
+                <About />
+                <Teams />
+                <Contact />
+            </main>
+            <Footer />
+        </div>
+    )
 }

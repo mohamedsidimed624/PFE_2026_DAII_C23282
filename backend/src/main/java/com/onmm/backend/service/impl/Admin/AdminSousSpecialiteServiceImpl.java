@@ -5,10 +5,7 @@ import com.onmm.backend.dto.Admin.specialite.SousSpecialiteRequest;
 import com.onmm.backend.entity.SousSpecialite;
 import com.onmm.backend.entity.Specialite;
 import com.onmm.backend.mapper.SousSpecialiteAdminMapper;
-import com.onmm.backend.repository.DemandeEducationRepository;
-import com.onmm.backend.repository.MedecinRepository;
-import com.onmm.backend.repository.SousSpecialiteRepository;
-import com.onmm.backend.repository.SpecialiteRepository;
+import com.onmm.backend.repository.*;
 import com.onmm.backend.service.Admin.AdminSousSpecialiteService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,18 +18,18 @@ public class AdminSousSpecialiteServiceImpl implements AdminSousSpecialiteServic
 
     private final SousSpecialiteRepository sousSpecialiteRepository;
     private final SpecialiteRepository specialiteRepository;
-    private final MedecinRepository medecinRepository;
+    private final MedecinEducationRepository medecinEducationRepository;
     private final DemandeEducationRepository demandeEducationRepository;
 
     public AdminSousSpecialiteServiceImpl(
             SousSpecialiteRepository sousSpecialiteRepository,
             SpecialiteRepository specialiteRepository,
-            MedecinRepository medecinRepository,
+            MedecinEducationRepository medecinEducationRepository,
             DemandeEducationRepository demandeEducationRepository
     ) {
         this.sousSpecialiteRepository = sousSpecialiteRepository;
         this.specialiteRepository = specialiteRepository;
-        this.medecinRepository = medecinRepository;
+        this.medecinEducationRepository = medecinEducationRepository;
         this.demandeEducationRepository = demandeEducationRepository;
     }
 
@@ -136,7 +133,7 @@ public class AdminSousSpecialiteServiceImpl implements AdminSousSpecialiteServic
     }
 
     private AdminSousSpecialiteResponse mapSousSpecialiteResponse(SousSpecialite sousSpecialite) {
-        long nombreMedecins = medecinRepository.countBySousSpecialiteId(sousSpecialite.getId());
+        long nombreMedecins = medecinEducationRepository.countBySousSpecialiteId(sousSpecialite.getId());
         long nombreDemandes = demandeEducationRepository.countBySousSpecialiteId(sousSpecialite.getId());
         boolean canDelete = canDeleteSousSpecialite(sousSpecialite.getId());
 
@@ -149,7 +146,7 @@ public class AdminSousSpecialiteServiceImpl implements AdminSousSpecialiteServic
     }
 
     private boolean canDeleteSousSpecialite(Long sousSpecialiteId) {
-        return !medecinRepository.existsBySousSpecialiteId(sousSpecialiteId)
+        return !medecinEducationRepository.existsBySousSpecialiteId(sousSpecialiteId)
                 && !demandeEducationRepository.existsBySousSpecialiteId(sousSpecialiteId);
     }
 

@@ -16,7 +16,7 @@ function StepEducation({ nextStep, prevStep }) {
         <EducationForm
           setIsAdding={setIsAdding}
           editingIndex={editingIndex}
-          setEditingIndex={setEditingIndex}   // ✅ correction ici
+          setEditingIndex={setEditingIndex}  
         />
 
       ) : (

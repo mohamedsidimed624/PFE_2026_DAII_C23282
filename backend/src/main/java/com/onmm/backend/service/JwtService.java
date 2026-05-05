@@ -1,24 +1,37 @@
 package com.onmm.backend.service;
 
+import com.onmm.backend.dto.auth.LoginResponse;
 import com.onmm.backend.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 @Service
-public class JwtService {
+public class JWTService {
 
-    // clé de dev seulement
+//    @Value("${jwt.secret}")
+//    private String secret;
+
+
+
     private static final String SECRET_KEY =
-            "ZGhpbHNlY3JldGtleWRoaWxzZWNyZXRrZXlkaGlsc2VjcmV0a2V5MTIzNDU2";
+           "ZGhpbHNlY3JldGtleWRoaWxzZWNyZXRrZXlkaGlsc2VjcmV0a2V5MTIzNDU2";
+
 
     public String generateToken(User user) {
 
@@ -30,13 +43,14 @@ public class JwtService {
                 .setClaims(claims)
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24)) // 24h
+                .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String extractEmail(String token) {
-        return extractAllClaims(token).getSubject();
+
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 
     public String extractRole(String token) {
@@ -44,28 +58,38 @@ public class JwtService {
     }
 
     public Long extractUserId(String token) {
-        Integer userId = extractAllClaims(token).get("userId", Integer.class);
-        return userId != null ? userId.longValue() : null;
+        Integer id = extractAllClaims(token).get("userId", Integer.class);
+        return id != null ? id.longValue() : null;
     }
 
-    public boolean isTokenValid(String token, User user) {
-        final String email = extractEmail(token);
-        return email.equals(user.getEmail()) && !isTokenExpired(token);
+
+    public boolean validateToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
+
 
     private boolean isTokenExpired(String token) {
-        return extractAllClaims(token).getExpiration().before(new Date());
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    private <T> T extractClaim(String token, Function<Claims, T> resolver) {
+        return resolver.apply(extractAllClaims(token));
     }
 
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
+                .setSigningKey(getKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    private Key getSignKey() {
+    private SecretKey getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }

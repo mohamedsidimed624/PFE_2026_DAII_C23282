@@ -1,7 +1,5 @@
 package com.onmm.backend.dto.publics;
 
-import com.onmm.backend.entity.SousSpecialite;
-import com.onmm.backend.entity.Specialite;
 import lombok.Data;
 
 @Data

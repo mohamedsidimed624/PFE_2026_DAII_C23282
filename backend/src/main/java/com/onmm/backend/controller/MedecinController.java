@@ -3,9 +3,11 @@ package com.onmm.backend.controller;
 import com.onmm.backend.dto.medecin.MedecinProfileResponse;
 import com.onmm.backend.dto.medecin.UpdateMedecinProfileRequest;
 import com.onmm.backend.entity.User;
+import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.service.MedecinService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +27,8 @@ public class MedecinController {
 
     @GetMapping("/me")
     public MedecinProfileResponse getMyProfile(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+        UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = principal.getUser();
         return medecinService.getMyProfile(user.getEmail());
     }
 

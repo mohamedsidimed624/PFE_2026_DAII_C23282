@@ -4,9 +4,9 @@ import com.onmm.backend.dto.publics.PublicEducationDto;
 import com.onmm.backend.dto.publics.PublicExperienceDto;
 import com.onmm.backend.dto.publics.PublicMedecinDetailResponse;
 import com.onmm.backend.dto.publics.PublicMedecinResponse;
-import com.onmm.backend.entity.DemandeEducation;
-import com.onmm.backend.entity.DemandeExperience;
 import com.onmm.backend.entity.Medecin;
+import com.onmm.backend.entity.MedecinEducation;
+import com.onmm.backend.entity.MedecinExperience;
 import com.onmm.backend.entity.enums.StatutMedecin;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.service.publics.PublicAnnuaireService;
@@ -16,8 +16,8 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
@@ -59,56 +59,42 @@ public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
     @Override
     @Transactional
     public PublicMedecinDetailResponse getPublicMedecinById(Long id) {
+
         Medecin medecin = medecinRepository.findPublicDetailById(id)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
         if (medecin.getStatut() != StatutMedecin.ACTIF) {
-            throw new RuntimeException("Médecin non disponible dans l'annuaire public");
+            throw new RuntimeException("Médecin non disponible");
         }
 
         return toDetailDto(medecin);
     }
 
-    private Sort buildSort(String sort) {
-        if (sort == null || sort.isBlank() || "alpha".equalsIgnoreCase(sort)) {
-            return Sort.by(Sort.Direction.ASC, "nom", "prenom");
-        }
-
-        if ("recent".equalsIgnoreCase(sort)) {
-            return Sort.by(Sort.Direction.DESC, "id");
-        }
-
-        if ("ancien".equalsIgnoreCase(sort)) {
-            return Sort.by(Sort.Direction.ASC, "id");
-        }
-
-        return Sort.by(Sort.Direction.ASC, "nom", "prenom");
-    }
-
     private PublicMedecinResponse toDto(Medecin medecin) {
+
         PublicMedecinResponse dto = new PublicMedecinResponse();
 
         dto.setId(medecin.getId());
         dto.setNom(medecin.getNom());
         dto.setPrenom(medecin.getPrenom());
         dto.setNumeroInscription(medecin.getNumeroInscription());
-        dto.setVille(medecin.getAdresse());
+        dto.setVilleExercice(medecin.getVilleExercice());
         dto.setPhotoProfilPath(medecin.getPhotoProfilPath());
 
-        if (medecin.getSpecialite() != null) {
-            dto.setSpecialiteId(medecin.getSpecialite().getId());
-            dto.setSpecialiteLibelle(medecin.getSpecialite().getLibelle());
-        }
-
-        if (medecin.getSousSpecialite() != null) {
-            dto.setSousSpecialiteId(medecin.getSousSpecialite().getId());
-            dto.setSousSpecialiteLibelle(medecin.getSousSpecialite().getLibelle());
-        }
+        dto.setEducations(
+                medecin.getEducations() == null
+                        ? List.of()
+                        : medecin.getEducations()
+                        .stream()
+                        .map(this::toEducationDto)
+                        .toList()
+        );
 
         return dto;
     }
 
     private PublicMedecinDetailResponse toDetailDto(Medecin medecin) {
+
         PublicMedecinDetailResponse dto = new PublicMedecinDetailResponse();
 
         dto.setId(medecin.getId());
@@ -122,39 +108,41 @@ public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
         dto.setNationalite(medecin.getNationalite());
         dto.setSexe(medecin.getSexe());
 
-        if (medecin.getSpecialite() != null) {
-            dto.setSpecialiteId(medecin.getSpecialite().getId());
-            dto.setSpecialiteLibelle(medecin.getSpecialite().getLibelle());
-        }
 
-        if (medecin.getSousSpecialite() != null) {
-            dto.setSousSpecialiteId(medecin.getSousSpecialite().getId());
-            dto.setSousSpecialiteLibelle(medecin.getSousSpecialite().getLibelle());
-        }
 
-        if (medecin.getUser() != null && medecin.getUser().getDemandeApprouvee() != null) {
-            List<PublicEducationDto> educations = medecin.getUser()
-                    .getDemandeApprouvee()
-                    .getEducations()
-                    .stream()
-                    .map(this::toEducationDto)
-                    .collect(Collectors.toList());
+        List<PublicEducationDto> educations = medecin.getEducations() == null
+                ? List.of()
+                : medecin.getEducations()
+                .stream()
+                .map(this::toEducationDto)
+                .toList();
 
-            List<PublicExperienceDto> experiences = medecin.getUser()
-                    .getDemandeApprouvee()
-                    .getExperiences()
-                    .stream()
-                    .map(this::toExperienceDto)
-                    .collect(Collectors.toList());
+        List<PublicExperienceDto> experiences = medecin.getExperiences() == null
+                ? List.of()
+                : medecin.getExperiences()
+                .stream()
+                .map(this::toExperienceDto)
+                .toList();
 
-            dto.setEducations(educations);
-            dto.setExperiences(experiences);
-        }
+        dto.setEducations(educations);
+        dto.setExperiences(experiences);
 
         return dto;
     }
 
-    private PublicEducationDto toEducationDto(DemandeEducation education) {
+    private MedecinEducation getEducationReference(Medecin medecin) {
+        if (medecin.getEducations() == null || medecin.getEducations().isEmpty()) {
+            return null;
+        }
+
+        return medecin.getEducations()
+                .stream()
+                .max(Comparator.comparing(MedecinEducation::getAnneeObtention))
+                .orElse(null);
+    }
+
+    private PublicEducationDto toEducationDto(MedecinEducation education) {
+
         PublicEducationDto dto = new PublicEducationDto();
 
         dto.setDiplome(education.getDiplome());
@@ -176,14 +164,33 @@ public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
         return dto;
     }
 
-    private PublicExperienceDto toExperienceDto(DemandeExperience experience) {
+    private PublicExperienceDto toExperienceDto(MedecinExperience experience) {
+
         PublicExperienceDto dto = new PublicExperienceDto();
+
         dto.setPoste(experience.getPoste());
         dto.setNomEtablissement(experience.getNomEtablissement());
         dto.setVille(experience.getVille());
         dto.setPays(experience.getPays());
         dto.setDateDebut(experience.getDateDebut() != null ? experience.getDateDebut().toString() : null);
         dto.setDateFin(experience.getDateFin() != null ? experience.getDateFin().toString() : null);
+
         return dto;
+    }
+
+    private Sort buildSort(String sort) {
+        if (sort == null || sort.isBlank() || "alpha".equalsIgnoreCase(sort)) {
+            return Sort.by(Sort.Direction.ASC, "nom", "prenom");
+        }
+
+        if ("recent".equalsIgnoreCase(sort)) {
+            return Sort.by(Sort.Direction.DESC, "id");
+        }
+
+        if ("ancien".equalsIgnoreCase(sort)) {
+            return Sort.by(Sort.Direction.ASC, "id");
+        }
+
+        return Sort.by(Sort.Direction.ASC, "nom", "prenom");
     }
 }

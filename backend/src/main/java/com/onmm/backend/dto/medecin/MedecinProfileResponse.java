@@ -1,7 +1,8 @@
 package com.onmm.backend.dto.medecin;
 
-import com.onmm.backend.entity.Specialite;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class MedecinProfileResponse {
@@ -17,10 +18,8 @@ public class MedecinProfileResponse {
     private String adresse;
     private String numeroInscription;
     private String statut;
-    private Long specialiteId;
-    private String specialiteLibelle;
-    private Long sousSpecialiteId;
-    private String sousSpecialiteLibelle;
     private String photoProfilPath;
+
+    private List<MedecinEducationDto> educations;
 
 }

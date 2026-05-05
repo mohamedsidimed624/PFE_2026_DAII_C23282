@@ -85,8 +85,13 @@ function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
       try {
         setLoadingSousSpecialites(true);
         const res = await getSousSpecialites(selectedSpecialiteId);
-        setSousSpecialites(res.data || []);
-        setValue("sousSpecialiteId", "");
+        const list = res.data || [];
+        setSousSpecialites(list);
+        const currentSousId = watch("sousSpecialiteId");
+        const exists = list.some((s) => String(s.id) === String(currentSousId));
+        if (!exists) {
+          setValue("sousSpecialiteId", "");
+        }
       } catch (error) {
         console.error("Erreur lors du chargement des sous-spécialités :", error);
         setSousSpecialites([]);
@@ -97,7 +102,7 @@ function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
     };
 
     loadSousSpecialites();
-  }, [selectedSpecialiteId, setValue]);
+  }, [selectedSpecialiteId, setValue, watch]);
 
   useEffect(() => {
     if (!selectedPays) {
@@ -110,10 +115,15 @@ function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
 
     const villesPays = Object.keys(educationData[selectedPays] || {});
     setVilles(villesPays);
-    setUniversites([]);
-    setValue("ville", "");
-    setValue("universite", "");
-  }, [selectedPays, setValue]);
+
+    const currentVille = watch("ville");
+    const villeExists = villesPays.includes(currentVille);
+
+    if (!villeExists) {
+      setValue("ville", "");
+      setValue("universite", "");
+    }
+  }, [selectedPays, setValue, watch]);
 
   useEffect(() => {
     if (!selectedPays || !selectedVille) {
@@ -122,9 +132,16 @@ function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
       return;
     }
 
-    setUniversites(educationData[selectedPays]?.[selectedVille] || []);
-    setValue("universite", "");
-  }, [selectedPays, selectedVille, setValue]);
+    const univs = educationData[selectedPays]?.[selectedVille] || [];
+    setUniversites(univs);
+
+    const currentUniversite = watch("universite");
+    const universiteExists = univs.includes(currentUniversite);
+
+    if (!universiteExists) {
+      setValue("universite", "");
+    }
+  }, [selectedPays, selectedVille, setValue, watch]);
 
   useEffect(() => {
     if (editingIndex === null) {
@@ -162,10 +179,10 @@ function EducationForm({ setIsAdding, editingIndex, setEditingIndex }) {
         setUniversites(univs);
 
         reset({
-          specialiteId: edu.specialiteId || "",
-          sousSpecialiteId: edu.sousSpecialiteId || "",
+          specialiteId: edu.specialiteId !== null && edu.specialiteId !== undefined ? String(edu.specialiteId) : "",
+          sousSpecialiteId: edu.sousSpecialiteId !== null && edu.sousSpecialiteId !== undefined ? String(edu.sousSpecialiteId) : "",
           diplome: edu.diplome || "",
-          anneeObtention: edu.anneeObtention || "",
+          anneeObtention: edu.anneeObtention !== null && edu.anneeObtention !== undefined ? String(edu.anneeObtention) : "",
           pays: edu.pays || "",
           ville: edu.ville || "",
           universite: edu.universite || "",

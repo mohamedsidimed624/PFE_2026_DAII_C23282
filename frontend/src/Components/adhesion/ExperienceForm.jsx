@@ -5,61 +5,92 @@ import { experienceSchema } from "../../validation/validationSchemas";
 import { experienceData } from "../../data/experienceData";
 import { useState, useEffect } from "react";
 import { postes } from "../../data/postes";
-
 import {
   Briefcase,
   Building,
   Calendar,
   MapPin,
-  FileText
+  FileText,
 } from "lucide-react";
-// import { set } from "zod";
 
 function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
-
   const { formData, updateSection } = useFormData();
-
-  const defaultValues =
-    editingIndex !== null && formData.experience
-      ? formData.experience[editingIndex]
-      : {};
 
   const {
     register,
     handleSubmit,
     reset,
     watch,
-    formState: { errors }
+    getValues,
+    formState: { errors },
   } = useForm({
     resolver: zodResolver(experienceSchema),
-    defaultValues
+    defaultValues: {
+      poste: "",
+      pays: "",
+      ville: "",
+      etablissement: "",
+      dateDebut: "",
+      dateFin: "",
+      posteActuel: false,
+      description: "",
+    },
   });
-
-  const onSubmit = (data) => {
-
-    let updated = [...(formData.experience || [])];
-
-    if (editingIndex !== null) {
-      updated[editingIndex] = data;
-    } else {
-      updated.push(data);
-    }
-
-    updateSection("experience", updated);
-
-    reset();
-
-    setEditingIndex(null);
-
-    setIsAdding(false);
-
-  };
 
   const [villes, setVilles] = useState([]);
   const [etablissements, setEtablissements] = useState([]);
+  const [isInitializingEdit, setIsInitializingEdit] = useState(false);
 
   const selectedPays = watch("pays");
   const selectedVille = watch("ville");
+  const isCurrent = watch("posteActuel");
+
+  useEffect(() => {
+    if (editingIndex == null) {
+      setIsInitializingEdit(false);
+      reset({
+        poste: "",
+        pays: "",
+        ville: "",
+        etablissement: "",
+        dateDebut: "",
+        dateFin: "",
+        posteActuel: false,
+        description: "",
+      });
+      setVilles([]);
+      setEtablissements([]);
+      return;
+    }
+
+    const exp = formData.experience?.[editingIndex];
+    if (!exp) return;
+
+    setIsInitializingEdit(true);
+
+    const villesPays = Object.keys(experienceData[exp.pays] || {});
+    const etablissementsVille =
+      experienceData[exp.pays]?.[exp.ville] || [];
+
+    setVilles(villesPays);
+    setEtablissements(etablissementsVille);
+
+    reset({
+      poste: exp.poste || "",
+      pays: exp.pays || "",
+      ville: exp.ville || "",
+      etablissement: exp.etablissement || "",
+      dateDebut: exp.dateDebut || "",
+      dateFin:
+        exp.dateFin !== null && exp.dateFin !== undefined ? exp.dateFin : "",
+      posteActuel: exp.posteActuel ?? !exp.dateFin,
+      description: exp.description || "",
+    });
+
+    setTimeout(() => {
+      setIsInitializingEdit(false);
+    }, 0);
+  }, [editingIndex, formData.experience, reset]);
 
   useEffect(() => {
     if (!selectedPays) {
@@ -68,43 +99,102 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
       return;
     }
 
-    const villesPays = Object.keys(experienceData[selectedPays]) || [];
-
+    const villesPays = Object.keys(experienceData[selectedPays] || {});
     setVilles(villesPays);
-    setEtablissements([]);
-  }, [selectedPays]);
+
+    if (isInitializingEdit) return;
+
+    const currentVille = getValues("ville");
+    const villeExists = villesPays.includes(currentVille);
+
+    if (!villeExists) {
+      reset(
+        {
+          ...getValues(),
+          ville: "",
+          etablissement: "",
+        },
+        {
+          keepErrors: true,
+          keepDirty: true,
+          keepTouched: true,
+        }
+      );
+      setEtablissements([]);
+    }
+  }, [selectedPays, getValues, reset, isInitializingEdit]);
 
   useEffect(() => {
     if (!selectedPays || !selectedVille) {
       setEtablissements([]);
       return;
     }
-    setEtablissements(experienceData[selectedPays][selectedVille] || []);
-  }, [selectedVille, selectedPays]);
 
+    const list = experienceData[selectedPays]?.[selectedVille] || [];
+    setEtablissements(list);
 
-  const isCurrent = watch("posteActuel");
+    if (isInitializingEdit) return;
 
+    const currentEtablissement = getValues("etablissement");
+    const exists = list.includes(currentEtablissement);
+
+    if (!exists) {
+      reset(
+        {
+          ...getValues(),
+          etablissement: "",
+        },
+        {
+          keepErrors: true,
+          keepDirty: true,
+          keepTouched: true,
+        }
+      );
+    }
+  }, [selectedPays, selectedVille, getValues, reset, isInitializingEdit]);
+
+  const onSubmit = (data) => {
+    const formatted = {
+      ...data,
+      dateFin: data.posteActuel ? "" : data.dateFin,
+    };
+
+    const updated = [...(formData.experience || [])];
+
+    if (editingIndex !== null) {
+      updated[editingIndex] = formatted;
+    } else {
+      updated.push(formatted);
+    }
+
+    updateSection("experience", updated);
+
+    reset({
+      poste: "",
+      pays: "",
+      ville: "",
+      etablissement: "",
+      dateDebut: "",
+      dateFin: "",
+      posteActuel: false,
+      description: "",
+    });
+
+    setVilles([]);
+    setEtablissements([]);
+    setEditingIndex(null);
+    setIsAdding(false);
+  };
 
   return (
-
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="grid grid-cols-1 md:grid-cols-2 gap-6"
     >
-
-      {/* Poste */}
-
       <div>
         <label className="text-sm font-medium">Poste occupé</label>
-
         <div className="relative">
-
-          <Briefcase
-            className="absolute left-3 top-4 text-gray-400"
-            size={18}
-          />
-
+          <Briefcase className="absolute left-3 top-4 text-gray-400" size={18} />
           <select
             {...register("poste")}
             className="w-full border rounded-lg p-3 pl-10 focus:ring-2 focus:ring-green-500"
@@ -116,32 +206,14 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
               </option>
             ))}
           </select>
-
-
-          <p className="text-red-500 text-sm">
-          {errors.poste?.message}
-        </p>
         </div>
-
-        
-
+        <p className="text-red-500 text-sm">{errors.poste?.message}</p>
       </div>
 
-
-      {/* Pays */}
-
       <div>
-        <label className="text-sm font-medium">
-          Pays
-        </label>
-
+        <label className="text-sm font-medium">Pays</label>
         <div className="relative">
-
-          <MapPin
-            className="absolute left-3 top-4 text-gray-400"
-            size={18}
-          />
-
+          <MapPin className="absolute left-3 top-4 text-gray-400" size={18} />
           <select
             {...register("pays")}
             className="w-full border rounded-lg p-3 pl-10 focus:ring-2 focus:ring-green-500"
@@ -153,24 +225,12 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
               </option>
             ))}
           </select>
-
-
-          <p className="text-red-500 text-sm">
-            {errors.pays?.message}
-          </p>
-
         </div>
-
+        <p className="text-red-500 text-sm">{errors.pays?.message}</p>
       </div>
 
-
-      {/* Ville */}
-
       <div>
-        <label className="text-sm font-medium">
-          Ville
-        </label>
-
+        <label className="text-sm font-medium">Ville</label>
         <select
           {...register("ville")}
           className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
@@ -183,29 +243,13 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
             </option>
           ))}
         </select>
-
-
-        <p className="text-red-500 text-sm">
-          {errors.ville?.message}
-        </p>
-
+        <p className="text-red-500 text-sm">{errors.ville?.message}</p>
       </div>
 
-
-      {/* Établissement */}
-
       <div>
-        <label className="text-sm font-medium">
-          Nom de l’établissement
-        </label>
-
+        <label className="text-sm font-medium">Nom de l’établissement</label>
         <div className="relative">
-
-          <Building
-            className="absolute left-3 top-4 text-gray-400"
-            size={18}
-          />
-
+          <Building className="absolute left-3 top-4 text-gray-400" size={18} />
           <select
             {...register("etablissement")}
             className="w-full border rounded-lg p-3 pl-10 focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
@@ -218,70 +262,35 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
               </option>
             ))}
           </select>
-
-
-          <p className="text-red-500 text-sm">
-          {errors.etablissement?.message}
-        </p>
         </div>
-
-        
+        <p className="text-red-500 text-sm">{errors.etablissement?.message}</p>
       </div>
 
-
-      {/* Date début */}
-
       <div>
-        <label className="text-sm font-medium">
-          Date de début
-        </label>
-
+        <label className="text-sm font-medium">Date de début</label>
         <div className="relative">
-
-          <Calendar
-            className="absolute left-3 top-4 text-gray-400"
-            size={18}
-          />
-
+          <Calendar className="absolute left-3 top-4 text-gray-400" size={18} />
           <input
             type="date"
             {...register("dateDebut")}
             className="w-full border rounded-lg p-3 pl-10"
           />
-
-          <p className="text-red-500 text-sm">
-            {errors.dateDebut?.message}
-          </p>
-
         </div>
-
+        <p className="text-red-500 text-sm">{errors.dateDebut?.message}</p>
       </div>
 
-
-      {/* Date fin */}
-
       <div>
-        <label className="text-sm font-medium">
-          Date de fin
-        </label>
-
+        <label className="text-sm font-medium">Date de fin</label>
         <div className="relative">
-
-          <Calendar
-            className="absolute left-3 top-4 text-gray-400"
-            size={18}
-          />
-
+          <Calendar className="absolute left-3 top-4 text-gray-400" size={18} />
           <input
             type="date"
             {...register("dateFin")}
             disabled={isCurrent}
             className="w-full border rounded-lg p-3 pl-10"
           />
-          <p className="text-red-500 text-sm">
-          {errors.dateFin?.message}
-        </p>
         </div>
+        <p className="text-red-500 text-sm">{errors.dateFin?.message}</p>
 
         <label className="inline-flex items-center mt-2">
           <input
@@ -289,53 +298,25 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
             {...register("posteActuel")}
             className="form-checkbox h-5 w-5 text-green-600"
           />
-          <span className="ml-2 text-sm font-medium">
-            Poste actuel
-          </span>
+          <span className="ml-2 text-sm font-medium">Poste actuel</span>
         </label>
-
-
       </div>
 
-
-      
-
-
-      {/* Description */}
-
       <div className="md:col-span-2">
-
-        <label className="text-sm font-medium">
-          Description
-        </label>
-
+        <label className="text-sm font-medium">Description</label>
         <div className="relative">
-
-          <FileText
-            className="absolute left-3 top-4 text-gray-400"
-            size={18}
-          />
-
+          <FileText className="absolute left-3 top-4 text-gray-400" size={18} />
           <textarea
             {...register("description")}
             rows="4"
             placeholder="Décrire vos responsabilités..."
             className="w-full border rounded-lg p-3 pl-10"
           />
-
-          <p className="text-red-500 text-sm">
-          {errors.description?.message}
-        </p>
-
         </div>
-
+        <p className="text-red-500 text-sm">{errors.description?.message}</p>
       </div>
 
-
-      {/* Boutons */}
-
       <div className="md:col-span-2 flex justify-between mt-6">
-
         <button
           type="button"
           onClick={() => {
@@ -353,13 +334,9 @@ function ExperienceForm({ setIsAdding, editingIndex, setEditingIndex }) {
         >
           Enregistrer
         </button>
-
       </div>
-
     </form>
-
   );
-
 }
 
 export default ExperienceForm;

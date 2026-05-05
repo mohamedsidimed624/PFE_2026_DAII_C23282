@@ -1,11 +1,11 @@
 package com.onmm.backend.service.impl;
 
+import com.onmm.backend.dto.medecin.MedecinEducationDto;
 import com.onmm.backend.dto.medecin.MedecinProfileResponse;
 import com.onmm.backend.dto.medecin.UpdateMedecinProfileRequest;
 import com.onmm.backend.entity.Medecin;
-import com.onmm.backend.entity.User;
+import com.onmm.backend.entity.MedecinEducation;
 import com.onmm.backend.repository.MedecinRepository;
-import com.onmm.backend.repository.UserRepository;
 import com.onmm.backend.service.MedecinService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,31 +17,49 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class MedecinServiceImpl implements MedecinService {
 
-    private final UserRepository userRepository;
     private final MedecinRepository medecinRepository;
 
     @Value("${upload.dir}")
     private String uploadDir;
 
-    public MedecinServiceImpl(UserRepository userRepository,
-                              MedecinRepository medecinRepository) {
-        this.userRepository = userRepository;
+    public MedecinServiceImpl(MedecinRepository medecinRepository) {
         this.medecinRepository = medecinRepository;
+    }
+
+    private MedecinEducationDto mapEducation(MedecinEducation education) {
+        MedecinEducationDto dto = new MedecinEducationDto();
+
+        dto.setId(education.getId());
+        dto.setDiplome(education.getDiplome());
+        dto.setUniversite(education.getUniversite());
+        dto.setPays(education.getPays());
+        dto.setVille(education.getVille());
+        dto.setAnneeObtention(education.getAnneeObtention());
+
+        if (education.getSpecialite() != null) {
+            dto.setSpecialiteId(education.getSpecialite().getId());
+            dto.setSpecialiteLibelle(education.getSpecialite().getLibelle());
+        }
+
+        if (education.getSousSpecialite() != null) {
+            dto.setSousSpecialiteId(education.getSousSpecialite().getId());
+            dto.setSousSpecialiteLibelle(education.getSousSpecialite().getLibelle());
+        }
+
+        return dto;
     }
 
     @Override
     @Transactional
     public MedecinProfileResponse getMyProfile(String email) {
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-
-        Medecin medecin = medecinRepository.findProfileByUserId(user.getId())
+        Medecin medecin = medecinRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Profil médecin introuvable"));
 
         return mapToResponse(medecin);
@@ -50,11 +68,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional
     public MedecinProfileResponse updateMyProfile(String email, UpdateMedecinProfileRequest request) {
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-
-        Medecin medecin = medecinRepository.findProfileByUserId(user.getId())
+        Medecin medecin = medecinRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
         medecin.setNom(request.getNom());
@@ -67,6 +81,8 @@ public class MedecinServiceImpl implements MedecinService {
 
         return mapToResponse(medecin);
     }
+
+
 
     private MedecinProfileResponse mapToResponse(Medecin medecin) {
         MedecinProfileResponse response = new MedecinProfileResponse();
@@ -84,15 +100,14 @@ public class MedecinServiceImpl implements MedecinService {
         response.setStatut(medecin.getStatut() != null ? medecin.getStatut().name() : null);
         response.setPhotoProfilPath(medecin.getPhotoProfilPath());
 
-        if (medecin.getSpecialite() != null) {
-            response.setSpecialiteId(medecin.getSpecialite().getId());
-            response.setSpecialiteLibelle(medecin.getSpecialite().getLibelle());
-        }
-
-        if (medecin.getSousSpecialite() != null) {
-            response.setSousSpecialiteId(medecin.getSousSpecialite().getId());
-            response.setSousSpecialiteLibelle(medecin.getSousSpecialite().getLibelle());
-        }
+        response.setEducations(
+                medecin.getEducations() == null
+                        ? List.of()
+                        : medecin.getEducations()
+                        .stream()
+                        .map(this::mapEducation)
+                        .toList()
+        );
 
         return response;
     }
@@ -100,7 +115,6 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional
     public String updateMyPhoto(String email, MultipartFile file) {
-
         if (file == null || file.isEmpty()) {
             throw new RuntimeException("Aucun fichier envoyé");
         }
@@ -113,10 +127,7 @@ public class MedecinServiceImpl implements MedecinService {
             throw new RuntimeException("Format d'image non supporté");
         }
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-
-        Medecin medecin = medecinRepository.findByUser(user)
+        Medecin medecin = medecinRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
         try {

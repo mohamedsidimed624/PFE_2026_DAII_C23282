@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { motion, AnimatePresence } from "framer-motion";
+import { fadeInUp, staggerContainer } from "../motion/animation";
 import { getPublicMedecins } from "../services/publicAnnuaireApi";
+import { getPublicSpecialites } from "../services/publicAnnuaireApi";
 import {
   Search,
   MapPin,
@@ -26,6 +29,33 @@ const TRIS = [
   { value: "ancien", label: "Plus anciens" },
 ];
 
+const VILLES_MAURITANIE = [
+    "Nouakchott",
+    "Nouadhibou",
+    "Rosso",
+    "Kaédi",
+    "Zouérate",
+    "Atar",
+    "Kiffa",
+    "Néma",
+    "Aioun",
+    "Boghé",
+    "Aleg",
+    "Tidjikja",
+    "Sélibaby",
+    "Akjoujt",
+    "Boutilimit",
+    "Chinguetti",
+    "Ouadane",
+    "Oualata",
+    "Maghama",
+    "Moudjéria",
+    "Bababé",
+    "Tintane",
+    "Guerou",
+    "M’Bout",
+  ];
+
 function AnnuairePage() {
   const navigate = useNavigate();
 
@@ -48,6 +78,8 @@ function AnnuairePage() {
   const [advancedPrenom, setAdvancedPrenom] = useState("");
   const [advancedNumero, setAdvancedNumero] = useState("");
 
+  const [specialitesDisponibles, setSpecialitesDisponibles] = useState([]);
+
   const [submittedFilters, setSubmittedFilters] = useState({
     nom: "",
     prenom: "",
@@ -55,6 +87,8 @@ function AnnuairePage() {
     specialite: "",
     ville: "",
   });
+
+  
 
   useEffect(() => {
     const fetchMedecins = async () => {
@@ -66,14 +100,8 @@ function AnnuairePage() {
           nom: submittedFilters.nom,
           prenom: submittedFilters.prenom,
           numeroInscription: submittedFilters.numeroInscription,
-          specialite:
-            submittedFilters.specialite === "Toutes spécialités"
-              ? ""
-              : submittedFilters.specialite,
-          ville:
-            submittedFilters.ville === "Toutes les villes"
-              ? ""
-              : submittedFilters.ville,
+          specialite: submittedFilters.specialite,
+          ville: submittedFilters.ville,
           page: page - 1,
           size: PAGE_SIZE,
           sort: tri,
@@ -91,26 +119,40 @@ function AnnuairePage() {
       }
     };
 
+    
+
     fetchMedecins();
   }, [submittedFilters, page, tri]);
 
-  const specialitesOptions = useMemo(() => {
-    const vals = [
-      ...new Set(medecins.map((m) => m.specialiteLibelle).filter(Boolean)),
-    ].sort((a, b) => a.localeCompare(b));
-
-    return ["Toutes spécialités", ...vals];
-  }, [medecins]);
-
   
 
-  const villesOptions = useMemo(() => {
-    const vals = [...new Set(medecins.map((m) => m.ville).filter(Boolean))].sort(
-      (a, b) => a.localeCompare(b)
-    );
+  useEffect(() => {
+    const fetchSpecialites = async () => {
+      try {
+        const data = await getPublicSpecialites();
+        setSpecialitesDisponibles(data || []);
+      } catch (err) {
+        console.error("Erreur chargement spécialités", err);
+      }
+    };
 
-    return ["Toutes les villes", ...vals];
-  }, [medecins]);
+    fetchSpecialites();
+  }, []);
+
+  const specialitesOptions = useMemo(() => {
+    return [
+      "Toutes spécialités",
+      ...specialitesDisponibles
+        .map((s) => s.libelle)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b)),
+    ];
+  }, [specialitesDisponibles]);
+
+  const villesOptions = useMemo(() => {
+
+    return ["Toutes les villes", ...VILLES_MAURITANIE];
+  }, []);
 
   const startItem = totalElements === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const endItem = Math.min(page * PAGE_SIZE, totalElements);
@@ -123,16 +165,16 @@ function AnnuairePage() {
         nom: advancedNom.trim(),
         prenom: advancedPrenom.trim(),
         numeroInscription: advancedNumero.trim(),
-        specialite,
-        ville,
+        specialite: specialite === "Toutes spécialités" ? "" : specialite,
+        ville: ville === "Toutes les villes" ? "" : ville,
       });
     } else {
       setSubmittedFilters({
         nom: searchInput.trim(),
         prenom: "",
         numeroInscription: "",
-        specialite,
-        ville,
+        specialite: specialite === "Toutes spécialités" ? "" : specialite,
+        ville: ville === "Toutes les villes" ? "" : ville,
       });
     }
 
@@ -170,33 +212,44 @@ function AnnuairePage() {
     <div className="min-h-screen bg-slate-50">
       <Navbar />
 
-      <section className="border-b border-slate-100 bg-white px-6 pb-12 pt-16">
-        <div className="mx-auto max-w-7xl">
+      <section className="relative overflow-hidden border-b border-slate-100 bg-white px-6 pb-16 pt-20">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-green-500/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <motion.div 
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+          className="mx-auto max-w-7xl relative z-10"
+        >
           <div className="max-w-3xl">
-            <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-green-700">
+            <motion.span variants={fadeInUp} className="mb-5 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-green-700 shadow-sm">
               <BadgeCheck size={13} />
               Registre officiel
-            </span>
+            </motion.span>
 
-            <h1 className="max-w-2xl text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl">
+            <motion.h1 variants={fadeInUp} className="max-w-2xl text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl">
               Annuaire National des
               <br />
-              <span className="text-green-600">Médecins</span>
-            </h1>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">Médecins</span>
+            </motion.h1>
 
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-500">
+            <motion.p variants={fadeInUp} className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
               Consultez le registre officiel de l'Ordre National des Médecins
               Mauritanien et recherchez les praticiens inscrits par nom,
               spécialité ou numéro d'inscription.
-            </p>
+            </motion.p>
           </div>
-        </div>
+        </motion.div>
       </section>
 
-      <section className="px-6 py-6">
+      <section className="px-6 pt-6 pb-10">
         <div className="mx-auto max-w-7xl">
-          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-col gap-3 border-b border-slate-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="overflow-hidden rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-slate-200/40"
+          >
+            <div className="flex flex-col gap-3 border-b border-slate-100/80 px-6 py-4 sm:flex-row sm:items-center sm:justify-between bg-white/50">
               <button
                 type="button"
                 onClick={() => setIsSearchOpen((v) => !v)}
@@ -382,7 +435,7 @@ function AnnuairePage() {
                 )}
               </form>
             )}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -468,7 +521,12 @@ function AnnuairePage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+          >
             {medecins.map((m) => (
               <MedecinCard
                 key={m.id}
@@ -476,7 +534,7 @@ function AnnuairePage() {
                 onClick={() => navigate(`/annuaire/${m.id}`)}
               />
             ))}
-          </div>
+          </motion.div>
         )}
 
         {!loading && totalPages > 1 && (
@@ -638,17 +696,30 @@ function MedecinCard({ medecin, onClick }) {
   const statusKey = (medecin.statut || "ACTIF").toUpperCase();
   const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.ACTIF;
 
-  const specialiteDisplay = medecin.sousSpecialiteLibelle
-    ? `${medecin.specialiteLibelle} — ${medecin.sousSpecialiteLibelle}`
-    : medecin.specialiteLibelle || "Spécialité non renseignée";
+  const specialiteDisplay =
+  medecin.educations && medecin.educations.length > 0
+    ? medecin.educations
+        .map((e) => {
+          if (e.specialiteLibelle && e.sousSpecialiteLibelle) {
+            return `${e.specialiteLibelle} — ${e.sousSpecialiteLibelle}`;
+          }
+          return e.specialiteLibelle;
+        })
+        .filter(Boolean)
+        .filter((value, index, self) => self.indexOf(value) === index)
+        .join(", ")
+    : "Spécialité non renseignée";
 
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <motion.div 
+      variants={fadeInUp}
+      className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-green-900/5 hover:border-green-200"
+    >
       <div
-        className={`absolute inset-0 bg-gradient-to-br ${status.cardGlow} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
+        className={`absolute inset-0 bg-gradient-to-br ${status.cardGlow} opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
       />
 
-      <div className="relative p-5">
+      <div className="relative p-6">
         <div className="flex items-start gap-4">
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
             {medecin.photoProfilPath ? (
@@ -695,8 +766,8 @@ function MedecinCard({ medecin, onClick }) {
             icon={<MapPin size={15} className="text-slate-400" />}
             label="Localisation"
             value={
-              medecin.ville
-                ? `${medecin.ville}, Mauritanie`
+              medecin.villeExercice
+                ? `${medecin.villeExercice}, Mauritanie`
                 : "Ville non renseignée"
             }
           />
@@ -730,7 +801,7 @@ function MedecinCard({ medecin, onClick }) {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

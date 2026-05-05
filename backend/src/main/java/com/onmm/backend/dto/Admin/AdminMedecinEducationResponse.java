@@ -18,4 +18,4 @@ public class AdminMedecinEducationResponse {
     private String ville;
     private String universite;
 
-    }
+}

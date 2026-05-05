@@ -52,6 +52,7 @@ function AdminDemandeDetail() {
   const [loading,         setLoading]         = useState(true);
   const [rejectComment,   setRejectComment]   = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showApprouveModal, setShowApprouveModal] = useState(false);
   const [actionLoading,   setActionLoading]   = useState(false);
   const [toastMsg,        setToastMsg]        = useState("");
 
@@ -79,6 +80,7 @@ function AdminDemandeDetail() {
     try {
       setActionLoading(true);
       await approveDemande(id);
+      setShowApprouveModal(false);
       showToast("Demande approuvée avec succès.");
       setTimeout(() => navigate("/admin/demandes"), 1500);
     } catch (e) {
@@ -267,7 +269,7 @@ function AdminDemandeDetail() {
         {isPending && (
           <div className="flex flex-wrap gap-3 pt-1">
             <button
-              onClick={handleApprove}
+              onClick={() => setShowApprouveModal(true)}
               disabled={actionLoading}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
             >
@@ -286,9 +288,47 @@ function AdminDemandeDetail() {
         )}
       </div>
 
+      {showApprouveModal && (
+        <div className="fixed inset-0 bg-black/35 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-base font-bold text-slate-900">Approuver la demande</h2>
+              </div>
+              <button
+                onClick={() => setShowApprouveModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-1">
+              <button
+                onClick={() => setShowApprouveModal(false)}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleApprove}
+                disabled={actionLoading}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <XCircle size={15} />
+                Confirmer l'approuve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
       {/* ── Modal Rejet ── */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/35 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
 
             <div className="flex items-start justify-between">
@@ -342,9 +382,6 @@ function AdminDemandeDetail() {
   );
 }
 
-/* ═══════════════════════════════════════════
-   Sous-composants
-═══════════════════════════════════════════ */
 function InfoCard({ icon, label, value }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">

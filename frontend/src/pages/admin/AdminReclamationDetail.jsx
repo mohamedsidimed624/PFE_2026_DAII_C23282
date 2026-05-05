@@ -17,6 +17,8 @@ import {
   Mail,
   Phone,
   MapPin,
+  X,
+  XCircle,
   CalendarDays,
   Clock3,
   Paperclip,
@@ -73,9 +75,9 @@ function formatShortDate(value) {
   });
 }
 
-function getStatusLabel(status) {
-  return STATUS_CONFIG[(status || "").toUpperCase()]?.label || status || "—";
-}
+// function getStatusLabel(status) {
+//   return STATUS_CONFIG[(status || "").toUpperCase()]?.label || status || "—";
+// }
 
 function getFileName(path) {
   if (!path) return "Pièce jointe";
@@ -235,6 +237,7 @@ function AdminReclamationDetail() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [adminResponse, setAdminResponse] = useState("");
+  const [ShowPrendreEnChargeModal, setShowPrendreEnChargeModal] = useState(false);
 
   const loadReclamation = async () => {
     try {
@@ -261,6 +264,7 @@ function AdminReclamationDetail() {
       setError("");
       setSuccess("");
       await startReclamation(id);
+      setShowPrendreEnChargeModal(false);
       setSuccess("La réclamation a été prise en charge.");
       await loadReclamation();
     } catch (err) {
@@ -408,7 +412,7 @@ function AdminReclamationDetail() {
             <div className="flex flex-wrap items-center gap-2">
               {isSubmitted && (
                 <button
-                  onClick={handleStart}
+                  onClick={() => setShowPrendreEnChargeModal(true)}
                   disabled={actionLoading}
                   className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -418,6 +422,42 @@ function AdminReclamationDetail() {
               )}
             </div>
           </div>
+
+          {ShowPrendreEnChargeModal && (
+        <div className="fixed inset-0 bg-black/35 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-base font-bold text-slate-900">Prendre en charge</h2>
+              </div>
+              <button
+                onClick={() => setShowPrendreEnChargeModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-1">
+              <button
+                onClick={() => setShowPrendreEnChargeModal(false)}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleStart}
+                disabled={actionLoading}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <XCircle size={15} />
+                Confirmer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
           <div className="grid gap-4 px-6 py-5 md:grid-cols-2 xl:grid-cols-4">
             <MiniCard

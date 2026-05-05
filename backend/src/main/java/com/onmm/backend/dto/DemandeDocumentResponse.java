@@ -1,9 +1,11 @@
 package com.onmm.backend.dto;
 
 import com.onmm.backend.entity.enums.TypeDocument;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
+@Data
 public class DemandeDocumentResponse {
 
     private Long id;
@@ -20,59 +22,5 @@ public class DemandeDocumentResponse {
 
     private LocalDateTime uploadDate;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTypeDocument() {
-        return typeDocument;
-    }
-
-    public void setTypeDocument(String typeDocument) {
-        this.typeDocument = typeDocument;
-    }
-
-    public String getCategorie() {
-        return categorie;
-    }
-
-    public void setCategorie(String categorie) {
-        this.categorie = categorie;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public Long getSize() {
-        return size;
-    }
-
-    public void setSize(Long size) {
-        this.size = size;
-    }
-
-    public LocalDateTime getUploadDate() {
-        return uploadDate;
-    }
-
-    public void setUploadDate(LocalDateTime uploadDate) {
-        this.uploadDate = uploadDate;
-    }
 }

@@ -5,11 +5,13 @@ import com.onmm.backend.dto.demande.RepriseDemandeResponse;
 import com.onmm.backend.dto.demande.SuiviDossierResponse;
 import com.onmm.backend.entity.ActivationToken;
 import com.onmm.backend.entity.DemandeAdhesion;
+import com.onmm.backend.entity.Medecin;
 import com.onmm.backend.entity.User;
 import com.onmm.backend.entity.enums.ApplicationStatus;
 import com.onmm.backend.entity.enums.TokenType;
 import com.onmm.backend.repository.ActivationTokenRepository;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
+import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.repository.UserRepository;
 import com.onmm.backend.service.DemandeAdhesionService;
 import com.onmm.backend.service.email.EmailService;
@@ -31,7 +33,7 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
 
     private final DemandeAdhesionRepository demandeAdhesionRepository;
     private final EmailService emailService;
-    private final UserRepository userRepository;
+    private final MedecinRepository medecinRepository;
     private final ActivationTokenRepository activationTokenRepository;
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
@@ -39,10 +41,10 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
         return "DOS-" + java.time.Year.now().getValue() + "-" + System.currentTimeMillis();
     }
 
-    public DemandeAdhesionServiceImpl(DemandeAdhesionRepository demandeAdhesionRepository, EmailService emailService, UserRepository userRepository, ActivationTokenRepository activationTokenRepository) {
+    public DemandeAdhesionServiceImpl(DemandeAdhesionRepository demandeAdhesionRepository, EmailService emailService, MedecinRepository medecinRepository, ActivationTokenRepository activationTokenRepository) {
         this.demandeAdhesionRepository = demandeAdhesionRepository;
         this.emailService = emailService;
-        this.userRepository = userRepository;
+        this.medecinRepository = medecinRepository;
         this.activationTokenRepository = activationTokenRepository;
     }
 
@@ -176,15 +178,15 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
 
         // Cas APPROUVED
         if (demande.isApproved()) {
-            User user = userRepository.findByDemandeApprouvee(demande).orElse(null);
+            Medecin medecin = medecinRepository.findByDemandeOrigine(demande).orElse(null);
 
-            if (user != null) {
+            if (medecin != null) {
                 response.setCompteCree(true);
-                response.setCompteActive(user.isEnabled());
+                response.setCompteActive(medecin.isEnabled());
 
-                if (!user.isEnabled()) {
+                if (!medecin.isEnabled()) {
                     response.setPeutActiverCompte(true);
-                    response.setActivationLink(getOrCreateActivationLink(user));
+                    response.setActivationLink(getOrCreateActivationLink(medecin));
                 }
             }
 
@@ -225,13 +227,29 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
         response.setEducation(
                 demande.getEducations().stream().map(edu -> {
                     RepriseDemandeResponse.EducationData e = new RepriseDemandeResponse.EducationData();
-                    e.setSpecialite(edu.getSpecialite());
-                    e.setSousSpecialite(edu.getSousSpecialite());
+
+                    if (edu.getSpecialite() != null) {
+                        e.setSpecialiteId(edu.getSpecialite().getId());
+                        e.setSpecialiteLibelle(edu.getSpecialite().getLibelle());
+                    } else {
+                        e.setSpecialiteId(null);
+                        e.setSpecialiteLibelle(null);
+                    }
+
+                    if (edu.getSousSpecialite() != null) {
+                        e.setSousSpecialiteId(edu.getSousSpecialite().getId());
+                        e.setSousSpecialiteLibelle(edu.getSousSpecialite().getLibelle());
+                    } else {
+                        e.setSousSpecialiteId(null);
+                        e.setSousSpecialiteLibelle(null);
+                    }
+
                     e.setDiplome(edu.getDiplome());
-                    e.setAnnee(edu.getAnneeObtention());
+                    e.setAnneeObtention(edu.getAnneeObtention());
                     e.setPays(edu.getPays());
                     e.setVille(edu.getVille());
                     e.setUniversite(edu.getUniversite());
+
                     return e;
                 }).toList()
         );

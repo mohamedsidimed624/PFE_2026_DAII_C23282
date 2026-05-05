@@ -27,7 +27,10 @@ public class PublicAnnuaireController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size,
             @RequestParam(defaultValue = "alpha") String sort
+
     ) {
+        System.out.println("specialite = " + specialite);
+        System.out.println("ville = " + ville);
         return publicAnnuaireService.searchMedecins(
                 nom,
                 prenom,

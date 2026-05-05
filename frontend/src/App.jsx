@@ -23,6 +23,9 @@ import MedecinReclamationCreatePage from "./pages/medecin/MedecinReclamationCrea
 import MedecinReclamationsPage from "./pages/medecin/MedecinReclamationsPage.jsx";
 
 import MedecinReclamationDetailPage from "./pages/medecin/MedecinReclamationDetailPage.jsx";
+import Contact from "./pages/ContactPage.jsx";
+import AnnoncesPage from "./pages/AnnoncesPage.jsx";
+import AnnonceDetailPage from "./pages/AnnonceDetailPage.jsx";
 
 import { FormProvider } from "./context/FormContext.jsx";
 
@@ -31,6 +34,9 @@ function App() {
     <FormProvider>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/annonces" element={<AnnoncesPage />} />
+        <Route path="/annonces/:id" element={<AnnonceDetailPage />} />
         <Route path="/adhesion" element={<SubmitApplication />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/set-password" element={<SetPasswordPage />} />

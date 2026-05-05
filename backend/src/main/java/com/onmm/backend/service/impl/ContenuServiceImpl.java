@@ -1,0 +1,159 @@
+package com.onmm.backend.service.impl;
+
+import com.onmm.backend.dto.contenu.*;
+import com.onmm.backend.entity.*;
+import com.onmm.backend.entity.enums.*;
+import com.onmm.backend.mapper.ContenuMapper;
+import com.onmm.backend.repository.*;
+import com.onmm.backend.service.Admin.ContenuService;
+import com.onmm.backend.service.FileStorageService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
+
+@Service
+@RequiredArgsConstructor
+public class ContenuServiceImpl implements ContenuService {
+
+    private final ContenuRepository contenuRepository;
+    private final CategorieRepository categorieRepository;
+    private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
+
+    @Override
+    public ContenuResponseDTO create(ContenuRequestDTO dto, MultipartFile image, Long userId) {
+        CategorieContenu categorie = categorieRepository.findById(dto.getCategorieId())
+                .orElseThrow(() -> new RuntimeException("Catégorie introuvable"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        String imageUrl = fileStorageService.storeContenuImage(image);
+
+        Contenu contenu = Contenu.builder()
+                .titre(dto.getTitre())
+                .resume(dto.getResume())
+                .contenu(dto.getContenu())
+                .type(dto.getType())
+                .categorie(categorie)
+                .visibilite(dto.getVisibilite())
+                .statut(ContenuStatut.DRAFT)
+                .createdBy(user)
+                .imageUrl(imageUrl)
+                .dateCreation(LocalDateTime.now())
+                .dateExpiration(parseDate(dto.getDateExpiration()))
+                .build();
+
+        return ContenuMapper.toDTO(contenuRepository.save(contenu));
+    }
+
+    @Override
+    public ContenuResponseDTO update(Long id, ContenuRequestDTO dto, MultipartFile image) {
+        Contenu contenu = contenuRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contenu introuvable"));
+
+        CategorieContenu categorie = categorieRepository.findById(dto.getCategorieId())
+                .orElseThrow(() -> new RuntimeException("Catégorie introuvable"));
+
+        contenu.setTitre(dto.getTitre());
+        contenu.setResume(dto.getResume());
+        contenu.setContenu(dto.getContenu());
+        contenu.setType(dto.getType());
+        contenu.setVisibilite(dto.getVisibilite());
+        contenu.setCategorie(categorie);
+        contenu.setDateExpiration(parseDate(dto.getDateExpiration()));
+
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = fileStorageService.storeContenuImage(image);
+            contenu.setImageUrl(imageUrl);
+        }
+
+        return ContenuMapper.toDTO(contenuRepository.save(contenu));
+    }
+
+    @Override
+    public void delete(Long id) {
+        contenuRepository.deleteById(id);
+    }
+
+
+    @Override
+    public Page<ContenuResponseDTO> getAdminContenus(int page, int size) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("dateCreation").descending()
+        );
+
+        return contenuRepository
+                .findAllByOrderByDateCreationDesc(pageable)
+                .map(ContenuMapper::toDTO);
+    }
+
+    @Override
+    public ContenuResponseDTO publish(Long id) {
+        Contenu contenu = contenuRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contenu introuvable"));
+
+        contenu.setStatut(ContenuStatut.PUBLISHED);
+        contenu.setDatePublication(LocalDateTime.now());
+
+        return ContenuMapper.toDTO(contenuRepository.save(contenu));
+    }
+
+    @Override
+    public ContenuResponseDTO unpublish(Long id) {
+        Contenu contenu = contenuRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contenu introuvable"));
+
+        contenu.setStatut(ContenuStatut.DRAFT);
+        contenu.setDatePublication(null);
+
+        return ContenuMapper.toDTO(contenuRepository.save(contenu));
+    }
+
+    @Override
+    public Page<ContenuResponseDTO> getPublicContenus(Long categorieId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("datePublication").descending());
+
+        Page<Contenu> contenus = categorieId != null
+                ? contenuRepository.findByStatutAndVisibiliteAndCategorie_Id(
+                ContenuStatut.PUBLISHED,
+                ContenuVisibilite.PUBLIC,
+                categorieId,
+                pageable
+        )
+                : contenuRepository.findByStatutAndVisibilite(
+                ContenuStatut.PUBLISHED,
+                ContenuVisibilite.PUBLIC,
+                pageable
+        );
+
+        return contenus.map(ContenuMapper::toDTO);
+    }
+
+    @Override
+    @Scheduled(fixedRate = 3600000)
+    public void expireContenus() {
+        contenuRepository.findAll().forEach(contenu -> {
+            if (contenu.getDateExpiration() != null
+                    && contenu.getDateExpiration().isBefore(LocalDateTime.now())
+                    && contenu.getStatut() == ContenuStatut.PUBLISHED) {
+
+                contenu.setStatut(ContenuStatut.EXPIRED);
+                contenuRepository.save(contenu);
+            }
+        });
+    }
+
+    private LocalDateTime parseDate(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return LocalDateTime.parse(value);
+    }
+}

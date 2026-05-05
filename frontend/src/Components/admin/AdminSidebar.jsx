@@ -18,8 +18,9 @@ const navItems = [
   { label: "Gestion des Médecins",    icon: Stethoscope,            to: "/admin/medecins" },
   { label: "Gestion des spécialités", icon: Tag,                    to: "/admin/specialites" },
   { label: "Gestion des Réclamations",icon: MessageSquareWarning,   to: "/admin/reclamations" },
-  { label: "Gestion des Sondages",    icon: BarChart2,              to: "/admin/sondages" },
   { label: "Diffusion d'information", icon: Megaphone,              to: "/admin/diffusion" },
+  { label: "Gestion des Sondages",    icon: BarChart2,              to: "/admin/sondages" },
+  { label: "Processus électoral",     icon: BarChart2,              to: "/admin/processus" },
 ];
 
 function AdminSidebar() {
