@@ -315,7 +315,7 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/45 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/35"
             onClick={() => !loading && onClose()}
           />
 

@@ -369,7 +369,7 @@ function Navbar() {
                         to="/login"
                         className="ml-6 flex items-center gap-2 bg-green-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-md shadow-slate-900/10 hover:bg-green-700 hover:shadow-green-700/20 hover:text-white transition-all duration-300 active:scale-95"
                     >
-                        <UserCircleIcon className="w-5 h-5" />
+                        <UserCircleIcon className="w-5 h-5" /> 
                         Espace Médecin
                     </Link>
                 </div>
