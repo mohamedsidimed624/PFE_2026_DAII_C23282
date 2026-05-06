@@ -1,20 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { getPublicMedecinById } from "../services/publicAnnuaireApi";
 import {
   ArrowLeft,
   MapPin,
   ShieldCheck,
-  Stethoscope,
-  FileBadge,
   UserRound,
   GraduationCap,
   Briefcase,
-  BadgeCheck,
   CreditCard,
-  CheckCircle2,
-  Sparkles,
   Building2,
   Globe,
 } from "lucide-react";
@@ -30,7 +26,7 @@ const formatDate = (d) => {
 
 const STATUS_CONFIG = {
   ACTIF: {
-    label: "Profil vérifié",
+    label: "Actif",
     cls: "bg-green-50 text-green-700 border-green-200",
     dot: "bg-green-500",
   },
@@ -68,445 +64,233 @@ function AnnuaireMedecinDetailPage() {
         setLoading(false);
       }
     };
-
     fetchMedecin();
   }, [id]);
 
-  const specialiteDisplay = useMemo(() => {
-    if (!medecin) return "Spécialité non renseignée";
-
-    if (medecin.specialiteLibelle && medecin.sousSpecialiteLibelle) {
-      return `${medecin.specialiteLibelle} — ${medecin.sousSpecialiteLibelle}`;
-    }
-
-    return medecin.specialiteLibelle || "Spécialité non renseignée";
-  }, [medecin]);
-
-  const profileSummary = useMemo(() => {
-    if (!medecin) return [];
-
-    return [
-      {
-        icon: <Stethoscope size={16} className="text-green-600" />,
-        label: "Spécialité",
-        value: specialiteDisplay,
-      },
-      {
-        icon: <CreditCard size={16} className="text-green-600" />,
-        label: "Numéro d'inscription",
-        value: medecin.numeroInscription || "—",
-      },
-      {
-        icon: <MapPin size={16} className="text-green-600" />,
-        label: "Adresse",
-        value: medecin.adresse || medecin.ville || "Non renseignée",
-      },
-    ];
-  }, [medecin, specialiteDisplay]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
 
-      <main className="mx-auto w-full max-w-6xl px-6 py-10">
+      <main className="mx-auto w-full max-w-2xl px-4 pb-12 pt-28">
+        {/* Back */}
         <button
           onClick={() => navigate("/annuaire")}
-          className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-slate-800"
+          className="mb-5 inline-flex items-center gap-1.5 text-sm text-[#64748B] transition-colors hover:text-[#0F172A]"
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={15} />
           Retour à l'annuaire
         </button>
 
+        {/* Loading skeleton */}
         {loading && (
-          <div className="space-y-5 animate-pulse">
-            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-              <div className="h-48 bg-slate-200" />
-              <div className="grid gap-4 p-6 md:grid-cols-3">
-                <div className="h-24 rounded-2xl bg-slate-100" />
-                <div className="h-24 rounded-2xl bg-slate-100" />
-                <div className="h-24 rounded-2xl bg-slate-100" />
+          <div className="animate-pulse overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm">
+            <div className="flex items-start gap-5 px-7 py-7">
+              <div className="h-20 w-20 shrink-0 rounded-full bg-slate-200" />
+              <div className="flex-1 space-y-3 pt-1">
+                <div className="h-5 w-44 rounded bg-slate-200" />
+                <div className="h-3.5 w-28 rounded bg-slate-100" />
+                <div className="h-5 w-32 rounded-full bg-slate-100" />
               </div>
             </div>
-
-            <div className="grid gap-5 lg:grid-cols-[1.6fr_0.8fr]">
-              <div className="h-64 rounded-3xl border border-slate-200 bg-white" />
-              <div className="h-64 rounded-3xl border border-slate-200 bg-white" />
+            <div className="space-y-2 border-t border-[#E2E8F0] px-7 py-5">
+              {[80, 60, 70, 50].map((w, i) => (
+                <div key={i} className={`h-3.5 w-${w === 80 ? 'full' : w === 60 ? '3/5' : w === 70 ? '2/3' : '1/2'} rounded bg-slate-100`} />
+              ))}
             </div>
           </div>
         )}
 
+        {/* Error */}
         {!loading && error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600">
             {error}
           </div>
         )}
 
+        {/* Not found */}
         {!loading && !error && !medecin && (
-          <div className="rounded-3xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-              <UserRound size={26} />
+          <div className="rounded-2xl border border-[#E2E8F0] bg-white px-6 py-14 text-center shadow-sm">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+              <UserRound size={26} className="text-slate-400" />
             </div>
-            <h2 className="text-xl font-bold text-slate-800">
-              Médecin introuvable
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <h2 className="text-base font-bold text-[#0F172A]">Médecin introuvable</h2>
+            <p className="mt-1.5 text-sm text-[#64748B]">
               Ce profil n'est pas disponible dans l'annuaire public.
             </p>
           </div>
         )}
 
+        {/* ── SINGLE UNIFIED PROFILE CARD ── */}
         {!loading && !error && medecin && (() => {
           const statusKey = String(medecin.statut || "ACTIF").toUpperCase();
           const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.ACTIF;
-          const isActif = statusKey === "ACTIF";
+          const workplace =
+            medecin.lieuExercice ||
+            medecin.experiences?.[0]?.nomEtablissement ||
+            null;
 
           return (
-            <div className="space-y-6">
-              <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                <div className="bg-gradient-to-r from-slate-900 via-green-900 to-emerald-700 px-8 py-10">
-                  <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:items-center">
-                    <div className="flex items-start gap-5">
-                      {medecin.photoProfilPath ? (
-                        <img
-                          src={`http://localhost:8080${medecin.photoProfilPath}`}
-                          alt={`Dr. ${medecin.nom}`}
-                          className="h-24 w-24 shrink-0 rounded-3xl border-2 border-white/20 object-cover shadow-xl"
-                        />
-                      ) : (
-                        <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-3xl bg-white/15 text-3xl font-bold text-white shadow-xl backdrop-blur">
-                          {medecin.prenom?.[0]}
-                          {medecin.nom?.[0]}
-                        </div>
-                      )}
+            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm">
 
-                      <div className="min-w-0">
-                        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-green-100 backdrop-blur">
-                          <Sparkles size={12} />
-                          Registre officiel ONMM
-                        </div>
-
-                        <h1 className="text-3xl font-extrabold leading-tight text-white md:text-4xl">
-                          Dr. {medecin.prenom} {medecin.nom}
-                        </h1>
-
-                        <p className="mt-3 inline-flex items-center gap-2 text-base font-medium text-green-100">
-                          <Stethoscope size={16} />
-                          {specialiteDisplay}
-                        </p>
-
-                        <div className="mt-5 flex flex-wrap gap-3">
-                          <span
-                            className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-bold ${status.cls}`}
-                          >
-                            <span className={`h-2 w-2 rounded-full ${status.dot}`} />
-                            {status.label}
-                          </span>
-
-                          <span className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white/90 backdrop-blur">
-                            <CreditCard size={14} />
-                            {medecin.numeroInscription || "N° non renseigné"}
-                          </span>
-
-                          <span className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white/90 backdrop-blur">
-                            <MapPin size={14} />
-                            {medecin.ville || "Ville non renseignée"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
-                      <p className="text-xs font-bold uppercase tracking-widest text-green-100/80">
-                        Vérification publique
-                      </p>
-                      <h2 className="mt-2 text-lg font-bold text-white">
-                        Profil consultable dans l'annuaire officiel
-                      </h2>
-                      <p className="mt-3 text-sm leading-7 text-white/80">
-                        Cette fiche confirme que le praticien est bien présent
-                        dans le registre public de l’Ordre National des Médecins
-                        Mauritanien.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 p-5 md:grid-cols-3">
-                  {profileSummary.map((item) => (
-                    <QuickValueCard
-                      key={item.label}
-                      icon={item.icon}
-                      label={item.label}
-                      value={item.value}
+              {/* ── 1. IDENTITY ── */}
+              <div className="flex flex-col gap-5 px-7 py-7 sm:flex-row sm:items-start">
+                {/* Avatar */}
+                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-[#E2E8F0] bg-slate-100">
+                  {medecin.photoProfilPath ? (
+                    <img
+                      src={`http://localhost:8080${medecin.photoProfilPath}`}
+                      alt=""
+                      className="h-full w-full object-cover"
                     />
-                  ))}
-                </div>
-              </section>
-
-              <section className="grid gap-6 lg:grid-cols-[1.6fr_0.8fr]">
-                <div className="space-y-6">
-                  <Section
-                    title="Présentation professionnelle"
-                    subtitle="Informations essentielles issues du registre public"
-                    icon={<BadgeCheck size={17} className="text-green-600" />}
-                  >
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <InfoBox
-                        label="Nom complet"
-                        value={`Dr. ${medecin.prenom} ${medecin.nom}`}
-                      />
-                      <InfoBox
-                        label="Spécialité principale"
-                        value={medecin.specialiteLibelle}
-                      />
-                      <InfoBox
-                        label="Sous-spécialité"
-                        value={medecin.sousSpecialiteLibelle}
-                      />
-                      <InfoBox
-                        label="Numéro d'inscription"
-                        value={medecin.numeroInscription}
-                      />
-                      <InfoBox
-                        label="Adresse"
-                        value={medecin.adresse}
-                        icon={<MapPin size={13} />}
-                      />
-                      <InfoBox label="Ville" value={medecin.ville} />
-                      {medecin.nationalite && (
-                        <InfoBox
-                          label="Nationalité"
-                          value={medecin.nationalite}
-                          icon={<Globe size={13} />}
-                        />
-                      )}
-                      {medecin.sexe && (
-                        <InfoBox label="Genre" value={medecin.sexe} />
-                      )}
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-[#0F766E] text-2xl font-bold text-white">
+                      {medecin.prenom?.[0]}{medecin.nom?.[0]}
                     </div>
-                  </Section>
-
-                  {medecin.educations?.length > 0 && (
-                    <Section
-                      title="Formation & qualifications"
-                      subtitle="Parcours académique et diplômes déclarés"
-                      icon={<GraduationCap size={17} className="text-green-600" />}
-                    >
-                      <div className="space-y-4">
-                        {medecin.educations.map((edu, i) => {
-                          const eduSpecialite = edu.sousSpecialiteLibelle
-                            ? `${edu.specialiteLibelle} — ${edu.sousSpecialiteLibelle}`
-                            : edu.specialiteLibelle || "Spécialité non renseignée";
-
-                          return (
-                            <TimelineCard
-                              key={edu.id || i}
-                              title={edu.diplome || "Diplôme"}
-                              badge={edu.anneeObtention || ""}
-                              subtitle={eduSpecialite}
-                              meta={[edu.universite, edu.ville, edu.pays]
-                                .filter(Boolean)
-                                .join(" • ")}
-                            />
-                          );
-                        })}
-                      </div>
-                    </Section>
-                  )}
-
-                  {medecin.experiences?.length > 0 && (
-                    <Section
-                      title="Expérience professionnelle"
-                      subtitle="Résumé des expériences déclarées"
-                      icon={<Briefcase size={17} className="text-green-600" />}
-                    >
-                      <div className="space-y-4">
-                        {medecin.experiences.map((exp, i) => (
-                          <TimelineCard
-                            key={exp.id || i}
-                            title={exp.poste || "Poste"}
-                            badge={`${exp.dateDebut ? formatDate(exp.dateDebut) : "—"} — ${
-                              exp.dateFin ? formatDate(exp.dateFin) : "Présent"
-                            }`}
-                            subtitle={exp.nomEtablissement || "Établissement non renseigné"}
-                            meta={[exp.ville, exp.pays].filter(Boolean).join(" • ")}
-                          />
-                        ))}
-                      </div>
-                    </Section>
                   )}
                 </div>
 
-                <div className="space-y-6">
-                  <SidePanel
-                    title="Ce que cette fiche confirme"
-                    icon={<ShieldCheck size={17} className="text-green-600" />}
-                  >
-                    <TrustItem
-                      ok={isActif}
-                      title="Inscription à l'Ordre"
-                      text="Le praticien figure dans le registre public officiel."
-                    />
-                    <TrustItem
-                      ok={Boolean(medecin.specialiteLibelle)}
-                      title="Spécialité déclarée"
-                      text="La spécialité affichée provient des données validées dans le registre."
-                    />
-                    <TrustItem
-                      ok={Boolean(medecin.numeroInscription)}
-                      title="Référence administrative"
-                      text="Le numéro d'inscription identifie le praticien dans l'annuaire."
-                    />
-                  </SidePanel>
+                {/* Name + role + badges */}
+                <div>
+                  <h1 className="text-xl font-bold text-[#0F172A]">
+                    Dr. {medecin.prenom} {medecin.nom}
+                  </h1>
+                  <p className="mt-0.5 text-sm text-[#64748B]">Médecin inscrit</p>
 
-                  <SidePanel
-                    title="Informations administratives"
-                    icon={<FileBadge size={17} className="text-green-600" />}
-                  >
-                    <MiniRow label="Statut public" value={status.label} />
-                    <MiniRow
-                      label="Numéro d'inscription"
-                      value={medecin.numeroInscription || "—"}
-                    />
-                    <MiniRow label="Ville" value={medecin.ville || "—"} />
-                    <MiniRow label="Spécialité" value={specialiteDisplay || "—"} />
-                  </SidePanel>
-
-                  <div className="rounded-3xl border border-green-200 bg-green-50 p-5">
-                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-green-100">
-                      <Building2 size={18} className="text-green-700" />
-                    </div>
-                    <h3 className="text-sm font-bold text-green-800">
-                      Source officielle
-                    </h3>
-                    <p className="mt-2 text-sm leading-7 text-green-700">
-                      Les informations visibles sur cette fiche sont publiées à
-                      partir du registre de l’Ordre National des Médecins
-                      Mauritanien.
-                    </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${status.cls}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+                      {status.label}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-teal-700">
+                      <ShieldCheck size={11} />
+                      Inscrit au registre ONMM
+                    </span>
                   </div>
                 </div>
-              </section>
+              </div>
+
+              {/* ── 2. INFORMATIONS PROFESSIONNELLES ── */}
+              <div className="border-t border-[#E2E8F0] px-7 py-6">
+                <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[#64748B]">
+                  Informations professionnelles
+                </p>
+                <div className="space-y-3">
+                  <InfoRow label="Spécialité" value={medecin.specialiteLibelle} />
+                  <InfoRow label="Sous-spécialité" value={medecin.sousSpecialiteLibelle} />
+                  <InfoRow label="N° d'inscription" value={medecin.numeroInscription} icon={<CreditCard size={13} className="text-[#64748B]" />} />
+                  {medecin.nationalite && <InfoRow label="Nationalité" value={medecin.nationalite} icon={<Globe size={13} className="text-[#64748B]" />} />}
+                </div>
+              </div>
+
+              {/* ── 3. LIEU D'EXERCICE ── */}
+              <div className="border-t border-[#E2E8F0] px-7 py-6">
+                <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[#64748B]">
+                  Lieu d'exercice
+                </p>
+                <div className="space-y-3">
+                  <InfoRow label="Ville / Wilaya" value={medecin.ville} icon={<MapPin size={13} className="text-[#64748B]" />} />
+                  {workplace && <InfoRow label="Établissement" value={workplace} icon={<Building2 size={13} className="text-[#64748B]" />} />}
+                  {medecin.adresse && <InfoRow label="Adresse" value={medecin.adresse} />}
+                </div>
+              </div>
+
+              {/* ── 4. FORMATION ── */}
+              {medecin.educations?.length > 0 && (
+                <div className="border-t border-[#E2E8F0] px-7 py-6">
+                  <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[#64748B]">
+                    <span className="inline-flex items-center gap-1.5">
+                      <GraduationCap size={12} />
+                      Formation
+                    </span>
+                  </p>
+                  <div className="space-y-4">
+                    {medecin.educations.map((edu, i) => {
+                      const eduSpec = edu.sousSpecialiteLibelle
+                        ? `${edu.specialiteLibelle} — ${edu.sousSpecialiteLibelle}`
+                        : edu.specialiteLibelle;
+                      const eduMeta = [edu.universite, edu.ville, edu.pays].filter(Boolean).join(" · ");
+                      return (
+                        <div key={edu.id || i} className="flex items-start gap-3">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#0F766E]" />
+                          <div>
+                            <p className="text-sm font-semibold text-[#0F172A]">
+                              {edu.diplome || "Diplôme"}
+                              {edu.anneeObtention && (
+                                <span className="ml-2 font-normal text-[#64748B]">{edu.anneeObtention}</span>
+                              )}
+                            </p>
+                            {eduSpec && <p className="text-xs text-[#0F766E]">{eduSpec}</p>}
+                            {eduMeta && <p className="text-xs text-[#64748B]">{eduMeta}</p>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ── 5. EXPÉRIENCE ── */}
+              {medecin.experiences?.length > 0 && (
+                <div className="border-t border-[#E2E8F0] px-7 py-6">
+                  <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[#64748B]">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Briefcase size={12} />
+                      Expérience professionnelle
+                    </span>
+                  </p>
+                  <div className="space-y-4">
+                    {medecin.experiences.map((exp, i) => {
+                      const expMeta = [exp.ville, exp.pays].filter(Boolean).join(" · ");
+                      return (
+                        <div key={exp.id || i} className="flex items-start gap-3">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#0F766E]" />
+                          <div>
+                            <p className="text-sm font-semibold text-[#0F172A]">{exp.poste || "Poste"}</p>
+                            <p className="text-xs text-[#64748B]">
+                              {exp.nomEtablissement && `${exp.nomEtablissement} · `}
+                              {exp.dateDebut ? formatDate(exp.dateDebut) : "—"}{" "}—{" "}
+                              {exp.dateFin ? formatDate(exp.dateFin) : "Présent"}
+                            </p>
+                            {expMeta && <p className="text-xs text-[#64748B]">{expMeta}</p>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ── 6. ACTION ── */}
+              <div className="border-t border-[#E2E8F0] bg-[#F8FAFC] px-7 py-5">
+                <button
+                  onClick={() => navigate("/annuaire")}
+                  className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#0F172A] transition hover:bg-slate-50"
+                >
+                  <ArrowLeft size={14} />
+                  Retour à l'annuaire
+                </button>
+              </div>
             </div>
           );
         })()}
       </main>
+
+      <Footer />
     </div>
   );
 }
 
-function Section({ title, subtitle, icon, children }) {
+function InfoRow({ label, value, icon }) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-5 flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-green-50">
-          {icon}
-        </div>
-        <div>
-          <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-          {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
-        </div>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function SidePanel({ title, icon, children }) {
-  return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-green-50">
-          {icon}
-        </div>
-        <h3 className="text-sm font-bold text-slate-900">{title}</h3>
-      </div>
-      <div className="space-y-4">{children}</div>
-    </section>
-  );
-}
-
-function QuickValueCard({ icon, label, value }) {
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-      <div className="mb-2 flex items-center gap-2">
-        {icon}
-        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-          {label}
+    <div className="flex items-start gap-2">
+      {icon && <span className="mt-0.5 shrink-0">{icon}</span>}
+      <div className="flex flex-1 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <span className="w-36 shrink-0 text-xs text-[#64748B]">{label}</span>
+        <span className="text-sm font-medium text-[#0F172A]">
+          {value || <span className="font-normal text-slate-300">—</span>}
         </span>
       </div>
-      <p className="break-words text-sm font-bold text-slate-900">{value}</p>
-    </div>
-  );
-}
-
-function InfoBox({ label, value, icon }) {
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-      <div className="mb-1.5 flex items-center gap-1.5">
-        {icon && <span className="text-slate-400">{icon}</span>}
-        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-          {label}
-        </p>
-      </div>
-      <p className="break-words text-sm font-semibold text-slate-800">
-        {value || <span className="font-normal text-slate-300">Non renseigné</span>}
-      </p>
-    </div>
-  );
-}
-
-function TimelineCard({ title, subtitle, badge, meta }) {
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h4 className="text-sm font-bold text-slate-900">{title}</h4>
-          {subtitle && (
-            <p className="mt-1 text-sm font-medium text-green-700">{subtitle}</p>
-          )}
-        </div>
-
-        {badge && (
-          <span className="rounded-xl border border-green-100 bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-            {badge}
-          </span>
-        )}
-      </div>
-
-      {meta && <p className="mt-3 text-sm leading-7 text-slate-500">{meta}</p>}
-    </div>
-  );
-}
-
-function TrustItem({ ok, title, text }) {
-  return (
-    <div className="flex items-start gap-3">
-      <div
-        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
-          ok ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-400"
-        }`}
-      >
-        <CheckCircle2 size={16} />
-      </div>
-
-      <div>
-        <p className="text-sm font-semibold text-slate-800">{title}</p>
-        <p className="mt-1 text-sm leading-6 text-slate-500">{text}</p>
-      </div>
-    </div>
-  );
-}
-
-function MiniRow({ label, value }) {
-  return (
-    <div className="border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
-      <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-        {label}
-      </p>
-      <p className="mt-1 break-words text-sm font-semibold text-slate-800">
-        {value}
-      </p>
     </div>
   );
 }

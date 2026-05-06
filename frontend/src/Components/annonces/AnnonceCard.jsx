@@ -1,123 +1,98 @@
 import { Link } from "react-router-dom";
-import { CalendarDays, ArrowRight, FileText } from "lucide-react";
+import { CalendarDays, ArrowRight, FileText, Pin } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const TYPE_STYLES = {
+  ANNONCE:    { label: "Annonce",     cls: "border-emerald-200 bg-emerald-50 text-emerald-700" },
+  ACTUALITE:  { label: "Actualité",   cls: "border-blue-200 bg-blue-50 text-blue-700" },
+  COMMUNIQUE: { label: "Communiqué",  cls: "border-purple-200 bg-purple-50 text-purple-700" },
+  DECISION:   { label: "Décision",    cls: "border-amber-200 bg-amber-50 text-amber-700" },
+  EVENEMENT:  { label: "Événement",   cls: "border-rose-200 bg-rose-50 text-rose-700" },
+};
 
 const formatDate = (value) => {
   if (!value) return "Non publié";
-
-  return new Date(value).toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+  return new Date(value).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
 };
 
-function getTypeLabel(type) {
-  switch (type) {
-    case "ANNONCE":
-      return "Annonce";
-    case "ACTUALITE":
-      return "Actualité";
-    case "COMMUNIQUE":
-      return "Communiqué";
-    case "DECISION":
-      return "Décision";
-    case "EVENEMENT":
-      return "Événement";
-    default:
-      return "Publication";
-  }
-}
-
-function getActionLabel(type) {
-  switch (type) {
-    case "COMMUNIQUE":
-      return "Lire le communiqué";
-    case "DECISION":
-      return "Consulter la décision";
-    case "EVENEMENT":
-      return "Voir l’événement";
-    case "ANNONCE":
-      return "Consulter l’annonce";
-    case "ACTUALITE":
-      return "Lire l’actualité";
-    default:
-      return "Lire la publication";
-  }
-}
-
 function AnnonceCard({ annonce }) {
-  const imageSrc = annonce.imageUrl
-    ? `${API_BASE_URL}${annonce.imageUrl}`
-    : null;
+  const imageSrc = annonce.imageUrl ? `${API_BASE_URL}${annonce.imageUrl}` : null;
+  const typeStyle = TYPE_STYLES[annonce.type] || { label: "Publication", cls: "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B]" };
 
   return (
-    <Link
-      to={`/annonces/${annonce.id}`}
-      aria-label={`Lire la publication : ${
-        annonce.titre || "Publication sans titre"
-      }`}
-      className="block h-full"
-    >
-      <Card className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-emerald-200 hover:shadow-md">
-        <div className="relative h-44 shrink-0 bg-slate-100">
-          {imageSrc ? (
-            <img
-              src={imageSrc}
-              alt={annonce.titre || "Image de la publication"}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-slate-300">
-              <FileText size={36} />
+    <div className="h-full">
+      <Link
+        to={`/annonces/${annonce.id}`}
+        aria-label={`Lire : ${annonce.titre || "Publication sans titre"}`}
+        className="group block h-full"
+      >
+        <div className="flex h-full flex-col overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-md">
+
+          {/* Image / placeholder */}
+          <div className="relative h-48 shrink-0 overflow-hidden bg-[#F8FAFC]">
+            {imageSrc ? (
+              <img
+                src={imageSrc}
+                alt={annonce.titre || ""}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center gap-2">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white">
+                  <FileText size={22} strokeWidth={1.5} className="text-[#64748B]" />
+                </div>
+                <span className="text-[10px] font-medium uppercase tracking-widest text-[#64748B]">
+                  Publication officielle
+                </span>
+              </div>
+            )}
+
+            {/* Type badge */}
+            <div className="absolute left-3 top-3">
+              <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold shadow-sm ${typeStyle.cls}`}>
+                {typeStyle.label}
+              </span>
             </div>
-          )}
-        </div>
 
-        <CardContent className="flex flex-1 flex-col p-5">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <Badge
-              variant="outline"
-              className="border-emerald-200 bg-emerald-50 text-emerald-700"
-            >
-              {getTypeLabel(annonce.type)}
-            </Badge>
-
-            {annonce.categorieNom && (
-              <Badge variant="outline" className="text-slate-600">
-                {annonce.categorieNom}
-              </Badge>
+            {/* Pin */}
+            {annonce.isPinned && (
+              <div className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm">
+                <Pin size={12} className="fill-[#0F766E] text-[#0F766E]" />
+              </div>
             )}
           </div>
 
-          <h3 className="line-clamp-2 text-base font-semibold leading-6 text-slate-900">
-            {annonce.titre || "Publication sans titre"}
-          </h3>
+          {/* Content */}
+          <div className="flex flex-1 flex-col px-5 pb-4 pt-4">
+            {annonce.categorieNom && (
+              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-[#64748B]">
+                {annonce.categorieNom}
+              </p>
+            )}
 
-          <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
-            {annonce.resume ||
-              "Aucun résumé disponible pour cette publication."}
-          </p>
+            <h3 className="line-clamp-2 text-base font-bold leading-6 text-[#0F172A] transition-colors group-hover:text-[#0F766E]">
+              {annonce.titre || "Publication sans titre"}
+            </h3>
 
-          <div className="mt-auto flex items-center justify-between gap-4 border-t border-slate-100 pt-4">
-            <span className="flex items-center gap-2 text-xs text-slate-500">
-              <CalendarDays size={14} />
-              {formatDate(annonce.datePublication || annonce.dateCreation)}
-            </span>
+            <p className="mt-2 line-clamp-3 flex-1 text-sm leading-6 text-[#64748B]">
+              {annonce.resume || "Aucun résumé disponible pour cette publication."}
+            </p>
 
-            <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-emerald-700">
-              {getActionLabel(annonce.type)}
-              <ArrowRight size={14} />
-            </span>
+            <div className="mt-4 flex items-center justify-between gap-2 border-t border-[#E2E8F0] pt-3">
+              <span className="flex items-center gap-1.5 text-xs text-[#64748B]">
+                <CalendarDays size={12} />
+                {formatDate(annonce.datePublication || annonce.dateCreation)}
+              </span>
+              <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#0F766E] transition-all group-hover:gap-2">
+                Lire plus
+                <ArrowRight size={12} />
+              </span>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </div>
+      </Link>
+    </div>
   );
 }
 

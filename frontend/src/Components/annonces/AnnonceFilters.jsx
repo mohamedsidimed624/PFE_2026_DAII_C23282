@@ -11,16 +11,15 @@ import {
   SlidersHorizontal,
   ChevronDown,
 } from "lucide-react";
-
 import { Input } from "@/components/ui/input";
 
 const TYPE_OPTIONS = [
-  { value: "", label: "Tous", icon: ListFilter },
-  { value: "ANNONCE", label: "Annonces", icon: Megaphone },
-  { value: "ACTUALITE", label: "Actualités", icon: Newspaper },
+  { value: "",           label: "Tous",        icon: ListFilter },
+  { value: "ANNONCE",    label: "Annonces",    icon: Megaphone },
+  { value: "ACTUALITE",  label: "Actualités",  icon: Newspaper },
   { value: "COMMUNIQUE", label: "Communiqués", icon: ShieldCheck },
-  { value: "DECISION", label: "Décisions", icon: Landmark },
-  { value: "EVENEMENT", label: "Événements", icon: CalendarCheck },
+  { value: "DECISION",   label: "Décisions",   icon: Landmark },
+  { value: "EVENEMENT",  label: "Événements",  icon: CalendarCheck },
 ];
 
 function AnnonceFilters({
@@ -30,9 +29,68 @@ function AnnonceFilters({
   onSearchSubmit,
   onTypeChange,
   onReset,
+  compact,
 }) {
   const [open, setOpen] = useState(false);
   const hasFilters = Boolean(search || type);
+
+  if (compact) {
+    return (
+      <div className="flex flex-1 flex-wrap items-center gap-2">
+        <form onSubmit={onSearchSubmit} className="flex items-center gap-2">
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Input
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Rechercher..."
+              className="h-9 w-48 rounded-lg border-slate-200 bg-slate-50 pl-9 text-sm focus-visible:border-emerald-500 focus-visible:ring-emerald-500/20"
+            />
+          </div>
+          <button
+            type="submit"
+            className="h-9 rounded-lg bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800"
+          >
+            OK
+          </button>
+        </form>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          {TYPE_OPTIONS.map((option) => {
+            const Icon = option.icon;
+            const active = type === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={active}
+                onClick={() => onTypeChange(option.value)}
+                className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
+                  active
+                    ? "border-emerald-700 bg-emerald-700 text-white"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                }`}
+              >
+                <Icon size={12} />
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {hasFilters && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+          >
+            <RotateCcw size={12} />
+            Réinitialiser
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -42,11 +100,7 @@ function AnnonceFilters({
           className="flex flex-1 flex-col gap-2 sm:flex-row"
         >
           <div className="relative flex-1">
-            <Search
-              size={17}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-
+            <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -54,7 +108,6 @@ function AnnonceFilters({
               className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-11 text-sm focus-visible:border-emerald-700 focus-visible:ring-emerald-700/20"
             />
           </div>
-
           <button
             type="submit"
             disabled={!search.trim() && !type}
@@ -71,10 +124,7 @@ function AnnonceFilters({
         >
           <SlidersHorizontal size={16} />
           Filtres
-          <ChevronDown
-            size={15}
-            className={`transition ${open ? "rotate-180" : ""}`}
-          />
+          <ChevronDown size={15} className={`transition ${open ? "rotate-180" : ""}`} />
         </button>
 
         {hasFilters && (
@@ -94,12 +144,10 @@ function AnnonceFilters({
           <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-400">
             Type de publication
           </p>
-
           <div className="flex flex-wrap gap-2">
             {TYPE_OPTIONS.map((option) => {
               const Icon = option.icon;
               const active = type === option.value;
-
               return (
                 <button
                   key={option.value}

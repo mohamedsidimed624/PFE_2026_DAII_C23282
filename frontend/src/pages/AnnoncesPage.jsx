@@ -7,10 +7,22 @@ import AnnonceFilters from "../components/annonces/AnnonceFilters";
 import AnnonceSkeleton from "../components/annonces/AnnonceSkeleton";
 import AnnonceEmptyState from "../components/annonces/AnnonceEmptyState";
 import { getPublicContenus } from "../services/publicContenuApi";
-import { Button } from "@/components/ui/button";
-import { ShieldCheck, SlidersHorizontal, Stethoscope, FileText } from "lucide-react";
+import { ShieldCheck, SlidersHorizontal } from "lucide-react";
 
 const ITEMS_PER_PAGE = 9;
+
+const MEDICAL_PATTERN = {
+  backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M17 0h6v17h17v6H23v17h-6V23H0v-6h17z' fill='%230F766E'/%3E%3C/svg%3E")`,
+  backgroundSize: "40px 40px",
+};
+
+const PUB_TYPES = [
+  { label: "Annonces",    cls: "border-emerald-200 bg-emerald-50 text-emerald-700" },
+  { label: "Actualités",  cls: "border-blue-200 bg-blue-50 text-blue-700" },
+  { label: "Communiqués", cls: "border-purple-200 bg-purple-50 text-purple-700" },
+  { label: "Décisions",   cls: "border-amber-200 bg-amber-50 text-amber-700" },
+  { label: "Événements",  cls: "border-rose-200 bg-rose-50 text-rose-700" },
+];
 
 export default function AnnoncesPage() {
   const [allContenus, setAllContenus] = useState([]);
@@ -29,7 +41,6 @@ export default function AnnoncesPage() {
 
   const mainRef = useRef(null);
 
-  // ---- Chargement initial / réinitialisation aux filtres ----
   const loadFirstPage = useCallback(async () => {
     try {
       setLoading(true);
@@ -62,7 +73,6 @@ export default function AnnoncesPage() {
     loadFirstPage();
   }, [loadFirstPage]);
 
-  // ---- Chargement de la page suivante ----
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return;
     const nextPage = currentPage + 1;
@@ -91,9 +101,7 @@ export default function AnnoncesPage() {
     setSubmittedSearch(search.trim());
   };
 
-  const handleTypeChange = (value) => {
-    setType(value);
-  };
+  const handleTypeChange = (value) => setType(value);
 
   const resetFilters = () => {
     setSearch("");
@@ -102,112 +110,106 @@ export default function AnnoncesPage() {
     setShowMobileFilters(false);
   };
 
-  // ---- Extraction de l'annonce épinglée (depuis TOUS les contenus chargés) ----
-  const featured = useMemo(() => {
-    return allContenus.find((item) => item.isPinned) || null;
-  }, [allContenus]);
+  const featured = useMemo(
+    () => allContenus.find((item) => item.isPinned) || null,
+    [allContenus]
+  );
 
-  // ---- Liste sans l'épinglé, triée côté client ----
   const list = useMemo(() => {
     let filtered = allContenus.filter((item) =>
       featured ? item.id !== featured.id : true
     );
     switch (sortOption) {
       case "oldest":
-        return [...filtered].sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-        );
+        return [...filtered].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
       case "titleAsc":
         return [...filtered].sort((a, b) => a.title.localeCompare(b.title));
       case "titleDesc":
         return [...filtered].sort((a, b) => b.title.localeCompare(a.title));
       case "recent":
       default:
-        return [...filtered].sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
+        return [...filtered].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
   }, [allContenus, featured, sortOption]);
 
   const totalAnnounces = allContenus.length;
   const hasActiveFilters = submittedSearch !== "" || type !== "";
 
-  // ---- Focus après chargement (accessibilité) ----
   useEffect(() => {
-    if (!loading && mainRef.current) {
-      mainRef.current.focus({ preventScroll: true });
-    }
+    if (!loading && mainRef.current) mainRef.current.focus({ preventScroll: true });
   }, [loading]);
 
   return (
     <>
       <Navbar />
 
-      <main className="min-h-screen bg-slate-50 pt-24">
-        {/* ---- En-tête ---- */}
-        <section className="relative bg-[#fcfcfc] border-b border-slate-100 overflow-hidden">
-  {/* Motif de fond discret – grille de points */}
-  <div
-    className="absolute inset-0 opacity-[0.03]"
-    style={{
-      backgroundImage: `radial-gradient(circle, #0f172a 1px, transparent 1px)`,
-      backgroundSize: '24px 24px',
-    }}
-  />
+      <main className="min-h-screen bg-[#F8FAFC] pt-24">
 
-  {/* Sceau décoratif en arrière-plan */}
-  <div className="absolute left-1/2 top-12 -translate-x-1/2 select-none pointer-events-none">
-    <div className="flex items-center justify-center rounded-full border-2 border-emerald-100 p-10 w-72 h-72 text-emerald-100/60">
-      <FileText size={100} strokeWidth={1} />
-    </div>
-  </div>
+        {/* ── En-tête avec identité visuelle ── */}
+        <section className="relative overflow-hidden border-b border-[#E2E8F0] bg-linear-to-br from-teal-50/50 to-white">
+          <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={MEDICAL_PATTERN} />
+          <div className="relative mx-auto max-w-5xl px-6 py-12">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
 
-  <div className="relative max-w-4xl mx-auto px-6 py-20 text-center">
-    {/* Badge officiel */}
-    <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 shadow-sm">
-      <ShieldCheck size={15} />
-      Publications officielles
-    </div>
+              {/* Gauche : texte */}
+              <div className="lg:flex-1">
+                <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-[#0F766E]">
+                  <ShieldCheck size={13} />
+                  Publications officielles · ONMM
+                </div>
+                <h1 className="text-2xl font-bold text-[#0F172A] md:text-3xl">
+                  Annonces et actualités
+                </h1>
+                <p className="mt-2 max-w-lg text-sm leading-6 text-[#64748B]">
+                  Consultez les publications officielles, communiqués et actualités
+                  de l&apos;Ordre National des Médecins de Mauritanie.
+                </p>
+                {!loading && totalAnnounces > 0 && (
+                  <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-sm">
+                    <span className="text-base font-bold text-[#0F172A]">{totalAnnounces}</span>
+                    <span className="text-xs text-[#64748B]">
+                      publication{totalAnnounces > 1 ? "s" : ""} disponible{totalAnnounces > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                )}
+              </div>
 
-    {/* Titre principal */}
-    <h1 className="text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
-      Annonces & Actualités
-    </h1>
+              {/* Droite : légende des types de publications */}
+              <div className="flex flex-col gap-2.5 rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm lg:w-52">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#64748B]">
+                  Types de publications
+                </p>
+                <div className="space-y-1.5">
+                  {PUB_TYPES.map((t) => (
+                    <span
+                      key={t.label}
+                      className={`flex items-center justify-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${t.cls}`}
+                    >
+                      {t.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-    {/* Sous-titre */}
-    <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
-      Consultez les communiqués, décisions, annonces et événements publiés
-      par l’Ordre National des Médecins de Mauritanie.
-    </p>
-
-    {/* Compteur de publications */}
-    {!loading && (
-      <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-500 shadow-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-        {totalAnnounces} publication{totalAnnounces > 1 ? 's' : ''} disponible{totalAnnounces > 1 ? 's' : ''}
-      </div>
-    )}
-  </div>
-</section>
-
-        {/* ---- Contenu principal ---- */}
+        {/* ── Contenu principal ── */}
         <section className="mx-auto max-w-7xl px-6 py-10">
-          {/* Barre sticky : filtres desktop + tri + compteur */}
-          <div className="sticky top-[72px] z-20 -mx-6 px-6 py-4 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+
+          {/* Barre sticky */}
+          <div className="sticky top-18 z-20 -mx-6 border-b border-[#E2E8F0] bg-white px-6 py-3">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 items-center gap-3">
-                {/* Bouton mobile pour ouvrir les filtres */}
                 <button
-                  className="lg:hidden inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className="lg:hidden inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
                   onClick={() => setShowMobileFilters(true)}
                   aria-label="Ouvrir les filtres"
                 >
-                  <SlidersHorizontal size={16} />
+                  <SlidersHorizontal size={15} />
                   Filtres
                 </button>
-
-                {/* Filtres inline (desktop) */}
-                <div className="hidden lg:flex items-center gap-3 flex-1">
+                <div className="hidden lg:flex flex-1 items-center gap-3">
                   <AnnonceFilters
                     search={search}
                     type={type}
@@ -219,58 +221,39 @@ export default function AnnoncesPage() {
                   />
                 </div>
               </div>
-
-              {/* Tri + compteur (toujours visible) */}
               <div className="flex items-center gap-3 self-end lg:self-auto">
-                <span className="text-sm text-slate-500 whitespace-nowrap">
+                <span className="text-sm text-[#64748B] whitespace-nowrap">
                   {totalAnnounces} résultat{totalAnnounces > 1 ? "s" : ""}
                 </span>
                 <select
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
-                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                   aria-label="Trier les annonces"
                 >
                   <option value="recent">Plus récent</option>
                   <option value="oldest">Plus ancien</option>
-                  <option value="titleAsc">Titre A-Z</option>
-                  <option value="titleDesc">Titre Z-A</option>
+                  <option value="titleAsc">Titre A–Z</option>
+                  <option value="titleDesc">Titre Z–A</option>
                 </select>
               </div>
             </div>
           </div>
 
-          {/* Panneau mobile des filtres (bottom sheet) */}
+          {/* Panneau mobile */}
           {showMobileFilters && (
-            <div
-              className="fixed inset-0 z-50 lg:hidden"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Filtres de recherche"
-            >
-              <div
-                className="absolute inset-0 bg-black/50"
-                onClick={() => setShowMobileFilters(false)}
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 animate-slide-up">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Filtres</h3>
-                  <button
-                    onClick={() => setShowMobileFilters(false)}
-                    className="text-slate-500 hover:text-slate-800"
-                    aria-label="Fermer les filtres"
-                  >
-                    ✕
-                  </button>
+            <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
+              <div className="absolute inset-0 bg-black/40" onClick={() => setShowMobileFilters(false)} />
+              <div className="absolute bottom-0 left-0 right-0 rounded-t-2xl bg-white p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-base font-semibold text-[#0F172A]">Filtres</h3>
+                  <button onClick={() => setShowMobileFilters(false)} className="text-[#64748B] hover:text-[#0F172A]">✕</button>
                 </div>
                 <AnnonceFilters
                   search={search}
                   type={type}
                   onSearchChange={setSearch}
-                  onSearchSubmit={(e) => {
-                    handleSearchSubmit(e);
-                    setShowMobileFilters(false);
-                  }}
+                  onSearchSubmit={(e) => { handleSearchSubmit(e); setShowMobileFilters(false); }}
                   onTypeChange={handleTypeChange}
                   onReset={resetFilters}
                 />
@@ -283,28 +266,19 @@ export default function AnnoncesPage() {
             {loading ? (
               <AnnonceSkeleton />
             ) : error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+              <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
                 <p className="text-sm font-medium text-red-700">{error}</p>
                 <div className="mt-4 flex justify-center gap-3">
-                  <button
-                    onClick={loadFirstPage}
-                    className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50"
-                  >
+                  <button onClick={loadFirstPage} className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50">
                     Réessayer
                   </button>
-                  <a
-                    href="/"
-                    className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                  >
+                  <a href="/" className="rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#0F172A] transition hover:bg-[#F8FAFC]">
                     Accueil
                   </a>
                 </div>
               </div>
             ) : allContenus.length === 0 ? (
-              <AnnonceEmptyState
-                hasFilters={hasActiveFilters}
-                onReset={resetFilters}
-              />
+              <AnnonceEmptyState hasFilters={hasActiveFilters} onReset={resetFilters} />
             ) : (
               <>
                 {featured && (
@@ -315,8 +289,9 @@ export default function AnnoncesPage() {
 
                 {list.length > 0 && (
                   <div>
-                    <div className="mb-4 flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-slate-900">
+                    <div className="mb-5 flex items-center gap-3">
+                      <div className="h-5 w-1 rounded-full bg-[#0F766E]" />
+                      <h2 className="text-base font-semibold text-[#0F172A]">
                         Toutes les publications
                       </h2>
                     </div>
@@ -329,21 +304,20 @@ export default function AnnoncesPage() {
                 )}
 
                 {featured && list.length === 0 && !loading && !error && (
-                  <p className="text-center text-slate-500">
+                  <p className="text-center text-sm text-[#64748B]">
                     Aucune autre publication pour le moment.
                   </p>
                 )}
 
-                {/* Charger plus */}
                 {hasMore && !loading && !error && (
                   <div className="mt-10 flex justify-center">
-                    <Button
+                    <button
                       onClick={loadMore}
                       disabled={loadingMore}
-                      className="rounded-xl px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                      className="rounded-xl border border-[#E2E8F0] bg-white px-8 py-3 text-sm font-semibold text-[#0F172A] shadow-sm transition hover:border-[#0F766E] hover:text-[#0F766E] disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {loadingMore ? "Chargement..." : "Charger plus d’annonces"}
-                    </Button>
+                      {loadingMore ? "Chargement..." : "Charger plus de publications"}
+                    </button>
                   </div>
                 )}
               </>

@@ -61,7 +61,7 @@ function ConfirmModal({ open, onClose, onConfirm, loading, config }) {
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/35"
+            className="absolute inset-0 bg-black/40" 
             onClick={onClose}
           />
           {/* Dialog */}
