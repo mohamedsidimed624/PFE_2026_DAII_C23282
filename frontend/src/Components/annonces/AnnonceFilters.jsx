@@ -37,25 +37,30 @@ function AnnonceFilters({
   if (compact) {
     return (
       <div className="flex flex-1 flex-wrap items-center gap-2">
-        <form onSubmit={onSearchSubmit} className="flex items-center gap-2">
+        <form onSubmit={onSearchSubmit} className="flex items-center gap-1.5">
           <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]"
+              aria-hidden="true"
+            />
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Rechercher..."
-              className="h-9 w-48 rounded-lg border-slate-200 bg-slate-50 pl-9 text-sm focus-visible:border-emerald-500 focus-visible:ring-emerald-500/20"
+              placeholder="Rechercher une publication..."
+              className="h-9 w-52 rounded-lg border-[#E2E8F0] bg-[#F8FAFC] pl-9 text-sm focus-visible:border-[#0F766E] focus-visible:ring-[#0F766E]/20"
             />
           </div>
           <button
             type="submit"
-            className="h-9 rounded-lg bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800"
+            aria-label="Lancer la recherche"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0F766E] text-white transition hover:bg-[#0e6b62]"
           >
-            OK
+            <Search size={14} aria-hidden="true" />
           </button>
         </form>
 
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filtrer par type">
           {TYPE_OPTIONS.map((option) => {
             const Icon = option.icon;
             const active = type === option.value;
@@ -67,11 +72,11 @@ function AnnonceFilters({
                 onClick={() => onTypeChange(option.value)}
                 className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
                   active
-                    ? "border-emerald-700 bg-emerald-700 text-white"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                    ? "border-[#0F766E] bg-[#0F766E] text-white"
+                    : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-teal-200 hover:bg-teal-50 hover:text-[#0F766E]"
                 }`}
               >
-                <Icon size={12} />
+                <Icon size={12} aria-hidden="true" />
                 {option.label}
               </button>
             );
@@ -82,9 +87,9 @@ function AnnonceFilters({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 text-xs font-medium text-[#64748B] transition hover:bg-[#F8FAFC]"
           >
-            <RotateCcw size={12} />
+            <RotateCcw size={12} aria-hidden="true" />
             Réinitialiser
           </button>
         )}
@@ -93,25 +98,26 @@ function AnnonceFilters({
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <section className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
       <div className="flex flex-col gap-3 p-4 lg:flex-row lg:items-center">
-        <form
-          onSubmit={onSearchSubmit}
-          className="flex flex-1 flex-col gap-2 sm:flex-row"
-        >
+        <form onSubmit={onSearchSubmit} className="flex flex-1 flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
-            <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search
+              size={16}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-[#64748B]"
+              aria-hidden="true"
+            />
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Rechercher une publication..."
-              className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-11 text-sm focus-visible:border-emerald-700 focus-visible:ring-emerald-700/20"
+              className="h-11 rounded-lg border-[#E2E8F0] bg-[#F8FAFC] pl-11 text-sm focus-visible:border-[#0F766E] focus-visible:ring-[#0F766E]/20"
             />
           </div>
           <button
             type="submit"
             disabled={!search.trim() && !type}
-            className="h-11 rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="h-11 rounded-lg bg-[#0F766E] px-5 text-sm font-semibold text-white transition hover:bg-[#0e6b62] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
           >
             Rechercher
           </button>
@@ -120,31 +126,33 @@ function AnnonceFilters({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          aria-expanded={open}
+          aria-controls="annonce-type-filters"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 text-sm font-medium text-[#0F172A] transition hover:bg-[#F8FAFC]"
         >
-          <SlidersHorizontal size={16} />
+          <SlidersHorizontal size={15} aria-hidden="true" />
           Filtres
-          <ChevronDown size={15} className={`transition ${open ? "rotate-180" : ""}`} />
+          <ChevronDown size={14} className={`transition ${open ? "rotate-180" : ""}`} aria-hidden="true" />
         </button>
 
         {hasFilters && (
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 text-sm font-medium text-[#64748B] transition hover:bg-[#F8FAFC]"
           >
-            <RotateCcw size={15} />
+            <RotateCcw size={14} aria-hidden="true" />
             Réinitialiser
           </button>
         )}
       </div>
 
       {open && (
-        <div className="border-t border-slate-100 px-4 pb-4 pt-3">
-          <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-400">
+        <div id="annonce-type-filters" className="border-t border-[#E2E8F0] px-4 pb-4 pt-3">
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-[#64748B]">
             Type de publication
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Type de publication">
             {TYPE_OPTIONS.map((option) => {
               const Icon = option.icon;
               const active = type === option.value;
@@ -154,13 +162,13 @@ function AnnonceFilters({
                   type="button"
                   aria-pressed={active}
                   onClick={() => onTypeChange(option.value)}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition ${
+                  className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
                     active
-                      ? "border-emerald-700 bg-emerald-700 text-white"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                      ? "border-[#0F766E] bg-[#0F766E] text-white"
+                      : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-teal-200 hover:bg-teal-50 hover:text-[#0F766E]"
                   }`}
                 >
-                  <Icon size={14} />
+                  <Icon size={14} aria-hidden="true" />
                   {option.label}
                 </button>
               );

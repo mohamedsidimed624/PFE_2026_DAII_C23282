@@ -4,13 +4,14 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { motion } from "framer-motion";
 import { fadeInUp, staggerContainer } from "../motion/animation";
-import { getPublicMedecins } from "../services/publicAnnuaireApi";
-import { getPublicSpecialites } from "../services/publicAnnuaireApi";
+import PublicHero from "../components/public/PublicHero";
+import StatusBadge from "../components/public/StatusBadge";
+import RegistryBadge from "../components/public/RegistryBadge";
+import { getPublicMedecins, getPublicSpecialites } from "../services/publicAnnuaireApi";
 import {
   Search,
   MapPin,
   BadgeCheck,
-  CreditCard,
   ChevronLeft,
   ChevronRight,
   ArrowRight,
@@ -18,18 +19,15 @@ import {
   ChevronDown,
   RotateCcw,
   Stethoscope,
-  ShieldCheck,
+  Building2,
 } from "lucide-react";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 const PAGE_SIZE = 6;
 
-const MEDICAL_PATTERN = {
-  backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M17 0h6v17h17v6H23v17h-6V23H0v-6h17z' fill='%230F766E'/%3E%3C/svg%3E")`,
-  backgroundSize: "40px 40px",
-};
-
 const TRIS = [
-  { value: "alpha", label: "Ordre alphabétique" },
+  { value: "alpha",  label: "Ordre alphabétique" },
   { value: "recent", label: "Plus récents" },
   { value: "ancien", label: "Plus anciens" },
 ];
@@ -87,7 +85,6 @@ function AnnuairePage() {
         setMedecins(data.content || []);
         setTotalPages(data.totalPages || 1);
         setTotalElements(data.totalElements || 0);
-        console.log("Fetched medecins:", data);
       } catch (err) {
         console.error(err);
         setError("Impossible de charger l'annuaire.");
@@ -104,7 +101,7 @@ function AnnuairePage() {
         const data = await getPublicSpecialites();
         setSpecialitesDisponibles(data || []);
       } catch (err) {
-        console.error("Erreur chargement spécialités", err);
+        console.error(err);
       }
     };
     fetchSpecialites();
@@ -122,23 +119,23 @@ function AnnuairePage() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (isAdvancedSearch) {
-      setSubmittedFilters({
-        nom: advancedNom.trim(),
-        prenom: advancedPrenom.trim(),
-        numeroInscription: advancedNumero.trim(),
-        specialite: specialite === "Toutes spécialités" ? "" : specialite,
-        ville: ville === "Toutes les villes" ? "" : ville,
-      });
-    } else {
-      setSubmittedFilters({
-        nom: searchInput.trim(),
-        prenom: "",
-        numeroInscription: "",
-        specialite: specialite === "Toutes spécialités" ? "" : specialite,
-        ville: ville === "Toutes les villes" ? "" : ville,
-      });
-    }
+    setSubmittedFilters(
+      isAdvancedSearch
+        ? {
+            nom: advancedNom.trim(),
+            prenom: advancedPrenom.trim(),
+            numeroInscription: advancedNumero.trim(),
+            specialite: specialite === "Toutes spécialités" ? "" : specialite,
+            ville: ville === "Toutes les villes" ? "" : ville,
+          }
+        : {
+            nom: searchInput.trim(),
+            prenom: "",
+            numeroInscription: "",
+            specialite: specialite === "Toutes spécialités" ? "" : specialite,
+            ville: ville === "Toutes les villes" ? "" : ville,
+          }
+    );
     setPage(1);
   };
 
@@ -166,56 +163,14 @@ function AnnuairePage() {
     <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
 
-      {/* ── En-tête avec identité visuelle ── */}
-      <section className="relative overflow-hidden border-b border-[#E2E8F0] bg-linear-to-br from-teal-50/50 to-white pt-24">
-        <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={MEDICAL_PATTERN} />
-        <div className="relative mx-auto max-w-7xl px-6">
-          <div className="py-10">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+      <PublicHero
+        badgeIcon={BadgeCheck}
+        badgeText="Registre officiel · ONMM"
+        title="Annuaire public des médecins"
+        subtitle="Recherchez un médecin inscrit au registre officiel de l'Ordre National des Médecins de Mauritanie."
+      />
 
-              {/* Gauche : titre */}
-              <div>
-                <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-[#0F766E]">
-                  <BadgeCheck size={12} />
-                  Registre officiel · ONMM
-                </div>
-                <h1 className="text-2xl font-bold text-[#0F172A] md:text-3xl">
-                  Annuaire public des médecins
-                </h1>
-                <p className="mt-1.5 max-w-lg text-sm text-[#64748B]">
-                  Recherchez un médecin inscrit au registre officiel de l&apos;Ordre
-                  National des Médecins de Mauritanie.
-                </p>
-              </div>
-
-              {/* Droite : credential de registre */}
-              {!loading && (
-                <div className="flex flex-col gap-3 rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm lg:w-64">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-50">
-                      <ShieldCheck size={16} className="text-[#0F766E]" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-[#64748B]">Médecins inscrits</p>
-                      <p className="text-lg font-bold text-[#0F172A]">{totalElements}</p>
-                    </div>
-                  </div>
-                  <div className="border-t border-[#E2E8F0] pt-3">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#64748B]">
-                      Registre certifié ONMM
-                    </p>
-                    <p className="mt-0.5 text-xs text-[#64748B]">
-                      Données officielles · République de Mauritanie
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Moteur de recherche ── */}
+      {/* ── Recherche dans le registre ── */}
       <section className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 pb-4 pt-6 lg:sticky lg:top-18 lg:z-20">
         <div className="mx-auto max-w-7xl">
           <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
@@ -224,17 +179,20 @@ function AnnuairePage() {
                 type="button"
                 onClick={() => setIsSearchOpen((v) => !v)}
                 className="inline-flex items-center gap-3 text-left"
+                aria-expanded={isSearchOpen}
+                aria-controls="registry-search-form"
               >
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-teal-100 bg-teal-50">
                   <ChevronDown
                     size={16}
                     className={`text-[#0F766E] transition-transform duration-200 ${isSearchOpen ? "rotate-180" : ""}`}
+                    aria-hidden="true"
                   />
                 </span>
                 <div>
-                  <h2 className="text-sm font-bold text-[#0F172A]">Moteur de recherche</h2>
+                  <h2 className="text-sm font-bold text-[#0F172A]">Recherche dans le registre</h2>
                   <p className="mt-0.5 text-xs text-[#64748B]">
-                    Recherchez un médecin par identité ou critères professionnels
+                    Recherchez par identité, spécialité ou localisation
                   </p>
                 </div>
               </button>
@@ -246,6 +204,8 @@ function AnnuairePage() {
                 <button
                   type="button"
                   onClick={() => setIsAdvancedSearch((v) => !v)}
+                  aria-pressed={isAdvancedSearch}
+                  aria-label="Activer la recherche avancée"
                   className={`relative h-5 w-10 rounded-full transition-colors duration-200 ${isAdvancedSearch ? "bg-[#0F766E]" : "bg-slate-200"}`}
                 >
                   <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all duration-200 ${isAdvancedSearch ? "left-5" : "left-0.5"}`} />
@@ -254,12 +214,12 @@ function AnnuairePage() {
             </div>
 
             {isSearchOpen && (
-              <form onSubmit={handleSearch} className="px-6 py-5">
+              <form id="registry-search-form" onSubmit={handleSearch} className="px-6 py-5">
                 {!isAdvancedSearch && (
                   <div className="grid grid-cols-1 gap-3 lg:grid-cols-[2fr_1fr_1fr_auto_auto]">
-                    <Field label="Nom du médecin ou N° d'inscription">
+                    <Field label="Nom ou N° d'inscription">
                       <div className="relative">
-                        <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
+                        <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" aria-hidden="true" />
                         <input
                           type="text"
                           value={searchInput}
@@ -281,7 +241,7 @@ function AnnuairePage() {
                         onClick={handleResetFilters}
                         className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 py-2.5 text-sm font-medium text-[#0F172A] transition hover:bg-[#F8FAFC]"
                       >
-                        <RotateCcw size={14} />
+                        <RotateCcw size={14} aria-hidden="true" />
                         Réinitialiser
                       </button>
                     </div>
@@ -290,7 +250,7 @@ function AnnuairePage() {
                         type="submit"
                         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0e6b62] active:scale-[.99]"
                       >
-                        <Search size={14} />
+                        <Search size={14} aria-hidden="true" />
                         Rechercher
                       </button>
                     </div>
@@ -332,14 +292,14 @@ function AnnuairePage() {
                         onClick={handleResetFilters}
                         className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-5 py-2.5 text-sm font-medium text-[#0F172A] transition hover:bg-[#F8FAFC]"
                       >
-                        <RotateCcw size={14} />
+                        <RotateCcw size={14} aria-hidden="true" />
                         Réinitialiser
                       </button>
                       <button
                         type="submit"
                         className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0e6b62] active:scale-[.99]"
                       >
-                        <Search size={14} />
+                        <Search size={14} aria-hidden="true" />
                         Rechercher
                       </button>
                     </div>
@@ -351,11 +311,11 @@ function AnnuairePage() {
         </div>
       </section>
 
-      {/* ── Résultats ── */}
+      {/* ── Results ── */}
       <main className="mx-auto w-full max-w-7xl px-6 pb-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 pt-6">
           <div className="flex items-center gap-3">
-            <div className="h-5 w-1 rounded-full bg-[#0F766E]" />
+            <div className="h-5 w-1 rounded-full bg-[#0F766E]" aria-hidden="true" />
             <p className="text-base font-semibold text-[#0F172A]">
               {loading ? (
                 <span className="text-sm font-normal text-[#64748B]">Recherche en cours…</span>
@@ -369,23 +329,21 @@ function AnnuairePage() {
               )}
             </p>
           </div>
-
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-[#64748B]">Trier par :</span>
             <select
               value={tri}
               onChange={(e) => { setTri(e.target.value); setPage(1); }}
+              aria-label="Trier les résultats"
               className="appearance-none rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-semibold text-[#0F766E] outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/15"
             >
-              {TRIS.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
+              {TRIS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
         </div>
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600" role="alert">
             {error}
           </div>
         )}
@@ -393,7 +351,7 @@ function AnnuairePage() {
         {loading ? (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-              <div key={i} className="animate-pulse overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+              <div key={i} className="animate-pulse overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm" aria-hidden="true">
                 <div className="h-0.5 bg-slate-100" />
                 <div className="flex justify-between p-5">
                   <div className="flex-1 space-y-3">
@@ -413,7 +371,7 @@ function AnnuairePage() {
         ) : medecins.length === 0 ? (
           <div className="rounded-xl border border-[#E2E8F0] bg-white px-6 py-16 text-center shadow-sm">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
-              <UserRound size={26} className="text-[#64748B]" />
+              <UserRound size={26} className="text-[#64748B]" aria-hidden="true" />
             </div>
             <h2 className="text-base font-bold text-[#0F172A]">Aucun médecin trouvé</h2>
             <p className="mx-auto mt-2 max-w-xs text-sm text-[#64748B]">
@@ -434,22 +392,25 @@ function AnnuairePage() {
         )}
 
         {!loading && totalPages > 1 && (
-          <div className="mt-10 flex flex-col items-center gap-3">
+          <nav className="mt-10 flex flex-col items-center gap-3" aria-label="Pagination">
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
+                aria-label="Page précédente"
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-[#64748B] shadow-sm transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-40"
               >
-                <ChevronLeft size={15} />
+                <ChevronLeft size={15} aria-hidden="true" />
               </button>
               {pageNumbers.map((item, idx) =>
                 item === "..." ? (
-                  <span key={`dot-${idx}`} className="flex h-9 w-9 items-center justify-center text-sm text-[#64748B]">…</span>
+                  <span key={`dot-${idx}`} className="flex h-9 w-9 items-center justify-center text-sm text-[#64748B]" aria-hidden="true">…</span>
                 ) : (
                   <button
                     key={item}
                     onClick={() => setPage(item)}
+                    aria-label={`Page ${item}`}
+                    aria-current={page === item ? "page" : undefined}
                     className={`flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition ${
                       page === item
                         ? "border-[#0F766E] bg-[#0F766E] text-white"
@@ -463,15 +424,16 @@ function AnnuairePage() {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
+                aria-label="Page suivante"
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-[#64748B] shadow-sm transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-40"
               >
-                <ChevronRight size={15} />
+                <ChevronRight size={15} aria-hidden="true" />
               </button>
             </div>
             <p className="text-xs text-[#64748B]">
               Affichage de {startItem}–{endItem} sur {totalElements} médecins
             </p>
-          </div>
+          </nav>
         )}
       </main>
 
@@ -499,11 +461,9 @@ function SelectField({ value, onChange, options }) {
         onChange={onChange}
         className="w-full appearance-none rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 pr-10 text-sm text-[#0F172A] outline-none transition focus:border-[#0F766E] focus:bg-white focus:ring-2 focus:ring-[#0F766E]/15"
       >
-        {options.map((option) => (
-          <option key={option} value={option}>{option}</option>
-        ))}
+        {options.map((option) => <option key={option} value={option}>{option}</option>)}
       </select>
-      <ChevronDown size={15} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
+      <ChevronDown size={15} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" aria-hidden="true" />
     </div>
   );
 }
@@ -529,18 +489,8 @@ function AdvancedGroup({ title, children }) {
   );
 }
 
-const STATUS_CONFIG = {
-  ACTIF:    { label: "Actif",     badge: "border-green-200 bg-green-50 text-green-700", dot: "bg-green-500" },
-  SUSPENDU: { label: "Suspendu",  badge: "border-red-200 bg-red-50 text-red-700",       dot: "bg-red-500" },
-  RETRAITE: { label: "Retraité",  badge: "border-slate-200 bg-slate-100 text-slate-600", dot: "bg-slate-400" },
-};
-
 function MedecinCard({ medecin, onClick }) {
-  const statusKey = (medecin.statut || "ACTIF").toUpperCase();
-  const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.ACTIF;
-
-  const primaryEdu = medecin.educations?.[0];
-  const specialite = primaryEdu?.specialiteLibelle || medecin.specialiteLibelle || null;
+  const specialite = medecin.educations?.[0]?.specialiteLibelle || medecin.specialiteLibelle || null;
   const workplace = medecin.lieuExercice || medecin.experiences?.[0]?.nomEtablissement || null;
   const ville = medecin.villeExercice || medecin.ville || null;
 
@@ -549,56 +499,57 @@ function MedecinCard({ medecin, onClick }) {
       variants={fadeInUp}
       className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm transition-shadow duration-200 hover:shadow-md"
     >
-      {/* Accent ligne */}
-      <div className="h-0.5 bg-[#0F766E]" />
+      <div className="h-0.5 bg-[#0F766E]" aria-hidden="true" />
 
       <div className="p-5">
-        {/* Identité */}
-        <div className="flex items-center gap-3">
+        {/* Identity row */}
+        <div className="flex items-start gap-3">
           <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#E2E8F0] bg-slate-100">
             {medecin.photoProfilPath ? (
-              <img src={`http://localhost:8080${medecin.photoProfilPath}`} alt="" className="h-full w-full object-cover" />
+              <img
+                src={`${API_BASE_URL}${medecin.photoProfilPath}`}
+                alt={`Photo de Dr. ${medecin.prenom} ${medecin.nom}`}
+                className="h-full w-full object-cover"
+              />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-[#0F766E] text-sm font-bold text-white">
+              <div className="flex h-full w-full items-center justify-center bg-[#0F766E] text-sm font-bold text-white" aria-hidden="true">
                 {medecin.prenom?.[0]}{medecin.nom?.[0]}
               </div>
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${status.badge}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-              {status.label}
-            </span>
-            <h3 className="mt-0.5 truncate text-sm font-bold text-[#0F172A]">
+            <h3 className="truncate text-sm font-bold text-[#0F172A]">
               Dr. {medecin.prenom} {medecin.nom}
             </h3>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              <StatusBadge status={medecin.statut} />
+              {medecin.numeroInscription && <RegistryBadge number={medecin.numeroInscription} />}
+            </div>
           </div>
         </div>
 
-        {/* Infos */}
+        {/* Info rows */}
         <div className="mt-4 space-y-2 border-t border-[#E2E8F0] pt-4">
-          <CardInfoRow icon={<Stethoscope size={13} className="text-[#0F766E]" />} value={specialite || "Spécialité non renseignée"} />
-          {ville && <CardInfoRow icon={<MapPin size={13} className="text-[#64748B]" />} value={`${ville}, Mauritanie`} />}
-          {workplace && <CardInfoRow icon={<CreditCard size={13} className="text-[#64748B]" />} value={workplace} />}
-          {medecin.numeroInscription && <CardInfoRow icon={<ShieldCheck size={13} className="text-[#64748B]" />} value={medecin.numeroInscription} />}
+          <InfoRow icon={<Stethoscope size={13} className="text-[#0F766E]" aria-hidden="true" />} value={specialite || "Spécialité non renseignée"} />
+          {ville && <InfoRow icon={<MapPin size={13} className="text-[#64748B]" aria-hidden="true" />} value={`${ville}, Mauritanie`} />}
+          {workplace && <InfoRow icon={<Building2 size={13} className="text-[#64748B]" aria-hidden="true" />} value={workplace} />}
         </div>
       </div>
 
-      {/* Footer */}
       <div className="border-t border-[#E2E8F0] bg-[#F8FAFC] px-5 py-3">
         <button
           onClick={onClick}
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#0F766E] transition-colors hover:text-[#0e6b62]"
         >
           Voir le profil
-          <ArrowRight size={14} />
+          <ArrowRight size={14} aria-hidden="true" />
         </button>
       </div>
     </motion.div>
   );
 }
 
-function CardInfoRow({ icon, value }) {
+function InfoRow({ icon, value }) {
   return (
     <div className="flex items-center gap-2 text-xs text-[#64748B]">
       <span className="shrink-0">{icon}</span>

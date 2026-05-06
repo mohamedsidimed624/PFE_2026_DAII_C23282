@@ -2,14 +2,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function CardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
+    <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white">
       <Skeleton className="h-48 w-full rounded-none" />
       <div className="space-y-3 p-5">
         <Skeleton className="h-3 w-16 rounded-full" />
         <Skeleton className="h-5 w-full rounded" />
         <Skeleton className="h-4 w-4/5 rounded" />
         <Skeleton className="h-4 w-2/3 rounded" />
-        <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+        <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-3">
           <Skeleton className="h-3 w-24 rounded" />
           <Skeleton className="h-3 w-20 rounded" />
         </div>
@@ -21,10 +21,7 @@ function CardSkeleton() {
 function AnnonceSkeleton() {
   return (
     <div className="space-y-8">
-      {/* Featured skeleton */}
-      <Skeleton className="h-105 w-full rounded-2xl" />
-
-      {/* Grid skeleton */}
+      <Skeleton className="h-96 w-full rounded-xl" />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <CardSkeleton key={i} />

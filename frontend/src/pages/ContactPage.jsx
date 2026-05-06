@@ -2,17 +2,19 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import PublicHero from "../components/public/PublicHero";
 import {
   Mail,
   Phone,
   MapPin,
   Clock,
   Send,
-  CheckCircle2,
+  Info,
   Building2,
   MessageSquare,
   AlertCircle,
 } from "lucide-react";
+
 
 const CONTACT_INFOS = [
   {
@@ -94,66 +96,12 @@ export default function ContactPage() {
     <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
 
-      {/* ── En-tête avec identité visuelle ── */}
-      <div className="relative overflow-hidden border-b border-[#E2E8F0] bg-linear-to-br from-teal-50/50 to-white pt-24">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M17 0h6v17h17v6H23v17h-6V23H0v-6h17z' fill='%230F766E'/%3E%3C/svg%3E")`,
-            backgroundSize: "40px 40px",
-          }}
-        />
-        <div className="relative mx-auto max-w-5xl px-6 py-12">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
-
-            {/* Gauche : texte */}
-            <div className="lg:flex-1">
-              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-[#0F766E]">
-                <MessageSquare size={12} />
-                Contact · ONMM
-              </div>
-              <h1 className="text-2xl font-bold text-[#0F172A] md:text-3xl">
-                Contactez l&apos;ONMM
-              </h1>
-              <p className="mt-2 max-w-lg text-sm leading-6 text-[#64748B]">
-                Contactez l&apos;Ordre National des Médecins de Mauritanie pour toute
-                demande administrative, inscription ou renseignement.
-              </p>
-            </div>
-
-            {/* Droite : contact rapide */}
-            <div className="flex flex-col gap-2 rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm lg:w-60">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#64748B]">
-                Contact rapide
-              </p>
-              <a
-                href="tel:+22245250000"
-                className="flex items-center gap-2.5 rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs text-[#0F172A] transition hover:border-teal-200 hover:bg-teal-50"
-              >
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-teal-50">
-                  <Phone size={11} className="text-[#0F766E]" />
-                </div>
-                +222 45 25 00 00
-              </a>
-              <a
-                href="mailto:contact@ordre-medecins.mr"
-                className="flex items-center gap-2.5 rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs text-[#0F172A] transition hover:border-teal-200 hover:bg-teal-50"
-              >
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-teal-50">
-                  <Mail size={11} className="text-[#0F766E]" />
-                </div>
-                contact@ordre-medecins.mr
-              </a>
-              <div className="flex items-center gap-2.5 rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs text-[#64748B]">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-slate-50">
-                  <Clock size={11} className="text-[#64748B]" />
-                </div>
-                Dim – Jeu · 08h00 – 16h00
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PublicHero
+        badgeIcon={MessageSquare}
+        badgeText="Contact · ONMM"
+        title="Contactez l'ONMM"
+        subtitle="Contactez l'Ordre National des Médecins de Mauritanie pour toute demande administrative, inscription ou renseignement."
+      />
 
       {/* ── Corps ── */}
       <div className="mx-auto max-w-5xl px-6 py-10">
@@ -256,15 +204,15 @@ export default function ContactPage() {
             <div className="px-6 py-6">
               {submitted ? (
                 <div className="flex flex-col items-center gap-4 py-10 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-50">
-                    <CheckCircle2 size={28} className="text-[#0F766E]" />
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-50">
+                    <Info size={28} className="text-amber-600" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-[#0F172A]">
-                      Message envoyé !
+                      Message préparé
                     </h3>
                     <p className="mt-1.5 max-w-xs text-sm text-[#64748B]">
-                      Notre équipe vous contactera dans un délai de 24 à 48 heures.
+                      Votre message a été préparé. La fonctionnalité d&apos;envoi sera connectée au backend prochainement.
                     </p>
                   </div>
                   <button

@@ -256,6 +256,7 @@ function LoginPage() {
                     </div>
                 </motion.div>
             </div>
+             <Footer />
         </div>
     );
 }
