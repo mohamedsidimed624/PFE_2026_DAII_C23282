@@ -48,13 +48,13 @@ function AnnonceFilters({
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Rechercher une publication..."
-              className="h-9 w-52 rounded-lg border-[#E2E8F0] bg-[#F8FAFC] pl-9 text-sm focus-visible:border-[#0F766E] focus-visible:ring-[#0F766E]/20"
+              className="h-9 w-52 rounded-lg border-[#E2E8F0] bg-[#F8FAFC] pl-9 text-sm focus-visible:border-[#16A34A] focus-visible:ring-[#16A34A]/20"
             />
           </div>
           <button
             type="submit"
             aria-label="Lancer la recherche"
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0F766E] text-white transition hover:bg-[#0e6b62]"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#16A34A] text-white transition hover:bg-[#15803d]"
           >
             <Search size={14} aria-hidden="true" />
           </button>
@@ -72,8 +72,8 @@ function AnnonceFilters({
                 onClick={() => onTypeChange(option.value)}
                 className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
                   active
-                    ? "border-[#0F766E] bg-[#0F766E] text-white"
-                    : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-teal-200 hover:bg-teal-50 hover:text-[#0F766E]"
+                    ? "border-[#16A34A] bg-[#16A34A] text-white"
+                    : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-green-200 hover:bg-green-50 hover:text-[#16A34A]"
                 }`}
               >
                 <Icon size={12} aria-hidden="true" />
@@ -111,13 +111,13 @@ function AnnonceFilters({
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Rechercher une publication..."
-              className="h-11 rounded-lg border-[#E2E8F0] bg-[#F8FAFC] pl-11 text-sm focus-visible:border-[#0F766E] focus-visible:ring-[#0F766E]/20"
+              className="h-11 rounded-lg border-[#E2E8F0] bg-[#F8FAFC] pl-11 text-sm focus-visible:border-[#16A34A] focus-visible:ring-[#16A34A]/20"
             />
           </div>
           <button
             type="submit"
             disabled={!search.trim() && !type}
-            className="h-11 rounded-lg bg-[#0F766E] px-5 text-sm font-semibold text-white transition hover:bg-[#0e6b62] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+            className="h-11 rounded-lg bg-[#16A34A] px-5 text-sm font-semibold text-white transition hover:bg-[#15803d] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
           >
             Rechercher
           </button>
@@ -164,8 +164,8 @@ function AnnonceFilters({
                   onClick={() => onTypeChange(option.value)}
                   className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
                     active
-                      ? "border-[#0F766E] bg-[#0F766E] text-white"
-                      : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-teal-200 hover:bg-teal-50 hover:text-[#0F766E]"
+                      ? "border-[#16A34A] bg-[#16A34A] text-white"
+                      : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-green-200 hover:bg-green-50 hover:text-[#16A34A]"
                   }`}
                 >
                   <Icon size={14} aria-hidden="true" />

@@ -19,7 +19,7 @@ import { formatAnnonceDate, getTypeLabel } from "../utils/annonceUtils";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 const TYPE_STYLES = {
-  ANNONCE:    "border-teal-200 bg-teal-50 text-[#0F766E]",
+  ANNONCE:    "border-green-200 bg-green-50 text-[#16A34A]",
   ACTUALITE:  "border-blue-200 bg-blue-50 text-blue-700",
   COMMUNIQUE: "border-purple-200 bg-purple-50 text-purple-700",
   DECISION:   "border-amber-200 bg-amber-50 text-amber-700",
@@ -89,7 +89,7 @@ function AnnonceDetailPage() {
           <div className="mx-auto max-w-4xl px-6 py-3.5">
             <Link
               to="/annonces"
-              className="inline-flex items-center gap-2 text-sm font-medium text-[#64748B] transition hover:text-[#0F766E]"
+              className="inline-flex items-center gap-2 text-sm font-medium text-[#64748B] transition hover:text-[#16A34A]"
             >
               <ArrowLeft size={14} />
               Retour aux publications
@@ -162,7 +162,7 @@ function AnnonceDetailPage() {
 
                 {/* Résumé */}
                 {annonce.resume && (
-                  <p className="mt-5 max-w-3xl border-l-4 border-[#0F766E] pl-5 text-base leading-7 text-[#64748B]">
+                  <p className="mt-5 max-w-3xl border-l-4 border-[#16A34A] pl-5 text-base leading-7 text-[#64748B]">
                     {annonce.resume}
                   </p>
                 )}
@@ -189,7 +189,7 @@ function AnnonceDetailPage() {
                     onClick={handleCopyLink}
                     className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition ${
                       copied
-                        ? "border-teal-200 bg-teal-50 text-[#0F766E]"
+                        ? "border-green-200 bg-green-50 text-[#16A34A]"
                         : "border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-[#F8FAFC]"
                     }`}
                   >

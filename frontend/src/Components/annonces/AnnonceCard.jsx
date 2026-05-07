@@ -27,7 +27,7 @@ function AnnonceCard({ annonce }) {
         aria-label={`Lire : ${annonce.titre || "Publication sans titre"}`}
         className="group block h-full"
       >
-        <div className="flex h-full flex-col overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-md">
+        <div className="flex h-full flex-col overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-green-200 hover:shadow-md">
 
           {/* Image / placeholder */}
           <div className="relative h-48 shrink-0 overflow-hidden bg-[#F8FAFC]">
@@ -58,7 +58,7 @@ function AnnonceCard({ annonce }) {
             {/* Pin */}
             {annonce.isPinned && (
               <div className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm">
-                <Pin size={12} className="fill-[#0F766E] text-[#0F766E]" />
+                <Pin size={12} className="fill-[#16A34A] text-[#16A34A]" />
               </div>
             )}
           </div>
@@ -71,7 +71,7 @@ function AnnonceCard({ annonce }) {
               </p>
             )}
 
-            <h3 className="line-clamp-2 text-base font-bold leading-6 text-[#0F172A] transition-colors group-hover:text-[#0F766E]">
+            <h3 className="line-clamp-2 text-base font-bold leading-6 text-[#0F172A] transition-colors group-hover:text-[#16A34A]">
               {annonce.titre || "Publication sans titre"}
             </h3>
 
@@ -84,7 +84,7 @@ function AnnonceCard({ annonce }) {
                 <CalendarDays size={12} />
                 {formatDate(annonce.datePublication || annonce.dateCreation)}
               </span>
-              <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#0F766E] transition-all group-hover:gap-2">
+              <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#16A34A] transition-all group-hover:gap-2">
                 Lire plus
                 <ArrowRight size={12} />
               </span>

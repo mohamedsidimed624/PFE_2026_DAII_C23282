@@ -42,7 +42,7 @@ function PublicHero({
         </h1>
 
         {/* Accent rule */}
-        <div className="mx-auto mt-6 h-0.5 w-16 rounded-full bg-teal-400/70" aria-hidden="true" />
+        <div className="mx-auto mt-6 h-0.5 w-16 rounded-full bg-green-500/80" aria-hidden="true" />
 
         {/* Subtitle */}
         <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-white/70">

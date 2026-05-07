@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { loginUser } from "../services/authApi";
 import Navbar from "../components/Navbar";
 import { Stethoscope, Shield, Eye, EyeOff, AlertCircle } from "lucide-react";
-
+import Footer from "../components/Footer";
 import medecinLogo from "../assets/logo.png";
 import ordreLogo from "../assets/logo.png";
 

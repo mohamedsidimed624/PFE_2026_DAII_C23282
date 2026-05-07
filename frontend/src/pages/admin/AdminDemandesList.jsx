@@ -16,9 +16,9 @@ const PAGE_SIZES     = [10, 25, 50];
 
 const getStatusClasses = (status) => {
   switch (status) {
-    case "APPROUVED": return { pill: "bg-green-100 text-green-700", dot: "bg-green-500" };
-    case "REJECTED": return { pill: "bg-red-100 text-red-700",   dot: "bg-red-500" };
-    default:         return { pill: "bg-amber-100 text-amber-600", dot: "bg-amber-400" };
+    case "APPROUVED": return { pill: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400", dot: "bg-green-500" };
+    case "REJECTED":  return { pill: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",         dot: "bg-red-500" };
+    default:          return { pill: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400", dot: "bg-amber-400" };
   }
 };
 
@@ -50,7 +50,6 @@ function AdminDemandesList() {
     })();
   }, []);
 
-  /* ── Filtres ── */
   const filtered = demandes.filter((d) => {
     const matchSearch =
       `${d.nom} ${d.prenom} ${d.email} ${d.id}`
@@ -70,7 +69,7 @@ function AdminDemandesList() {
   if (loading) {
     return (
       <AdminLayout title="Gestion des demandes">
-        <div className="flex items-center gap-3 text-slate-500 text-sm p-4">
+        <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-sm p-4">
           <div className="w-4 h-4 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
           Chargement…
         </div>
@@ -87,24 +86,24 @@ function AdminDemandesList() {
 
           {/* Recherche */}
           <div className="relative flex-1 min-w-48 max-w-72">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
-              placeholder="Search by order id"
+              placeholder="Rechercher..."
               value={search}
               onChange={handleSearch}
-              className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 rounded-xl bg-white text-slate-700 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all"
+              className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all"
             />
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             {/* Filtre statut */}
             <div className="relative">
-              <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               <select
                 value={statusFilter}
                 onChange={(e) => handleStatus(e.target.value)}
-                className="pl-8 pr-8 py-2 text-sm border border-slate-200 rounded-xl bg-white text-slate-700 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
+                className="pl-8 pr-8 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
               >
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s}>{s === "Tous" ? "Statut : Tous" : s}</option>
@@ -113,33 +112,33 @@ function AdminDemandesList() {
             </div>
 
             {/* Filtre date (UI only) */}
-            <button className="flex items-center gap-2 px-3.5 py-2 text-sm border border-slate-200 rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition-colors">
-              <CalendarDays size={14} className="text-slate-400" />
-              Filter by date range
+            <button className="flex items-center gap-2 px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <CalendarDays size={14} className="text-slate-400 dark:text-slate-500" />
+              Filtrer par date
             </button>
           </div>
         </div>
 
         {/* ── Table ── */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors duration-200">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-100">
+                <tr className="border-b border-slate-100 dark:border-slate-800">
                   {["ID", "DATE", "DEMANDEUR", "STATUS", "ACTION"].map((h) => (
                     <th
                       key={h}
-                      className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                      className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500"
                     >
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                 {paginated.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-5 py-12 text-center text-sm text-slate-400">
+                    <td colSpan={5} className="px-5 py-12 text-center text-sm text-slate-400 dark:text-slate-500">
                       Aucune demande trouvée.
                     </td>
                   </tr>
@@ -147,20 +146,20 @@ function AdminDemandesList() {
                   paginated.map((d) => {
                     const sc = getStatusClasses(d.statut);
                     return (
-                      <tr key={d.id} className="hover:bg-slate-50/60 transition-colors group">
-                        <td className="px-5 py-3.5 text-sm font-semibold text-slate-700">
+                      <tr key={d.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/60 transition-colors group">
+                        <td className="px-5 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-300">
                           #{d.id}
                         </td>
-                        <td className="px-5 py-3.5 text-sm text-slate-500">
+                        <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">
                           {formatDate(d.dateCreation || d.date)}
                         </td>
                         <td className="px-5 py-3.5">
                           <div>
-                            <p className="text-sm font-medium text-slate-800">
+                            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
                               {d.nom} {d.prenom}
                             </p>
                             {d.email && (
-                              <p className="text-xs text-slate-400 mt-0.5">{d.email}</p>
+                              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{d.email}</p>
                             )}
                           </div>
                         </td>
@@ -173,10 +172,10 @@ function AdminDemandesList() {
                         <td className="px-5 py-3.5">
                           <button
                             onClick={() => navigate(`/admin/demandes/${d.id}`)}
-                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-600 hover:text-green-700 transition-colors"
+                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors"
                           >
                             <Eye size={14} />
-                            View Details
+                            Voir détail
                           </button>
                         </td>
                       </tr>
@@ -188,24 +187,24 @@ function AdminDemandesList() {
           </div>
 
           {/* ── Pagination ── */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-100">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <span>Showing</span>
+          <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+              <span>Affichage</span>
               <select
                 value={pageSize}
                 onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                className="border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-600 outline-none focus:border-green-500 transition-all"
+                className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 outline-none focus:border-green-500 transition-all"
               >
                 {PAGE_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
-              <span>of {filtered.length}</span>
+              <span>sur {filtered.length}</span>
             </div>
 
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft size={14} />
               </button>
@@ -219,7 +218,7 @@ function AdminDemandesList() {
                     className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
                       page === p
                         ? "bg-green-600 text-white"
-                        : "border border-slate-200 text-slate-500 hover:bg-slate-50"
+                        : "border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
                     {p}
@@ -230,7 +229,7 @@ function AdminDemandesList() {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight size={14} />
               </button>

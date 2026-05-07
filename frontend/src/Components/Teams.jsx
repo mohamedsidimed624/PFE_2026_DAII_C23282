@@ -79,9 +79,9 @@ export default function Teams() {
                             {/* Child 1: Bureau Exécutif */}
                             <motion.div variants={fadeInUp} className="flex-1 flex flex-col items-center relative md:pt-8">
                                 <div className="hidden md:block absolute top-0 w-1 h-8 bg-slate-200 rounded-b-full"></div>
-                                <div className="w-full md:w-auto bg-white rounded-2xl border border-slate-100 p-6 flex flex-col items-center text-center shadow-lg shadow-slate-200/40 hover:shadow-xl hover:border-teal-200 transition-all duration-300 group overflow-hidden relative">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-teal-50 to-emerald-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                    <div className="w-12 h-12 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mb-4 relative z-10">
+                                <div className="w-full md:w-auto bg-white rounded-2xl border border-slate-100 p-6 flex flex-col items-center text-center shadow-lg shadow-slate-200/40 hover:shadow-xl hover:border-green-200 transition-all duration-300 group overflow-hidden relative">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-green-50 to-emerald-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4 relative z-10">
                                         <Users size={24} />
                                     </div>
                                     <h3 className="text-lg font-bold text-slate-900 mb-2 relative z-10">Bureau Exécutif</h3>

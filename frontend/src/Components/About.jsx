@@ -27,7 +27,7 @@ function About() {
         <section className="py-24 bg-slate-50 relative overflow-hidden">
             {/* Premium Background Elements */}
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-br from-green-100/40 to-emerald-50/20 rounded-full blur-[120px] pointer-events-none transform translate-x-1/3 -translate-y-1/4"></div>
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-emerald-100/40 to-teal-50/20 rounded-full blur-[100px] pointer-events-none transform -translate-x-1/3 translate-y-1/4"></div>
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-emerald-100/40 to-green-50/20 rounded-full blur-[100px] pointer-events-none transform -translate-x-1/3 translate-y-1/4"></div>
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">

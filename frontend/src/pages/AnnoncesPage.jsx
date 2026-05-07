@@ -133,7 +133,7 @@ export default function AnnoncesPage() {
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
                   aria-label="Trier les annonces"
-                  className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                  className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#16A34A]/20"
                 >
                   <option value="recent">Plus récent</option>
                   <option value="oldest">Plus ancien</option>
@@ -194,7 +194,7 @@ export default function AnnoncesPage() {
                 {list.length > 0 && (
                   <div>
                     <div className="mb-5 flex items-center gap-3">
-                      <div className="h-5 w-1 rounded-full bg-[#0F766E]" aria-hidden="true" />
+                      <div className="h-5 w-1 rounded-full bg-[#16A34A]" aria-hidden="true" />
                       <h2 className="text-base font-semibold text-[#0F172A]">Toutes les publications</h2>
                     </div>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -214,7 +214,7 @@ export default function AnnoncesPage() {
                     <button
                       onClick={loadMore}
                       disabled={loadingMore}
-                      className="rounded-xl border border-[#E2E8F0] bg-white px-8 py-3 text-sm font-semibold text-[#0F172A] shadow-sm transition hover:border-[#0F766E] hover:text-[#0F766E] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-xl border border-[#E2E8F0] bg-white px-8 py-3 text-sm font-semibold text-[#0F172A] shadow-sm transition hover:border-[#16A34A] hover:text-[#16A34A] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {loadingMore ? "Chargement..." : "Charger plus de publications"}
                     </button>

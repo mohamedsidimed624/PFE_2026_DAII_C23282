@@ -67,7 +67,7 @@ const DEPARTMENTS = [
 ];
 
 const INPUT_CLS =
-  "w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm text-[#0F172A] placeholder:text-[#94A3B8] transition focus:border-[#0F766E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]/15";
+  "w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm text-[#0F172A] placeholder:text-[#94A3B8] transition focus:border-[#16A34A] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#16A34A]/15";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -120,8 +120,8 @@ export default function ContactPage() {
               <div className="divide-y divide-[#E2E8F0]">
                 {CONTACT_INFOS.map(({ icon: Icon, label, value, sub }) => (
                   <div key={label} className="flex items-start gap-4 px-6 py-4">
-                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50">
-                      <Icon size={15} className="text-[#0F766E]" />
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-50">
+                      <Icon size={15} className="text-[#16A34A]" />
                     </div>
                     <div>
                       <p className="text-xs font-medium text-[#64748B]">{label}</p>
@@ -155,7 +155,7 @@ export default function ContactPage() {
                       </p>
                       <a
                         href={`mailto:${dept.email}`}
-                        className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-[#64748B] transition hover:text-[#0F766E]"
+                        className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-[#64748B] transition hover:text-[#16A34A]"
                       >
                         <Mail size={11} />
                         {dept.email}
@@ -163,7 +163,7 @@ export default function ContactPage() {
                     </div>
                     <a
                       href={`tel:${dept.phone.replace(/\s/g, "")}`}
-                      className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#0F172A] transition hover:border-teal-200 hover:bg-teal-50 hover:text-[#0F766E] sm:self-auto"
+                      className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#0F172A] transition hover:border-green-200 hover:bg-green-50 hover:text-[#16A34A] sm:self-auto"
                     >
                       <Phone size={11} />
                       {dept.phone}
@@ -175,8 +175,8 @@ export default function ContactPage() {
 
             {/* Institution officielle */}
             <div className="flex items-start gap-4 rounded-xl border border-[#E2E8F0] bg-white px-6 py-5 shadow-sm">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50">
-                <Building2 size={15} className="text-[#0F766E]" />
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-50">
+                <Building2 size={15} className="text-[#16A34A]" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-[#0F172A]">
@@ -296,7 +296,7 @@ export default function ContactPage() {
 
                   <button
                     type="submit"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0e6b62] active:scale-[.99]"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#16A34A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#15803d] active:scale-[.99]"
                   >
                     <Send size={14} />
                     Envoyer le message
@@ -346,7 +346,7 @@ export default function ContactPage() {
           </div>
           <Link
             to="/reclamation"
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 text-sm font-medium text-[#0F172A] transition hover:border-[#0F766E] hover:text-[#0F766E] sm:self-auto self-start"
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 text-sm font-medium text-[#0F172A] transition hover:border-[#16A34A] hover:text-[#16A34A] sm:self-auto self-start"
           >
             Déposer une réclamation
           </Link>
@@ -363,7 +363,7 @@ function FormField({ label, required, children }) {
     <div>
       <label className="mb-1.5 block text-xs font-semibold text-[#0F172A]">
         {label}
-        {required && <span className="ml-1 text-[#0F766E]">*</span>}
+        {required && <span className="ml-1 text-[#16A34A]">*</span>}
       </label>
       {children}
     </div>

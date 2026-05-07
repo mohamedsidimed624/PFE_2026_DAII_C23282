@@ -41,8 +41,8 @@ function AnnonceFeatured({ annonce }) {
 
             {/* Pin */}
             {annonce.isPinned && (
-              <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#0F766E] shadow">
-                <Pin size={11} className="fill-[#0F766E] text-[#0F766E]" />
+              <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#16A34A] shadow">
+                <Pin size={11} className="fill-[#16A34A] text-[#16A34A]" />
                 Épinglé
               </div>
             )}
@@ -75,7 +75,7 @@ function AnnonceFeatured({ annonce }) {
                   <CalendarDays size={13} />
                   Publié le {formatAnnonceDate(annonce.datePublication || annonce.dateCreation)}
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0F766E] px-4 py-1.5 text-xs font-semibold text-white transition group-hover:bg-[#0e6b62]">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white transition group-hover:bg-[#15803d]">
                   {getActionLabel(annonce.type)}
                   <ArrowRight size={13} />
                 </span>
@@ -98,10 +98,10 @@ function AnnonceFeatured({ annonce }) {
         aria-label={`Lire : ${annonce.titre || "Publication sans titre"}`}
         className="group block"
       >
-        <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm transition-all duration-200 group-hover:border-teal-200 group-hover:shadow-md">
+        <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm transition-all duration-200 group-hover:border-green-200 group-hover:shadow-md">
           <div className="flex">
             {/* Accent bar */}
-            <div className="w-1 shrink-0 bg-[#0F766E]" />
+            <div className="w-1 shrink-0 bg-[#16A34A]" />
 
             <div className="flex flex-1 flex-col justify-center p-6 md:flex-row md:items-center md:p-10">
               <div className="flex-1">
@@ -115,13 +115,13 @@ function AnnonceFeatured({ annonce }) {
                     </span>
                   )}
                   {annonce.isPinned && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-[#0F766E]">
-                      <Pin size={10} className="fill-[#0F766E]" /> Épinglé
+                    <span className="inline-flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-[#16A34A]">
+                      <Pin size={10} className="fill-[#16A34A]" /> Épinglé
                     </span>
                   )}
                 </div>
 
-                <h2 className="text-2xl font-bold leading-tight text-[#0F172A] transition-colors group-hover:text-[#0F766E] md:text-3xl">
+                <h2 className="text-2xl font-bold leading-tight text-[#0F172A] transition-colors group-hover:text-[#16A34A] md:text-3xl">
                   {annonce.titre || "Publication sans titre"}
                 </h2>
 
@@ -136,7 +136,7 @@ function AnnonceFeatured({ annonce }) {
                     <CalendarDays size={13} />
                     Publié le {formatAnnonceDate(annonce.datePublication || annonce.dateCreation)}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0F766E] px-4 py-1.5 text-xs font-semibold text-white transition group-hover:bg-[#0e6b62]">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white transition group-hover:bg-[#15803d]">
                     {getActionLabel(annonce.type)}
                     <ArrowRight size={13} />
                   </span>

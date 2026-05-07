@@ -1,46 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import MedecinSidebar from "./MedecinSidebar";
-import MedecinTopbar from "./MedecinTopbar";
+import NavbarMedecinDashboard from "./NavbarMedecinDashboard";
 
-function MedecinLayout({ title, subtitle, children, profile }) {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+function MedecinLayout({ children, title = "Tableau de bord" }) {
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem("medecinSidebarCollapsed") === "true"
+  );
 
-  // Initialize Dark Mode based on localStorage
-  useEffect(() => {
-    const isDark = localStorage.getItem("theme") === "dark";
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
+  const toggle = () =>
+    setCollapsed((c) => {
+      localStorage.setItem("medecinSidebarCollapsed", String(!c));
+      return !c;
+    });
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
-      {/* Sidebar — fixed height, no scroll */}
-      <aside
-        className={`hidden shrink-0 lg:block transition-all duration-300 ease-in-out z-20 ${
-          isSidebarCollapsed ? "w-20" : "w-64"
-        }`}
-      >
-        <MedecinSidebar isCollapsed={isSidebarCollapsed} />
-      </aside>
+    <div className="flex min-h-screen bg-slate-50 transition-colors duration-200 dark:bg-slate-950">
+      <MedecinSidebar collapsed={collapsed} onToggle={toggle} />
 
-      {/* Right column — topbar + content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Topbar — stays at top naturally */}
-        <div className="shrink-0 z-10 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md">
-          <MedecinTopbar
-            title={title}
-            subtitle={subtitle}
-            profile={profile}
-            isSidebarCollapsed={isSidebarCollapsed}
-            toggleSidebar={() => setIsSidebarCollapsed(prev => !prev)}
-          />
-        </div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <NavbarMedecinDashboard title={title} onToggleSidebar={toggle} />
 
-        {/* Scrollable content */}
-        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 text-slate-900 dark:text-slate-100">
+        <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>
       </div>

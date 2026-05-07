@@ -482,7 +482,7 @@ function AdminSpecialitesPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
-                className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 rounded-xl bg-white text-slate-700 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all"
+                className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
 
@@ -494,7 +494,7 @@ function AdminSpecialitesPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => handleStatusChange(e.target.value)}
-                className="pl-8 pr-8 py-2 text-sm border border-slate-200 rounded-xl bg-white text-slate-700 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
+                className="pl-8 pr-8 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
               >
                 {STATUS_OPTIONS.map((opt) => (
                   <option key={opt.label} value={opt.value}>
@@ -510,7 +510,7 @@ function AdminSpecialitesPage() {
                 setSortBy(e.target.value);
                 setPage(0);
               }}
-              className="px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white text-slate-700 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
+              className="px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -525,7 +525,7 @@ function AdminSpecialitesPage() {
                 setSize(Number(e.target.value));
                 setPage(0);
               }}
-              className="px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white text-slate-700 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
+              className="px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
             >
               {PAGE_SIZE_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -537,7 +537,7 @@ function AdminSpecialitesPage() {
             <button
               type="button"
               onClick={handleReset}
-              className="flex items-center gap-2 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               <RotateCcw size={14} />
               Réinitialiser
@@ -554,7 +554,7 @@ function AdminSpecialitesPage() {
           </button>
         </div>
 
-        <div className="text-sm text-slate-500">
+        <div className="text-sm text-slate-500 dark:text-slate-400">
           <p>
             {summary.totalSpecialites} spécialité
             {summary.totalSpecialites > 1 ? "s" : ""},{" "}
@@ -563,7 +563,7 @@ function AdminSpecialitesPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           {error ? (
             <ErrorState message={error} onRetry={() => loadSpecialites(search, statusFilter, page)} />
           ) : specialites.length === 0 ? (
@@ -572,32 +572,32 @@ function AdminSpecialitesPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1050px]">
                 <thead>
-                  <tr className="border-b border-slate-100">
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  <tr className="border-b border-slate-100 dark:border-slate-800">
+                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                       LIBELLÉ
                     </th>
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                       CODE
                     </th>
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                       STATUT
                     </th>
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                       SOUS-SPÉC.
                     </th>
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                       MÉDECINS
                     </th>
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                       DEMANDES
                     </th>
-                    <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                       ACTIONS
                     </th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {specialites.map((specialite) => {
                     const isExpanded = expandedRows[specialite.id];
                     const sousSpecialites = sousSpecialitesMap[specialite.id] || [];
@@ -643,9 +643,9 @@ function AdminSpecialitesPage() {
        
 
         {!error && totalElements > 0 && (
-            <div className="border-t border-slate-100 bg-white px-5 py-3.5">
+            <div className="border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3.5">
                 <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
                     <span>Showing</span>
                     <select
                     value={size}
@@ -653,7 +653,7 @@ function AdminSpecialitesPage() {
                         setSize(Number(e.target.value));
                         setPage(0);
                     }}
-                    className="border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-600 bg-white outline-none focus:border-green-500 transition-all"
+                    className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 outline-none focus:border-green-500 transition-all"
                     >
                     {PAGE_SIZE_OPTIONS.map((s) => (
                         <option key={s} value={s}>
@@ -669,7 +669,7 @@ function AdminSpecialitesPage() {
                     type="button"
                     onClick={() => setPage((prev) => Math.max(0, prev - 1))}
                     disabled={page === 0 || loading}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                     <ChevronLeft size={14} />
                     </button>
@@ -684,7 +684,7 @@ function AdminSpecialitesPage() {
                         className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
                             page === pageIndex
                             ? "bg-green-600 text-white"
-                            : "border border-slate-200 text-slate-500 hover:bg-slate-50"
+                            : "border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                         }`}
                         >
                         {pageIndex + 1}
@@ -698,7 +698,7 @@ function AdminSpecialitesPage() {
                         setPage((prev) => Math.min(totalPages - 1, prev + 1))
                     }
                     disabled={page >= totalPages - 1 || loading}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                     <ChevronRight size={14} />
                     </button>
@@ -761,23 +761,23 @@ function SpecialiteRows({
 }) {
   return (
     <>
-      <tr className="hover:bg-slate-50/60 transition-colors">
+      <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
         <td className="px-5 py-3.5">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onToggleExpand}
-              className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors"
+              className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
 
             <div>
-              <p className="text-sm font-semibold text-slate-800">
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                 {specialite.libelle}
               </p>
               {specialite.description && (
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                   {specialite.description}
                 </p>
               )}
@@ -785,21 +785,21 @@ function SpecialiteRows({
           </div>
         </td>
 
-        <td className="px-5 py-3.5 text-sm text-slate-500">{specialite.code}</td>
+        <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{specialite.code}</td>
 
         <td className="px-5 py-3.5">
           <StatusBadge active={specialite.active} />
         </td>
 
-        <td className="px-5 py-3.5 text-sm font-medium text-slate-600">
+        <td className="px-5 py-3.5 text-sm font-medium text-slate-600 dark:text-slate-300">
           {specialite.nombreSousSpecialites ?? 0}
         </td>
 
-        <td className="px-5 py-3.5 text-sm font-medium text-slate-600">
+        <td className="px-5 py-3.5 text-sm font-medium text-slate-600 dark:text-slate-300">
           {specialite.nombreMedecins ?? 0}
         </td>
 
-        <td className="px-5 py-3.5 text-sm font-medium text-slate-600">
+        <td className="px-5 py-3.5 text-sm font-medium text-slate-600 dark:text-slate-300">
           {specialite.nombreDemandes ?? 0}
         </td>
 
@@ -849,7 +849,7 @@ function SpecialiteRows({
             <tr>
               <td
                 colSpan={7}
-                className="px-5 py-4 bg-slate-50 text-sm text-slate-500"
+                className="px-5 py-4 bg-slate-50 dark:bg-slate-800/30 text-sm text-slate-500 dark:text-slate-400"
               >
                 <div className="flex items-center gap-2">
                   <HeartPulse size={16} className="text-green-600 animate-pulse" />
@@ -861,7 +861,7 @@ function SpecialiteRows({
             <tr>
               <td
                 colSpan={7}
-                className="px-5 py-4 bg-slate-50 text-sm text-slate-400"
+                className="px-5 py-4 bg-slate-50 dark:bg-slate-800/30 text-sm text-slate-400 dark:text-slate-500"
               >
                 Aucune sous-spécialité.
               </td>
@@ -870,17 +870,17 @@ function SpecialiteRows({
             sousSpecialites.map((sous) => (
               <tr
                 key={sous.id}
-                className="bg-slate-50/70 hover:bg-slate-100/70 transition-colors"
+                className="bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors"
               >
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3 pl-10">
                     <div className="h-2 w-2 rounded-full bg-green-500" />
                     <div>
-                      <p className="text-sm font-medium text-slate-700">
+                      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                         {sous.libelle}
                       </p>
                       {sous.description && (
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                           {sous.description}
                         </p>
                       )}
@@ -888,19 +888,19 @@ function SpecialiteRows({
                   </div>
                 </td>
 
-                <td className="px-5 py-3.5 text-sm text-slate-500">{sous.code}</td>
+                <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{sous.code}</td>
 
                 <td className="px-5 py-3.5">
                   <StatusBadge active={sous.active} />
                 </td>
 
-                <td className="px-5 py-3.5 text-sm text-slate-400">—</td>
+                <td className="px-5 py-3.5 text-sm text-slate-400 dark:text-slate-500">—</td>
 
-                <td className="px-5 py-3.5 text-sm font-medium text-slate-600">
+                <td className="px-5 py-3.5 text-sm font-medium text-slate-600 dark:text-slate-300">
                   {sous.nombreMedecins ?? 0}
                 </td>
 
-                <td className="px-5 py-3.5 text-sm font-medium text-slate-600">
+                <td className="px-5 py-3.5 text-sm font-medium text-slate-600 dark:text-slate-300">
                   {sous.nombreDemandes ?? 0}
                 </td>
 
@@ -965,13 +965,13 @@ function RowMenu({ menuKey, openMenu, setOpenMenu, items }) {
       <button
         type="button"
         onClick={toggle}
-        className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+        className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
       >
         <MoreHorizontal size={15} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-10 z-20 min-w-[190px] rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+        <div className="absolute right-0 top-10 z-20 min-w-[190px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg overflow-hidden">
           {items.map((item, index) => (
             <button
               key={index}
@@ -980,8 +980,8 @@ function RowMenu({ menuKey, openMenu, setOpenMenu, items }) {
               onClick={(e) => handleItemClick(e, item)}
               className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                 item.danger
-                  ? "text-red-600 hover:bg-red-50"
-                  : "text-slate-700 hover:bg-slate-50"
+                  ? "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
               }`}
             >
               {item.icon}
@@ -999,13 +999,13 @@ function StatusBadge({ active }) {
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
         active
-          ? "bg-green-100 text-green-700"
-          : "bg-slate-100 text-slate-600"
+          ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
       }`}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          active ? "bg-green-500" : "bg-slate-400"
+          active ? "bg-green-500" : "bg-slate-400 dark:bg-slate-500"
         }`}
       />
       {active ? "ACTIVE" : "INACTIVE"}
@@ -1016,8 +1016,8 @@ function StatusBadge({ active }) {
 function FeedbackBanner({ type, message }) {
   const classes =
     type === "success"
-      ? "border-green-200 bg-green-50 text-green-700"
-      : "border-red-200 bg-red-50 text-red-700";
+      ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+      : "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400";
 
   return (
     <div className={`rounded-2xl border px-4 py-3 text-sm font-medium ${classes}`}>
@@ -1028,14 +1028,14 @@ function FeedbackBanner({ type, message }) {
 
 function MedicalLoading() {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm min-h-[240px] flex flex-col items-center justify-center text-center px-6">
-      <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-4">
-        <Stethoscope size={26} className="text-green-600 animate-pulse" />
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm min-h-[240px] flex flex-col items-center justify-center text-center px-6">
+      <div className="w-16 h-16 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center mb-4">
+        <Stethoscope size={26} className="text-green-600 dark:text-green-400 animate-pulse" />
       </div>
-      <h3 className="text-base font-bold text-slate-800">
+      <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
         Chargement des spécialités…
       </h3>
-      <p className="mt-2 text-sm text-slate-500 max-w-md">
+      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 max-w-md">
         Préparation du référentiel médical.
       </p>
     </div>
@@ -1045,14 +1045,14 @@ function MedicalLoading() {
 function ErrorState({ message, onRetry }) {
   return (
     <div className="min-h-[220px] flex flex-col items-center justify-center text-center px-6">
-      <h3 className="text-lg font-bold text-slate-800">
+      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
         Une erreur est survenue
       </h3>
-      <p className="mt-2 text-sm text-slate-500">{message}</p>
+      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors"
+        className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-700 text-white text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors"
       >
         <RotateCcw size={14} />
         Réessayer
@@ -1064,13 +1064,13 @@ function ErrorState({ message, onRetry }) {
 function EmptyState() {
   return (
     <div className="min-h-[220px] flex flex-col items-center justify-center text-center px-6">
-      <div className="w-14 h-14 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center mb-4">
+      <div className="w-14 h-14 rounded-2xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center mb-4">
         <Stethoscope size={24} />
       </div>
-      <h3 className="text-lg font-bold text-slate-800">
+      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
         Aucune spécialité disponible
       </h3>
-      <p className="mt-2 text-sm text-slate-500 max-w-md">
+      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 max-w-md">
         Commencez par ajouter une spécialité pour structurer le référentiel
         médical.
       </p>

@@ -1,5 +1,4 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState } from "react";
 import {
   LayoutDashboard,
   User,
@@ -10,130 +9,143 @@ import {
   Vote,
   Settings,
   LogOut,
-  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Newspaper,
+  Award,
+  Search,
+  ClipboardList,
 } from "lucide-react";
 
-const NAV_ITEMS = [
-  { label: "Dashboard",     icon: LayoutDashboard, to: "/medecin/dashboard" },
-  { label: "Mon profil",    icon: User,            to: "/medecin/profil" },
-  { label: "Mes documents", icon: FileText,        to: "/medecin/documents" },
-  { label: "Notifications", icon: Bell,            to: "/medecin/notifications", badge: 3 },
-  { label: "Réclamations",  icon: TriangleAlert,   to: "/medecin/reclamations" },
-  { label: "Sondages",      icon: BarChart3,       to: "/medecin/sondages" },
-  { label: "Élections",     icon: Vote,            to: "/medecin/elections" },
+const navItems = [
+  { label: "Dashboard", icon: LayoutDashboard, to: "/medecin/dashboard" },
+  { label: "Mon profil", icon: User, to: "/medecin/profil" },
+  { label: "Réclamations", icon: TriangleAlert, to: "/medecin/reclamations" },
+  { label: "Notifications", icon: Bell, to: "/medecin/notifications" },
+  { label: "Sondages", icon: BarChart3, to: "/medecin/sondages" },
+  { label: "Élections", icon: Vote, to: "/medecin/elections" },
+  { label: "Paramètres", icon: Settings, to: "/medecin/parametres" },
 ];
 
-function MedecinSidebar({ isCollapsed = false }) {
+// const mainItems = [
+//   { label: "Dashboard", icon: LayoutDashboard, to: "/medecin/dashboard" },
+//   { label: "Mon dossier", icon: ClipboardList, to: "/suivi-dossier" },
+//   { label: "Mon profil", icon: User, to: "/medecin/profil" },
+//   { label: "Certificat", icon: Award, to: "/medecin/certificat" },
+//   { label: "Réclamations", icon: TriangleAlert, to: "/medecin/reclamations" },
+//   { label: "Annonces médecins", icon: Newspaper, to: "/medecin/annonces" },
+//   { label: "Annuaire", icon: Search, to: "/annuaire" },
+// ];
+
+// const serviceItems = [
+//   { label: "Documents", icon: FileText, to: "/medecin/documents" },
+//   { label: "Notifications", icon: Bell, to: "/medecin/notifications" },
+//   { label: "Sondages", icon: BarChart3, to: "/medecin/sondages" },
+//   { label: "Élections", icon: Vote, to: "/medecin/elections" },
+//   { label: "Paramètres", icon: Settings, to: "/medecin/parametres" },
+// ];
+
+function MedecinSidebar({ collapsed, onToggle }) {
   const navigate = useNavigate();
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("email");
+    localStorage.clear();
     navigate("/login");
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-950 transition-colors duration-300">
-      {/* ── Logo centré ── */}
-      <div className={`flex items-center justify-center py-5 border-b border-slate-200 dark:border-slate-800 transition-colors ${isCollapsed ? 'px-2' : 'px-4'}`}>
+    <aside
+      className={`${
+        collapsed ? "w-14" : "w-56"
+      } flex min-h-screen shrink-0 flex-col overflow-hidden border-r border-slate-100 bg-white transition-all duration-300 dark:border-slate-800 dark:bg-slate-900`}
+    >
+      <div className="flex shrink-0 items-center justify-center border-b border-slate-100 py-4 dark:border-slate-800">
         <img
-          src="./assets/logo.png"
+          src="/src/assets/logo.png"
           alt="Ordre des Médecins"
-          className={`object-contain transition-all duration-300 ${isCollapsed ? 'h-10 w-10' : 'h-14 w-14'}`}
+          className={`object-contain transition-all duration-300 ${
+            collapsed ? "h-8 w-8" : "h-16 w-16"
+          }`}
         />
       </div>
 
-      {/* ── Navigation ── */}
-      <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
-        {NAV_ITEMS.map(({ label, icon: Icon, to, badge }) => (
+      <nav className="flex-1 space-y-5 overflow-y-auto overflow-x-hidden px-2 py-4">
+        <NavSection title="Espace médecin" items={navItems} collapsed={collapsed} />
+        {/* <NavSection title="Services" items={serviceItems} collapsed={collapsed} /> */}
+      </nav>
+
+      <div className="shrink-0 space-y-2 border-t border-slate-100 px-2 py-3 dark:border-slate-800">
+        <button
+          onClick={onToggle}
+          title={collapsed ? "Développer le menu" : "Réduire le menu"}
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-2 text-sm text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+        >
+          {collapsed ? (
+            <ChevronRight size={16} />
+          ) : (
+            <>
+              <ChevronLeft size={16} />
+              <span className="text-xs">Réduire</span>
+            </>
+          )}
+        </button>
+
+        <button
+          onClick={handleLogout}
+          title={collapsed ? "Déconnexion" : undefined}
+          className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-950/30 ${
+            collapsed ? "justify-center" : "justify-start"
+          }`}
+        >
+          <LogOut size={17} className="shrink-0" />
+          {!collapsed && <span className="truncate leading-none">Déconnexion</span>}
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function NavSection({ title, items, collapsed }) {
+  return (
+    <div>
+      {!collapsed && (
+        <p className="mb-2 px-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-600">
+          {title}
+        </p>
+      )}
+
+      <div className="space-y-0.5">
+        {items.map(({ label, icon: Icon, to }) => (
           <NavLink
             key={to}
             to={to}
-            title={isCollapsed ? label : ""}
+            title={collapsed ? label : undefined}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+              `flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-green-600 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-green-400"
-              } ${isCollapsed ? 'justify-center' : 'justify-start'}`
+                  ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              } ${collapsed ? "justify-center" : ""}`
             }
           >
             {({ isActive }) => (
               <>
-                <div className="relative flex items-center justify-center">
-                  <Icon
-                    size={20}
-                    className={`transition-colors ${isActive ? "text-green-600 dark:text-green-400" : "text-slate-400 dark:text-slate-500"}`}
-                  />
-                  {badge && isCollapsed && (
-                    <span className="absolute -top-1.5 -right-1.5 h-3 w-3 rounded-full bg-red-500 border-2 border-white dark:border-slate-950" />
-                  )}
-                </div>
-                {!isCollapsed && (
-                  <div className="flex flex-1 items-center justify-between overflow-hidden">
-                    <span className="leading-none whitespace-nowrap">{label}</span>
-                    {badge ? (
-                      <span className="min-w-[20px] h-[20px] inline-flex items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white leading-none shadow-sm">
-                        {badge}
-                      </span>
-                    ) : null}
-                  </div>
+                <Icon
+                  size={17}
+                  className={`shrink-0 ${
+                    isActive
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-slate-400 dark:text-slate-500"
+                  }`}
+                />
+
+                {!collapsed && (
+                  <span className="truncate leading-none">{label}</span>
                 )}
               </>
             )}
           </NavLink>
         ))}
-
-        {/* ── Paramètres ── */}
-        <div>
-          <button
-            onClick={() => setSettingsOpen((o) => !o)}
-            title={isCollapsed ? "Paramètres" : ""}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200 text-slate-600 hover:bg-slate-50 hover:text-green-600 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-green-400 ${isCollapsed ? 'justify-center' : 'justify-start'}`}
-          >
-            <Settings size={20} className="text-slate-400 dark:text-slate-500 shrink-0" />
-            {!isCollapsed && (
-              <>
-                <span className="flex-1 text-left leading-none whitespace-nowrap">Paramètres</span>
-                <ChevronDown
-                  size={16}
-                  className={`text-slate-400 transition-transform duration-200 ${settingsOpen ? "rotate-180" : ""}`}
-                />
-              </>
-            )}
-          </button>
-
-          {!isCollapsed && settingsOpen && (
-            <div className="ml-9 mt-1 space-y-1">
-              <NavLink
-                to="/medecin/parametres/compte"
-                className={({ isActive }) => `flex items-center px-4 py-2 rounded-lg text-xs font-medium transition-colors ${isActive ? 'text-green-600 dark:text-green-400 bg-green-50/50 dark:bg-green-900/20' : 'text-slate-500 hover:text-green-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-green-400 dark:hover:bg-slate-800/50'}`}
-              >
-                Mon compte
-              </NavLink>
-              <NavLink
-                to="/medecin/parametres/securite"
-                className={({ isActive }) => `flex items-center px-4 py-2 rounded-lg text-xs font-medium transition-colors ${isActive ? 'text-green-600 dark:text-green-400 bg-green-50/50 dark:bg-green-900/20' : 'text-slate-500 hover:text-green-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-green-400 dark:hover:bg-slate-800/50'}`}
-              >
-                Sécurité
-              </NavLink>
-            </div>
-          )}
-        </div>
-      </nav>
-
-      {/* ── Déconnexion ── */}
-      <div className="border-t border-slate-200 dark:border-slate-800 p-3 transition-colors">
-        <button
-          onClick={handleLogout}
-          title={isCollapsed ? "Déconnexion" : ""}
-          className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200 text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-950/30 ${isCollapsed ? 'justify-center' : 'justify-start'}`}
-        >
-          <LogOut size={20} className="shrink-0" />
-          {!isCollapsed && <span className="leading-none whitespace-nowrap">Déconnexion</span>}
-        </button>
       </div>
     </div>
   );

@@ -46,4 +46,8 @@ public interface DemandeAdhesionRepository extends JpaRepository<DemandeAdhesion
     WHERE d.email = :email
 """)
     Optional<DemandeAdhesion> findByEmailWithDetails(@Param("email") String email);
+
+    long countByStatut(ApplicationStatus statut);
+
+    List<DemandeAdhesion> findTop5ByOrderBySubmissionDateDesc();
 }

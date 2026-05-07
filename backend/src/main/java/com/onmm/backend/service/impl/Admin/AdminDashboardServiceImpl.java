@@ -1,0 +1,59 @@
+package com.onmm.backend.service.impl.Admin;
+
+import com.onmm.backend.dto.Admin.DashboardStatsResponse;
+import com.onmm.backend.entity.DemandeAdhesion;
+import com.onmm.backend.entity.enums.ApplicationStatus;
+import com.onmm.backend.entity.enums.StatutMedecin;
+import com.onmm.backend.repository.DemandeAdhesionRepository;
+import com.onmm.backend.repository.MedecinRepository;
+import com.onmm.backend.repository.SpecialiteRepository;
+import com.onmm.backend.service.Admin.AdminDashboardService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class AdminDashboardServiceImpl implements AdminDashboardService {
+
+    private final DemandeAdhesionRepository demandeRepo;
+    private final MedecinRepository medecinRepo;
+    private final SpecialiteRepository specialiteRepo;
+
+    @Override
+    public DashboardStatsResponse getStats() {
+        long totalDemandes   = demandeRepo.count();
+        long enAttente       = demandeRepo.countByStatut(ApplicationStatus.PENDING);
+        long acceptees       = demandeRepo.countByStatut(ApplicationStatus.APPROUVED);
+        long rejetees        = demandeRepo.countByStatut(ApplicationStatus.REJECTED);
+
+        long totalMedecins   = medecinRepo.count();
+        long actifs          = medecinRepo.countByStatut(StatutMedecin.ACTIF);
+        long suspendus       = medecinRepo.countByStatut(StatutMedecin.SUSPENDU);
+        long hommes          = medecinRepo.countBySexe("Homme");
+        long femmes          = medecinRepo.countBySexe("Femme");
+
+        long totalSpecialites = specialiteRepo.count();
+
+        List<DemandeAdhesion> recent = demandeRepo.findTop5ByOrderBySubmissionDateDesc();
+        List<DashboardStatsResponse.RecentDemandeDto> recentDtos = recent.stream()
+            .map(d -> new DashboardStatsResponse.RecentDemandeDto(
+                d.getId(),
+                d.getNom(),
+                d.getPrenom(),
+                d.getNumeroDossier(),
+                d.getStatut().name(),
+                d.getSubmissionDate()
+            ))
+            .toList();
+
+        return new DashboardStatsResponse(
+            totalDemandes, enAttente, acceptees, rejetees,
+            totalMedecins, actifs, suspendus, hommes, femmes,
+            totalSpecialites, recentDtos
+        );
+    }
+}

@@ -2,6 +2,7 @@ package com.onmm.backend.repository;
 
 import com.onmm.backend.entity.DemandeAdhesion;
 import com.onmm.backend.entity.Medecin;
+import com.onmm.backend.entity.enums.StatutMedecin;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -35,4 +36,8 @@ public interface MedecinRepository extends JpaRepository<Medecin, Long>, JpaSpec
     Optional<Medecin> findByDemandeOrigine(DemandeAdhesion demande);
 
     Optional<Medecin> findByEmail(String email);
+
+    long countByStatut(StatutMedecin statut);
+
+    long countBySexe(String sexe);
 }

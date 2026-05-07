@@ -144,7 +144,7 @@ function AnnuaireMedecinDetailPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-[#0F766E] text-2xl font-bold text-white">
+                    <div className="flex h-full w-full items-center justify-center bg-[#16A34A] text-2xl font-bold text-white">
                       {medecin.prenom?.[0]}{medecin.nom?.[0]}
                     </div>
                   )}
@@ -162,7 +162,7 @@ function AnnuaireMedecinDetailPage() {
                       <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
                       {status.label}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-teal-700">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700">
                       <ShieldCheck size={11} />
                       Inscrit au registre ONMM
                     </span>
@@ -212,7 +212,7 @@ function AnnuaireMedecinDetailPage() {
                       const eduMeta = [edu.universite, edu.ville, edu.pays].filter(Boolean).join(" · ");
                       return (
                         <div key={edu.id || i} className="flex items-start gap-3">
-                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#0F766E]" />
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#16A34A]" />
                           <div>
                             <p className="text-sm font-semibold text-[#0F172A]">
                               {edu.diplome || "Diplôme"}
@@ -220,7 +220,7 @@ function AnnuaireMedecinDetailPage() {
                                 <span className="ml-2 font-normal text-[#64748B]">{edu.anneeObtention}</span>
                               )}
                             </p>
-                            {eduSpec && <p className="text-xs text-[#0F766E]">{eduSpec}</p>}
+                            {eduSpec && <p className="text-xs text-[#16A34A]">{eduSpec}</p>}
                             {eduMeta && <p className="text-xs text-[#64748B]">{eduMeta}</p>}
                           </div>
                         </div>
@@ -244,7 +244,7 @@ function AnnuaireMedecinDetailPage() {
                       const expMeta = [exp.ville, exp.pays].filter(Boolean).join(" · ");
                       return (
                         <div key={exp.id || i} className="flex items-start gap-3">
-                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#0F766E]" />
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#16A34A]" />
                           <div>
                             <p className="text-sm font-semibold text-[#0F172A]">{exp.poste || "Poste"}</p>
                             <p className="text-xs text-[#64748B]">

@@ -182,10 +182,10 @@ function AnnuairePage() {
                 aria-expanded={isSearchOpen}
                 aria-controls="registry-search-form"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-teal-100 bg-teal-50">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-green-100 bg-green-50">
                   <ChevronDown
                     size={16}
-                    className={`text-[#0F766E] transition-transform duration-200 ${isSearchOpen ? "rotate-180" : ""}`}
+                    className={`text-[#16A34A] transition-transform duration-200 ${isSearchOpen ? "rotate-180" : ""}`}
                     aria-hidden="true"
                   />
                 </span>
@@ -198,7 +198,7 @@ function AnnuairePage() {
               </button>
 
               <label className="inline-flex cursor-pointer select-none items-center gap-3">
-                <span className={`text-xs font-semibold transition-colors ${isAdvancedSearch ? "text-[#0F766E]" : "text-[#64748B]"}`}>
+                <span className={`text-xs font-semibold transition-colors ${isAdvancedSearch ? "text-[#16A34A]" : "text-[#64748B]"}`}>
                   Recherche avancée
                 </span>
                 <button
@@ -206,7 +206,7 @@ function AnnuairePage() {
                   onClick={() => setIsAdvancedSearch((v) => !v)}
                   aria-pressed={isAdvancedSearch}
                   aria-label="Activer la recherche avancée"
-                  className={`relative h-5 w-10 rounded-full transition-colors duration-200 ${isAdvancedSearch ? "bg-[#0F766E]" : "bg-slate-200"}`}
+                  className={`relative h-5 w-10 rounded-full transition-colors duration-200 ${isAdvancedSearch ? "bg-[#16A34A]" : "bg-slate-200"}`}
                 >
                   <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all duration-200 ${isAdvancedSearch ? "left-5" : "left-0.5"}`} />
                 </button>
@@ -225,7 +225,7 @@ function AnnuairePage() {
                           value={searchInput}
                           onChange={(e) => setSearchInput(e.target.value)}
                           placeholder="Ahmed, Sidi, ORD-1001..."
-                          className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2.5 pl-9 pr-4 text-sm text-[#0F172A] outline-none transition focus:border-[#0F766E] focus:bg-white focus:ring-2 focus:ring-[#0F766E]/15"
+                          className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2.5 pl-9 pr-4 text-sm text-[#0F172A] outline-none transition focus:border-[#16A34A] focus:bg-white focus:ring-2 focus:ring-[#16A34A]/15"
                         />
                       </div>
                     </Field>
@@ -248,7 +248,7 @@ function AnnuairePage() {
                     <div className="flex items-end">
                       <button
                         type="submit"
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0e6b62] active:scale-[.99]"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#16A34A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#15803d] active:scale-[.99]"
                       >
                         <Search size={14} aria-hidden="true" />
                         Rechercher
@@ -297,7 +297,7 @@ function AnnuairePage() {
                       </button>
                       <button
                         type="submit"
-                        className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0e6b62] active:scale-[.99]"
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#16A34A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#15803d] active:scale-[.99]"
                       >
                         <Search size={14} aria-hidden="true" />
                         Rechercher
@@ -315,7 +315,7 @@ function AnnuairePage() {
       <main className="mx-auto w-full max-w-7xl px-6 pb-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 pt-6">
           <div className="flex items-center gap-3">
-            <div className="h-5 w-1 rounded-full bg-[#0F766E]" aria-hidden="true" />
+            <div className="h-5 w-1 rounded-full bg-[#16A34A]" aria-hidden="true" />
             <p className="text-base font-semibold text-[#0F172A]">
               {loading ? (
                 <span className="text-sm font-normal text-[#64748B]">Recherche en cours…</span>
@@ -335,7 +335,7 @@ function AnnuairePage() {
               value={tri}
               onChange={(e) => { setTri(e.target.value); setPage(1); }}
               aria-label="Trier les résultats"
-              className="appearance-none rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-semibold text-[#0F766E] outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/15"
+              className="appearance-none rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-semibold text-[#16A34A] outline-none transition focus:border-[#16A34A] focus:ring-2 focus:ring-[#16A34A]/15"
             >
               {TRIS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
@@ -413,7 +413,7 @@ function AnnuairePage() {
                     aria-current={page === item ? "page" : undefined}
                     className={`flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition ${
                       page === item
-                        ? "border-[#0F766E] bg-[#0F766E] text-white"
+                        ? "border-[#16A34A] bg-[#16A34A] text-white"
                         : "border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-[#F8FAFC]"
                     }`}
                   >
@@ -459,7 +459,7 @@ function SelectField({ value, onChange, options }) {
       <select
         value={value}
         onChange={onChange}
-        className="w-full appearance-none rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 pr-10 text-sm text-[#0F172A] outline-none transition focus:border-[#0F766E] focus:bg-white focus:ring-2 focus:ring-[#0F766E]/15"
+        className="w-full appearance-none rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 pr-10 text-sm text-[#0F172A] outline-none transition focus:border-[#16A34A] focus:bg-white focus:ring-2 focus:ring-[#16A34A]/15"
       >
         {options.map((option) => <option key={option} value={option}>{option}</option>)}
       </select>
@@ -475,7 +475,7 @@ function AdvancedInput({ value, onChange, placeholder }) {
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="w-full rounded-lg border border-[#E2E8F0] bg-white px-4 py-2.5 text-sm text-[#0F172A] outline-none transition focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/15"
+      className="w-full rounded-lg border border-[#E2E8F0] bg-white px-4 py-2.5 text-sm text-[#0F172A] outline-none transition focus:border-[#16A34A] focus:ring-2 focus:ring-[#16A34A]/15"
     />
   );
 }
@@ -499,7 +499,7 @@ function MedecinCard({ medecin, onClick }) {
       variants={fadeInUp}
       className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm transition-shadow duration-200 hover:shadow-md"
     >
-      <div className="h-0.5 bg-[#0F766E]" aria-hidden="true" />
+      <div className="h-0.5 bg-[#16A34A]" aria-hidden="true" />
 
       <div className="p-5">
         {/* Identity row */}
@@ -512,7 +512,7 @@ function MedecinCard({ medecin, onClick }) {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-[#0F766E] text-sm font-bold text-white" aria-hidden="true">
+              <div className="flex h-full w-full items-center justify-center bg-[#16A34A] text-sm font-bold text-white" aria-hidden="true">
                 {medecin.prenom?.[0]}{medecin.nom?.[0]}
               </div>
             )}
@@ -530,7 +530,7 @@ function MedecinCard({ medecin, onClick }) {
 
         {/* Info rows */}
         <div className="mt-4 space-y-2 border-t border-[#E2E8F0] pt-4">
-          <InfoRow icon={<Stethoscope size={13} className="text-[#0F766E]" aria-hidden="true" />} value={specialite || "Spécialité non renseignée"} />
+          <InfoRow icon={<Stethoscope size={13} className="text-[#16A34A]" aria-hidden="true" />} value={specialite || "Spécialité non renseignée"} />
           {ville && <InfoRow icon={<MapPin size={13} className="text-[#64748B]" aria-hidden="true" />} value={`${ville}, Mauritanie`} />}
           {workplace && <InfoRow icon={<Building2 size={13} className="text-[#64748B]" aria-hidden="true" />} value={workplace} />}
         </div>
@@ -539,7 +539,7 @@ function MedecinCard({ medecin, onClick }) {
       <div className="border-t border-[#E2E8F0] bg-[#F8FAFC] px-5 py-3">
         <button
           onClick={onClick}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#0F766E] transition-colors hover:text-[#0e6b62]"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#16A34A] transition-colors hover:text-[#15803d]"
         >
           Voir le profil
           <ArrowRight size={14} aria-hidden="true" />

@@ -39,9 +39,9 @@ const VISIBILITY_OPTIONS = [
 ];
 
 const STATUS_CONFIG = {
-  PUBLISHED: { label: "Publié",    badge: "bg-green-50 text-green-700 border-green-200",  dot: "bg-green-500" },
-  DRAFT:     { label: "Brouillon", badge: "bg-slate-50 text-slate-600 border-slate-200",  dot: "bg-slate-400" },
-  EXPIRED:   { label: "Expiré",    badge: "bg-red-50 text-red-600 border-red-200",        dot: "bg-red-500"   },
+  PUBLISHED: { label: "Publié",    badge: "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800",  dot: "bg-green-500" },
+  DRAFT:     { label: "Brouillon", badge: "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700",     dot: "bg-slate-400 dark:bg-slate-500" },
+  EXPIRED:   { label: "Expiré",    badge: "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800",              dot: "bg-red-500"   },
 };
 
 const formatDate = (v) => {
@@ -70,35 +70,35 @@ function ConfirmModal({ open, onClose, onConfirm, loading, config }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.93, y: 8 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+            className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl"
           >
             {/* Header */}
-            <div className={cx("flex items-center gap-3 px-5 py-4 border-b", config.headerBg)}>
+            <div className={cx("flex items-center gap-3 px-5 py-4 border-b dark:border-slate-700", config.headerBg)}>
               <div className={cx("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", config.iconBg)}>
                 {config.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-900">{config.title}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{config.subtitle}</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{config.title}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{config.subtitle}</p>
               </div>
-              <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition">
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition">
                 <X size={16} />
               </button>
             </div>
 
             {/* Body */}
             <div className="px-5 py-4">
-              <p className="text-sm text-slate-700 leading-6">{config.message}</p>
+              <p className="text-sm text-slate-700 dark:text-slate-300 leading-6">{config.message}</p>
               {config.warning && (
-                <div className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
-                  <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-600" />
-                  <p className="text-xs text-amber-700">{config.warning}</p>
+                <div className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-3 py-2.5">
+                  <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                  <p className="text-xs text-amber-700 dark:text-amber-400">{config.warning}</p>
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/60 px-5 py-3.5">
+            <div className="flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 px-5 py-3.5">
               <button
                 onClick={onClose}
                 disabled={loading}
@@ -140,8 +140,8 @@ function VisibilityBadge({ visibility }) {
     <span className={cx(
       "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
       isPublic
-        ? "border-blue-200 bg-blue-50 text-blue-700"
-        : "border-purple-200 bg-purple-50 text-purple-700"
+        ? "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400"
+        : "border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400"
     )}>
       {isPublic ? <Globe size={10} /> : <Lock size={10} />}
       {isPublic ? "Public" : "Médecins"}
@@ -156,15 +156,15 @@ function StatCard({ label, value, icon, color, active, onClick }) {
       onClick={onClick}
       className={cx(
         "flex items-center gap-3 rounded-xl border p-4 text-left transition",
-        active ? "border-green-300 bg-green-50 ring-1 ring-green-200" : "border-slate-200 bg-white hover:border-slate-300"
+        active ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20 ring-1 ring-green-200 dark:ring-green-800" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-600"
       )}
     >
       <div className={cx("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", color)}>
         {icon}
       </div>
       <div>
-        <p className="text-xs text-slate-500">{label}</p>
-        <p className="text-lg font-bold text-slate-900">{value}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
+        <p className="text-lg font-bold text-slate-900 dark:text-slate-100">{value}</p>
       </div>
     </button>
   );
@@ -177,7 +177,7 @@ function InlineActions({ contenu, onEdit, onConfirmAction }) {
       <button
         onClick={() => onEdit(contenu)}
         title="Modifier"
-        className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:text-slate-800"
+        className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-800 dark:hover:text-slate-200"
       >
         <Pencil size={13} />
       </button>
@@ -186,7 +186,7 @@ function InlineActions({ contenu, onEdit, onConfirmAction }) {
         <button
           onClick={() => onConfirmAction("unpublish", contenu)}
           title="Dépublier"
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 transition hover:bg-amber-100"
+          className="flex h-7 w-7 items-center justify-center rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 transition hover:bg-amber-100 dark:hover:bg-amber-900/30"
         >
           <EyeOff size={13} />
         </button>
@@ -194,7 +194,7 @@ function InlineActions({ contenu, onEdit, onConfirmAction }) {
         <button
           onClick={() => onConfirmAction("publish", contenu)}
           title="Publier"
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-green-200 bg-green-50 text-green-700 transition hover:bg-green-100"
+          className="flex h-7 w-7 items-center justify-center rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 transition hover:bg-green-100 dark:hover:bg-green-900/30"
         >
           <Send size={13} />
         </button>
@@ -203,7 +203,7 @@ function InlineActions({ contenu, onEdit, onConfirmAction }) {
       <button
         onClick={() => onConfirmAction("delete", contenu)}
         title="Supprimer"
-        className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100"
+        className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 transition hover:bg-red-100 dark:hover:bg-red-900/30"
       >
         <Trash2 size={13} />
       </button>
@@ -216,7 +216,7 @@ function ContentGrid({ contenus, loading, error, onEdit, onConfirmAction }) {
   if (loading) return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="h-64 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+        <div key={i} className="h-64 animate-pulse rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900" />
       ))}
     </div>
   );
@@ -234,14 +234,14 @@ function ContentGrid({ contenus, loading, error, onEdit, onConfirmAction }) {
         return (
           <article
             key={c.id}
-            className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             {/* Image */}
-            <div className="relative h-36 bg-slate-100">
+            <div className="relative h-36 bg-slate-100 dark:bg-slate-800">
               {imageSrc ? (
                 <img src={imageSrc} alt={c.titre} className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full items-center justify-center text-slate-300">
+                <div className="flex h-full items-center justify-center text-slate-300 dark:text-slate-600">
                   <FileText size={32} />
                 </div>
               )}
@@ -254,21 +254,21 @@ function ContentGrid({ contenus, loading, error, onEdit, onConfirmAction }) {
             {/* Body */}
             <div className="p-4">
               <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
                   {c.type || "—"}
                 </span>
                 <VisibilityBadge visibility={c.visibilite} />
               </div>
 
-              <h3 className="line-clamp-2 text-sm font-semibold text-slate-900 leading-snug">
+              <h3 className="line-clamp-2 text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug">
                 {c.titre || "Sans titre"}
               </h3>
-              <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-slate-500">
+              <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
                 {c.resume || "Aucun résumé"}
               </p>
 
-              <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-                <span className="text-xs text-slate-400">{formatDate(c.dateCreation)}</span>
+              <div className="mt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-3">
+                <span className="text-xs text-slate-400 dark:text-slate-500">{formatDate(c.dateCreation)}</span>
                 <InlineActions contenu={c} onEdit={onEdit} onConfirmAction={onConfirmAction} />
               </div>
             </div>
@@ -282,12 +282,12 @@ function ContentGrid({ contenus, loading, error, onEdit, onConfirmAction }) {
 /* ── Empty State ────────────────────────────────────── */
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-20 text-center">
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 py-20 text-center">
+      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500">
         <FileText size={22} />
       </div>
-      <p className="text-sm font-semibold text-slate-700">Aucun contenu trouvé</p>
-      <p className="mt-1 text-xs text-slate-400">Créez un contenu ou modifiez vos filtres.</p>
+      <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Aucun contenu trouvé</p>
+      <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Créez un contenu ou modifiez vos filtres.</p>
     </div>
   );
 }
@@ -298,30 +298,30 @@ function Pagination({ page, totalPages, pageSize, totalItems, onPageChange, onPa
   const to   = Math.min(page * pageSize, totalItems);
 
   return (
-    <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3.5">
-      <div className="flex items-center gap-2 text-xs text-slate-500">
+    <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 px-5 py-3.5">
+      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
         <span>Lignes</span>
         <select
           value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-green-500"
+          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 text-xs outline-none focus:border-green-500"
         >
           {PAGE_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
-        <span className="text-slate-400">{from}–{to} sur {totalItems}</span>
+        <span className="text-slate-400 dark:text-slate-500">{from}–{to} sur {totalItems}</span>
       </div>
 
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPageChange(page - 1)} disabled={page === 1}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 transition hover:bg-slate-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronLeft size={14} />
         </button>
-        <span className="px-3 text-xs font-semibold text-slate-600">{page} / {totalPages}</span>
+        <span className="px-3 text-xs font-semibold text-slate-600 dark:text-slate-400">{page} / {totalPages}</span>
         <button
           onClick={() => onPageChange(page + 1)} disabled={page === totalPages}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 transition hover:bg-slate-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronRight size={14} />
         </button>
@@ -469,12 +469,12 @@ function AdminContenusPage() {
         {/* ── HEADER ── */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold text-slate-900">Contenus</h1>
-            <p className="mt-0.5 text-sm text-slate-500">
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Contenus</h1>
+            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
               {stats.total} contenu{stats.total !== 1 ? "s" : ""} —{" "}
-              <span className="text-green-700 font-medium">{stats.published} publié{stats.published !== 1 ? "s" : ""}</span>,{" "}
-              <span className="text-slate-600">{stats.draft} brouillon{stats.draft !== 1 ? "s" : ""}</span>,{" "}
-              <span className="text-red-600">{stats.expired} expiré{stats.expired !== 1 ? "s" : ""}</span>
+              <span className="text-green-700 dark:text-green-400 font-medium">{stats.published} publié{stats.published !== 1 ? "s" : ""}</span>,{" "}
+              <span className="text-slate-600 dark:text-slate-400">{stats.draft} brouillon{stats.draft !== 1 ? "s" : ""}</span>,{" "}
+              <span className="text-red-600 dark:text-red-400">{stats.expired} expiré{stats.expired !== 1 ? "s" : ""}</span>
             </p>
           </div>
 
@@ -514,7 +514,7 @@ function AdminContenusPage() {
         )} */}
 
         {/* ── TOOLBAR ── */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           <div className="flex flex-wrap items-center gap-2 px-4 py-3">
             {/* Search */}
             <div className="relative min-w-0 flex-1 sm:max-w-xs">
@@ -523,7 +523,7 @@ function AdminContenusPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Titre, résumé, catégorie..."
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-8 text-sm outline-none transition focus:border-green-500 focus:bg-white focus:ring-2 focus:ring-green-500/10"
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 py-2 pl-9 pr-8 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:focus:bg-slate-700 focus:ring-2 focus:ring-green-500/10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {search && (
                 <button onClick={() => setSearch("")}
@@ -542,7 +542,7 @@ function AdminContenusPage() {
                 <Filter size={12} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <select
                   value={f.value} onChange={(e) => f.onChange(e.target.value)}
-                  className="appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-7 pr-7 text-sm text-slate-700 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/10"
+                  className="appearance-none rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 pl-7 pr-7 text-sm text-slate-700 dark:text-slate-200 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/10"
                 >
                   {f.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
@@ -552,13 +552,13 @@ function AdminContenusPage() {
             {hasFilters && (
               <button
                 onClick={() => { setSearch(""); setStatusFilter(""); setTypeFilter(""); setVisibilityFilter(""); }}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 <RotateCcw size={12} /> Reset
               </button>
             )}
 
-            <div className="ml-auto flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+            <div className="ml-auto flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1">
               {[
                 { mode: "table", icon: <List size={14} /> },
                 { mode: "grid",  icon: <LayoutGrid size={14} /> },
@@ -568,7 +568,7 @@ function AdminContenusPage() {
                   onClick={() => setViewMode(mode)}
                   className={cx(
                     "flex h-7 w-7 items-center justify-center rounded-md transition",
-                    viewMode === mode ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100"
+                    viewMode === mode ? "bg-slate-900 dark:bg-slate-600 text-white" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
                   )}
                 >
                   {icon}
@@ -578,9 +578,9 @@ function AdminContenusPage() {
           </div>
 
           {!loading && (
-            <div className="border-t border-slate-100 px-4 py-2">
-              <p className="text-xs text-slate-400">
-                <span className="font-semibold text-slate-700">{filtered.length}</span> résultat{filtered.length !== 1 ? "s" : ""}
+            <div className="border-t border-slate-100 dark:border-slate-800 px-4 py-2">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                <span className="font-semibold text-slate-700 dark:text-slate-300">{filtered.length}</span> résultat{filtered.length !== 1 ? "s" : ""}
                 {search && <span> · "<em>{search}</em>"</span>}
               </p>
             </div>
@@ -589,25 +589,25 @@ function AdminContenusPage() {
 
         {/* ── TABLE VIEW ── */}
         {viewMode === "table" && (
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/80">
+                  <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">
                     {["Titre & résumé","Type","Statut","Visibilité","Créé le","Publié le","Expire le","Actions"].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                         {h}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {loading ? (
                     Array.from({ length: 8 }).map((_, i) => (
                       <tr key={i} className="animate-pulse">
                         {Array.from({ length: 8 }).map((__, j) => (
                           <td key={j} className="px-4 py-3.5">
-                            <div className="h-3 rounded bg-slate-100" style={{ width: `${50 + (j*13)%45}%` }} />
+                            <div className="h-3 rounded bg-slate-100 dark:bg-slate-800" style={{ width: `${50 + (j*13)%45}%` }} />
                           </td>
                         ))}
                       </tr>
@@ -616,7 +616,7 @@ function AdminContenusPage() {
                     <tr><td colSpan={8}><EmptyState /></td></tr>
                   ) : (
                     paginated.map((c) => (
-                      <tr key={c.id} className="group transition hover:bg-slate-50/60">
+                      <tr key={c.id} className="group transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
                         {/* Titre */}
                         <td className="max-w-[260px] px-4 py-3.5">
                           <div className="flex items-center gap-2.5">
@@ -627,20 +627,20 @@ function AdminContenusPage() {
                                 className="h-8 w-8 shrink-0 rounded-lg object-cover"
                               />
                             ) : (
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500">
                                 <FileText size={14} />
                               </div>
                             )}
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-slate-800">{c.titre}</p>
-                              <p className="truncate text-xs text-slate-400">{c.resume || "—"}</p>
+                              <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">{c.titre}</p>
+                              <p className="truncate text-xs text-slate-400 dark:text-slate-500">{c.resume || "—"}</p>
                             </div>
                           </div>
                         </td>
 
                         {/* Type */}
                         <td className="px-4 py-3.5">
-                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                          <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
                             {c.type || "—"}
                           </span>
                         </td>
@@ -656,9 +656,9 @@ function AdminContenusPage() {
                         </td>
 
                         {/* Dates */}
-                        <td className="px-4 py-3.5 text-xs text-slate-500">{formatDate(c.dateCreation)}</td>
-                        <td className="px-4 py-3.5 text-xs text-slate-500">{formatDate(c.datePublication)}</td>
-                        <td className="px-4 py-3.5 text-xs text-slate-500">{formatDate(c.dateExpiration)}</td>
+                        <td className="px-4 py-3.5 text-xs text-slate-500 dark:text-slate-400">{formatDate(c.dateCreation)}</td>
+                        <td className="px-4 py-3.5 text-xs text-slate-500 dark:text-slate-400">{formatDate(c.datePublication)}</td>
+                        <td className="px-4 py-3.5 text-xs text-slate-500 dark:text-slate-400">{formatDate(c.dateExpiration)}</td>
 
                         {/* Actions */}
                         <td className="px-4 py-3.5">
@@ -689,7 +689,7 @@ function AdminContenusPage() {
               onEdit={handleEdit} onConfirmAction={openConfirm}
             />
             {!loading && filtered.length > 0 && (
-              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
                 <Pagination
                   page={page} totalPages={totalPages} pageSize={pageSize} totalItems={filtered.length}
                   onPageChange={setPage}

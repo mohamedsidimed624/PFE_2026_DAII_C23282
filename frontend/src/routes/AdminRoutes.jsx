@@ -8,11 +8,15 @@ import AdminReclamationsList from "../pages/admin/AdminReclamationList";
 import AdminReclamationDetail from "../pages/admin/AdminReclamationDetail";
 import AdminSpecialitesPage from "../pages/admin/AdminSpecialitesPage";
 import AdminContenusPage from "../pages/admin/AdminContenusPage";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminParametresPage from "../pages/admin/AdminParametresPage";
 
 
 function AdminRoutes() {
   return (
     <Routes>
+      <Route path="dashboard" element={<AdminDashboard />} />
+
       <Route path="demandes" element={<AdminDemandesList />} />
       <Route path="demandes/:id" element={<AdminDemandeDetail />} />
 
@@ -25,6 +29,9 @@ function AdminRoutes() {
       <Route path="specialites" element={<AdminSpecialitesPage />} />
 
       <Route path="diffusion" element={<AdminContenusPage />} />
+
+      <Route path="parametres" element={<AdminParametresPage />} />
+      <Route path="parametres/securite" element={<AdminParametresPage />} />
     </Routes>
   );
 }

@@ -9,6 +9,7 @@ import {
   Sun,
   Moon,
   Check,
+  Menu,
 } from "lucide-react";
 
 /* ── Fausses notifications (à remplacer par ton API) ── */
@@ -20,7 +21,7 @@ const MOCK_NOTIFICATIONS = [
   { id: 5, message: "Sondage mensuel publié avec succès",         time: "Hier",         read: true  },
 ];
 
-function NavbarDashboard({ title = "Gestion des demandes" }) {
+function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
   const [userOpen,      setUserOpen]      = useState(false);
   const [notifOpen,     setNotifOpen]     = useState(false);
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
@@ -34,14 +35,16 @@ function NavbarDashboard({ title = "Gestion des demandes" }) {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  /* ── Dark mode : toggle classe sur <html> ── */
+  /* ── Dark mode : toggle classe + data-theme sur <html> ── */
   useEffect(() => {
     const root = document.documentElement;
     if (darkMode) {
       root.classList.add("dark");
+      root.setAttribute("data-theme", "dark");
       localStorage.setItem("theme", "dark");
     } else {
       root.classList.remove("dark");
+      root.setAttribute("data-theme", "light");
       localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
@@ -75,9 +78,14 @@ function NavbarDashboard({ title = "Gestion des demandes" }) {
   return (
     <header className="h-14 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 transition-colors duration-200">
 
-      {/* ── Logo + titre ── */}
+      {/* ── Toggle + titre ── */}
       <div className="flex items-center gap-3">
-        
+        <button
+          onClick={onToggleSidebar}
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        >
+          <Menu size={18} />
+        </button>
         <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
           {title}
         </span>

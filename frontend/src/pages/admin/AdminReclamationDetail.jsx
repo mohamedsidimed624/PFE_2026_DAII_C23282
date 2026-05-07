@@ -1,104 +1,49 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { getReclamationById, startReclamation, closeReclamation } from "../../services/adminReclamationApi";
 import {
-  getReclamationById,
-  startReclamation,
-  closeReclamation,
-} from "../../services/adminReclamationApi";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  AlertCircle,
-  PlayCircle,
-  Lock,
-  FileText,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  X,
-  XCircle,
-  CalendarDays,
-  Clock3,
-  Paperclip,
-  Inbox,
-  ClipboardList,
+  ArrowLeft, CheckCircle2, AlertCircle, PlayCircle, Lock,
+  FileText, User, Mail, Phone, MapPin, X, XCircle,
+  CalendarDays, Clock3, Paperclip, Inbox, ClipboardList,
 } from "lucide-react";
 
 const cx = (...classes) => classes.filter(Boolean).join(" ");
 
 const STATUS_CONFIG = {
-  SUBMITTED: {
-    label: "Soumise",
-    badge: "bg-amber-50 text-amber-700 border-amber-200",
-  },
-  IN_PROGRESS: {
-    label: "En cours",
-    badge: "bg-blue-50 text-blue-700 border-blue-200",
-  },
-  CLOSED: {
-    label: "Clôturée",
-    badge: "bg-green-50 text-green-700 border-green-200",
-  },
+  SUBMITTED:   { label: "Soumise",   badge: "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800" },
+  IN_PROGRESS: { label: "En cours",  badge: "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
+  CLOSED:      { label: "Clôturée",  badge: "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800" },
 };
 
-const STATUS_ORDER = {
-  SUBMITTED: 0,
-  IN_PROGRESS: 1,
-  CLOSED: 2,
-};
+const STATUS_ORDER = { SUBMITTED: 0, IN_PROGRESS: 1, CLOSED: 2 };
 
 const TIMELINE_STEPS = [
-  { key: "SUBMITTED", label: "Réclamation soumise", field: "dateCreation" },
-  { key: "IN_PROGRESS", label: "Prise en charge", field: "datePriseEnCharge" },
-  { key: "CLOSED", label: "Réclamation clôturée", field: "dateCloture" },
+  { key: "SUBMITTED",   label: "Réclamation soumise", field: "dateCreation" },
+  { key: "IN_PROGRESS", label: "Prise en charge",     field: "datePriseEnCharge" },
+  { key: "CLOSED",      label: "Réclamation clôturée",field: "dateCloture" },
 ];
 
 function formatDateTime(value) {
   if (!value) return "—";
-  return new Date(value).toLocaleString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return new Date(value).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 function formatShortDate(value) {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return new Date(value).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 }
-
-// function getStatusLabel(status) {
-//   return STATUS_CONFIG[(status || "").toUpperCase()]?.label || status || "—";
-// }
 
 function getFileName(path) {
   if (!path) return "Pièce jointe";
-  const decoded = decodeURIComponent(path);
-  const parts = decoded.split("/");
+  const parts = decodeURIComponent(path).split("/");
   return parts[parts.length - 1] || "Pièce jointe";
 }
 
 function StatusBadge({ status }) {
-  const config = STATUS_CONFIG[(status || "").toUpperCase()] || {
-    label: status || "—",
-    badge: "bg-slate-50 text-slate-600 border-slate-200",
-  };
-
+  const config = STATUS_CONFIG[(status || "").toUpperCase()] || { label: status || "—", badge: "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700" };
   return (
-    <span
-      className={cx(
-        "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold",
-        config.badge
-      )}
-    >
+    <span className={cx("inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold", config.badge)}>
       {config.label}
     </span>
   );
@@ -106,18 +51,16 @@ function StatusBadge({ status }) {
 
 function DetailSection({ title, icon, children, action }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+    <section className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-colors duration-200">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-50 text-green-600">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">
             {icon}
           </div>
-          <h2 className="text-sm font-bold text-slate-800">{title}</h2>
+          <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">{title}</h2>
         </div>
-
         {action}
       </div>
-
       <div className="px-5 py-5">{children}</div>
     </section>
   );
@@ -125,23 +68,15 @@ function DetailSection({ title, icon, children, action }) {
 
 function MiniCard({ label, value, icon, accent }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 p-4 transition-colors duration-200">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            {label}
-          </p>
-          <p
-            className={cx(
-              "mt-2 text-sm font-semibold leading-6",
-              accent ? "text-green-700" : "text-slate-800"
-            )}
-          >
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</p>
+          <p className={cx("mt-2 text-sm font-semibold leading-6", accent ? "text-green-700 dark:text-green-400" : "text-slate-800 dark:text-slate-100")}>
             {value || "—"}
           </p>
         </div>
-
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-400 shadow-sm">
           {icon}
         </div>
       </div>
@@ -151,18 +86,13 @@ function MiniCard({ label, value, icon, accent }) {
 
 function AuthorRow({ icon, label, value }) {
   return (
-    <div className="flex items-start gap-3 border-b border-slate-100 py-3 last:border-b-0">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+    <div className="flex items-start gap-3 border-b border-slate-100 dark:border-slate-800 py-3 last:border-b-0">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
         {icon}
       </div>
-
       <div className="min-w-0">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-          {label}
-        </p>
-        <p className="mt-1 break-all text-sm font-medium text-slate-700">
-          {value || "—"}
-        </p>
+        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</p>
+        <p className="mt-1 text-sm font-medium text-slate-700 dark:text-slate-300" style={{ wordBreak: "break-all" }}>{value || "—"}</p>
       </div>
     </div>
   );
@@ -170,55 +100,37 @@ function AuthorRow({ icon, label, value }) {
 
 function Timeline({ status, reclamation }) {
   const currentOrder = STATUS_ORDER[(status || "").toUpperCase()] ?? -1;
-
   return (
     <div className="space-y-0">
       {TIMELINE_STEPS.map((step, index) => {
         const stepOrder = STATUS_ORDER[step.key];
-        const done = currentOrder >= stepOrder;
-        const current = currentOrder === stepOrder;
-        const isLast = index === TIMELINE_STEPS.length - 1;
-        const date = reclamation[step.field];
-
+        const done      = currentOrder >= stepOrder;
+        const current   = currentOrder === stepOrder;
+        const isLast    = index === TIMELINE_STEPS.length - 1;
+        const date      = reclamation[step.field];
         return (
           <div key={step.key} className="flex gap-3">
             <div className="flex flex-col items-center">
-              <div
-                className={cx(
-                  "flex h-8 w-8 items-center justify-center rounded-full border-2",
-                  done && current
-                    ? "border-green-600 bg-green-600 text-white"
-                    : done
-                    ? "border-green-300 bg-green-50 text-green-600"
-                    : "border-slate-200 bg-white text-slate-300"
-                )}
-              >
+              <div className={cx(
+                "flex h-8 w-8 items-center justify-center rounded-full border-2",
+                done && current
+                  ? "border-green-600 bg-green-600 text-white"
+                  : done
+                  ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400"
+                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-300 dark:text-slate-600"
+              )}>
                 {done ? <CheckCircle2 size={14} /> : <Clock3 size={13} />}
               </div>
-
               {!isLast && (
                 <div
-                  className={cx(
-                    "mt-1 w-0.5 flex-1 rounded-full",
-                    done && currentOrder > stepOrder ? "bg-green-300" : "bg-slate-200"
-                  )}
+                  className={cx("mt-1 w-0.5 flex-1 rounded-full", done && currentOrder > stepOrder ? "bg-green-300 dark:bg-green-700" : "bg-slate-200 dark:bg-slate-700")}
                   style={{ minHeight: 28 }}
                 />
               )}
             </div>
-
             <div className={cx("pb-5", isLast && "pb-0")}>
-              <p
-                className={cx(
-                  "text-sm font-semibold",
-                  done ? "text-slate-800" : "text-slate-400"
-                )}
-              >
-                {step.label}
-              </p>
-              <p className="mt-1 text-xs text-slate-400">
-                {date ? formatDateTime(date) : "—"}
-              </p>
+              <p className={cx("text-sm font-semibold", done ? "text-slate-800 dark:text-slate-100" : "text-slate-400 dark:text-slate-600")}>{step.label}</p>
+              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{date ? formatDateTime(date) : "—"}</p>
             </div>
           </div>
         );
@@ -231,18 +143,17 @@ function AdminReclamationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [reclamation, setReclamation] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [reclamation, setReclamation]   = useState(null);
+  const [loading, setLoading]           = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError]               = useState("");
+  const [success, setSuccess]           = useState("");
   const [adminResponse, setAdminResponse] = useState("");
-  const [ShowPrendreEnChargeModal, setShowPrendreEnChargeModal] = useState(false);
+  const [showPrendreEnChargeModal, setShowPrendreEnChargeModal] = useState(false);
 
   const loadReclamation = async () => {
     try {
-      setLoading(true);
-      setError("");
+      setLoading(true); setError("");
       const data = await getReclamationById(id);
       setReclamation(data);
       setAdminResponse(data.adminResponse || "");
@@ -254,90 +165,58 @@ function AdminReclamationDetail() {
     }
   };
 
-  useEffect(() => {
-    loadReclamation();
-  }, [id]);
+  useEffect(() => { loadReclamation(); }, [id]);
 
   const handleStart = async () => {
     try {
-      setActionLoading(true);
-      setError("");
-      setSuccess("");
+      setActionLoading(true); setError(""); setSuccess("");
       await startReclamation(id);
       setShowPrendreEnChargeModal(false);
       setSuccess("La réclamation a été prise en charge.");
       await loadReclamation();
     } catch (err) {
-      console.error(err);
-      setError(
-        err.response?.data?.message ||
-          "Impossible de prendre en charge la réclamation."
-      );
+      setError(err.response?.data?.message || "Impossible de prendre en charge la réclamation.");
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleClose = async () => {
-    if (!adminResponse.trim()) {
-      setError("La réponse administrative est obligatoire pour clôturer.");
-      return;
-    }
-
+    if (!adminResponse.trim()) { setError("La réponse administrative est obligatoire pour clôturer."); return; }
     try {
-      setActionLoading(true);
-      setError("");
-      setSuccess("");
+      setActionLoading(true); setError(""); setSuccess("");
       await closeReclamation(id, adminResponse);
       setSuccess("La réclamation a été clôturée avec succès.");
       await loadReclamation();
     } catch (err) {
-      console.error(err);
-      setError(
-        err.response?.data?.message ||
-          "Impossible de clôturer la réclamation."
-      );
+      setError(err.response?.data?.message || "Impossible de clôturer la réclamation.");
     } finally {
       setActionLoading(false);
     }
   };
 
-  const isSubmitted = reclamation?.statut === "SUBMITTED";
+  const isSubmitted  = reclamation?.statut === "SUBMITTED";
   const isInProgress = reclamation?.statut === "IN_PROGRESS";
-  const isClosed = reclamation?.statut === "CLOSED";
-
-  const authorTypeLabel =
-    reclamation?.typeAuteur === "MEDECIN" ? "Médecin" : "Citoyen";
+  const isClosed     = reclamation?.statut === "CLOSED";
+  const authorTypeLabel = reclamation?.typeAuteur === "MEDECIN" ? "Médecin" : "Citoyen";
 
   const authorFullName = useMemo(() => {
     if (!reclamation) return "—";
-    return (
-      `${reclamation.prenomAuteur || ""} ${reclamation.nomAuteur || ""}`.trim() ||
-      "—"
-    );
+    return `${reclamation.prenomAuteur || ""} ${reclamation.nomAuteur || ""}`.trim() || "—";
   }, [reclamation]);
 
   if (loading) {
     return (
       <AdminLayout title="Gestion des réclamations">
         <div className="space-y-5">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-green-500 border-t-transparent" />
             Chargement du détail...
           </div>
-
-          <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="h-4 w-40 rounded bg-slate-200" />
-            <div className="mt-4 h-8 w-64 rounded bg-slate-200" />
-            <div className="mt-3 h-4 w-80 rounded bg-slate-100" />
-          </div>
-
-          <div className="grid gap-5 xl:grid-cols-[1.35fr_0.65fr]">
-            <div className="space-y-5">
-              <div className="h-44 rounded-2xl bg-slate-100" />
-              <div className="h-52 rounded-2xl bg-slate-100" />
-            </div>
-            <div className="h-72 rounded-2xl bg-slate-100" />
+          <div className="animate-pulse rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <div className="h-4 w-40 rounded bg-slate-200 dark:bg-slate-700" />
+            <div className="mt-4 h-8 w-64 rounded bg-slate-200 dark:bg-slate-700" />
+            <div className="mt-3 h-4 w-80 rounded bg-slate-100 dark:bg-slate-800" />
           </div>
         </div>
       </AdminLayout>
@@ -347,16 +226,12 @@ function AdminReclamationDetail() {
   if (!reclamation) {
     return (
       <AdminLayout title="Gestion des réclamations">
-        <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-16 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500">
             <Inbox size={24} />
           </div>
-          <h2 className="text-lg font-bold text-slate-800">
-            Réclamation introuvable
-          </h2>
-          <p className="mt-2 text-sm text-slate-500">
-            Cette réclamation n’existe pas ou n’est plus disponible.
-          </p>
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Réclamation introuvable</h2>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Cette réclamation n'existe pas ou n'est plus disponible.</p>
         </div>
       </AdminLayout>
     );
@@ -367,48 +242,40 @@ function AdminReclamationDetail() {
       <div className="space-y-5">
         <button
           onClick={() => navigate("/admin/reclamations")}
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-800"
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 transition hover:text-slate-800 dark:hover:text-slate-200"
         >
           <ArrowLeft size={15} />
           Retour à la liste
         </button>
 
         {success && (
-          <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+          <div className="flex items-start gap-3 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">
             <CheckCircle2 size={17} className="mt-0.5 shrink-0" />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+          <div className="flex items-start gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-600 dark:text-red-400">
             <AlertCircle size={17} className="mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-5 border-b border-slate-100 px-6 py-5 xl:flex-row xl:items-start xl:justify-between">
+        {/* Header section */}
+        <section className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-colors duration-200">
+          <div className="flex flex-col gap-5 border-b border-slate-100 dark:border-slate-800 px-6 py-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-green-600">
-                Réclamation
-              </p>
-
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-green-600 dark:text-green-400">Réclamation</p>
               <div className="mt-2 flex flex-wrap items-center gap-2.5">
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-                  {reclamation.numeroReclamation}
-                </h1>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{reclamation.numeroReclamation}</h1>
                 <StatusBadge status={reclamation.statut} />
-                <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+                <span className="inline-flex rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400">
                   {authorTypeLabel}
                 </span>
               </div>
-
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
-                {reclamation.objet || "Sans objet"}
-              </p>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">{reclamation.objet || "Sans objet"}</p>
             </div>
-
             <div className="flex flex-wrap items-center gap-2">
               {isSubmitted && (
                 <button
@@ -423,109 +290,39 @@ function AdminReclamationDetail() {
             </div>
           </div>
 
-          {ShowPrendreEnChargeModal && (
-        <div className="fixed inset-0 bg-black/35 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
-
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-base font-bold text-slate-900">Prendre en charge</h2>
-              </div>
-              <button
-                onClick={() => setShowPrendreEnChargeModal(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="flex gap-3 justify-end pt-1">
-              <button
-                onClick={() => setShowPrendreEnChargeModal(false)}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleStart}
-                disabled={actionLoading}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <XCircle size={15} />
-                Confirmer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
           <div className="grid gap-4 px-6 py-5 md:grid-cols-2 xl:grid-cols-4">
-            <MiniCard
-              label="Auteur"
-              value={authorFullName}
-              icon={<User size={15} />}
-            />
-            <MiniCard
-              label="Date création"
-              value={formatShortDate(reclamation.dateCreation)}
-              icon={<CalendarDays size={15} />}
-            />
-            <MiniCard
-              label="Pièce jointe"
-              value={reclamation.pieceJointePath ? "Disponible" : "Aucune"}
-              icon={<Paperclip size={15} />}
-              accent={!!reclamation.pieceJointePath}
-            />
-            <MiniCard
-              label="Réponse admin"
-              value={reclamation.adminResponse ? "Rédigée" : "En attente"}
-              icon={<ClipboardList size={15} />}
-              accent={!!reclamation.adminResponse}
-            />
+            <MiniCard label="Auteur"         value={authorFullName}                                             icon={<User size={15} />} />
+            <MiniCard label="Date création"  value={formatShortDate(reclamation.dateCreation)}                 icon={<CalendarDays size={15} />} />
+            <MiniCard label="Pièce jointe"   value={reclamation.pieceJointePath ? "Disponible" : "Aucune"}    icon={<Paperclip size={15} />}    accent={!!reclamation.pieceJointePath} />
+            <MiniCard label="Réponse admin"  value={reclamation.adminResponse   ? "Rédigée"    : "En attente"} icon={<ClipboardList size={15} />} accent={!!reclamation.adminResponse} />
           </div>
         </section>
 
         <div className="grid gap-5 xl:grid-cols-[1.35fr_0.65fr]">
           <div className="space-y-5">
-            <DetailSection
-              title="Réclamation"
-              icon={<FileText size={16} />}
-            >
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <p className="whitespace-pre-line text-sm leading-7 text-slate-800">
-                  {reclamation.message || "—"}
-                </p>
+            <DetailSection title="Réclamation" icon={<FileText size={16} />}>
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-4">
+                <p className="whitespace-pre-line text-sm leading-7 text-slate-800 dark:text-slate-200">{reclamation.message || "—"}</p>
               </div>
             </DetailSection>
 
             {reclamation.pieceJointePath && (
-              <DetailSection
-                title="Pièce jointe"
-                icon={<Paperclip size={16} />}
-              >
+              <DetailSection title="Pièce jointe" icon={<Paperclip size={16} />}>
                 <a
                   href={`http://localhost:8080${reclamation.pieceJointePath}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-green-200 hover:bg-green-50/40"
+                  target="_blank" rel="noreferrer"
+                  className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 transition hover:border-green-200 hover:bg-green-50/40 dark:hover:bg-green-900/20"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-400">
                       <FileText size={16} />
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-800">
-                        {getFileName(reclamation.pieceJointePath)}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        Ouvrir le document transmis
-                      </p>
+                      <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{getFileName(reclamation.pieceJointePath)}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">Ouvrir le document transmis</p>
                     </div>
                   </div>
-
-                  <span className="text-sm font-medium text-green-700">
-                    Ouvrir
-                  </span>
+                  <span className="text-sm font-medium text-green-700 dark:text-green-400">Ouvrir</span>
                 </a>
               </DetailSection>
             )}
@@ -533,13 +330,7 @@ function AdminReclamationDetail() {
             <DetailSection
               title="Réponse administrative"
               icon={<ClipboardList size={16} />}
-              action={
-                !isClosed && (
-                  <span className="text-xs text-slate-400">
-                    Réponse obligatoire pour clôturer
-                  </span>
-                )
-              }
+              action={!isClosed && <span className="text-xs text-slate-400 dark:text-slate-500">Réponse obligatoire pour clôturer</span>}
             >
               <div className="space-y-4">
                 <textarea
@@ -548,19 +339,17 @@ function AdminReclamationDetail() {
                   disabled={isClosed}
                   rows={10}
                   placeholder="Saisir ici la réponse administrative..."
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-green-500 focus:bg-white focus:ring-2 focus:ring-green-500/15 disabled:cursor-not-allowed disabled:bg-slate-100"
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm text-slate-800 dark:text-slate-200 outline-none transition focus:border-green-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-green-500/15 disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-800/50"
                 />
-
                 {isClosed ? (
-                  <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                  <div className="rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-4 py-3 text-sm text-green-700 dark:text-green-400">
                     Cette réclamation est clôturée. La réponse est désormais en lecture seule.
                   </div>
                 ) : (
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-                    <p className="text-xs leading-5 text-slate-500">
-                      La réponse enregistrée ici sera communiquée comme réponse finale de l’administration.
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3">
+                    <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
+                      La réponse enregistrée ici sera communiquée comme réponse finale de l'administration.
                     </p>
-
                     {isInProgress && (
                       <button
                         onClick={handleClose}
@@ -578,53 +367,56 @@ function AdminReclamationDetail() {
           </div>
 
           <div className="space-y-5">
-            <DetailSection
-              title="Déposant"
-              icon={<User size={16} />}
-            >
+            <DetailSection title="Déposant" icon={<User size={16} />}>
               <div className="mb-4">
-                <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                <span className="inline-flex rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400">
                   {authorTypeLabel}
                 </span>
               </div>
-
               <div className="space-y-0">
-                <AuthorRow
-                  icon={<User size={14} />}
-                  label="Nom complet"
-                  value={authorFullName}
-                />
-                <AuthorRow
-                  icon={<Mail size={14} />}
-                  label="Email"
-                  value={reclamation.emailAuteur || "—"}
-                />
-                <AuthorRow
-                  icon={<Phone size={14} />}
-                  label="Téléphone"
-                  value={reclamation.telephoneAuteur || "—"}
-                />
-                <AuthorRow
-                  icon={<MapPin size={14} />}
-                  label="Adresse / Ville"
-                  value={
-                    reclamation.adresseAuteur ||
-                    reclamation.villeAuteur ||
-                    "—"
-                  }
-                />
+                <AuthorRow icon={<User size={14} />}   label="Nom complet" value={authorFullName} />
+                <AuthorRow icon={<Mail size={14} />}   label="Email"       value={reclamation.emailAuteur || "—"} />
+                <AuthorRow icon={<Phone size={14} />}  label="Téléphone"   value={reclamation.telephoneAuteur || "—"} />
+                <AuthorRow icon={<MapPin size={14} />} label="Adresse / Ville" value={reclamation.adresseAuteur || reclamation.villeAuteur || "—"} />
               </div>
             </DetailSection>
 
-            <DetailSection
-              title="Suivi"
-              icon={<Clock3 size={16} />}
-            >
+            <DetailSection title="Suivi" icon={<Clock3 size={16} />}>
               <Timeline status={reclamation.statut} reclamation={reclamation} />
             </DetailSection>
           </div>
         </div>
       </div>
+
+      {/* Modal Prendre en charge */}
+      {showPrendreEnChargeModal && (
+        <div className="fixed inset-0 bg-black/35 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 space-y-4">
+            <div className="flex items-start justify-between">
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Prendre en charge</h2>
+              <button onClick={() => setShowPrendreEnChargeModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex gap-3 justify-end pt-1">
+              <button
+                onClick={() => setShowPrendreEnChargeModal(false)}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleStart}
+                disabled={actionLoading}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <XCircle size={15} />
+                Confirmer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
