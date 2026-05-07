@@ -11,6 +11,7 @@ import {
   Check,
   Menu,
 } from "lucide-react";
+import { getMyProfile } from "../../services/adminProfileApi";
 
 /* ── Fausses notifications (à remplacer par ton API) ── */
 const MOCK_NOTIFICATIONS = [
@@ -28,6 +29,7 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
   const [darkMode,      setDarkMode]      = useState(
     () => localStorage.getItem("theme") === "dark"
   );
+  const [profile, setProfile] = useState(null);
 
   const userRef  = useRef(null);
   const notifRef = useRef(null);
@@ -48,6 +50,11 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
       localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
+
+  /* ── Charger le profil admin ── */
+  useEffect(() => {
+    getMyProfile().then((res) => setProfile(res.data)).catch(() => {});
+  }, []);
 
   /* ── Fermer les dropdowns au clic extérieur ── */
   useEffect(() => {
@@ -72,8 +79,17 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
     navigate("/login");
   };
 
-  const userName = localStorage.getItem("userName") || "Med Ahmed";
-  const userRole = localStorage.getItem("userRole")  || "Admin";
+  const userName = profile?.nomComplet || localStorage.getItem("email") || "Admin";
+  const userRole = "Administrateur";
+  const photoUrl = profile?.photoProfilPath
+    ? `http://localhost:8080${profile.photoProfilPath}`
+    : null;
+  const initials = userName
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <header className="h-14 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 transition-colors duration-200">
@@ -208,8 +224,14 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
             onClick={() => { setUserOpen((o) => !o); setNotifOpen(false); }}
             className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           >
-            <div className="w-7 h-7 rounded-lg bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 flex items-center justify-center shrink-0">
-              <User size={15} />
+            <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0">
+              {photoUrl ? (
+                <img src={photoUrl} alt={userName} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 flex items-center justify-center text-[10px] font-bold">
+                  {initials || <User size={13} />}
+                </div>
+              )}
             </div>
             <div className="hidden sm:block text-left">
               <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 leading-none">
