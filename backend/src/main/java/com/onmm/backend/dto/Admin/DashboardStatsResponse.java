@@ -22,8 +22,12 @@ public class DashboardStatsResponse {
     private long medecinsSuspendus;
     private long medecinsHommes;
     private long medecinsFemmes;
+    private long medecinsMauritaniens;
+    private long medecinsEtrangers;
 
     private long totalSpecialites;
+    private long specialitesAvecMedecins;
+    private long reclamationsEnAttente;
 
     private List<RecentDemandeDto> recentDemandes;
 

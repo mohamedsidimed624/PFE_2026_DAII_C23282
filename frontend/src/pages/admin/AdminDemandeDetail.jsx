@@ -23,6 +23,23 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+async function downloadFile(url, filename) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename || "document";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+  } catch (e) {
+    console.error("Download failed:", e);
+  }
+}
+
 const getStatusClasses = (status) => {
   switch ((status || "").toUpperCase()) {
     case "APPROVED":
@@ -247,14 +264,13 @@ function AdminDemandeDetail() {
                       <Eye size={13} />
                       Voir
                     </a>
-                    <a
-                      href={`http://localhost:8080/${doc.filePath}`}
-                      download
+                    <button
+                      onClick={() => downloadFile(`http://localhost:8080/${doc.filePath}`, doc.fileName)}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-xs font-medium text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
                     >
                       <Download size={13} />
                       Télécharger
-                    </a>
+                    </button>
                   </div>
                 </div>
               ))}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllDemandes } from "../../services/adminApi";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import AdminLayout from "../../components/admin/AdminLayout";
 import {
   Search,
@@ -9,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  ClipboardList,
 } from "lucide-react";
 
 const STATUS_OPTIONS = ["Tous", "PENDING", "APPROUVED", "REJECTED"];
@@ -77,12 +79,54 @@ function AdminDemandesList() {
     );
   }
 
+  const pending   = demandes.filter(d => d.statut === "PENDING").length;
+  const accepted  = demandes.filter(d => d.statut === "APPROUVED").length;
+  const rejected  = demandes.filter(d => d.statut === "REJECTED").length;
+
   return (
     <AdminLayout title="Gestion des demandes">
       <div className="space-y-4">
 
+        {/* ── Header ── */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="flex flex-wrap items-center justify-between gap-3"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20">
+              <ClipboardList size={18} className="text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-slate-800 dark:text-slate-100">Gestion des demandes</h1>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">{demandes.length} demande(s) au total</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {[
+              { label: "En attente", count: pending,  bg: "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400", status: "PENDING"  },
+              { label: "Acceptées",  count: accepted, bg: "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400", status: "APPROUVED" },
+              { label: "Rejetées",   count: rejected, bg: "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400",         status: "REJECTED"  },
+            ].map(({ label, count, bg, status }) => (
+              <button
+                key={status}
+                onClick={() => { setStatusFilter(statusFilter === status ? "Tous" : status); setPage(1); }}
+                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${bg} ${statusFilter === status ? "ring-2 ring-offset-1 ring-current" : ""}`}
+              >
+                {label} · {count}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+
         {/* ── Barre d'outils ── */}
-        <div className="flex flex-wrap items-center gap-3 justify-between">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.15, duration: 0.3 }}
+          className="flex flex-wrap items-center gap-3 justify-between"
+        >
 
           {/* Recherche */}
           <div className="relative flex-1 min-w-48 max-w-72">
@@ -117,7 +161,7 @@ function AdminDemandesList() {
               Filtrer par date
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── Table ── */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors duration-200">

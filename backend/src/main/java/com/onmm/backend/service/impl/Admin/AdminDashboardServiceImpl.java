@@ -3,9 +3,11 @@ package com.onmm.backend.service.impl.Admin;
 import com.onmm.backend.dto.Admin.DashboardStatsResponse;
 import com.onmm.backend.entity.DemandeAdhesion;
 import com.onmm.backend.entity.enums.ApplicationStatus;
+import com.onmm.backend.entity.enums.ReclamationStatus;
 import com.onmm.backend.entity.enums.StatutMedecin;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
 import com.onmm.backend.repository.MedecinRepository;
+import com.onmm.backend.repository.ReclamationRepository;
 import com.onmm.backend.repository.SpecialiteRepository;
 import com.onmm.backend.service.Admin.AdminDashboardService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
     private final DemandeAdhesionRepository demandeRepo;
     private final MedecinRepository medecinRepo;
+    private final ReclamationRepository reclamationRepo;
     private final SpecialiteRepository specialiteRepo;
 
     @Override
@@ -35,8 +38,14 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         long suspendus       = medecinRepo.countByStatut(StatutMedecin.SUSPENDU);
         long hommes          = medecinRepo.countBySexe("Homme");
         long femmes          = medecinRepo.countBySexe("Femme");
+        long mauritaniens    = medecinRepo.countByNationaliteIgnoreCase("mauritanienne");
+        long etrangers       = totalMedecins - mauritaniens;
 
-        long totalSpecialites = specialiteRepo.count();
+        long totalSpecialites        = specialiteRepo.count();
+        long specialitesAvecMedecins = specialiteRepo.countSpecialitesAvecMedecins();
+
+        long reclamationsEnAttente = reclamationRepo.countByStatut(ReclamationStatus.SUBMITTED)
+                + reclamationRepo.countByStatut(ReclamationStatus.IN_PROGRESS);
 
         List<DemandeAdhesion> recent = demandeRepo.findTop5ByOrderBySubmissionDateDesc();
         List<DashboardStatsResponse.RecentDemandeDto> recentDtos = recent.stream()
@@ -45,7 +54,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 d.getNom(),
                 d.getPrenom(),
                 d.getNumeroDossier(),
-                d.getStatut().name(),
+                d.getStatut() != null ? d.getStatut().name() : null,
                 d.getSubmissionDate()
             ))
             .toList();
@@ -53,7 +62,9 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         return new DashboardStatsResponse(
             totalDemandes, enAttente, acceptees, rejetees,
             totalMedecins, actifs, suspendus, hommes, femmes,
-            totalSpecialites, recentDtos
+            mauritaniens, etrangers,
+            totalSpecialites, specialitesAvecMedecins, reclamationsEnAttente,
+            recentDtos
         );
     }
 }

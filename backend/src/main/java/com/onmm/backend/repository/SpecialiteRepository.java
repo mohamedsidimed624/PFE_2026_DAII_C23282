@@ -4,6 +4,7 @@ import com.onmm.backend.entity.Specialite;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,4 +30,7 @@ public interface SpecialiteRepository extends JpaRepository<Specialite, Long> {
 
 
     List<Specialite> findByActiveTrueOrderByLibelleAsc();
+
+    @Query("SELECT COUNT(DISTINCT e.specialite.id) FROM MedecinEducation e WHERE e.specialite IS NOT NULL")
+    long countSpecialitesAvecMedecins();
 }

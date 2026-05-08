@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { getAllReclamations } from "../../services/adminReclamationApi";
 import {
   Search, ChevronRight, ChevronLeft, Inbox, AlertCircle,
-  Filter, ChevronsLeft, ChevronsRight, RotateCcw,
+  Filter, ChevronsLeft, ChevronsRight, RotateCcw, MessageSquareWarning,
 } from "lucide-react";
 
 const cx = (...classes) => classes.filter(Boolean).join(" ");
@@ -161,17 +162,27 @@ function AdminReclamationsList() {
     <AdminLayout title="Gestion des réclamations">
       <div className="space-y-4">
 
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Gestion des réclamations</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Consultez, filtrez et traitez les réclamations déposées.</p>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-900/20">
+              <MessageSquareWarning size={18} className="text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-slate-800 dark:text-slate-100">Gestion des réclamations</h1>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">Consultez, filtrez et traitez les réclamations déposées.</p>
+            </div>
           </div>
           {!loading && submittedCount > 0 && (
             <div className="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
               {submittedCount} à traiter
             </div>
           )}
-        </div>
+        </motion.div>
 
         <div className="space-y-3">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -239,7 +250,12 @@ function AdminReclamationsList() {
           </div>
         )}
 
-        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-colors duration-200">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.35 }}
+          className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-colors duration-200"
+        >
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -323,7 +339,7 @@ function AdminReclamationsList() {
               onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
             />
           )}
-        </div>
+        </motion.div>
       </div>
     </AdminLayout>
   );

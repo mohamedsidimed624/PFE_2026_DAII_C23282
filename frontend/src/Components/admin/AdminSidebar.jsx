@@ -8,6 +8,7 @@ import {
   BarChart2,
   Megaphone,
   Settings,
+  Vote,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -20,9 +21,9 @@ const navItems = [
   { label: "Gestion des Médecins",     Icon: Stethoscope,          to: "/admin/medecins" },
   { label: "Gestion des spécialités",  Icon: Tag,                  to: "/admin/specialites" },
   { label: "Gestion des Réclamations", Icon: MessageSquareWarning, to: "/admin/reclamations" },
-  { label: "Diffusion d'information",  Icon: Megaphone,            to: "/admin/diffusion" },
   { label: "Gestion des Sondages",     Icon: BarChart2,            to: "/admin/sondages" },
-  { label: "Processus électoral",      Icon: BarChart2,            to: "/admin/processus" },
+  { label: "Diffusion d'information",  Icon: Megaphone,            to: "/admin/diffusion" },
+  { label: "Processus Électoral",      Icon: Vote,                 to: "/admin/processus" },
 ];
 
 function AdminSidebar({ collapsed, onToggle }) {
@@ -51,7 +52,7 @@ function AdminSidebar({ collapsed, onToggle }) {
             to={to}
             title={collapsed ? label : undefined}
             className={({ isActive }) =>
-              `flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              `relative flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
                 isActive
                   ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
                   : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
@@ -60,6 +61,9 @@ function AdminSidebar({ collapsed, onToggle }) {
           >
             {({ isActive }) => (
               <>
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-green-500" />
+                )}
                 <Icon
                   size={17}
                   className={`shrink-0 ${isActive ? "text-green-600 dark:text-green-400" : "text-slate-400 dark:text-slate-500"}`}

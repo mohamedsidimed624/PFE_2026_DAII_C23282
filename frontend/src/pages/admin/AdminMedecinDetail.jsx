@@ -21,6 +21,23 @@ import {
 } from "lucide-react";
 
 /* ── Helpers ── */
+async function downloadFile(url, filename) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename || "document";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+  } catch (e) {
+    console.error("Download failed:", e);
+  }
+}
+
 const formatDate = (d) => {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("fr-FR");
@@ -206,6 +223,41 @@ function AdminMedecinDetail() {
           </div>
         </div>
 
+        {/* ── Profile hero ── */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 flex flex-col sm:flex-row items-center sm:items-start gap-5">
+          {medecin.photoProfilPath ? (
+            <img
+              src={`http://localhost:8080${medecin.photoProfilPath}`}
+              alt={`${medecin.prenom} ${medecin.nom}`}
+              className="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-slate-800 shadow-md shrink-0"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-2xl font-bold text-green-700 dark:text-green-400 border-4 border-white dark:border-slate-800 shadow-md shrink-0">
+              {(medecin.prenom?.[0] || "").toUpperCase()}{(medecin.nom?.[0] || "").toUpperCase()}
+            </div>
+          )}
+          <div className="flex-1 text-center sm:text-left min-w-0">
+            <p className="text-xs font-bold uppercase tracking-widest text-green-600 dark:text-green-400 mb-1">Médecin</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 truncate">
+              Dr. {medecin.prenom} {medecin.nom}
+            </h2>
+            {medecin.specialiteLibelle && (
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{medecin.specialiteLibelle}{medecin.sousSpecialiteLibelle ? ` · ${medecin.sousSpecialiteLibelle}` : ""}</p>
+            )}
+            <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-3">
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold ${sc.pill}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                {medecin.statut || "—"}
+              </span>
+              {medecin.numeroInscription && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-600 dark:text-slate-400">
+                  N° {medecin.numeroInscription}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* ── Information personnelle ── */}
         <Section title="Information personnelle">
           <InfoGrid>
@@ -323,14 +375,13 @@ function AdminMedecinDetail() {
                     >
                       <Eye size={14} />
                     </a>
-                    <a
-                      href={`http://localhost:8080/${doc.filePath}`}
-                      download
+                    <button
+                      onClick={() => downloadFile(`http://localhost:8080/${doc.filePath}`, doc.fileName)}
                       className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                       title="Télécharger"
                     >
                       <Download size={14} />
-                    </a>
+                    </button>
                   </div>
                 </div>
               ))}

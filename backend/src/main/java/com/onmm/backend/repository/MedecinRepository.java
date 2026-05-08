@@ -40,4 +40,6 @@ public interface MedecinRepository extends JpaRepository<Medecin, Long>, JpaSpec
     long countByStatut(StatutMedecin statut);
 
     long countBySexe(String sexe);
+
+    long countByNationaliteIgnoreCase(String nationalite);
 }
