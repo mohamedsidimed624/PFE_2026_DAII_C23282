@@ -1,131 +1,131 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { fadeInUp, staggerContainer } from "../motion/animation";
 import {
     FilePlus2,
     SearchCheck,
-    Stethoscope,
     MessageSquareWarning,
+    Stethoscope,
     ArrowRight,
 } from "lucide-react";
+import { fadeInUp, staggerContainer } from "../motion/animation";
 
-const services = [
+const SERVICES = [
     {
-        title: "Demande d’adhésion",
-        description: "Soumettez votre dossier en ligne rapidement et de manière sécurisée.",
-        cta: "Commencer",
         icon: FilePlus2,
+        title: "Demande d'adhésion",
+        desc: "Soumettez votre dossier en ligne rapidement et en toute sécurité. Un parcours guidé, étape par étape.",
         link: "/adhesion",
-        color: "from-green-500 to-emerald-400"
+        badge: "En ligne",
+        iconBg: "bg-green-100",
+        iconColor: "text-green-700",
+        badgeBg: "bg-green-50 text-green-700",
+        border: "hover:border-green-300",
+        arrowColor: "text-green-600",
     },
     {
-        title: "Suivi de dossier",
-        description: "Consultez l’état d'avancement de votre demande en temps réel.",
-        cta: "Suivre",
         icon: SearchCheck,
-        link: "/suivi",
-        color: "from-blue-500 to-cyan-400"
+        title: "Suivi de dossier",
+        desc: "Consultez l'avancement de votre demande à tout moment, en temps réel, depuis votre espace.",
+        link: "/suivi-dossier",
+        badge: "Temps réel",
+        iconBg: "bg-blue-100",
+        iconColor: "text-blue-700",
+        badgeBg: "bg-blue-50 text-blue-700",
+        border: "hover:border-blue-300",
+        arrowColor: "text-blue-600",
     },
     {
-        title: "Réclamation",
-        description: "Signalez un problème ou une irrégularité en toute confidentialité.",
-        cta: "Déposer",
         icon: MessageSquareWarning,
+        title: "Réclamation",
+        desc: "Signalez un problème ou une irrégularité déontologique en toute confidentialité.",
         link: "/reclamations",
-        color: "from-amber-500 to-orange-400"
+        badge: "Confidentiel",
+        iconBg: "bg-[#A0891B]/10",
+        iconColor: "text-[#A0891B]",
+        badgeBg: "bg-[#A0891B]/10 text-[#A0891B]",
+        border: "hover:border-[#A0891B]/40",
+        arrowColor: "text-[#A0891B]",
     },
     {
-        title: "Annuaire",
-        description: "Recherchez un médecin inscrit à l'Ordre National.",
-        cta: "Rechercher",
         icon: Stethoscope,
+        title: "Annuaire médical",
+        desc: "Recherchez un médecin inscrit à l'Ordre par nom, spécialité ou wilaya.",
         link: "/annuaire",
-        color: "from-indigo-500 to-violet-400"
+        badge: "3 500+ médecins",
+        iconBg: "bg-slate-100",
+        iconColor: "text-slate-700",
+        badgeBg: "bg-slate-100 text-slate-600",
+        border: "hover:border-slate-400",
+        arrowColor: "text-slate-700",
     },
 ];
 
-function ServiceCard({ service }) {
-    const Icon = service.icon;
-
+export default function Services() {
     return (
-        <Link to={service.link} className="block h-full outline-none">
-            <motion.div
-                variants={fadeInUp}
-                whileHover={{ y: -8, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="group relative flex flex-col h-full p-8 bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 transition-all duration-300 hover:shadow-2xl overflow-hidden"
-            >
-                {/* Decorative background glow on hover */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-bl-full pointer-events-none ${service.color}" />
-
-                {/* Icon Container */}
-                <div className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-gradient-to-br ${service.color} text-white mb-6 shadow-md transform group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon size={28} strokeWidth={2} />
-                </div>
-
-                {/* Content */}
-                <h3 className="font-bold text-slate-900 text-xl mb-3 tracking-tight">
-                    {service.title}
-                </h3>
-                
-                <p className="text-base text-slate-600 leading-relaxed flex-1">
-                    {service.description}
-                </p>
-
-                {/* CTA */}
-                <div className="mt-8 flex items-center justify-between text-sm font-bold text-slate-900 group-hover:text-green-600 transition-colors">
-                    <span>
-                        {service.cta}
+        <section className="py-24 bg-white relative overflow-hidden">
+            <div className="max-w-6xl mx-auto px-6">
+                {/* Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 0.5 }}
+                    className="text-center max-w-xl mx-auto mb-14"
+                >
+                    <span className="inline-flex items-center gap-2 rounded-full border border-[#A0891B]/30 bg-[#A0891B]/8 px-4 py-1.5 text-xs font-bold tracking-widest uppercase text-[#A0891B] mb-4">
+                        Services en ligne
                     </span>
-                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-green-50 transition-colors">
-                        <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
-                    </div>
-                </div>
-            </motion.div>
-        </Link>
-    );
-}
-
-function Services() {
-    return (
-        <section className="py-24 bg-slate-50 relative overflow-hidden">
-            {/* Background elements */}
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-green-50 via-transparent to-transparent opacity-70 pointer-events-none" />
-
-            <div className="max-w-7xl mx-auto px-6 relative z-10">
-                <div className="text-center max-w-2xl mx-auto mb-16">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.6 }}
-                    >
-                        <span className="inline-flex items-center justify-center rounded-full bg-green-100 text-green-700 px-4 py-1.5 text-sm font-bold tracking-wide uppercase mb-4">
-                            Services Rapides
+                    <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
+                        Accédez à vos{" "}
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">
+                            démarches
                         </span>
-                        <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-5">
-                            Vos démarches <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">en ligne</span>
-                        </h2>
-                        <p className="text-lg text-slate-600 leading-relaxed">
-                            Accédez rapidement aux principales fonctionnalités de l’Ordre des Médecins. Un processus simplifié, sécurisé et transparent.
-                        </p>
-                    </motion.div>
-                </div>
+                    </h2>
+                    <p className="text-base text-slate-500 leading-relaxed">
+                        Un espace simplifié, sécurisé et transparent pour toutes vos interactions avec l'Ordre National des Médecins.
+                    </p>
+                </motion.div>
 
+                {/* Cards — 4 equal columns */}
                 <motion.div
                     variants={staggerContainer}
                     initial="hidden"
                     whileInView="show"
-                    viewport={{ once: true, margin: "-50px" }}
-                    className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
+                    viewport={{ once: true, margin: "-60px" }}
+                    className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5"
                 >
-                    {services.map((s, i) => (
-                        <ServiceCard key={i} service={s} />
-                    ))}
+                    {SERVICES.map((svc) => {
+                        const SvcIcon = svc.icon;
+                        return (
+                            <motion.div key={svc.title} variants={fadeInUp}>
+                                <Link
+                                    to={svc.link}
+                                    className={`flex flex-col h-full min-h-[260px] bg-white rounded-2xl border border-slate-200 p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${svc.border} group outline-none`}
+                                >
+                                    {/* Icon */}
+                                    <div className={`w-12 h-12 rounded-xl ${svc.iconBg} ${svc.iconColor} flex items-center justify-center mb-5 flex-shrink-0`}>
+                                        <SvcIcon size={22} strokeWidth={2} />
+                                    </div>
+
+                                    {/* Text */}
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-slate-900 text-base mb-2">{svc.title}</h3>
+                                        <p className="text-slate-500 text-sm leading-relaxed">{svc.desc}</p>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="mt-5 flex items-center justify-between">
+                                        <span className={`text-xs font-semibold rounded-full px-3 py-1 ${svc.badgeBg}`}>
+                                            {svc.badge}
+                                        </span>
+                                        <ArrowRight size={16} className={`${svc.arrowColor} group-hover:translate-x-1 transition-transform`} />
+                                    </div>
+                                </Link>
+                            </motion.div>
+                        );
+                    })}
                 </motion.div>
             </div>
         </section>
     );
 }
-
-export default Services;

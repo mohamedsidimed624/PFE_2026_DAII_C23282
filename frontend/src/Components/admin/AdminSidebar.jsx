@@ -9,14 +9,17 @@ import {
   Megaphone,
   Settings,
   Vote,
+  Bell,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getUnreadCount } from "../../services/notificationApi";
 
 const navItems = [
   { label: "Dashboard",                Icon: LayoutDashboard,      to: "/admin/dashboard" },
+  { label: "Notifications",            Icon: Bell,                 to: "/admin/notifications", badge: true },
   { label: "Gestion des demandes",     Icon: ClipboardList,        to: "/admin/demandes" },
   { label: "Gestion des Médecins",     Icon: Stethoscope,          to: "/admin/medecins" },
   { label: "Gestion des spécialités",  Icon: Tag,                  to: "/admin/specialites" },
@@ -28,6 +31,16 @@ const navItems = [
 
 function AdminSidebar({ collapsed, onToggle }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCount = () => {
+      getUnreadCount().then((res) => setUnreadCount(res.data.count || 0)).catch(() => {});
+    };
+    fetchCount();
+    const id = setInterval(fetchCount, 30000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <aside
@@ -46,7 +59,7 @@ function AdminSidebar({ collapsed, onToggle }) {
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto overflow-x-hidden">
-        {navItems.map(({ label, Icon, to }) => (
+        {navItems.map(({ label, Icon, to, badge }) => (
           <NavLink
             key={to}
             to={to}
@@ -64,11 +77,23 @@ function AdminSidebar({ collapsed, onToggle }) {
                 {isActive && (
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-green-500" />
                 )}
-                <Icon
-                  size={17}
-                  className={`shrink-0 ${isActive ? "text-green-600 dark:text-green-400" : "text-slate-400 dark:text-slate-500"}`}
-                />
-                {!collapsed && <span className="leading-none truncate">{label}</span>}
+                <div className="relative shrink-0">
+                  <Icon
+                    size={17}
+                    className={isActive ? "text-green-600 dark:text-green-400" : "text-slate-400 dark:text-slate-500"}
+                  />
+                  {badge && unreadCount > 0 && collapsed && (
+                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-3.5 flex items-center justify-center bg-red-500 rounded-full text-[8px] text-white font-bold px-0.5">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </div>
+                {!collapsed && <span className="flex-1 leading-none truncate">{label}</span>}
+                {!collapsed && badge && unreadCount > 0 && (
+                  <span className="rounded-full bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 text-[10px] font-bold text-red-600 dark:text-red-400">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </>
             )}
           </NavLink>

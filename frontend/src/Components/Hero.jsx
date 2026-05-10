@@ -242,7 +242,6 @@ import { Search, ArrowRight, BarChart3, PieChart } from "lucide-react";
 import { getSuiviDossier } from "../services/demandeSuiviApi";
 import hero from "../assets/hero.jpg";
 import { heroLogos } from "../constant/data";
-import { RiPlayFill } from "@remixicon/react";
 import Marquee from "react-fast-marquee";
 
 
@@ -292,7 +291,7 @@ function Hero() {
 
           <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight mb-6">
             Ordre National des 
-            <span className="block text-green-600">Médecins Mauritanien</span>
+            <span className="block text-green-600">Médecins Mauritaniens</span>
           </h1>
 
           <p className="max-w-2xl text-gray-600 text-base md:text-lg leading-8 mb-10">
@@ -398,16 +397,6 @@ function Hero() {
         <div className="absolute top-0 right-0 bg-gradient-to-l from-white-97 via-white-97/80 to-transparent w-24 h-full z-10 pointer-events-none" />
       </div>
 
-      <figure>
-        {/* <img src="images/hero-banner.png" alt="hero banner" /> */}
-        <div className="relative inset-0 bg-black/20 z-20">
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 z-20 -translate-y-1/2">
-            <span className="flex bg-white w-16 h-16 items-center justify-center rounded-full play-btn cursor-pointer">
-              <RiPlayFill size={30} className="text-green-600" />
-            </span>
-          </div>
-        </div>
-      </figure>
     </section>
   );
 }

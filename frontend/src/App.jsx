@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import "./App.css";
 
 import Home from "./pages/Home";
@@ -21,17 +21,31 @@ import AnnuairePage from "./pages/AnnuairePage.jsx";
 import PublicReclamationPage from "./pages/PublicReclamationPage.jsx";
 import MedecinReclamationCreatePage from "./pages/medecin/MedecinReclamationCreatePage.jsx";
 import MedecinReclamationsPage from "./pages/medecin/MedecinReclamationsPage.jsx";
-
 import MedecinReclamationDetailPage from "./pages/medecin/MedecinReclamationDetailPage.jsx";
+
 import Contact from "./pages/ContactPage.jsx";
 import AnnoncesPage from "./pages/AnnoncesPage.jsx";
 import AnnonceDetailPage from "./pages/AnnonceDetailPage.jsx";
+import GaleriePage from "./pages/GaleriePage.jsx";
+import AProposPage from "./pages/AProposPage.jsx";
+import ChatbotPage from "./pages/ChatbotPage.jsx";
+import AssistantButton from "./components/public/AssistantButton.jsx";
 
-import { FormProvider } from "./context/FormContext.jsx";
+function PublicChatbot() {
+  const { pathname } = useLocation();
+  if (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/medecin") ||
+    pathname === "/login" ||
+    pathname === "/set-password" ||
+    pathname === "/assistant"
+  ) return null;
+  return <AssistantButton />;
+}
 
 function App() {
   return (
-    <FormProvider>
+    <>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/contact" element={<Contact />} />
@@ -44,6 +58,9 @@ function App() {
         <Route path="/annuaire" element={<AnnuairePage />} />
         <Route path="/annuaire/:id" element={<AnnuaireMedecinDetailPage />} />
         <Route path="/reclamations" element={<PublicReclamationPage />} />
+        <Route path="/galerie" element={<GaleriePage />} />
+        <Route path="/a-propos" element={<AProposPage />} />
+        <Route path="/assistant" element={<ChatbotPage />} />
 
         <Route
           path="/medecin/reclamations"
@@ -153,7 +170,9 @@ function App() {
           }
         />
       </Routes>
-    </FormProvider>
+
+      <PublicChatbot />
+    </>
   );
 }
 

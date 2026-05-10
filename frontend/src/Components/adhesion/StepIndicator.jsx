@@ -1,99 +1,127 @@
 import { useEffect } from "react";
 import { useFormData } from "../../context/FormContext";
 
-import {
-  User,
-  GraduationCap,
-  Briefcase,
-  FileText,
-  ShieldCheck,
-  Check
-} from "lucide-react";
-
-const steps = [
-  { label: "Informations personnelles", icon: User },
-  { label: "Informations sur l'éducation", icon: GraduationCap },
-  { label: "Expérience professionnelle", icon: Briefcase },
-  { label: "Documents requis", icon: FileText },
-  { label: "Déclaration et consentement", icon: ShieldCheck }
+const STEPS = [
+  "Informations personnelles",
+  "Informations sur l'éducation",
+  "Expérience professionnelle",
+  "Documents requis",
+  "Déclaration et consentement",
 ];
 
-function StepIndicator() {
+const W = 260;
+const H = 54;
+const N = 22;
 
+function chevronPoints(i, total) {
+  const mid = H / 2;
+
+  if (i === 0) {
+    return `0,0 ${W - N},0 ${W},${mid} ${W - N},${H} 0,${H} ${N},${mid}`;
+  }
+
+  if (i === total - 1) {
+    return `0,0 ${W - N},0 ${W},${mid} ${W - N},${H} 0,${H} ${N},${mid}`;
+  }
+
+  return `0,0 ${W - N},0 ${W},${mid} ${W - N},${H} 0,${H} ${N},${mid}`;
+}
+
+export default function StepIndicator() {
   const { step, setStep, submitted } = useFormData();
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [step]);
 
   if (submitted) return null;
 
+  const total = STEPS.length;
+
   return (
-    
-    <div className="flex w-full mb-10 overflow-hidden">
+    <div
+      className="w-full mb-10 overflow-x-auto"
+      style={{
+        padding: "6px 0",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: "14px",
+          minWidth: "100%",
+        }}
+      >
+        {STEPS.map((label, i) => {
+          const num = i + 1;
+          const active = step === num;
+          const completed = step > num;
+          const clickable = num <= step;
 
-      {steps.map((item, index) => {
+          const isGreen = active || completed;
 
-        const Icon = item.icon;
-        const stepNumber = index + 1;
+          const fill = isGreen ? "#2fbe73" : "#ffffff";
+          const stroke = isGreen ? "#2fbe73" : "#dfe7e4";
+          const color = isGreen ? "#ffffff" : "#374151";
 
-        const active = step === stepNumber;
-        const completed = step > stepNumber;
+          return (
+            <div
+              key={i}
+              onClick={() => {
+                if (clickable) setStep(num);
+              }}
+              style={{
+                position: "relative",
+                flex: 1,
+                minWidth: 0,
+                height: "54px",
+                cursor: clickable ? "pointer" : "default",
+                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.08))",
+              }}
+            >
+              <svg
+                viewBox={`0 0 ${W} ${H}`}
+                preserveAspectRatio="none"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  overflow: "visible",
+                }}
+              >
+                <polygon
+                  points={chevronPoints(i, total)}
+                  fill={fill}
+                  stroke={stroke}
+                  strokeWidth="1.4"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
 
-        return (
-
-          <div
-            key={index}
-
-            onClick={() => {
-              if (stepNumber <= step) {
-                setStep(stepNumber);
-              }
-            }}
-
-            className={`
-            relative flex items-center gap-2 px-6 py-3 text-sm font-medium
-            cursor-pointer transition-all duration-300
-
-            ${active
-              ? "bg-green-600 text-white"
-              : completed
-              ? "bg-green-500 text-white"
-              : "bg-gray-200 text-gray-600"}
-
-            ${index !== 0 && "ml-6"}
-            `}
-            
-            style={{
-              clipPath:
-                index === steps.length 
-                  ? "polygon(0 0,100% 0,100% 100%,0% 100%)"
-                  : "polygon(0 0,calc(100% - 20px) 0,100% 50%,calc(100% - 20px) 100%,0 100%)"
-            }}
-
-          >
-
-            {completed ? (
-              <Check size={18}/>
-            ) : (
-              <Icon size={18}/>
-            )}
-
-            {item.label}
-
-          </div>
-
-        );
-
-      })}
-
+              <div
+                style={{
+                  position: "relative",
+                  zIndex: 2,
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingLeft: "32px",
+                  paddingRight: "32px",
+                  color,
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  textAlign: "center",
+                  whiteSpace: "normal",
+                }}
+              >
+                {label}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
-
   );
-
 }
-
-export default StepIndicator;

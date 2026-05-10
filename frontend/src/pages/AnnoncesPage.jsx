@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import PublicHero from "../components/public/PublicHero";
+import Breadcrumb from "../components/public/Breadcrumb";
 import AnnonceCard from "../components/annonces/AnnonceCard";
 import AnnonceFeatured from "../components/annonces/AnnonceFeatured";
 import AnnonceFilters from "../components/annonces/AnnonceFilters";
 import AnnonceSkeleton from "../components/annonces/AnnonceSkeleton";
 import AnnonceEmptyState from "../components/annonces/AnnonceEmptyState";
 import { getPublicContenus } from "../services/publicContenuApi";
-import { ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { Newspaper, SlidersHorizontal } from "lucide-react";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -91,18 +91,36 @@ export default function AnnoncesPage() {
   return (
     <>
       <Navbar />
+      <Breadcrumb items={[{ label: "Accueil", to: "/" }, { label: "Annonces" }]} />
 
-      <main className="min-h-screen bg-[#F8FAFC]">
-        <PublicHero
-          badgeIcon={ShieldCheck}
-          badgeText="Publications officielles · ONMM"
-          title="Annonces et actualités"
-          subtitle="Consultez les publications officielles, communiqués et actualités de l'Ordre National des Médecins de Mauritanie."
-        />
+      <main className="min-h-screen bg-slate-50">
+        {/* ── Page header ── */}
+        <div className="border-b border-slate-100 bg-white">
+          <div className="mx-auto max-w-7xl px-6 py-10">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="h-px w-10 bg-green-600" />
+              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-green-600">
+                <Newspaper size={11} />
+                Publications officielles · ONMM
+              </span>
+              <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                Mis à jour en temps réel
+              </span>
+            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+              Annonces &amp; Actualités
+            </h1>
+            <p className="mt-2 max-w-xl text-sm text-slate-500">
+              Communiqués officiels, décisions ordinales, formations et actualités de l'Ordre National des Médecins.
+            </p>
+          </div>
+          <div className="h-px bg-linear-to-r from-green-500 via-emerald-300 to-transparent" />
+        </div>
 
         <section className="mx-auto max-w-7xl px-6 py-10">
           {/* Sticky filter bar */}
-          <div className="sticky top-18 z-20 -mx-6 border-b border-[#E2E8F0] bg-white px-6 py-3">
+          <div className="sticky top-18 z-20 -mx-6 border-b border-slate-200 bg-white px-6 py-3">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 items-center gap-3">
                 <button

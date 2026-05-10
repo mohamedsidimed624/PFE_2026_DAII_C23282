@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import Breadcrumb from "../components/public/Breadcrumb";
 import { motion } from "framer-motion";
 import { fadeInUp, staggerContainer } from "../motion/animation";
-import PublicHero from "../components/public/PublicHero";
 import StatusBadge from "../components/public/StatusBadge";
 import RegistryBadge from "../components/public/RegistryBadge";
 import { getPublicMedecins, getPublicSpecialites } from "../services/publicAnnuaireApi";
@@ -21,6 +21,8 @@ import {
   Stethoscope,
   Building2,
 } from "lucide-react";
+
+const BREADCRUMB = [{ label: "Accueil", to: "/" }, { label: "Annuaire médical" }];
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
@@ -160,18 +162,45 @@ function AnnuairePage() {
     }, []);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
+      <Breadcrumb items={BREADCRUMB} />
 
-      <PublicHero
-        badgeIcon={BadgeCheck}
-        badgeText="Registre officiel · ONMM"
-        title="Annuaire public des médecins"
-        subtitle="Recherchez un médecin inscrit au registre officiel de l'Ordre National des Médecins de Mauritanie."
-      />
+      {/* ── Page header ── */}
+      <section className="bg-white border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="h-px w-10 bg-green-600" />
+            <span className="text-xs font-bold uppercase tracking-widest text-green-600">
+              <BadgeCheck size={11} className="inline mr-1" />
+              Registre officiel · ONMM
+            </span>
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+            Annuaire des médecins
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Vérifiez qu'un médecin est bien inscrit au registre officiel de l'Ordre
+          </p>
+          {/* Stats */}
+          <div className="mt-6 flex flex-wrap gap-6">
+            {[
+              { label: "Médecins inscrits", value: "3 500+" },
+              { label: "Spécialités", value: "40+" },
+              { label: "Wilayas", value: "13" },
+            ].map((s) => (
+              <div key={s.label} className="flex items-baseline gap-2">
+                <span className="text-2xl font-extrabold text-green-600">{s.value}</span>
+                <span className="text-xs text-slate-400">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="h-px bg-linear-to-r from-green-500 via-emerald-300 to-transparent" />
+      </section>
 
       {/* ── Recherche dans le registre ── */}
-      <section className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 pb-4 pt-6 lg:sticky lg:top-18 lg:z-20">
+      <section className="border-b border-slate-200 bg-white px-6 pb-4 pt-6 lg:sticky lg:top-18 lg:z-20">
         <div className="mx-auto max-w-7xl">
           <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
             <div className="flex flex-col gap-3 border-b border-[#E2E8F0] px-6 py-4 sm:flex-row sm:items-center sm:justify-between">

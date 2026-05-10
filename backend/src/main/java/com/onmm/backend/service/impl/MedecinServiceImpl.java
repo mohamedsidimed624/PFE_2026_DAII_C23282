@@ -7,6 +7,7 @@ import com.onmm.backend.entity.Medecin;
 import com.onmm.backend.entity.MedecinEducation;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.service.MedecinService;
+import com.onmm.backend.service.NotificationService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,12 +26,14 @@ import java.util.UUID;
 public class MedecinServiceImpl implements MedecinService {
 
     private final MedecinRepository medecinRepository;
+    private final NotificationService notificationService;
 
     @Value("${upload.dir}")
     private String uploadDir;
 
-    public MedecinServiceImpl(MedecinRepository medecinRepository) {
+    public MedecinServiceImpl(MedecinRepository medecinRepository, NotificationService notificationService) {
         this.medecinRepository = medecinRepository;
+        this.notificationService = notificationService;
     }
 
     private MedecinEducationDto mapEducation(MedecinEducation education) {
@@ -78,6 +81,14 @@ public class MedecinServiceImpl implements MedecinService {
         medecin.setAdresse(request.getAdresse());
 
         medecinRepository.save(medecin);
+
+        notificationService.createNotification(
+                "MEDECIN_PROFIL_MODIFIE",
+                "Profil médecin modifié",
+                medecin.getPrenom() + " " + medecin.getNom() + " a mis à jour son profil",
+                "/admin/medecins/" + medecin.getId(),
+                false
+        );
 
         return mapToResponse(medecin);
     }

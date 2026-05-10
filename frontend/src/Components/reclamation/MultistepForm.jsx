@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
-import { ShieldCheck, Info, Phone, ArrowLeft, ArrowRight, RotateCcw, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, RotateCcw, Loader2 } from "lucide-react";
 
 import Progress from "./Progress";
 import StepPersonal from "./StepPersonal";
@@ -51,24 +51,6 @@ const INITIAL_DATA = {
   adresse: "", email: "", categorie: "", objet: "", message: "", fichier: null,
 };
 
-const SIDEBAR_INFO = [
-  {
-    icon: <ShieldCheck size={15} className="text-green-600" />,
-    title: "Confidentialité",
-    desc: "Vos données servent uniquement au traitement de votre réclamation.",
-  },
-  {
-    icon: <Info size={15} className="text-slate-400" />,
-    title: "Conseil",
-    desc: "Un message structuré et factuel accélère le traitement de votre dossier.",
-  },
-  {
-    icon: <Phone size={15} className="text-slate-400" />,
-    title: "Besoin d'aide ?",
-    desc: "Contactez l'administration via les canaux officiels de l'ONMM.",
-  },
-];
-
 export default function MultistepForm() {
   const totalSteps = 4;
 
@@ -83,7 +65,6 @@ export default function MultistepForm() {
   });
   const [errors, setErrors]       = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [complete, setComplete]   = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [receipt, setReceipt]     = useState(null);
 
@@ -150,7 +131,6 @@ export default function MultistepForm() {
       const res = await createPublicReclamation(payload, data.fichier);
       setReceipt({ numeroReclamation: res?.numeroReclamation || res?.reference || res?.id || "—" });
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      setComplete(true);
       setStep(3);
       localStorage.removeItem("publicReclamationFormData");
     } catch (err) {
@@ -165,7 +145,6 @@ export default function MultistepForm() {
     setErrors({});
     setSubmitError("");
     setReceipt(null);
-    setComplete(false);
     setStep(0);
     localStorage.removeItem("publicReclamationFormData");
   };
@@ -178,82 +157,65 @@ export default function MultistepForm() {
   ];
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_260px]">
+    <div className="mx-auto max-w-5xl px-4 py-10">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+        
+        {/* Header bleu/vert selon ton thème */}
+        <div className="bg-green-700 px-6 py-6 text-center">
+          <h1 className="text-2xl font-bold text-white">
+            Déposer une réclamation
+          </h1>
+        </div>
 
-        {/* ── Carte principale ── */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          {/* Header de la carte */}
-          <div className="border-b border-slate-100 bg-white px-6 py-5">
-            <h2 className="text-xl font-bold text-slate-900">
-              Déposer une réclamation
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Formulaire public · Ordre National des Médecins de Mauritanie
-            </p>
-            <Progress step={step} />
-          </div>
+        <div className="px-8 py-7">
+          <Progress step={step} />
 
-          {/* Corps du formulaire */}
-          <div className="px-6 py-5">
-            {submitError && (
-              <div className="mb-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                <span>{submitError}</span>
-              </div>
-            )}
-
-            <div className="relative min-h-80">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={steps[step].id}
-                  initial={{ opacity: 0, x: 24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -24 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
-                  {steps[step].component}
-                </motion.div>
-              </AnimatePresence>
+          {submitError && (
+            <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {submitError}
             </div>
+          )}
+
+          <div className="relative min-h-80 pt-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={steps[step].id}
+                initial={{ opacity: 0, x: 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -24 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <h2 className="mb-6 text-2xl font-bold text-slate-800">
+                  {steps[step].title}
+                </h2>
+
+                {steps[step].component}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Pied : navigation */}
-          <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/50 px-6 py-4">
-            {/* Bouton gauche : Réinitialiser (toujours visible sauf succès) */}
+          {/* Navigation style photo */}
+          <div className="mt-8 flex items-center justify-between gap-4">
             <div>
-              {step < totalSteps - 1 && (
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-                >
-                  <RotateCcw size={14} />
-                  Réinitialiser
-                </button>
-              )}
-            </div>
-
-            {/* Boutons droite : navigation */}
-            <div className="flex items-center gap-3">
               {step > 0 && step < totalSteps - 1 && (
                 <button
                   type="button"
                   onClick={back}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  className="rounded-md border border-green-600 bg-white px-6 py-2.5 text-sm font-bold uppercase text-green-700 transition hover:bg-green-50"
                 >
-                  <ArrowLeft size={15} />
-                  Précédent
+                  Retour
                 </button>
               )}
+            </div>
 
+            <div>
               {step < totalSteps - 2 && (
                 <button
                   type="button"
                   onClick={next}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-green-700 active:scale-[.98]"
+                  className="rounded-md bg-green-700 px-7 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800"
                 >
                   Suivant
-                  <ArrowRight size={15} />
                 </button>
               )}
 
@@ -262,19 +224,9 @@ export default function MultistepForm() {
                   type="button"
                   onClick={submit}
                   disabled={submitting}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-60 active:scale-[.98]"
+                  className="rounded-md bg-green-700 px-7 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
-                  {submitting ? (
-                    <>
-                      <Loader2 size={15} className="animate-spin" />
-                      Envoi en cours…
-                    </>
-                  ) : (
-                    <>
-                      Envoyer la réclamation
-                      <ArrowRight size={15} />
-                    </>
-                  )}
+                  {submitting ? "Enregistrement..." : "Envoyer"}
                 </button>
               )}
 
@@ -282,52 +234,21 @@ export default function MultistepForm() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-green-700"
+                  className="rounded-md bg-green-700 px-7 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800"
                 >
                   Nouvelle réclamation
-                  <ArrowRight size={15} />
                 </button>
               )}
             </div>
           </div>
+
+          <div className="mt-8 text-center text-sm text-slate-500">
+            Besoin d'aide ?{" "}
+            <span className="font-bold uppercase text-green-700">
+              Contacter l'administration
+            </span>
+          </div>
         </div>
-
-        {/* ── Sidebar ── */}
-        <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-          {SIDEBAR_INFO.map((info) => (
-            <div key={info.title} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 shrink-0">{info.icon}</div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">{info.title}</p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">{info.desc}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {/* Aperçu temps réel (masqué aux étapes 3 et 4) */}
-          {step < 2 && (
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-400">Aperçu</p>
-              <div className="space-y-0 text-sm">
-                {[
-                  { label: "Nom",       value: `${data.prenom} ${data.nom}`.trim() },
-                  { label: "Email",     value: data.email },
-                  { label: "Catégorie", value: categoryMap.get(data.categorie) },
-                  { label: "Objet",     value: data.objet },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex items-start justify-between gap-2 border-b border-slate-100 py-2 last:border-0">
-                    <span className="shrink-0 text-xs text-slate-400">{label}</span>
-                    <span className="text-right text-xs font-medium text-slate-700 break-words max-w-[65%]">
-                      {value || <span className="text-slate-300">—</span>}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </aside>
       </div>
     </div>
   );

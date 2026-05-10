@@ -10,12 +10,15 @@ import AdminSpecialitesPage from "../pages/admin/AdminSpecialitesPage";
 import AdminContenusPage from "../pages/admin/AdminContenusPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminParametresPage from "../pages/admin/AdminParametresPage";
+import AdminNotificationsPage from "../pages/admin/AdminNotificationsPage";
 
 
 function AdminRoutes() {
   return (
     <Routes>
       <Route path="dashboard" element={<AdminDashboard />} />
+
+      <Route path="notifications" element={<AdminNotificationsPage />} />
 
       <Route path="demandes" element={<AdminDemandesList />} />
       <Route path="demandes/:id" element={<AdminDemandeDetail />} />

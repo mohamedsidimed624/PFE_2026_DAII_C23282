@@ -14,6 +14,7 @@ import com.onmm.backend.repository.DemandeAdhesionRepository;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.repository.UserRepository;
 import com.onmm.backend.service.DemandeAdhesionService;
+import com.onmm.backend.service.NotificationService;
 import com.onmm.backend.service.email.EmailService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -35,17 +36,19 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
     private final EmailService emailService;
     private final MedecinRepository medecinRepository;
     private final ActivationTokenRepository activationTokenRepository;
+    private final NotificationService notificationService;
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
     private String genererNumeroDossier() {
         return "DOS-" + java.time.Year.now().getValue() + "-" + System.currentTimeMillis();
     }
 
-    public DemandeAdhesionServiceImpl(DemandeAdhesionRepository demandeAdhesionRepository, EmailService emailService, MedecinRepository medecinRepository, ActivationTokenRepository activationTokenRepository) {
+    public DemandeAdhesionServiceImpl(DemandeAdhesionRepository demandeAdhesionRepository, EmailService emailService, MedecinRepository medecinRepository, ActivationTokenRepository activationTokenRepository, NotificationService notificationService) {
         this.demandeAdhesionRepository = demandeAdhesionRepository;
         this.emailService = emailService;
         this.medecinRepository = medecinRepository;
         this.activationTokenRepository = activationTokenRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -109,6 +112,14 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
                 saved.getEmail(),
                 saved.getNom(),
                 saved.getNumeroDossier()
+        );
+
+        notificationService.createNotification(
+                "NOUVELLE_DEMANDE",
+                "Nouvelle demande d'adhésion",
+                saved.getPrenom() + " " + saved.getNom() + " a soumis une demande d'adhésion",
+                "/admin/demandes/" + saved.getId(),
+                true
         );
 
         return saved;

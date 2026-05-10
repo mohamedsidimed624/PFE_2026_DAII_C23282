@@ -8,6 +8,7 @@ import {
   FileSearch, MessageSquare,
 } from "lucide-react";
 import { getSuiviDossier, getDemandePourReprise } from "../services/demandeSuiviApi";
+import Breadcrumb from "../components/public/Breadcrumb";
 import { useFormData } from "../context/FormContext";
 
 const formatDate = (d) => {
@@ -189,7 +190,8 @@ function SuiviDossierPage() {
   if (loading) return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-slate-50 pt-24">
+      <Breadcrumb items={[{ label: "Accueil", to: "/" }, { label: "Suivi de dossier" }]} />
+      <div className="min-h-screen bg-slate-50">
         <main className="mx-auto max-w-3xl px-6 py-10">
           <div className="space-y-4 animate-pulse">
             <div className="h-32 rounded-2xl bg-slate-200" />
@@ -205,7 +207,8 @@ function SuiviDossierPage() {
   if (error && !result) return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-slate-50 pt-24">
+      <Breadcrumb items={[{ label: "Accueil", to: "/" }, { label: "Suivi de dossier" }]} />
+      <div className="min-h-screen bg-slate-50">
         <main className="mx-auto max-w-2xl px-6 py-10">
           <div className="overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm">
             <div className="border-b border-red-100 bg-red-50 px-6 py-4">
@@ -245,7 +248,8 @@ function SuiviDossierPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-slate-50 pt-24">
+      <Breadcrumb items={[{ label: "Accueil", to: "/" }, { label: "Suivi de dossier" }]} />
+      <div className="min-h-screen bg-slate-50">
         <main className="mx-auto max-w-3xl space-y-5 px-6 py-10">
 
           {/* ── Header ── */}

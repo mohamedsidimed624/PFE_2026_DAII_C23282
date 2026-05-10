@@ -308,15 +308,18 @@ function Navbar() {
         { label: "Accueil", to: "/" },
         { label: "Annuaire", to: "/annuaire" },
         { label: "Annonces", to: "/annonces" },
+        { label: "Galerie", to: "/galerie" },
+        { label: "À propos", to: "/a-propos" },
         { label: "Contact", to: "/contact" },
+        { label: "Assistant IA", to: "/assistant" },
     ];
 
     return (
         <nav 
             className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-                scrolled 
-                    ? "bg-white/90 backdrop-blur-xl border-b border-slate-200/50 shadow-sm py-3" 
-                    : "bg-white/50 backdrop-blur-md border-b border-transparent py-5"
+                scrolled
+                    ? "bg-white backdrop-blur-xl border-b border-slate-200 shadow-sm py-3"
+                    : "bg-white/60 backdrop-blur-md border-b border-transparent py-5"
             }`}
         >
             <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -334,6 +337,9 @@ function Navbar() {
                         </span>
                         <span className="block text-sm text-slate-900 font-bold tracking-tight transition-colors group-hover:text-green-800">
                             des Médecins
+                        </span>
+                        <span className="block text-[10px] text-slate-400 tracking-wide">
+                            République Islamique de Mauritanie
                         </span>
                     </div>
                 </Link>

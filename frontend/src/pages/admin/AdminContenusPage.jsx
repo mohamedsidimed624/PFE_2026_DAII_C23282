@@ -102,16 +102,21 @@ function ConfirmModal({ open, onClose, onConfirm, loading, config }) {
               <button
                 onClick={onClose}
                 disabled={loading}
-                className="btn btn-ghost btn-sm text-slate-600"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
               >
                 Annuler
               </button>
               <button
                 onClick={onConfirm}
                 disabled={loading}
-                className={cx("btn btn-sm gap-2 text-white", config.confirmClass)}
+                className={cx("inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed", config.confirmClass)}
               >
-                {loading && <span className="loading loading-spinner loading-xs" />}
+                {loading && (
+                  <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                )}
                 {config.confirmLabel}
               </button>
             </div>
@@ -487,31 +492,31 @@ function AdminContenusPage() {
           </button>
         </div>
 
-        {/* ── STAT CARDS (cliquables) ──
+        {/* ── STAT CARDS ── */}
         {!loading && (
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatCard
               label="Total" value={stats.total}
-              icon={<TrendingUp size={16} />} color="bg-slate-100 text-slate-600"
+              icon={<TrendingUp size={16} />} color="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
               active={!statusFilter} onClick={() => setStatusFilter("")}
             />
             <StatCard
               label="Publiés" value={stats.published}
-              icon={<FileCheck size={16} />} color="bg-green-100 text-green-600"
+              icon={<FileCheck size={16} />} color="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
               active={statusFilter === "PUBLISHED"} onClick={() => setStatusFilter(statusFilter === "PUBLISHED" ? "" : "PUBLISHED")}
             />
             <StatCard
               label="Brouillons" value={stats.draft}
-              icon={<FileClock size={16} />} color="bg-slate-100 text-slate-500"
+              icon={<FileClock size={16} />} color="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
               active={statusFilter === "DRAFT"} onClick={() => setStatusFilter(statusFilter === "DRAFT" ? "" : "DRAFT")}
             />
             <StatCard
               label="Expirés" value={stats.expired}
-              icon={<FileX size={16} />} color="bg-red-100 text-red-500"
+              icon={<FileX size={16} />} color="bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400"
               active={statusFilter === "EXPIRED"} onClick={() => setStatusFilter(statusFilter === "EXPIRED" ? "" : "EXPIRED")}
             />
           </div>
-        )} */}
+        )}
 
         {/* ── TOOLBAR ── */}
         <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">

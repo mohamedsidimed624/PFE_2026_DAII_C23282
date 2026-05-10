@@ -12,20 +12,25 @@ import {
   Menu,
 } from "lucide-react";
 import { getMyProfile } from "../../services/adminProfileApi";
+import { getNotifications, markAsRead, markAllAsRead } from "../../services/notificationApi";
 
-/* ── Fausses notifications (à remplacer par ton API) ── */
-const MOCK_NOTIFICATIONS = [
-  { id: 1, message: "Nouvelle demande soumise par Mohamed Ahmed", time: "Il y a 5 min",  read: false },
-  { id: 2, message: "Demande #6548 a été approuvée",             time: "Il y a 20 min", read: false },
-  { id: 3, message: "Réclamation en attente de traitement",       time: "Il y a 1h",    read: false },
-  { id: 4, message: "Dr. Fatima Mint a mis à jour son profil",    time: "Il y a 2h",    read: true  },
-  { id: 5, message: "Sondage mensuel publié avec succès",         time: "Hier",         read: true  },
-];
+function formatRelTime(dt) {
+  if (!dt) return "";
+  const d = new Date(dt);
+  const diffMin = Math.floor((Date.now() - d) / 60000);
+  if (diffMin < 1)  return "À l'instant";
+  if (diffMin < 60) return `Il y a ${diffMin} min`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24)   return `Il y a ${diffH}h`;
+  const diffD = Math.floor(diffH / 24);
+  if (diffD < 7)    return `Il y a ${diffD}j`;
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+}
 
 function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
   const [userOpen,      setUserOpen]      = useState(false);
   const [notifOpen,     setNotifOpen]     = useState(false);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
   const [darkMode,      setDarkMode]      = useState(
     () => localStorage.getItem("theme") === "dark"
   );
@@ -35,9 +40,9 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
   const notifRef = useRef(null);
   const navigate = useNavigate();
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.lu).length;
 
-  /* ── Dark mode : toggle classe + data-theme sur <html> ── */
+  /* ── Dark mode ── */
   useEffect(() => {
     const root = document.documentElement;
     if (darkMode) {
@@ -51,12 +56,12 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
     }
   }, [darkMode]);
 
-  /* ── Charger le profil admin ── */
+  /* ── Profil admin ── */
   useEffect(() => {
     getMyProfile().then((res) => setProfile(res.data)).catch(() => {});
   }, []);
 
-  /* ── Fermer les dropdowns au clic extérieur ── */
+  /* ── Fermer dropdowns au clic extérieur ── */
   useEffect(() => {
     const handler = (e) => {
       if (userRef.current  && !userRef.current.contains(e.target))  setUserOpen(false);
@@ -66,13 +71,33 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const markAllRead = () =>
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  /* ── Fetch notifications (poll 30s) ── */
+  const fetchNotifications = () => {
+    getNotifications()
+      .then((res) => setNotifications(res.data.slice(0, 6)))
+      .catch(() => {});
+  };
+  useEffect(() => {
+    fetchNotifications();
+    const id = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(id);
+  }, []);
 
-  const markOneRead = (id) =>
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const handleMarkAllRead = async () => {
+    await markAllAsRead();
+    setNotifications((prev) => prev.map((n) => ({ ...n, lu: true })));
+  };
+
+  const handleNotifClick = async (n) => {
+    if (!n.lu) {
+      markAsRead(n.id).catch(() => {});
+      setNotifications((prev) =>
+        prev.map((x) => (x.id === n.id ? { ...x, lu: true } : x))
+      );
+    }
+    if (n.lien) navigate(n.lien);
+    setNotifOpen(false);
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -107,10 +132,10 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
         </span>
       </div>
 
-      {/* ── Actions côté droit ── */}
+      {/* ── Actions droite ── */}
       <div className="flex items-center gap-1">
 
-        {/* ── Toggle Dark / Light ── */}
+        {/* Dark / Light */}
         <button
           onClick={() => setDarkMode((d) => !d)}
           title={darkMode ? "Mode clair" : "Mode sombre"}
@@ -130,7 +155,7 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
           >
             <Bell size={18} />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5 leading-none">
+              <span className="absolute top-1.5 right-1.5 min-w-4 h-4 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5 leading-none">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
@@ -154,7 +179,7 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
                 </div>
                 {unreadCount > 0 && (
                   <button
-                    onClick={markAllRead}
+                    onClick={handleMarkAllRead}
                     className="flex items-center gap-1 text-[11px] font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors"
                   >
                     <Check size={11} />
@@ -166,35 +191,36 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
               {/* Liste */}
               <div className="divide-y divide-slate-50 dark:divide-slate-800 max-h-72 overflow-y-auto">
                 {notifications.length === 0 ? (
-                  <p className="text-center text-xs text-slate-400 py-8">
+                  <p className="text-center text-xs text-slate-400 dark:text-slate-500 py-8">
                     Aucune notification
                   </p>
                 ) : (
                   notifications.map((n) => (
                     <button
                       key={n.id}
-                      onClick={() => markOneRead(n.id)}
+                      onClick={() => handleNotifClick(n)}
                       className={`w-full text-left flex items-start gap-3 px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60 ${
-                        !n.read ? "bg-green-50/60 dark:bg-green-900/10" : ""
+                        !n.lu ? "bg-green-50/60 dark:bg-green-900/10" : ""
                       }`}
                     >
                       <span
-                        className={`mt-1.5 w-2 h-2 rounded-full shrink-0 transition-colors ${
-                          !n.read ? "bg-green-500" : "bg-transparent"
+                        className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
+                          !n.lu ? "bg-green-500" : "bg-transparent"
                         }`}
                       />
-                      <div className="min-w-0">
-                        <p
-                          className={`text-xs leading-relaxed ${
-                            !n.read
-                              ? "font-semibold text-slate-800 dark:text-slate-100"
-                              : "text-slate-500 dark:text-slate-400"
-                          }`}
-                        >
+                      <div className="min-w-0 flex-1">
+                        <p className={`text-xs leading-relaxed ${
+                          !n.lu
+                            ? "font-semibold text-slate-800 dark:text-slate-100"
+                            : "text-slate-500 dark:text-slate-400"
+                        }`}>
+                          {n.titre}
+                        </p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 truncate">
                           {n.message}
                         </p>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-                          {n.time}
+                        <p className="text-[10px] text-slate-300 dark:text-slate-600 mt-0.5">
+                          {formatRelTime(n.createdAt)}
                         </p>
                       </div>
                     </button>
@@ -215,7 +241,7 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
           )}
         </div>
 
-        {/* ── Séparateur vertical ── */}
+        {/* Séparateur */}
         <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
 
         {/* ── Menu utilisateur ── */}

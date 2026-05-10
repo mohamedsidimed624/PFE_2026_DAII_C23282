@@ -12,6 +12,7 @@ import com.onmm.backend.entity.enums.ReclamationStatus;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.repository.ReclamationRepository;
 import com.onmm.backend.repository.UserRepository;
+import com.onmm.backend.service.NotificationService;
 import com.onmm.backend.service.ReclamationService;
 import com.onmm.backend.service.email.EmailService;
 import jakarta.transaction.Transactional;
@@ -29,15 +30,18 @@ public class ReclamationServiceImpl implements ReclamationService {
     private final UserRepository userRepository;
     private final MedecinRepository medecinRepository;
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     public ReclamationServiceImpl(ReclamationRepository reclamationRepository,
                                   UserRepository userRepository,
                                   MedecinRepository medecinRepository,
-                                  EmailService emailService) {
+                                  EmailService emailService,
+                                  NotificationService notificationService) {
         this.reclamationRepository = reclamationRepository;
         this.userRepository = userRepository;
         this.medecinRepository = medecinRepository;
         this.emailService = emailService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -67,6 +71,14 @@ public class ReclamationServiceImpl implements ReclamationService {
         reclamation.setEmailCitoyen(request.getEmail());
 
         reclamationRepository.save(reclamation);
+
+        notificationService.createNotification(
+                "NOUVELLE_RECLAMATION",
+                "Nouvelle réclamation soumise",
+                reclamation.getPrenomCitoyen() + " " + reclamation.getNomCitoyen() + " a soumis une réclamation : " + reclamation.getObjet(),
+                "/admin/reclamations/" + reclamation.getId(),
+                true
+        );
 
         emailService.sendPublicReclamationSubmissionEmail(
                 reclamation.getEmailCitoyen(),
@@ -103,6 +115,14 @@ public class ReclamationServiceImpl implements ReclamationService {
         reclamation.setMedecin(medecin);
 
         reclamationRepository.save(reclamation);
+
+        notificationService.createNotification(
+                "NOUVELLE_RECLAMATION",
+                "Nouvelle réclamation (médecin)",
+                medecin.getPrenom() + " " + medecin.getNom() + " (médecin) a soumis une réclamation : " + reclamation.getObjet(),
+                "/admin/reclamations/" + reclamation.getId(),
+                true
+        );
 
         return toCreatedResponse(reclamation);
     }
@@ -168,6 +188,14 @@ public class ReclamationServiceImpl implements ReclamationService {
         reclamation.setDateDerniereMiseAJour(now);
 
         reclamationRepository.save(reclamation);
+
+        notificationService.createNotification(
+                "RECLAMATION_PRISE_EN_CHARGE",
+                "Réclamation prise en charge",
+                "Réclamation " + reclamation.getNumeroReclamation() + " est maintenant en cours de traitement",
+                "/admin/reclamations/" + id,
+                false
+        );
     }
 
     @Override
@@ -196,6 +224,14 @@ public class ReclamationServiceImpl implements ReclamationService {
         }
 
         reclamationRepository.save(reclamation);
+
+        notificationService.createNotification(
+                "RECLAMATION_CLOTUREE",
+                "Réclamation clôturée",
+                "Réclamation " + reclamation.getNumeroReclamation() + " a été clôturée",
+                "/admin/reclamations/" + id,
+                false
+        );
 
         String destinataireEmail;
         String destinataireNom;

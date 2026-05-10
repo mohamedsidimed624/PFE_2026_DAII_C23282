@@ -12,6 +12,7 @@ import {
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import Breadcrumb from "../components/public/Breadcrumb";
 
 import { getPublicContenuById } from "../services/publicContenuApi";
 import { formatAnnonceDate, getTypeLabel } from "../utils/annonceUtils";
@@ -82,20 +83,13 @@ function AnnonceDetailPage() {
     <>
       <Navbar />
 
-      <main className="min-h-screen bg-[#F8FAFC] pt-24">
+      <Breadcrumb items={[
+        { label: "Accueil", to: "/" },
+        { label: "Annonces", to: "/annonces" },
+        { label: annonce?.titre || "Publication" },
+      ]} />
 
-        {/* Breadcrumb */}
-        <div className="border-b border-[#E2E8F0] bg-white">
-          <div className="mx-auto max-w-4xl px-6 py-3.5">
-            <Link
-              to="/annonces"
-              className="inline-flex items-center gap-2 text-sm font-medium text-[#64748B] transition hover:text-[#16A34A]"
-            >
-              <ArrowLeft size={14} />
-              Retour aux publications
-            </Link>
-          </div>
-        </div>
+      <main className="min-h-screen bg-[#F8FAFC]">
 
         <div className="mx-auto max-w-4xl px-6 py-10">
           {loading ? (

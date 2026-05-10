@@ -12,6 +12,7 @@ import com.onmm.backend.repository.ActivationTokenRepository;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
 import com.onmm.backend.repository.UserRepository;
 import com.onmm.backend.service.Admin.AdminDemandeService;
+import com.onmm.backend.service.NotificationService;
 import org.springframework.stereotype.Service;
 import com.onmm.backend.entity.enums.ApplicationStatus;
 import com.onmm.backend.service.email.EmailService;
@@ -30,6 +31,7 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
     private final UserRepository userRepository;
     private final ActivationTokenRepository tokenRepository;
     private final MedecinRepository medecinRepository;
+    private final NotificationService notificationService;
 
 
 
@@ -50,12 +52,13 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         return SectionOrdre.SPECIALISTE;
     }
 
-    public AdminDemandeServiceImpl(DemandeAdhesionRepository repository, EmailService emailService, UserRepository userRepository, ActivationTokenRepository tokenRepository, MedecinRepository medecinRepository) {
+    public AdminDemandeServiceImpl(DemandeAdhesionRepository repository, EmailService emailService, UserRepository userRepository, ActivationTokenRepository tokenRepository, MedecinRepository medecinRepository, NotificationService notificationService) {
         this.repository = repository;
         this.emailService = emailService;
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.medecinRepository = medecinRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -176,6 +179,14 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         demande.setAdminComment(comment);
 
         repository.save(demande);
+
+        notificationService.createNotification(
+                "DEMANDE_REJETEE",
+                "Demande d'adhésion rejetée",
+                demande.getPrenom() + " " + demande.getNom() + " — dossier traité (rejeté)",
+                "/admin/demandes/" + id,
+                false
+        );
 
         emailService.sendRejectionEmail(
                 demande.getEmail(),
@@ -304,6 +315,14 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         }
 
         medecinRepository.save(medecin);
+
+        notificationService.createNotification(
+                "DEMANDE_APPROUVEE",
+                "Demande d'adhésion approuvée",
+                demande.getPrenom() + " " + demande.getNom() + " — dossier approuvé, compte médecin créé",
+                "/admin/demandes/" + id,
+                false
+        );
 
         ActivationToken token = new ActivationToken();
         token.setToken(UUID.randomUUID().toString());
