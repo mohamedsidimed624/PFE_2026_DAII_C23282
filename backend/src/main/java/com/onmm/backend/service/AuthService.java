@@ -11,4 +11,8 @@ public interface AuthService {
     void setPassword(SetPasswordRequest request);
 
     LoginResponse login(LoginRequest request);
+
+    void forgotPassword(String email);
+
+    void verifyActivationEmail(String token, String email);
 }

@@ -301,7 +301,7 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
                     return activationTokenRepository.save(newToken);
                 });
 
-        return frontendUrl + "/set-password?token=" + token.getToken();
+        return frontendUrl + "/activate?token=" + token.getToken();
     }
 
 }

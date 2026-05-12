@@ -133,4 +133,23 @@ public class EmailServiceImpl implements EmailService {
 
         mailSender.send(message);
     }
+
+    @Override
+    @Async
+    public void sendPasswordResetEmail(String to, String name, String resetLink) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Réinitialisation de votre mot de passe - ONMM");
+        message.setText(
+                "Bonjour " + name + ",\n\n" +
+                "Vous avez demandé la réinitialisation de votre mot de passe.\n" +
+                "Cliquez sur le lien ci-dessous pour définir un nouveau mot de passe :\n\n" +
+                resetLink + "\n\n" +
+                "Ce lien est valable pendant 1 heure.\n" +
+                "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.\n\n" +
+                "Cordialement,\n" +
+                "ONMM"
+        );
+        mailSender.send(message);
+    }
 }

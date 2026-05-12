@@ -4,7 +4,7 @@ import com.onmm.backend.dto.reclamation.CreateMedecinReclamationRequest;
 import com.onmm.backend.dto.reclamation.ReclamationCreatedResponse;
 import com.onmm.backend.dto.reclamation.ReclamationDetailResponse;
 import com.onmm.backend.dto.reclamation.ReclamationListResponse;
-import com.onmm.backend.entity.User;
+import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.service.FileStorageService;
 import com.onmm.backend.service.ReclamationService;
 import org.springframework.security.core.Authentication;
@@ -27,18 +27,19 @@ public class MedecinReclamationController {
         this.fileStorageService = fileStorageService;
     }
 
+    private String currentEmail(Authentication auth) {
+        return ((UserPrincipal) auth.getPrincipal()).getUser().getEmail();
+    }
+
     @PostMapping
     public ReclamationCreatedResponse createMedecinReclamation(
             Authentication authentication,
             @RequestPart("data") CreateMedecinReclamationRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
-        User user = (User) authentication.getPrincipal();
-
         String pieceJointePath = fileStorageService.storeReclamationFile(file);
-
         return reclamationService.createMedecinReclamation(
-                user.getEmail(),
+                currentEmail(authentication),
                 request,
                 pieceJointePath
         );
@@ -46,8 +47,7 @@ public class MedecinReclamationController {
 
     @GetMapping
     public List<ReclamationListResponse> getMyReclamations(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return reclamationService.getMedecinReclamations(user.getEmail());
+        return reclamationService.getMedecinReclamations(currentEmail(authentication));
     }
 
     @GetMapping("/{id}")
@@ -55,7 +55,6 @@ public class MedecinReclamationController {
             @PathVariable Long id,
             Authentication authentication
     ) {
-        User user = (User) authentication.getPrincipal();
-        return reclamationService.getMedecinReclamationDetail(id, user.getEmail());
+        return reclamationService.getMedecinReclamationDetail(id, currentEmail(authentication));
     }
 }

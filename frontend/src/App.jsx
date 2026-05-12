@@ -5,6 +5,8 @@ import Home from "./pages/Home";
 import SubmitApplication from "./pages/SubmitApplication";
 import LoginPage from "./pages/LoginPage";
 import SetPasswordPage from "./pages/SetPasswordPages";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ActivateAccountPage from "./pages/ActivateAccountPage";
 import SuiviDossierPage from "./pages/SuiviDossierPage";
 
 import AdminRoutes from "./routes/AdminRoutes";
@@ -22,6 +24,8 @@ import PublicReclamationPage from "./pages/PublicReclamationPage.jsx";
 import MedecinReclamationCreatePage from "./pages/medecin/MedecinReclamationCreatePage.jsx";
 import MedecinReclamationsPage from "./pages/medecin/MedecinReclamationsPage.jsx";
 import MedecinReclamationDetailPage from "./pages/medecin/MedecinReclamationDetailPage.jsx";
+import MedecinNotificationsPage from "./pages/medecin/MedecinNotificationsPage.jsx";
+import MedecinCotisationPage from "./pages/medecin/MedecinCotisationPage.jsx";
 
 import Contact from "./pages/ContactPage.jsx";
 import AnnoncesPage from "./pages/AnnoncesPage.jsx";
@@ -38,6 +42,8 @@ function PublicChatbot() {
     pathname.startsWith("/medecin") ||
     pathname === "/login" ||
     pathname === "/set-password" ||
+    pathname === "/forgot-password" ||
+    pathname === "/activate" ||
     pathname === "/assistant"
   ) return null;
   return <AssistantButton />;
@@ -54,6 +60,8 @@ function App() {
         <Route path="/adhesion" element={<SubmitApplication />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/set-password" element={<SetPasswordPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/activate" element={<ActivateAccountPage />} />
         <Route path="/suivi-dossier" element={<SuiviDossierPage />} />
         <Route path="/annuaire" element={<AnnuairePage />} />
         <Route path="/annuaire/:id" element={<AnnuaireMedecinDetailPage />} />
@@ -129,7 +137,16 @@ function App() {
           path="/medecin/notifications"
           element={
             <MedecinRoute>
-              <PlaceholderPage title="Notifications" />
+              <MedecinNotificationsPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/cotisation"
+          element={
+            <MedecinRoute>
+              <MedecinCotisationPage />
             </MedecinRoute>
           }
         />

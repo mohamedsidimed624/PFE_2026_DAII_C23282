@@ -14,4 +14,6 @@ public interface EmailService {
 
     void sendReclamationClosedEmail(String to, String name, String numeroReclamation, String objet, String adminResponse);
 
+    void sendPasswordResetEmail(String to, String name, String resetLink);
+
 }

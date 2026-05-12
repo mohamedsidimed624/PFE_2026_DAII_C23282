@@ -19,6 +19,8 @@ public class MedecinProfileResponse {
     private String numeroInscription;
     private String statut;
     private String photoProfilPath;
+    private String sectionOrdre;
+    private String villeExercice;
 
     private List<MedecinEducationDto> educations;
 

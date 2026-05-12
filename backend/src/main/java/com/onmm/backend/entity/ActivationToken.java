@@ -21,7 +21,7 @@ public class ActivationToken {
     @Enumerated(EnumType.STRING)
     private TokenType type;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

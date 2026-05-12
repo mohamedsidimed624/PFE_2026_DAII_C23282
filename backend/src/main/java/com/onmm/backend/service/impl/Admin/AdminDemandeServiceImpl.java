@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.onmm.backend.entity.enums.ApplicationStatus;
 import com.onmm.backend.service.email.EmailService;
 import com.onmm.backend.repository.MedecinRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -33,7 +34,8 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
     private final MedecinRepository medecinRepository;
     private final NotificationService notificationService;
 
-
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
 
     private String genererNumeroInscription() {
         return "OM-" + java.time.Year.now().getValue() + "-" + System.currentTimeMillis();
@@ -238,6 +240,7 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         medecin.setAdresse(demande.getAdresse());
         medecin.setNumeroInscription(genererNumeroInscription());
         medecin.setStatut(StatutMedecin.ACTIF);
+        medecin.setDateApprouvement(java.time.LocalDate.now());
         medecin.setDateNaissance(demande.getDateNaissance());
 
         // Section ordre : règle simple basée sur les formations
@@ -333,7 +336,7 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
 
         tokenRepository.save(token);
 
-        String link = "http://localhost:5173/set-password?token=" + token.getToken();
+        String link = frontendUrl + "/activate?token=" + token.getToken();
 
         emailService.sendApprovalEmail(
                 demande.getEmail(),

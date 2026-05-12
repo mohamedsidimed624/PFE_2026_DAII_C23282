@@ -1,133 +1,62 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { createMedecinReclamation } from "../../services/medecinReclamationApi";
 import {
   ArrowLeft, Send, Paperclip, CheckCircle2, AlertCircle,
-  X, Upload, Clock, ShieldCheck, ChevronRight, ListChecks,
+  X, Upload, Clock, ShieldCheck, ListChecks, Tag, FileText, Loader2,
 } from "lucide-react";
 
-/* ── Catégories groupées visuellement ───────────────── */
-const CATEGORY_GROUPS = [
-  {
-    id: "administratif",
-    label: "Administratif",
-    icon: "📋",
-    description: "Dossier, délais, informations",
-    sub: [
-      { value: "RETARD_TRAITEMENT",   label: "Retard de traitement" },
-      { value: "ERREUR_DOSSIER",      label: "Erreur sur dossier" },
-      { value: "DEMANDE_INFORMATION", label: "Demande d'information" },
-    ],
-  },
-  {
-    id: "medical",
-    label: "Pratique médicale",
-    icon: "🩺",
-    description: "Soins, prescriptions, certificats",
-    sub: [
-      { value: "QUALITE_SOINS",            label: "Qualité des soins" },
-      { value: "CERTIFICAT_MEDICAL",       label: "Certificat médical" },
-      { value: "PRESCRIPTION_ABUSIVE",     label: "Prescription abusive" },
-      { value: "INFORMATION_CONSENTEMENT", label: "Information et consentement" },
-    ],
-  },
-  {
-    id: "comportement",
-    label: "Comportement & déontologie",
-    icon: "⚖️",
-    description: "Conduite, secret, confraternité",
-    sub: [
-      { value: "COMPORTEMENT_INAPPROPRIE",    label: "Comportement inapproprié" },
-      { value: "SECRET_PROFESSIONNEL",        label: "Secret professionnel" },
-      { value: "CONFRATERNITE",               label: "Confraternité" },
-      { value: "PUBLICITE_CHARLATANISME",     label: "Publicité / charlatanisme" },
-      { value: "DECONSIDERATION_PROFESSION",  label: "Déconsidération de la profession" },
-    ],
-  },
-  {
-    id: "autre",
-    label: "Autre",
-    icon: "📝",
-    description: "Autre motif non listé",
-    sub: [{ value: "AUTRE", label: "Autre" }],
-  },
+const CATEGORIES = [
+  { value: "RETARD_TRAITEMENT",          label: "Retard de traitement",             group: "Administratif" },
+  { value: "ERREUR_DOSSIER",             label: "Erreur sur dossier",               group: "Administratif" },
+  { value: "DEMANDE_INFORMATION",        label: "Demande d'information",            group: "Administratif" },
+  { value: "QUALITE_SOINS",              label: "Qualité des soins",                group: "Pratique médicale" },
+  { value: "CERTIFICAT_MEDICAL",         label: "Certificat médical",               group: "Pratique médicale" },
+  { value: "PRESCRIPTION_ABUSIVE",       label: "Prescription abusive",             group: "Pratique médicale" },
+  { value: "INFORMATION_CONSENTEMENT",   label: "Information et consentement",      group: "Pratique médicale" },
+  { value: "COMPORTEMENT_INAPPROPRIE",   label: "Comportement inapproprié",         group: "Déontologie" },
+  { value: "SECRET_PROFESSIONNEL",       label: "Secret professionnel",             group: "Déontologie" },
+  { value: "CONFRATERNITE",              label: "Confraternité",                    group: "Déontologie" },
+  { value: "PUBLICITE_CHARLATANISME",    label: "Publicité / charlatanisme",        group: "Déontologie" },
+  { value: "DECONSIDERATION_PROFESSION", label: "Déconsidération de la profession", group: "Déontologie" },
+  { value: "AUTRE",                      label: "Autre",                            group: "Autre" },
 ];
 
-const ALL_CATEGORIES = CATEGORY_GROUPS.flatMap((g) => g.sub);
+const GROUPS = [...new Set(CATEGORIES.map((c) => c.group))];
 
-const cx = (...c) => c.filter(Boolean).join(" ");
+const inputCls = (hasError) =>
+  `w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition
+   focus:ring-2 focus:ring-green-500/20 focus:border-green-500
+   ${hasError ? "border-red-300 focus:border-red-400 focus:ring-red-400/20" : "border-slate-200"}`;
 
-const formatFileSize = (b) => {
-  if (!b && b !== 0) return "";
-  if (b < 1024) return `${b} o`;
-  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} Ko`;
-  return `${(b / (1024 * 1024)).toFixed(1)} Mo`;
-};
-
-/* ── Variants ───────────────────────────────────────── */
-const fadeUp = {
-  hidden:  { opacity: 0, y: 14 },
-  visible: (i = 0) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.32, delay: i * 0.06, ease: "easeOut" },
-  }),
-};
-
-const slideIn = {
-  hidden:  { opacity: 0, x: -10 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.25, ease: "easeOut" } },
-  exit:    { opacity: 0, x: 10, transition: { duration: 0.18 } },
-};
-
-const alertV = {
-  hidden:  { opacity: 0, y: -10, scale: 0.97 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.22 } },
-  exit:    { opacity: 0, scale: 0.97, transition: { duration: 0.18 } },
-};
-
-/* ── Field ──────────────────────────────────────────── */
-function Field({ label, required, hint, error, children, index = 0 }) {
+function Field({ label, required, hint, error, children }) {
   return (
-    <motion.div
-      variants={fadeUp} initial="hidden" animate="visible" custom={index}
-      className="space-y-1.5"
-    >
-      <div className="flex items-baseline justify-between gap-2">
-        <label className="text-sm font-medium text-base-content">
-          {label}{required && <span className="ml-1 text-error">*</span>}
-        </label>
-        {hint && <span className="text-xs text-base-content/40 shrink-0">{hint}</span>}
-      </div>
+    <div className="space-y-1.5">
+      <label className="block text-sm font-medium text-slate-700">
+        {label}{required && <span className="ml-0.5 text-red-500">*</span>}
+      </label>
+      {hint && <p className="text-xs text-slate-400 -mt-0.5">{hint}</p>}
       {children}
-      <AnimatePresence mode="wait">
-        {error && (
-          <motion.p
-            key="err"
-            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.15 }}
-            className="flex items-center gap-1.5 text-xs font-medium text-error"
-          >
-            <AlertCircle size={11} />{error}
-          </motion.p>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {error && (
+        <p className="flex items-center gap-1 text-xs font-medium text-red-600" role="alert">
+          <AlertCircle size={11} />{error}
+        </p>
+      )}
+    </div>
   );
 }
 
-/* ── Main ───────────────────────────────────────────── */
 export default function MedecinReclamationCreatePage() {
   const navigate = useNavigate();
 
-  const [activeGroup, setActiveGroup] = useState(null);
-  const [form, setForm]   = useState({ categorie: "", objet: "", message: "" });
-  const [file, setFile]   = useState(null);
+  const [form, setForm]               = useState({ categorie: "", objet: "", message: "" });
+  const [file, setFile]               = useState(null);
   const [errors, setErrors]           = useState({});
   const [submitError, setSubmitError] = useState("");
   const [loading, setLoading]         = useState(false);
-  const [submitted, setSubmitted]     = useState(null); // { numero }
+  const [submitted, setSubmitted]     = useState(null);
 
   const setField = (name, value) => {
     setForm((p) => ({ ...p, [name]: value }));
@@ -135,26 +64,15 @@ export default function MedecinReclamationCreatePage() {
     setSubmitError("");
   };
 
-  const selectGroup = (groupId) => {
-    const grp = CATEGORY_GROUPS.find((g) => g.id === groupId);
-    setActiveGroup(groupId);
-    // Auto-select si une seule sub-catégorie
-    if (grp?.sub.length === 1) {
-      setField("categorie", grp.sub[0].value);
-    } else {
-      setField("categorie", "");
-    }
-  };
-
   const validate = () => {
     const e = {};
     if (!form.objet.trim())                  e.objet     = "L'objet est obligatoire.";
     else if (form.objet.trim().length < 5)   e.objet     = "Minimum 5 caractères.";
-    if (!form.categorie)                     e.categorie = "Choisissez une catégorie.";
+    if (!form.categorie)                     e.categorie = "Sélectionnez une catégorie.";
     if (!form.message.trim())                e.message   = "La description est obligatoire.";
     else if (form.message.trim().length < 20) e.message  = "Minimum 20 caractères.";
     if (file) {
-      const ok = ["application/pdf","image/png","image/jpeg","image/jpg","image/webp"];
+      const ok = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp"];
       if (file.type && !ok.includes(file.type)) e.file = "Format non supporté (PDF, PNG, JPG).";
       else if (file.size > 5 * 1024 * 1024)     e.file = "Le fichier dépasse 5 Mo.";
     }
@@ -166,7 +84,7 @@ export default function MedecinReclamationCreatePage() {
     setSubmitError("");
     const errs = validate();
     setErrors(errs);
-    if (Object.keys(errs).length > 0) { setSubmitError("Corrigez les champs en erreur."); return; }
+    if (Object.keys(errs).length > 0) return;
     try {
       setLoading(true);
       const res = await createMedecinReclamation(
@@ -175,16 +93,13 @@ export default function MedecinReclamationCreatePage() {
       );
       setSubmitted({ numero: res?.numeroReclamation || "" });
     } catch (err) {
-      setSubmitError(err.response?.data?.message || "Impossible de soumettre.");
+      setSubmitError(err.response?.data?.message || "Impossible de soumettre la réclamation.");
     } finally {
       setLoading(false);
     }
   };
 
-  const activeGroupData = CATEGORY_GROUPS.find((g) => g.id === activeGroup);
-  const selectedCatLabel = ALL_CATEGORIES.find((c) => c.value === form.categorie)?.label;
-
-  /* ── SUCCESS STATE ────────────────────────────────── */
+  /* ── Success ── */
   if (submitted) {
     return (
       <MedecinLayout title="Réclamation soumise" subtitle="">
@@ -192,409 +107,252 @@ export default function MedecinReclamationCreatePage() {
           <motion.div
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 18 }}
-            className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-success/15 text-success"
+            transition={{ type: "spring", stiffness: 220, damping: 18 }}
+            className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-600"
           >
-            <CheckCircle2 size={40} strokeWidth={1.5} />
+            <CheckCircle2 size={38} strokeWidth={1.5} />
           </motion.div>
 
-          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={1}>
-            <h1 className="text-2xl font-bold text-base-content">
-              Réclamation soumise
-            </h1>
-            <p className="mt-2 text-sm text-base-content/60">
-              Votre demande a bien été enregistrée et sera traitée par l'administration.
-            </p>
-          </motion.div>
+          <h1 className="text-2xl font-bold text-slate-900">Réclamation soumise</h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Votre demande a été transmise à l'administration de l'Ordre.
+          </p>
 
           {submitted.numero && (
-            <motion.div
-              variants={fadeUp} initial="hidden" animate="visible" custom={2}
-              className="mt-5 inline-flex items-center gap-2 rounded-xl border border-base-200 bg-base-200/50 px-5 py-3"
-            >
-              <span className="text-xs text-base-content/50">Référence</span>
-              <span className="font-mono text-sm font-bold text-base-content">
-                {submitted.numero}
-              </span>
-            </motion.div>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3">
+              <span className="text-xs text-slate-400">Référence</span>
+              <span className="font-mono text-sm font-bold text-slate-800">{submitted.numero}</span>
+            </div>
           )}
 
-          {/* What's next */}
-          <motion.div
-            variants={fadeUp} initial="hidden" animate="visible" custom={3}
-            className="mt-6 rounded-2xl border border-base-200 bg-base-100 p-5 text-left space-y-3"
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-base-content/40">
-              Prochaines étapes
-            </p>
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 text-left space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Prochaines étapes</p>
             {[
-              { icon: <Clock size={14} />, text: "Votre réclamation sera examinée dans les meilleurs délais." },
-              { icon: <ShieldCheck size={14} />, text: "L'administration vous contactera si des informations complémentaires sont nécessaires." },
-              { icon: <ListChecks size={14} />, text: "Vous pourrez suivre l'état de votre réclamation depuis votre espace." },
+              { icon: <Clock size={14} />,      text: "Votre réclamation sera examinée dans les meilleurs délais." },
+              { icon: <ShieldCheck size={14} />, text: "L'administration vous contactera si nécessaire." },
+              { icon: <ListChecks size={14} />,  text: "Suivez l'état depuis votre espace réclamations." },
             ].map((item, i) => (
-              <div key={i} className="flex items-start gap-3 text-sm text-base-content/70">
-                <span className="mt-0.5 text-success shrink-0">{item.icon}</span>
+              <div key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                <span className="mt-0.5 shrink-0 text-green-600">{item.icon}</span>
                 {item.text}
               </div>
             ))}
-          </motion.div>
+          </div>
 
-          <motion.div
-            variants={fadeUp} initial="hidden" animate="visible" custom={4}
-            className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center"
-          >
+          <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
             <button
               onClick={() => navigate("/medecin/reclamations")}
-              className="btn btn-success gap-2 text-white"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-green-700 px-6 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800"
             >
-              <ListChecks size={16} />
-              Voir mes réclamations
+              <ListChecks size={15} /> Voir mes réclamations
             </button>
             <button
-              onClick={() => {
-                setSubmitted(null);
-                setForm({ categorie: "", objet: "", message: "" });
-                setFile(null); setActiveGroup(null);
-              }}
-              className="btn btn-ghost gap-2"
+              onClick={() => { setSubmitted(null); setForm({ categorie: "", objet: "", message: "" }); setFile(null); }}
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-green-600 bg-white px-6 py-2.5 text-sm font-bold uppercase text-green-700 transition hover:bg-green-50"
             >
               Nouvelle réclamation
             </button>
-          </motion.div>
+          </div>
         </div>
       </MedecinLayout>
     );
   }
 
-  /* ── FORM ─────────────────────────────────────────── */
+  /* ── Form ── */
   return (
-    <MedecinLayout title="Nouvelle réclamation" subtitle="Soumettez une réclamation à l'administration.">
-      <div className="mx-auto max-w-2xl space-y-5">
+    <MedecinLayout title="Nouvelle réclamation" subtitle="Soumettez une réclamation à l'administration de l'Ordre.">
+      <div className="mx-auto max-w-2xl">
 
         {/* Back */}
-        <motion.button
-          initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.28 }}
+        <button
           onClick={() => navigate("/medecin/reclamations")}
-          className="btn btn-ghost btn-sm gap-2 text-base-content/50 hover:text-base-content"
+          className="mb-4 inline-flex items-center gap-1.5 text-sm text-slate-500 transition hover:text-slate-800"
         >
-          <ArrowLeft size={14} /> Retour
-        </motion.button>
+          <ArrowLeft size={15} /> Retour aux réclamations
+        </button>
 
-        {/* Header contextuel */}
-        <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}
-          className="rounded-2xl border border-base-200 bg-base-200/40 px-5 py-4"
-        >
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success">
-              <ShieldCheck size={16} />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-base-content">
-                Déposer une réclamation
-              </p>
-              <p className="mt-1 text-xs text-base-content/50 leading-5">
-                Votre demande sera transmise à l'administration de l'Ordre.
-                Elle sera examinée et vous recevrez une réponse dans les meilleurs délais.
-                Soyez précis et factuel pour accélérer le traitement.
-              </p>
-            </div>
-          </div>
-        </motion.div>
+        {/* Card */}
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
 
-        {/* Submit error */}
-        <AnimatePresence>
-          {submitError && (
-            <motion.div
-              variants={alertV} initial="hidden" animate="visible" exit="exit"
-              className="alert alert-error shadow-sm"
-            >
-              <AlertCircle size={16} className="shrink-0" />
-              <p className="text-sm">{submitError}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Form card */}
-        <motion.div
-          variants={fadeUp} initial="hidden" animate="visible" custom={1}
-          className="card border border-base-200 bg-base-100 shadow-sm"
-        >
-          {/* Card header */}
-          <div className="flex items-center justify-between border-b border-base-200 bg-base-200/40 px-5 py-3.5">
-            <p className="text-sm font-semibold text-base-content">
-              Informations de la réclamation
+          {/* Green header */}
+          <div className="bg-green-700 px-6 py-5 text-center">
+            <h2 className="text-xl font-bold text-white">Déposer une réclamation</h2>
+            <p className="mt-1 text-sm text-green-100">
+              Soyez précis et factuel pour accélérer le traitement de votre dossier.
             </p>
-            <span className="text-xs text-base-content/40">
-              <span className="text-error">*</span> obligatoire
-            </span>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="divide-y divide-base-200">
+          <div className="px-6 py-6 space-y-5">
 
-              {/* ── Objet ── */}
-              <div className="px-5 py-4">
-                <Field label="Objet" required hint="résumé en une phrase" error={errors.objet} index={2}>
+            {/* Submit error */}
+            <AnimatePresence>
+              {submitError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  className="flex items-center gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                >
+                  <AlertCircle size={15} className="shrink-0" />{submitError}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <p className="text-sm text-slate-500">
+              Les champs marqués <span className="font-semibold text-red-500">*</span> sont obligatoires.
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+
+              {/* Objet */}
+              <Field label="Objet" required hint="Résumez en une phrase (120 caractères max)." error={errors.objet}>
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <FileText size={15} />
+                  </span>
                   <input
                     type="text"
                     value={form.objet}
                     onChange={(e) => setField("objet", e.target.value)}
-                    placeholder='Ex. "Mon dossier dinscription a été rejeté sans justification le 15 mars."'
+                    placeholder="Objet de la réclamation"
                     maxLength={120}
-                    className={cx("input input-bordered w-full text-sm", errors.objet && "input-error")}/>
-                  <div className="mt-1 flex justify-end">
-                    <span className="text-xs text-base-content/30">{form.objet.length}/120</span>
-                  </div>
-                </Field>
-              </div>
-
-              {/* ── Catégorie en 2 étapes ── */}
-              <div className="px-5 py-4 space-y-3">
-                <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={3}>
-                  <div className="flex items-baseline justify-between">
-                    <label className="text-sm font-medium text-base-content">
-                      Catégorie <span className="text-error">*</span>
-                    </label>
-                    {selectedCatLabel && (
-                      <span className="badge badge-success badge-sm gap-1">
-                        <CheckCircle2 size={10} /> {selectedCatLabel}
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="mt-1 text-xs text-base-content/40">
-                    Sélectionnez d'abord le type, puis précisez si nécessaire.
-                  </p>
-
-                  {/* Étape 1 — groupes */}
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {CATEGORY_GROUPS.map((grp) => (
-                      <button
-                        key={grp.id}
-                        type="button"
-                        onClick={() => selectGroup(grp.id)}
-                        className={cx(
-                          "flex items-start gap-2.5 rounded-xl border px-3 py-2.5 text-left transition",
-                          activeGroup === grp.id
-                            ? "border-success/50 bg-success/8 ring-1 ring-success/30"
-                            : "border-base-200 bg-base-100 hover:border-success/30 hover:bg-base-200/40"
-                        )}
-                      >
-                        <span className="text-base leading-none mt-0.5">{grp.icon}</span>
-                        <div className="min-w-0">
-                          <p className={cx(
-                            "text-xs font-semibold leading-tight",
-                            activeGroup === grp.id ? "text-success" : "text-base-content"
-                          )}>
-                            {grp.label}
-                          </p>
-                          <p className="mt-0.5 text-xs text-base-content/40 leading-tight">
-                            {grp.description}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Étape 2 — sous-catégories */}
-                  <AnimatePresence>
-                    {activeGroup && activeGroupData && activeGroupData.sub.length > 1 && (
-                      <motion.div
-                        key={activeGroup}
-                        variants={slideIn} initial="hidden" animate="visible" exit="exit"
-                        className="mt-3 space-y-1.5"
-                      >
-                        <p className="text-xs font-medium text-base-content/60">
-                          Précisez :
-                        </p>
-                        <div className="space-y-1">
-                          {activeGroupData.sub.map((sub) => (
-                            <button
-                              key={sub.value}
-                              type="button"
-                              onClick={() => setField("categorie", sub.value)}
-                              className={cx(
-                                "flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition",
-                                form.categorie === sub.value
-                                  ? "border-success/40 bg-success/8 text-success font-medium"
-                                  : "border-base-200 bg-base-100 text-base-content/70 hover:bg-base-200/40"
-                              )}
-                            >
-                              {sub.label}
-                              {form.categorie === sub.value && (
-                                <CheckCircle2 size={14} className="text-success shrink-0" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  <AnimatePresence>
-                    {errors.categorie && (
-                      <motion.p
-                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-2 flex items-center gap-1.5 text-xs font-medium text-error"
-                      >
-                        <AlertCircle size={11} /> {errors.categorie}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              </div>
-
-              {/* ── Description ── */}
-              <div className="px-5 py-4">
-                <Field
-                  label="Description"
-                  required
-                  hint="soyez factuel et précis"
-                  error={errors.message}
-                  index={4}
-                >
-                  <textarea
-                    rows={7}
-                    value={form.message}
-                    onChange={(e) => setField("message", e.target.value)}
-                    placeholder={"Exemple : Le 12 mars, j'ai soumis mon dossier de renouvellement. Malgré plusieurs relances, aucune réponse n'a été donnée. Je sollicite une explication et un traitement rapide..."}
-                    maxLength={2000}
-                    className={cx(
-                      "textarea textarea-bordered w-full resize-none text-sm leading-relaxed",
-                      errors.message && "textarea-error"
-                    )}
+                    className={`${inputCls(Boolean(errors.objet))} pl-10 pr-14`}
                   />
-                  <div className="mt-1 flex items-center justify-between">
-                    <span className="text-xs text-base-content/40">
-                      Minimum 20 caractères
-                    </span>
-                    <span className={cx(
-                      "text-xs",
-                      form.message.length > 1800 ? "text-warning" : "text-base-content/30"
-                    )}>
-                      {form.message.length}/2000
-                    </span>
-                  </div>
-                </Field>
-              </div>
+                  <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+                    {form.objet.length}/120
+                  </span>
+                </div>
+              </Field>
 
-              {/* ── Pièce jointe ── */}
-              <div className="px-5 py-4">
-                <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={5} className="space-y-2">
-                  <div className="flex items-baseline justify-between">
-                    <label className="text-sm font-medium text-base-content">
-                      Pièce jointe
-                    </label>
-                    <span className="text-xs text-base-content/40">
-                      recommandée — PDF, PNG, JPG, max 5 Mo
-                    </span>
-                  </div>
+              {/* Catégorie */}
+              <Field label="Catégorie" required error={errors.categorie}>
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <Tag size={15} />
+                  </span>
+                  <select
+                    value={form.categorie}
+                    onChange={(e) => setField("categorie", e.target.value)}
+                    className={`${inputCls(Boolean(errors.categorie))} appearance-none pl-10 pr-9`}
+                  >
+                    <option value="">— Sélectionner une catégorie —</option>
+                    {GROUPS.map((group) => (
+                      <optgroup key={group} label={group}>
+                        {CATEGORIES.filter((c) => c.group === group).map((c) => (
+                          <option key={c.value} value={c.value}>{c.label}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">▾</span>
+                </div>
+              </Field>
 
-                  <p className="text-xs text-base-content/40">
-                    Un document justificatif (capture, courrier, résultat…) renforce votre dossier.
+              {/* Message */}
+              <Field label="Message" required hint="Décrivez les faits avec précision (dates, lieu, personnes concernées)." error={errors.message}>
+                <textarea
+                  rows={6}
+                  value={form.message}
+                  onChange={(e) => setField("message", e.target.value)}
+                  maxLength={2000}
+                  placeholder="Décrivez votre réclamation en détail…"
+                  className={`w-full rounded-xl border bg-white resize-none px-4 py-3 text-sm text-slate-900 outline-none transition
+                    focus:ring-2 focus:ring-green-500/20 focus:border-green-500
+                    ${errors.message ? "border-red-300 focus:border-red-400 focus:ring-red-400/20" : "border-slate-200"}`}
+                />
+                <div className="flex items-center justify-between">
+                  {!errors.message && <span className="text-xs text-slate-400">Minimum 20 caractères</span>}
+                  <span className={`ml-auto text-xs ${form.message.length > 1800 ? "text-amber-500" : "text-slate-400"}`}>
+                    {form.message.length}/2000
+                  </span>
+                </div>
+              </Field>
+
+              {/* Pièce jointe */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-slate-700">Pièce jointe</label>
+                <p className="text-xs text-slate-400">Optionnel — PDF, PNG ou JPG, max 5 Mo.</p>
+
+                <AnimatePresence mode="wait">
+                  {!file ? (
+                    <motion.label
+                      key="upload"
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed px-4 py-4 transition
+                        ${errors.file ? "border-red-300 bg-red-50" : "border-slate-200 bg-slate-50 hover:border-green-400 hover:bg-green-50/40"}`}
+                    >
+                      <Upload size={18} className="shrink-0 text-slate-400" />
+                      <div>
+                        <p className="text-sm font-medium text-slate-700">Choisir un fichier</p>
+                        <p className="text-xs text-slate-400">PDF, PNG ou JPG · max 5 Mo</p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="application/pdf,image/png,image/jpeg,image/jpg,image/webp"
+                        className="hidden"
+                        onChange={(e) => { setFile(e.target.files?.[0] || null); setErrors((p) => ({ ...p, file: "" })); }}
+                      />
+                    </motion.label>
+                  ) : (
+                    <motion.div
+                      key="file"
+                      initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+                      className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-green-100 bg-white text-green-600">
+                        <Paperclip size={15} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-slate-800">{file.name}</p>
+                        <p className="text-xs text-slate-400">{Math.round(file.size / 1024)} Ko</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setFile(null); setErrors((p) => ({ ...p, file: "" })); }}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500"
+                      >
+                        <X size={14} />
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {errors.file && (
+                  <p className="flex items-center gap-1 text-xs font-medium text-red-600" role="alert">
+                    <AlertCircle size={11} />{errors.file}
                   </p>
-
-                  <AnimatePresence mode="wait">
-                    {!file ? (
-                      <motion.label
-                        key="upload"
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className={cx(
-                          "flex cursor-pointer items-center gap-3 rounded-xl border border-dashed px-4 py-3.5 transition",
-                          errors.file
-                            ? "border-error/50 bg-error/5"
-                            : "border-base-300 bg-base-200/20 hover:border-success/50 hover:bg-success/5"
-                        )}
-                      >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-base-300 bg-base-100 text-base-content/40">
-                          <Upload size={15} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-base-content">
-                            Ajouter un justificatif
-                          </p>
-                          <p className="text-xs text-base-content/40">Cliquez pour sélectionner</p>
-                        </div>
-                        <input
-                          type="file"
-                          accept="application/pdf,image/png,image/jpeg,image/webp"
-                          className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0] || null;
-                            setFile(f);
-                            setErrors((p) => ({ ...p, file: "" }));
-                            setSubmitError("");
-                          }}
-                        />
-                      </motion.label>
-                    ) : (
-                      <motion.div
-                        key="file"
-                        initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="flex items-center gap-3 rounded-xl border border-success/30 bg-success/5 px-4 py-3"
-                      >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-success/20 bg-base-100 text-success">
-                          <Paperclip size={15} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-base-content">{file.name}</p>
-                          <p className="text-xs text-base-content/40">{formatFileSize(file.size)}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => { setFile(null); setErrors((p) => ({ ...p, file: "" })); }}
-                          className="btn btn-ghost btn-sm btn-square text-base-content/40 hover:text-error"
-                        >
-                          <X size={14} />
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  <AnimatePresence>
-                    {errors.file && (
-                      <motion.p
-                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="flex items-center gap-1.5 text-xs font-medium text-error"
-                      >
-                        <AlertCircle size={11} /> {errors.file}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+                )}
               </div>
 
-            </div>
+              {/* Actions */}
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  type="button"
+                  onClick={() => navigate("/medecin/reclamations")}
+                  className="rounded-md border border-green-600 bg-white px-5 py-2.5 text-sm font-bold uppercase text-green-700 transition hover:bg-green-50"
+                >
+                  Annuler
+                </button>
 
-            {/* Card footer */}
-            <div className="flex items-center justify-between border-t border-base-200 bg-base-200/40 px-5 py-3.5">
-              <button
-                type="button"
-                onClick={() => navigate("/medecin/reclamations")}
-                className="btn btn-ghost btn-sm gap-2 text-base-content/50"
-              >
-                <ArrowLeft size={14} /> Annuler
-              </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 rounded-md bg-green-700 px-7 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {loading ? (
+                    <><Loader2 size={14} className="animate-spin" />Envoi en cours…</>
+                  ) : (
+                    <><Send size={14} />Envoyer</>
+                  )}
+                </button>
+              </div>
 
-              <motion.button
-                type="submit"
-                disabled={loading}
-                whileTap={{ scale: 0.97 }}
-                className="btn btn-success btn-sm gap-2 text-white"
-              >
-                {loading ? (
-                  <><span className="loading loading-spinner loading-xs" />Envoi...</>
-                ) : (
-                  <><Send size={14} />Soumettre<ChevronRight size={13} /></>
-                )}
-              </motion.button>
-            </div>
-          </form>
-        </motion.div>
+            </form>
+          </div>
+
+          <div className="border-t border-slate-100 bg-slate-50 px-6 py-3 text-center text-sm text-slate-500">
+            Besoin d'aide ?{" "}
+            <span className="font-bold uppercase text-green-700">Contacter l'administration</span>
+          </div>
+        </div>
 
       </div>
     </MedecinLayout>

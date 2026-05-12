@@ -6,6 +6,7 @@ import com.onmm.backend.entity.MedecinDocument;
 import com.onmm.backend.entity.MedecinEducation;
 import com.onmm.backend.entity.MedecinExperience;
 import com.onmm.backend.entity.enums.StatutMedecin;
+import com.onmm.backend.entity.enums.TokenType;
 import com.onmm.backend.repository.ActivationTokenRepository;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.service.Admin.AdminMedecinService;
@@ -150,6 +151,9 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
         medecin.setStatut(StatutMedecin.ACTIF);
+        if (medecin.getDateApprouvement() == null) {
+            medecin.setDateApprouvement(java.time.LocalDate.now());
+        }
         medecinRepository.save(medecin);
     }
 
@@ -160,7 +164,7 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
         Medecin medecin = medecinRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
-        activationTokenRepository.deleteByUser(medecin);
+        activationTokenRepository.deleteByUserAndType(medecin, TokenType.SET_PASSWORD);
 
         medecinRepository.delete(medecin);
     }

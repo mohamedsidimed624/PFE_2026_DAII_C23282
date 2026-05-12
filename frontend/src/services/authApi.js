@@ -7,7 +7,8 @@ export const loginUser = async (email, password) => {
   return response.data;
 };
 
-// export const setPassword = async (token, password, confirmPassword) => {
-//   const response = await axios.post(`${API_URL}/set-password`, { token, password, confirmPassword });
-//   return response.data;
-// };
+export const forgotPassword = (email) =>
+  axios.post(`${API_URL}/forgot-password`, { email });
+
+export const verifyActivationEmail = (token, email) =>
+  axios.post(`${API_URL}/verify-activation-email`, { token, email });

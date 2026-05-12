@@ -62,6 +62,9 @@ public class Medecin extends User {
     @Column(name = "date_naissance")
     private LocalDate dateNaissance;
 
+    @Column(name = "date_approuvement")
+    private LocalDate dateApprouvement;
+
     @Column(name = "ville_exercice", length = 100)
     private String villeExercice;
 

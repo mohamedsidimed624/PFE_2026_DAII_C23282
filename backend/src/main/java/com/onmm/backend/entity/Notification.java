@@ -1,10 +1,12 @@
 package com.onmm.backend.entity;
 
+import com.onmm.backend.entity.Medecin;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications")
+@SuppressWarnings("unused")
 public class Notification {
 
     @Id
@@ -32,6 +34,11 @@ public class Notification {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    // null = admin notification; non-null = scoped to this doctor
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medecin_id")
+    private Medecin medecin;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -55,4 +62,7 @@ public class Notification {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Medecin getMedecin() { return medecin; }
+    public void setMedecin(Medecin medecin) { this.medecin = medecin; }
 }

@@ -6,7 +6,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findAllByOrderByCreatedAtDesc();
-    List<Notification> findByLuFalseOrderByCreatedAtDesc();
-    long countByLuFalse();
+
+    // ── Admin (medecin is null) ───────────────────────────────────────────────
+    List<Notification> findByMedecinIsNullOrderByCreatedAtDesc();
+    List<Notification> findByMedecinIsNullAndLuFalseOrderByCreatedAtDesc();
+    long countByMedecinIsNullAndLuFalse();
+
+    // ── Doctor-scoped ─────────────────────────────────────────────────────────
+    List<Notification> findByMedecinEmailOrderByCreatedAtDesc(String email);
+    List<Notification> findByMedecinEmailAndLuFalseOrderByCreatedAtDesc(String email);
+    long countByMedecinEmailAndLuFalse(String email);
 }

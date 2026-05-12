@@ -1,1440 +1,853 @@
-// import { useEffect, useMemo, useState } from "react";
-// import MedecinLayout from "../../components/medecin/MedecinLayout";
-// import {
-//   getMyProfile,
-//   updateMyProfile,
-//   uploadMyPhoto,
-// } from "../../services/medecinApi";
-// import {
-//   User,
-//   Mail,
-//   Phone,
-//   IdCard,
-//   ShieldCheck,
-//   Globe,
-//   MapPin,
-//   Save,
-//   Pencil,
-//   X,
-//   Stethoscope,
-//   FileBadge,
-//   Lock,
-//   CheckCircle2,
-//   AlertCircle,
-//   Camera,
-// } from "lucide-react";
-
-// function MedecinProfilPage() {
-//   const [form, setForm] = useState({
-//     nom: "",
-//     prenom: "",
-//     email: "",
-//     telephone: "",
-//     nni: "",
-//     sexe: "",
-//     nationalite: "",
-//     adresse: "",
-//     numeroInscription: "",
-//     statut: "",
-//     specialite: "",
-//     photoProfilPath: "",
-//   });
-
-//   const [initialForm, setInitialForm] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [saving, setSaving] = useState(false);
-//   const [photoUploading, setPhotoUploading] = useState(false);
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [success, setSuccess] = useState("");
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     const loadProfile = async () => {
-//       try {
-//         const res = await getMyProfile();
-//         const d = res.data;
-
-//         const normalized = {
-//           nom: d.nom || "",
-//           prenom: d.prenom || "",
-//           email: d.email || "",
-//           telephone: d.telephone || "",
-//           nni: d.nni || "",
-//           sexe: d.sexe || "",
-//           nationalite: d.nationalite || "",
-//           adresse: d.adresse || "",
-//           numeroInscription: d.numeroInscription || "",
-//           statut: d.statut || "",
-//           specialite: d.specialite || "",
-//           photoProfilPath: d.photoProfilPath || "",
-//         };
-
-//         setForm(normalized);
-//         setInitialForm(normalized);
-//       } catch (err) {
-//         console.error(err);
-//         setError("Impossible de charger le profil médecin.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     loadProfile();
-//   }, []);
-
-//   const completion = useMemo(() => {
-//     const fields = [
-//       "nom",
-//       "prenom",
-//       "email",
-//       "telephone",
-//       "nni",
-//       "sexe",
-//       "nationalite",
-//       "adresse",
-//       "numeroInscription",
-//       "statut",
-//       "specialite",
-//     ];
-
-//     const filled = fields.filter(
-//       (field) => form[field] && String(form[field]).trim() !== ""
-//     ).length;
-
-//     return Math.round((filled / fields.length) * 100);
-//   }, [form]);
-
-//   const initials = useMemo(() => {
-//     const p = form.prenom?.[0] || "?";
-//     const n = form.nom?.[0] || "?";
-//     return `${p}${n}`.toUpperCase();
-//   }, [form.nom, form.prenom]);
-
-//   const statusClasses = useMemo(() => {
-//     const value = (form.statut || "").toUpperCase();
-
-//     if (["ACTIF", "ACTIVE", "APPROVED"].includes(value)) {
-//       return "bg-green-50 text-green-700 border-green-200";
-//     }
-
-//     if (["SUSPENDU", "SUSPENDED"].includes(value)) {
-//       return "bg-red-50 text-red-700 border-red-200";
-//     }
-
-//     if (["PENDING"].includes(value)) {
-//       return "bg-amber-50 text-amber-700 border-amber-200";
-//     }
-
-//     return "bg-slate-50 text-slate-700 border-slate-200";
-//   }, [form.statut]);
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setForm((prev) => ({
-//       ...prev,
-//       [name]: value,
-//     }));
-//   };
-
-//   const handleEdit = () => {
-//     setSuccess("");
-//     setError("");
-//     setIsEditing(true);
-//   };
-
-//   const handleCancel = () => {
-//     if (initialForm) {
-//       setForm(initialForm);
-//     }
-//     setSuccess("");
-//     setError("");
-//     setIsEditing(false);
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     try {
-//       setSaving(true);
-//       setSuccess("");
-//       setError("");
-
-//       const payload = {
-//         nom: form.nom,
-//         prenom: form.prenom,
-//         telephone: form.telephone,
-//         nationalite: form.nationalite,
-//         adresse: form.adresse,
-//       };
-
-//       const res = await updateMyProfile(payload);
-//       const d = res.data;
-
-//       const updated = {
-//         ...form,
-//         nom: d.nom || "",
-//         prenom: d.prenom || "",
-//         telephone: d.telephone || "",
-//         nationalite: d.nationalite || "",
-//         adresse: d.adresse || "",
-//       };
-
-//       setForm(updated);
-//       setInitialForm(updated);
-//       setSuccess("Profil mis à jour avec succès.");
-//       setIsEditing(false);
-//     } catch (err) {
-//       console.error(err);
-//       setError("Impossible de mettre à jour le profil.");
-//     } finally {
-//       setSaving(false);
-//     }
-//   };
-
-//   const handlePhotoChange = async (e) => {
-//     const file = e.target.files?.[0];
-//     if (!file) return;
-
-//     try {
-//       setPhotoUploading(true);
-//       setSuccess("");
-//       setError("");
-
-//       const res = await uploadMyPhoto(file);
-//       const newPhotoPath = res.data.photoProfilPath;
-
-//       setForm((prev) => ({
-//         ...prev,
-//         photoProfilPath: newPhotoPath,
-//       }));
-
-//       setInitialForm((prev) => ({
-//         ...prev,
-//         photoProfilPath: newPhotoPath,
-//       }));
-
-//       setSuccess("Photo de profil mise à jour avec succès.");
-//     } catch (err) {
-//       console.error(err);
-//       setError("Impossible de mettre à jour la photo de profil.");
-//     } finally {
-//       setPhotoUploading(false);
-//     }
-//   };
-
-//   if (loading) {
-//     return (
-//       <MedecinLayout
-//         title="Mon profil"
-//         subtitle="Chargement des informations du profil."
-//       >
-//         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-//           <p className="text-slate-600">Chargement du profil...</p>
-//         </div>
-//       </MedecinLayout>
-//     );
-//   }
-
-//   return (
-//     <MedecinLayout
-//       title="Mon profil"
-//       subtitle="Consultez vos informations personnelles et professionnelles."
-//     >
-//       <div className="space-y-6">
-//         {success && (
-//           <div className="flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-green-700">
-//             <CheckCircle2 size={18} />
-//             <span>{success}</span>
-//           </div>
-//         )}
-
-//         {error && (
-//           <div className="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-600">
-//             <AlertCircle size={18} />
-//             <span>{error}</span>
-//           </div>
-//         )}
-
-//         {/* HERO */}
-//         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-//           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-//             <div className="flex items-start gap-4">
-//               <div className="relative shrink-0">
-//                 <div className="rounded-[22px] bg-gradient-to-br from-green-600 via-green-500 to-emerald-300 p-[3px]">
-//                   <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-[19px] bg-white text-2xl font-bold text-green-700">
-//                     {form.photoProfilPath ? (
-//                       <img
-//                         src={`http://localhost:8080${form.photoProfilPath}`}
-//                         alt="Photo de profil"
-//                         className="h-full w-full object-cover"
-//                       />
-//                     ) : (
-//                       initials
-//                     )}
-//                   </div>
-//                 </div>
-
-//                 <label
-//                   htmlFor="photo-upload"
-//                   className="absolute -bottom-1 -right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-green-600 text-white shadow-md transition hover:bg-green-700"
-//                   title="Changer la photo"
-//                 >
-//                   <Camera size={16} />
-//                 </label>
-
-//                 <input
-//                   id="photo-upload"
-//                   type="file"
-//                   accept="image/png,image/jpeg,image/webp"
-//                   onChange={handlePhotoChange}
-//                   className="hidden"
-//                 />
-//               </div>
-
-//               <div>
-//                 <div className="mb-2 flex flex-wrap items-center gap-3">
-//                   <h2 className="text-2xl font-bold text-slate-900">
-//                     Dr. {form.prenom} {form.nom}
-//                   </h2>
-
-//                   <span
-//                     className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${statusClasses}`}
-//                   >
-//                     <span className="h-2 w-2 rounded-full bg-current opacity-80" />
-//                     {form.statut || "Inconnu"}
-//                   </span>
-//                 </div>
-
-//                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500">
-//                   <span className="inline-flex items-center gap-2">
-//                     <Stethoscope size={15} className="text-green-600" />
-//                     {form.specialite || "Spécialité non renseignée"}
-//                   </span>
-
-//                   {form.email && (
-//                     <span className="inline-flex items-center gap-2">
-//                       <Mail size={15} className="text-green-600" />
-//                       {form.email}
-//                     </span>
-//                   )}
-//                 </div>
-//               </div>
-//             </div>
-
-//             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-//               <div className="min-w-[140px]">
-//                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-//                   Profil complété
-//                 </p>
-//                 <div className="flex items-center gap-3">
-//                   <div className="h-2 w-28 overflow-hidden rounded-full bg-slate-200">
-//                     <div
-//                       className="h-full rounded-full bg-gradient-to-r from-green-500 to-green-700 transition-all duration-500"
-//                       style={{ width: `${completion}%` }}
-//                     />
-//                   </div>
-//                   <span className="text-sm font-bold text-green-700">
-//                     {completion}%
-//                   </span>
-//                 </div>
-//               </div>
-
-//               {!isEditing ? (
-//                 <button
-//                   type="button"
-//                   onClick={handleEdit}
-//                   className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-green-700"
-//                 >
-//                   <Pencil size={16} />
-//                   Modifier
-//                 </button>
-//               ) : (
-//                 <div className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
-//                   <Pencil size={15} />
-//                   Mode édition
-//                 </div>
-//               )}
-//             </div>
-//           </div>
-
-//           {photoUploading && (
-//             <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-//               Mise à jour de la photo en cours...
-//             </div>
-//           )}
-//         </section>
-
-//         {/* BODY */}
-//         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
-//           <div className="space-y-6">
-//             {!isEditing ? (
-//               <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-//                 <div className="mb-6">
-//                   <h3 className="text-xl font-bold text-slate-800">
-//                     Informations du profil
-//                   </h3>
-//                   <p className="mt-1 text-sm text-slate-500">
-//                     Vue complète des informations disponibles dans votre espace.
-//                   </p>
-//                 </div>
-
-//                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-//                   <ReadOnlyItem
-//                     label="Nom"
-//                     value={form.nom}
-//                     icon={<User size={18} />}
-//                   />
-//                   <ReadOnlyItem
-//                     label="Prénom"
-//                     value={form.prenom}
-//                     icon={<User size={18} />}
-//                   />
-//                   <ReadOnlyItem
-//                     label="Email"
-//                     value={form.email}
-//                     icon={<Mail size={18} />}
-//                   />
-//                   <ReadOnlyItem
-//                     label="Téléphone"
-//                     value={form.telephone}
-//                     icon={<Phone size={18} />}
-//                   />
-//                   <ReadOnlyItem
-//                     label="NNI"
-//                     value={form.nni}
-//                     icon={<IdCard size={18} />}
-//                   />
-//                   <ReadOnlyItem
-//                     label="Sexe"
-//                     value={form.sexe}
-//                     icon={<ShieldCheck size={18} />}
-//                   />
-//                   <ReadOnlyItem
-//                     label="Nationalité"
-//                     value={form.nationalite}
-//                     icon={<Globe size={18} />}
-//                   />
-//                   <ReadOnlyItem
-//                     label="Spécialité"
-//                     value={form.specialite}
-//                     icon={<Stethoscope size={18} />}
-//                   />
-//                   <ReadOnlyItem
-//                     label="Numéro d’inscription"
-//                     value={form.numeroInscription}
-//                     icon={<FileBadge size={18} />}
-//                   />
-//                   <ReadOnlyItem
-//                     label="Statut"
-//                     value={form.statut}
-//                     icon={<ShieldCheck size={18} />}
-//                   />
-//                   <div className="md:col-span-2">
-//                     <ReadOnlyItem
-//                       label="Adresse"
-//                       value={form.adresse}
-//                       icon={<MapPin size={18} />}
-//                     />
-//                   </div>
-//                 </div>
-//               </section>
-//             ) : (
-//               <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-//                 <div className="mb-6">
-//                   <h3 className="text-xl font-bold text-slate-800">
-//                     Modifier les informations
-//                   </h3>
-//                   <p className="mt-1 text-sm text-slate-500">
-//                     Seuls certains champs peuvent être modifiés.
-//                   </p>
-//                 </div>
-
-//                 <form onSubmit={handleSubmit} className="space-y-6">
-//                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-//                     <InputField
-//                       label="Nom"
-//                       name="nom"
-//                       value={form.nom}
-//                       onChange={handleChange}
-//                       icon={<User size={18} />}
-//                     />
-
-//                     <InputField
-//                       label="Prénom"
-//                       name="prenom"
-//                       value={form.prenom}
-//                       onChange={handleChange}
-//                       icon={<User size={18} />}
-//                     />
-
-//                     <InputField
-//                       label="Téléphone"
-//                       name="telephone"
-//                       value={form.telephone}
-//                       onChange={handleChange}
-//                       icon={<Phone size={18} />}
-//                     />
-
-//                     <SelectField
-//                       label="Nationalité"
-//                       name="nationalite"
-//                       value={form.nationalite}
-//                       onChange={handleChange}
-//                       icon={<Globe size={18} />}
-//                       options={[
-//                         { value: "", label: "Choisir" },
-//                         { value: "Mauritanienne", label: "Mauritanienne" },
-//                         { value: "Sénégalaise", label: "Sénégalaise" },
-//                         { value: "Marocaine", label: "Marocaine" },
-//                         { value: "Française", label: "Française" },
-//                         { value: "Autre", label: "Autre" },
-//                       ]}
-//                     />
-
-//                     <div className="md:col-span-2">
-//                       <InputField
-//                         label="Adresse"
-//                         name="adresse"
-//                         value={form.adresse}
-//                         onChange={handleChange}
-//                         icon={<MapPin size={18} />}
-//                       />
-//                     </div>
-//                   </div>
-
-//                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-//                     <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
-//                       <Lock size={16} className="text-slate-500" />
-//                       Champs non modifiables
-//                     </div>
-
-//                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-//                       <MiniReadOnly label="Email" value={form.email} />
-//                       <MiniReadOnly label="NNI" value={form.nni} />
-//                       <MiniReadOnly label="Sexe" value={form.sexe} />
-//                       <MiniReadOnly
-//                         label="Numéro d’inscription"
-//                         value={form.numeroInscription}
-//                       />
-//                       <MiniReadOnly label="Statut" value={form.statut} />
-//                       <MiniReadOnly label="Spécialité" value={form.specialite} />
-//                     </div>
-//                   </div>
-
-//                   <div className="flex flex-wrap gap-3">
-//                     <button
-//                       type="submit"
-//                       disabled={saving}
-//                       className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-//                     >
-//                       <Save size={16} />
-//                       {saving ? "Enregistrement..." : "Enregistrer"}
-//                     </button>
-
-//                     <button
-//                       type="button"
-//                       onClick={handleCancel}
-//                       className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-//                     >
-//                       <X size={16} />
-//                       Annuler
-//                     </button>
-//                   </div>
-//                 </form>
-//               </section>
-//             )}
-//           </div>
-
-//           <div className="space-y-6">
-//             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-//               <p className="mb-4 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
-//                 Données administratives
-//               </p>
-
-//               <div className="space-y-4">
-//                 <AdminRow
-//                   icon={<Mail size={16} />}
-//                   label="Email"
-//                   value={form.email}
-//                 />
-//                 <AdminRow
-//                   icon={<IdCard size={16} />}
-//                   label="NNI"
-//                   value={form.nni}
-//                 />
-//                 <AdminRow
-//                   icon={<FileBadge size={16} />}
-//                   label="N° inscription"
-//                   value={form.numeroInscription}
-//                 />
-//                 <AdminRow
-//                   icon={<Stethoscope size={16} />}
-//                   label="Spécialité"
-//                   value={form.specialite}
-//                 />
-//                 <AdminRow
-//                   icon={<ShieldCheck size={16} />}
-//                   label="Statut"
-//                   value={form.statut}
-//                 />
-//               </div>
-//             </section>
-
-//             <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-white shadow-sm">
-//               <div className="mb-4 flex items-center gap-3">
-//                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/15 text-green-300">
-//                   <Lock size={18} />
-//                 </div>
-//                 <div>
-//                   <h3 className="font-semibold">Données protégées</h3>
-//                   <p className="text-sm text-slate-300">
-//                     Informations verrouillées
-//                   </p>
-//                 </div>
-//               </div>
-
-//               <p className="text-sm leading-6 text-slate-300">
-//                 Certaines données sont verrouillées car elles proviennent de
-//                 votre dossier validé par l’administration de l’Ordre des
-//                 Médecins. Pour toute correction, une procédure administrative
-//                 sera nécessaire.
-//               </p>
-//             </section>
-//           </div>
-//         </div>
-//       </div>
-//     </MedecinLayout>
-//   );
-// }
-
-// function InputField({ label, name, value, onChange, icon }) {
-//   return (
-//     <div>
-//       <label className="mb-2 block text-sm font-medium text-slate-700">
-//         {label}
-//       </label>
-
-//       <div className="relative">
-//         <span className="pointer-events-none absolute left-3 top-3.5 text-slate-400">
-//           {icon}
-//         </span>
-
-//         <input
-//           type="text"
-//           name={name}
-//           value={value}
-//           onChange={onChange}
-//           className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-4 text-slate-800 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/15"
-//         />
-//       </div>
-//     </div>
-//   );
-// }
-
-// function SelectField({ label, name, value, onChange, icon, options }) {
-//   return (
-//     <div>
-//       <label className="mb-2 block text-sm font-medium text-slate-700">
-//         {label}
-//       </label>
-
-//       <div className="relative">
-//         <span className="pointer-events-none absolute left-3 top-3.5 z-10 text-slate-400">
-//           {icon}
-//         </span>
-
-//         <select
-//           name={name}
-//           value={value}
-//           onChange={onChange}
-//           className="w-full appearance-none rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-4 text-slate-800 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/15"
-//         >
-//           {options.map((option) => (
-//             <option key={option.value} value={option.value}>
-//               {option.label}
-//             </option>
-//           ))}
-//         </select>
-//       </div>
-//     </div>
-//   );
-// }
-
-// function ReadOnlyItem({ label, value, icon }) {
-//   return (
-//     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-green-200 hover:bg-green-50">
-//       <div className="mb-2 flex items-center gap-2 text-slate-500">
-//         <span>{icon}</span>
-//         <span className="text-sm font-medium">{label}</span>
-//       </div>
-
-//       <p className="break-words font-semibold text-slate-800">
-//         {value || "Non renseigné"}
-//       </p>
-//     </div>
-//   );
-// }
-
-// function MiniReadOnly({ label, value }) {
-//   return (
-//     <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-//       <p className="mb-1 text-xs text-slate-500">{label}</p>
-//       <p className="break-words text-sm font-semibold text-slate-800">
-//         {value || "Non renseigné"}
-//       </p>
-//     </div>
-//   );
-// }
-
-// function AdminRow({ icon, label, value }) {
-//   return (
-//     <div className="flex items-start gap-3 border-b border-slate-100 pb-4 last:border-b-0 last:pb-0">
-//       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-600">
-//         {icon}
-//       </div>
-
-//       <div className="min-w-0">
-//         <p className="mb-1 text-xs font-medium text-slate-400">{label}</p>
-//         <p className="truncate text-sm font-semibold text-slate-800">
-//           {value || "Non renseigné"}
-//         </p>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default MedecinProfilPage;
-
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  User, GraduationCap, Briefcase, FileText,
+  Pencil, X, Plus, Trash2, Upload, Download,
+  Loader2, Camera,
+} from "lucide-react";
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import {
-  getMyProfile,
-  updateMyProfile,
-  uploadMyPhoto,
+  getMyProfile, updateMyProfile, uploadMyPhoto,
+  getMyEducations, addMyEducation, deleteMyEducation,
+  getMyExperiences, addMyExperience, deleteMyExperience,
+  getMyDocuments, uploadMyDocument, deleteMyDocument,
 } from "../../services/medecinApi";
-import {
-  User,
-  Mail,
-  Phone,
-  IdCard,
-  ShieldCheck,
-  Globe,
-  MapPin,
-  Save,
-  Pencil,
-  X,
-  Stethoscope,
-  FileBadge,
-  Lock,
-  CheckCircle2,
-  AlertCircle,
-  Camera,
-} from "lucide-react";
+import { getSpecialites, getSousSpecialites } from "../../services/api";
 
-function MedecinProfilPage() {
-  const [form, setForm] = useState({
-    nom: "",
-    prenom: "",
-    email: "",
-    telephone: "",
-    nni: "",
-    sexe: "",
-    nationalite: "",
-    adresse: "",
-    numeroInscription: "",
-    statut: "",
-    educations: [],
-    photoProfilPath: "",
+const BASE_URL = "http://localhost:8080";
+
+const TABS = [
+  { id: "profil",     label: "Profil personnel",  icon: User },
+  { id: "education",  label: "Éducation",          icon: GraduationCap },
+  { id: "experience", label: "Expériences",        icon: Briefcase },
+  { id: "documents",  label: "Documents",          icon: FileText },
+];
+
+const DOC_TYPES = ["DIPLOME", "CERTIFICAT", "ATTESTATION", "AUTORISATION", "AUTRE"];
+const DOC_CATS  = ["DIPLOME", "CERTIFICAT", "AUTORISATION", "EXPERIENCE", "AUTRE"];
+
+// ── Shared helpers ────────────────────────────────────────────────────────────
+
+function StatutBadge({ statut }) {
+  const s = String(statut || "").toUpperCase();
+  if (["ACTIF", "ACTIVE"].includes(s))
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
+        <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> Actif
+      </span>
+    );
+  if (["EN_ATTENTE", "PENDING"].includes(s))
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> En attente
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+      {statut || "—"}
+    </span>
+  );
+}
+
+function Field({ label, value, className = "" }) {
+  return (
+    <div className={className}>
+      <p className="mb-1 text-sm font-medium text-slate-400">
+        {label}
+      </p>
+      <p className="break-words text-sm font-bold text-slate-800">
+        {value || "—"}
+      </p>
+    </div>
+  );
+}
+
+function InfoCard({ title, onEdit, children }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+        <h2 className="text-base font-bold text-slate-800">{title}</h2>
+
+        {onEdit && (
+          <button
+            onClick={onEdit}
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          >
+            <Pencil size={16} />
+          </button>
+        )}
+      </div>
+
+      <div className="px-6 py-5">{children}</div>
+    </div>
+  );
+}
+
+function EmptyState({ icon, text }) {
+  const IconComp = icon;
+  return (
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-12 text-center">
+      <IconComp size={24} className="text-slate-300 mb-2" />
+      <p className="text-sm text-slate-400">{text}</p>
+    </div>
+  );
+}
+
+// ── Modal base ────────────────────────────────────────────────────────────────
+
+function ModalBase({ title, onClose, children, footer }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.18 }}
+        className="w-full max-w-md rounded-2xl bg-white shadow-2xl flex flex-col max-h-[90vh]"
+      >
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 shrink-0">
+          <p className="font-bold text-slate-900">{title}</p>
+          <button
+            onClick={onClose}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition"
+          >
+            <X size={14} />
+          </button>
+        </div>
+        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">{children}</div>
+        {footer && (
+          <div className="border-t border-slate-100 px-6 py-4 flex gap-2 shrink-0">{footer}</div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Education modal ───────────────────────────────────────────────────────────
+
+function EducationModal({ onClose, onSaved }) {
+  const [f, setF] = useState({
+    diplome: "", specialiteId: "", sousSpecialiteId: "",
+    anneeObtention: "", universite: "", pays: "", ville: "",
   });
-
-  const [initialForm, setInitialForm] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [specialites, setSpecialites]       = useState([]);
+  const [sousSpecialites, setSousSpecialites] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [photoUploading, setPhotoUploading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  const [err, setErr]       = useState("");
+  const currentYear = new Date().getFullYear();
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const res = await getMyProfile();
-        const d = res.data;
+  useEffect(() => { getSpecialites().then(r => setSpecialites(r.data)).catch(() => {}); }, []);
 
-        const normalized = {
-            nom: d.nom || "",
-            prenom: d.prenom || "",
-            email: d.email || "",
-            telephone: d.telephone || "",
-            nni: d.nni || "",
-            sexe: d.sexe || "",
-            nationalite: d.nationalite || "",
-            adresse: d.adresse || "",
-            numeroInscription: d.numeroInscription || "",
-            statut: d.statut || "",
-            educations: Array.isArray(d.educations) ? d.educations : [],
-            photoProfilPath: d.photoProfilPath || "",
-        };
-
-        setForm(normalized);
-        setInitialForm(normalized);
-      } catch (err) {
-        console.error(err);
-        setError("Impossible de charger le profil médecin.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProfile();
-  }, []);
-
-  const completion = useMemo(() => {
-    const fields = [
-      "nom",
-      "prenom",
-      "email",
-      "telephone",
-      "nni",
-      "sexe",
-      "nationalite",
-      "adresse",
-      "numeroInscription",
-      "statut",
-    ];
-
-    const filled = fields.filter(
-      (field) => form[field] && String(form[field]).trim() !== ""
-    ).length;
-
-    const hasEducations = form.educations?.length > 0 ? 1 : 0;
-
-    return Math.round(((filled + hasEducations) / (fields.length + 1)) * 100);
-  }, [form]);
-
-  const initials = useMemo(() => {
-    const p = form.prenom?.[0] || "?";
-    const n = form.nom?.[0] || "?";
-    return `${p}${n}`.toUpperCase();
-  }, [form.nom, form.prenom]);
-
-  const statusClasses = useMemo(() => {
-    const value = (form.statut || "").toUpperCase();
-
-    if (["ACTIF", "ACTIVE", "APPROVED"].includes(value)) {
-      return "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800/50";
-    }
-
-    if (["SUSPENDU", "SUSPENDED"].includes(value)) {
-      return "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50";
-    }
-
-    if (["PENDING"].includes(value)) {
-      return "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/50";
-    }
-
-    return "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
-  }, [form.statut]);
-
-  const specialitesDisplay = useMemo(() => {
-  if (!form.educations || form.educations.length === 0) {
-    return "Spécialité non renseignée";
-  }
-
-  return form.educations
-    .map((e) => {
-      if (e.specialiteLibelle && e.sousSpecialiteLibelle) {
-        return `${e.specialiteLibelle} — ${e.sousSpecialiteLibelle}`;
-      }
-      return e.specialiteLibelle;
-    })
-    .filter(Boolean)
-    .filter((value, index, self) => self.indexOf(value) === index)
-    .join(", ");
-}, [form.educations]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleSpecialite = (id) => {
+    setF(p => ({ ...p, specialiteId: id, sousSpecialiteId: "" }));
+    setSousSpecialites([]);
+    if (id) getSousSpecialites(id).then(r => setSousSpecialites(r.data)).catch(() => {});
   };
 
-  const handleEdit = () => {
-    setSuccess("");
-    setError("");
-    setIsEditing(true);
-  };
-
-  const handleCancel = () => {
-    if (initialForm) {
-      setForm(initialForm);
+  const submit = async () => {
+    if (!f.diplome || !f.universite || !f.pays || !f.ville || !f.anneeObtention) {
+      setErr("Veuillez remplir tous les champs obligatoires (*).");
+      return;
     }
-    setSuccess("");
-    setError("");
-    setIsEditing(false);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+    setSaving(true);
+    setErr("");
     try {
-      setSaving(true);
-      setSuccess("");
-      setError("");
-
-      const payload = {
-        nom: form.nom,
-        prenom: form.prenom,
-        telephone: form.telephone,
-        nationalite: form.nationalite,
-        adresse: form.adresse,
-      };
-
-      const res = await updateMyProfile(payload);
-      const d = res.data;
-
-      const updated = {
-        ...form,
-        nom: d.nom || "",
-        prenom: d.prenom || "",
-        telephone: d.telephone || "",
-        nationalite: d.nationalite || "",
-        adresse: d.adresse || "",
-        educations: form.educations || [],
-      };
-
-      setForm(updated);
-      setInitialForm(updated);
-      setSuccess("Profil mis à jour avec succès.");
-      setIsEditing(false);
-    } catch (err) {
-      console.error(err);
-      setError("Impossible de mettre à jour le profil.");
+      const res = await addMyEducation({
+        diplome: f.diplome,
+        specialiteId: f.specialiteId ? Number(f.specialiteId) : null,
+        sousSpecialiteId: f.sousSpecialiteId ? Number(f.sousSpecialiteId) : null,
+        anneeObtention: Number(f.anneeObtention),
+        universite: f.universite,
+        pays: f.pays,
+        ville: f.ville,
+      });
+      onSaved(res.data);
+    } catch {
+      setErr("Erreur lors de l'enregistrement.");
     } finally {
       setSaving(false);
     }
   };
 
-  const handlePhotoChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const inp = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20";
 
+  return (
+    <ModalBase
+      title="Ajouter une formation"
+      onClose={onClose}
+      footer={
+        <>
+          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+            Annuler
+          </button>
+          <button onClick={submit} disabled={saving} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-green-700 py-2.5 text-sm font-bold text-white hover:bg-green-800 disabled:bg-slate-300 transition">
+            {saving && <Loader2 size={14} className="animate-spin" />} Enregistrer
+          </button>
+        </>
+      }
+    >
+      {err && <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">{err}</p>}
+      <div>
+        <label className="text-xs font-semibold text-slate-600 mb-1 block">Diplôme *</label>
+        <input value={f.diplome} onChange={e => setF(p => ({ ...p, diplome: e.target.value }))} placeholder="Ex : Doctorat en médecine" className={inp} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Spécialité</label>
+          <select value={f.specialiteId} onChange={e => handleSpecialite(e.target.value)} className={inp + " cursor-pointer"}>
+            <option value="">— Choisir —</option>
+            {specialites.map(s => <option key={s.id} value={s.id}>{s.libelle}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Sous-spécialité</label>
+          <select value={f.sousSpecialiteId} onChange={e => setF(p => ({ ...p, sousSpecialiteId: e.target.value }))} disabled={!sousSpecialites.length} className={inp + " cursor-pointer disabled:opacity-50"}>
+            <option value="">— Choisir —</option>
+            {sousSpecialites.map(s => <option key={s.id} value={s.id}>{s.libelle}</option>)}
+          </select>
+        </div>
+      </div>
+      <div>
+        <label className="text-xs font-semibold text-slate-600 mb-1 block">Université *</label>
+        <input value={f.universite} onChange={e => setF(p => ({ ...p, universite: e.target.value }))} placeholder="Nom de l'université" className={inp} />
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Pays *</label>
+          <input value={f.pays} onChange={e => setF(p => ({ ...p, pays: e.target.value }))} placeholder="France" className={inp} />
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Ville *</label>
+          <input value={f.ville} onChange={e => setF(p => ({ ...p, ville: e.target.value }))} placeholder="Paris" className={inp} />
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Année *</label>
+          <input type="number" value={f.anneeObtention} onChange={e => setF(p => ({ ...p, anneeObtention: e.target.value }))} placeholder={String(currentYear)} min={1950} max={currentYear} className={inp} />
+        </div>
+      </div>
+    </ModalBase>
+  );
+}
+
+// ── Experience modal ──────────────────────────────────────────────────────────
+
+function ExperienceModal({ onClose, onSaved }) {
+  const [f, setF] = useState({
+    poste: "", nomEtablissement: "", pays: "", ville: "",
+    dateDebut: "", dateFin: "", description: "",
+  });
+  const [actuel, setActuel] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr]       = useState("");
+
+  const submit = async () => {
+    if (!f.poste || !f.nomEtablissement || !f.dateDebut) {
+      setErr("Veuillez remplir les champs obligatoires (*).");
+      return;
+    }
+    setSaving(true);
+    setErr("");
     try {
-      setPhotoUploading(true);
-      setSuccess("");
-      setError("");
-
-      const res = await uploadMyPhoto(file);
-      const newPhotoPath = res.data.photoProfilPath;
-
-      setForm((prev) => ({
-        ...prev,
-        photoProfilPath: newPhotoPath,
-      }));
-
-      setInitialForm((prev) => ({
-        ...prev,
-        photoProfilPath: newPhotoPath,
-      }));
-
-      setSuccess("Photo de profil mise à jour avec succès.");
-    } catch (err) {
-      console.error(err);
-      setError("Impossible de mettre à jour la photo de profil.");
+      const res = await addMyExperience({ ...f, dateFin: actuel ? null : f.dateFin });
+      onSaved(res.data);
+    } catch {
+      setErr("Erreur lors de l'enregistrement.");
     } finally {
-      setPhotoUploading(false);
+      setSaving(false);
     }
   };
 
+  const inp = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20";
+
+  return (
+    <ModalBase
+      title="Ajouter une expérience"
+      onClose={onClose}
+      footer={
+        <>
+          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+            Annuler
+          </button>
+          <button onClick={submit} disabled={saving} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-green-700 py-2.5 text-sm font-bold text-white hover:bg-green-800 disabled:bg-slate-300 transition">
+            {saving && <Loader2 size={14} className="animate-spin" />} Enregistrer
+          </button>
+        </>
+      }
+    >
+      {err && <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">{err}</p>}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Poste *</label>
+          <input value={f.poste} onChange={e => setF(p => ({ ...p, poste: e.target.value }))} placeholder="Ex : Médecin généraliste" className={inp} />
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Établissement *</label>
+          <input value={f.nomEtablissement} onChange={e => setF(p => ({ ...p, nomEtablissement: e.target.value }))} placeholder="Nom de la structure" className={inp} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Pays</label>
+          <input value={f.pays} onChange={e => setF(p => ({ ...p, pays: e.target.value }))} placeholder="Mauritanie" className={inp} />
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Ville</label>
+          <input value={f.ville} onChange={e => setF(p => ({ ...p, ville: e.target.value }))} placeholder="Nouakchott" className={inp} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Date début *</label>
+          <input type="date" value={f.dateDebut} onChange={e => setF(p => ({ ...p, dateDebut: e.target.value }))} className={inp} />
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Date fin</label>
+          <input type="date" value={f.dateFin} onChange={e => setF(p => ({ ...p, dateFin: e.target.value }))} disabled={actuel} className={inp + (actuel ? " opacity-40" : "")} />
+        </div>
+      </div>
+      <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
+        <input type="checkbox" checked={actuel} onChange={e => { setActuel(e.target.checked); if (e.target.checked) setF(p => ({ ...p, dateFin: "" })); }} className="rounded" />
+        Poste actuel
+      </label>
+      <div>
+        <label className="text-xs font-semibold text-slate-600 mb-1 block">Description</label>
+        <textarea value={f.description} onChange={e => setF(p => ({ ...p, description: e.target.value }))} rows={3} placeholder="Décrivez vos responsabilités..." className={inp + " resize-none"} />
+      </div>
+    </ModalBase>
+  );
+}
+
+// ── Document modal ────────────────────────────────────────────────────────────
+
+function DocumentModal({ onClose, onSaved }) {
+  const [file, setFile]     = useState(null);
+  const [type, setType]     = useState("AUTRE");
+  const [cat, setCat]       = useState("AUTRE");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr]       = useState("");
+  const fileRef = useRef();
+
+  const submit = async () => {
+    if (!file) { setErr("Veuillez sélectionner un fichier."); return; }
+    setSaving(true);
+    setErr("");
+    try {
+      const res = await uploadMyDocument(file, type, cat);
+      onSaved(res.data);
+    } catch {
+      setErr("Erreur lors du téléversement.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const sel = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 cursor-pointer";
+
+  return (
+    <ModalBase
+      title="Téléverser un document"
+      onClose={onClose}
+      footer={
+        <>
+          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+            Annuler
+          </button>
+          <button onClick={submit} disabled={saving} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-green-700 py-2.5 text-sm font-bold text-white hover:bg-green-800 disabled:bg-slate-300 transition">
+            {saving && <Loader2 size={14} className="animate-spin" />} Téléverser
+          </button>
+        </>
+      }
+    >
+      {err && <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">{err}</p>}
+      <div
+        onClick={() => fileRef.current.click()}
+        className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-8 cursor-pointer hover:border-green-400 hover:bg-green-50/30 transition"
+      >
+        <Upload size={24} className="text-slate-400 mb-2" />
+        {file ? (
+          <p className="text-sm font-semibold text-slate-700">{file.name}</p>
+        ) : (
+          <>
+            <p className="text-sm text-slate-500">Cliquez pour sélectionner un fichier</p>
+            <p className="text-xs text-slate-400 mt-0.5">PDF, JPG, PNG — max 10 Mo</p>
+          </>
+        )}
+        <input ref={fileRef} type="file" className="hidden" onChange={e => setFile(e.target.files[0] || null)} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Type</label>
+          <select value={type} onChange={e => setType(e.target.value)} className={sel}>
+            {DOC_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block">Catégorie</label>
+          <select value={cat} onChange={e => setCat(e.target.value)} className={sel}>
+            {DOC_CATS.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+    </ModalBase>
+  );
+}
+
+// ── Profile header ────────────────────────────────────────────────────────────
+
+function ProfileHeader({ profile, educations, onPhotoUpload, uploading }) {
+  const fileRef = useRef();
+  const specialite = educations[0]?.specialiteLibelle || "Médecin";
+  const photoUrl = profile.photoProfilPath ? `${BASE_URL}${profile.photoProfilPath}` : null;
+  const initials = (profile.prenom?.[0] || "") + (profile.nom?.[0] || "");
+
+  return (
+    <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
+        <div className="flex flex-1 items-center gap-5">
+          <div
+            onClick={() => fileRef.current.click()}
+            className="group relative h-24 w-24 shrink-0 cursor-pointer"
+          >
+            {photoUrl ? (
+              <img
+                src={photoUrl}
+                alt="Photo profil"
+                className="h-24 w-24 rounded-full object-cover shadow-md"
+              />
+            ) : (
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-100 shadow-md">
+                <span className="text-2xl font-bold text-green-700">
+                  {initials}
+                </span>
+              </div>
+            )}
+
+            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition group-hover:bg-black/35">
+              {uploading ? (
+                <Loader2 size={20} className="animate-spin text-white" />
+              ) : (
+                <Camera size={18} className="text-white opacity-0 transition group-hover:opacity-100" />
+              )}
+            </div>
+
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) =>
+                e.target.files[0] && onPhotoUpload(e.target.files[0])
+              }
+            />
+          </div>
+
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Dr. {profile.prenom} {profile.nom}
+            </h1>
+
+            <p className="mt-1 text-sm font-medium text-slate-500">
+              <span className="text-green-700">{specialite}</span>
+              {profile.sectionOrdre && (
+                <> | {String(profile.sectionOrdre).replace(/_/g, " ")}</>
+              )}
+            </p>
+
+            <div className="mt-3">
+              <StatutBadge statut={profile.statut} />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid flex-1 grid-cols-1 gap-4 border-t border-slate-100 pt-5 sm:grid-cols-2 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+          <Field label="N° Inscription" value={profile.numeroInscription} />
+          <Field label="Téléphone" value={profile.telephone} />
+          <Field label="Email" value={profile.email} />
+          <Field label="NNI" value={profile.nni} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+export default function MedecinProfilPage() {
+  const [profile,      setProfile]      = useState(null);
+  const [educations,   setEducations]   = useState([]);
+  const [experiences,  setExperiences]  = useState([]);
+  const [documents,    setDocuments]    = useState([]);
+  const [activeTab,    setActiveTab]    = useState("profil");
+  const [loading,      setLoading]      = useState(true);
+  const [uploading,    setUploading]    = useState(false);
+  const [editing,      setEditing]      = useState(false);
+  const [form,         setForm]         = useState({});
+  const [saving,       setSaving]       = useState(false);
+  const [saveErr,      setSaveErr]      = useState("");
+  const [showEduModal, setShowEduModal] = useState(false);
+  const [showExpModal, setShowExpModal] = useState(false);
+  const [showDocModal, setShowDocModal] = useState(false);
+
+  useEffect(() => {
+    Promise.allSettled([getMyProfile(), getMyEducations(), getMyExperiences(), getMyDocuments()])
+      .then(([p, e, ex, d]) => {
+        if (p.status === "fulfilled") {
+          setProfile(p.value.data);
+          setForm({
+            nom: p.value.data.nom || "", prenom: p.value.data.prenom || "",
+            telephone: p.value.data.telephone || "", nationalite: p.value.data.nationalite || "",
+            adresse: p.value.data.adresse || "",
+          });
+        }
+        if (e.status === "fulfilled") setEducations(e.value.data);
+        if (ex.status === "fulfilled") setExperiences(ex.value.data);
+        if (d.status === "fulfilled") setDocuments(d.value.data);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveErr("");
+    try {
+      const res = await updateMyProfile(form);
+      setProfile(res.data);
+      setEditing(false);
+    } catch {
+      setSaveErr("Erreur lors de la sauvegarde.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePhoto = async (file) => {
+    setUploading(true);
+    try {
+      const res = await uploadMyPhoto(file);
+      setProfile(p => ({ ...p, photoProfilPath: res.data.photoProfilPath }));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const inp = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20";
+
   if (loading) {
     return (
-      <MedecinLayout
-        title="Mon profil"
-        subtitle="Chargement des informations du profil."
-      >
-        <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-colors">
-          <p className="text-slate-600 dark:text-slate-400">Chargement du profil...</p>
+      <MedecinLayout title="Mon profil">
+        <div className="flex h-60 items-center justify-center">
+          <Loader2 size={22} className="animate-spin text-slate-400" />
         </div>
       </MedecinLayout>
     );
   }
 
   return (
-    <MedecinLayout
-      title="Mon profil"
-      subtitle="Consultez vos informations personnelles et professionnelles."
-    >
-      <div className="space-y-6">
-        {success && (
-          <div className="flex items-center gap-3 rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/40 px-4 py-3 text-green-700 dark:text-green-400 transition-colors">
-            <CheckCircle2 size={18} />
-            <span>{success}</span>
-          </div>
+    <MedecinLayout title="Mon profil">
+      <AnimatePresence>
+        {showEduModal && (
+          <EducationModal
+            onClose={() => setShowEduModal(false)}
+            onSaved={edu => { setEducations(p => [...p, edu]); setShowEduModal(false); }}
+          />
         )}
-
-        {error && (
-          <div className="flex items-center gap-3 rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/40 px-4 py-3 text-red-600 dark:text-red-400 transition-colors">
-            <AlertCircle size={18} />
-            <span>{error}</span>
-          </div>
+        {showExpModal && (
+          <ExperienceModal
+            onClose={() => setShowExpModal(false)}
+            onSaved={exp => { setExperiences(p => [...p, exp]); setShowExpModal(false); }}
+          />
         )}
+        {showDocModal && (
+          <DocumentModal
+            onClose={() => setShowDocModal(false)}
+            onSaved={doc => { setDocuments(p => [...p, doc]); setShowDocModal(false); }}
+          />
+        )}
+      </AnimatePresence>
 
-        {/* HERO */}
-        <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-colors relative overflow-hidden">
-          {/* Subtle background decoration */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 dark:bg-green-400/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+      <div className="mx-auto max-w-7xl space-y-6">
 
-          <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-start gap-5">
-              <div className="relative shrink-0">
-                <div className="rounded-[24px] bg-gradient-to-br from-green-600 via-green-500 to-emerald-400 p-[3px] shadow-lg">
-                  <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[21px] bg-white dark:bg-slate-900 text-3xl font-bold text-green-700 dark:text-green-500 transition-colors">
-                    {form.photoProfilPath ? (
-                      <img
-                        src={`http://localhost:8080${form.photoProfilPath}`}
-                        alt="Photo de profil"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      initials
-                    )}
-                  </div>
-                </div>
+        <ProfileHeader
+          profile={profile}
+          educations={educations}
+          onPhotoUpload={handlePhoto}
+          uploading={uploading}
+        />
 
-                <label
-                  htmlFor="photo-upload"
-                  className="absolute -bottom-2 -right-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-2 border-white dark:border-slate-900 bg-green-600 dark:bg-green-500 text-white shadow-md transition hover:scale-105 hover:bg-green-700 dark:hover:bg-green-400"
-                  title="Changer la photo"
-                >
-                  <Camera size={18} />
-                </label>
+        {/* Tab bar */}
+        <div className="rounded-2xl bg-green-50/70 p-2">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
 
-                <input
-                  id="photo-upload"
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  onChange={handlePhotoChange}
-                  className="hidden"
-                />
-              </div>
-
-              <div className="pt-2">
-                <div className="mb-2 flex flex-wrap items-center gap-3">
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white transition-colors">
-                    Dr. {form.prenom} {form.nom}
-                  </h2>
-
-                  <span
-                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide transition-colors ${statusClasses}`}
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-current opacity-80" />
-                    {form.statut || "Inconnu"}
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-500 dark:text-slate-400 transition-colors">
-                  <span className="inline-flex items-center gap-2">
-                    <Stethoscope size={16} className="text-green-600 dark:text-green-500" />
-                    {specialitesDisplay}
-                  </span>
-
-                  {form.email && (
-                    <span className="inline-flex items-center gap-2">
-                      <Mail size={16} className="text-green-600 dark:text-green-500" />
-                      {form.email}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-              <div className="min-w-[150px]">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 transition-colors">
-                  Profil complété
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="h-2 w-32 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 transition-colors">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-1000 ease-out"
-                      style={{ width: `${completion}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-bold text-green-700 dark:text-green-400 transition-colors">
-                    {completion}%
-                  </span>
-                </div>
-              </div>
-
-              {!isEditing ? (
+              return (
                 <button
-                  type="button"
-                  onClick={handleEdit}
-                  className="inline-flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-white px-5 py-3 text-sm font-semibold text-white dark:text-slate-900 transition hover:bg-slate-800 dark:hover:bg-slate-200 shadow-sm"
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition ${
+                    active
+                      ? "bg-white text-green-700 shadow-sm"
+                      : "text-slate-600 hover:bg-white/70 hover:text-slate-900"
+                  }`}
                 >
-                  <Pencil size={16} />
-                  Modifier
+                  <Icon size={16} />
+                  {tab.label}
                 </button>
-              ) : (
-                <div className="inline-flex items-center gap-2 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/30 px-5 py-3 text-sm font-semibold text-amber-700 dark:text-amber-400 transition-colors">
-                  <Pencil size={16} />
-                  Mode édition
-                </div>
-              )}
-            </div>
-          </div>
-
-          {photoUploading && (
-            <div className="mt-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm text-slate-600 dark:text-slate-300 transition-colors animate-pulse">
-              Mise à jour de la photo en cours...
-            </div>
-          )}
-        </section>
-
-        {/* BODY */}
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
-          <div className="space-y-6">
-            {!isEditing ? (
-              <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm transition-colors">
-                <div className="mb-6">
-                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white transition-colors">
-                    Informations du profil
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 transition-colors">
-                    Vue complète des informations disponibles dans votre espace personnelles.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <ReadOnlyItem
-                    label="Nom"
-                    value={form.nom}
-                    icon={<User size={18} />}
-                  />
-                  <ReadOnlyItem
-                    label="Prénom"
-                    value={form.prenom}
-                    icon={<User size={18} />}
-                  />
-                  <ReadOnlyItem
-                    label="Email"
-                    value={form.email}
-                    icon={<Mail size={18} />}
-                  />
-                  <ReadOnlyItem
-                    label="Téléphone"
-                    value={form.telephone}
-                    icon={<Phone size={18} />}
-                  />
-                  <ReadOnlyItem
-                    label="NNI"
-                    value={form.nni}
-                    icon={<IdCard size={18} />}
-                  />
-                  <ReadOnlyItem
-                    label="Sexe"
-                    value={form.sexe}
-                    icon={<ShieldCheck size={18} />}
-                  />
-                  <ReadOnlyItem
-                    label="Nationalité"
-                    value={form.nationalite}
-                    icon={<Globe size={18} />}
-                  />
-                  <ReadOnlyItem
-                    label="Spécialités"
-                    value={specialitesDisplay}
-                    icon={<Stethoscope size={18} />}
-                  />
-                  <ReadOnlyItem
-                    label="Numéro d’inscription"
-                    value={form.numeroInscription}
-                    icon={<FileBadge size={18} />}
-                  />
-                  <ReadOnlyItem
-                    label="Statut"
-                    value={form.statut}
-                    icon={<ShieldCheck size={18} />}
-                  />
-                  <div className="md:col-span-2">
-                    <ReadOnlyItem
-                      label="Adresse"
-                      value={form.adresse}
-                      icon={<MapPin size={18} />}
-                    />
-                  </div>
-                </div>
-              </section>
-            ) : (
-              <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm transition-colors">
-                <div className="mb-6">
-                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white transition-colors">
-                    Modifier les informations
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 transition-colors">
-                    Seuls certains champs peuvent être modifiés.
-                  </p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <InputField
-                      label="Nom"
-                      name="nom"
-                      value={form.nom}
-                      onChange={handleChange}
-                      icon={<User size={18} />}
-                    />
-
-                    <InputField
-                      label="Prénom"
-                      name="prenom"
-                      value={form.prenom}
-                      onChange={handleChange}
-                      icon={<User size={18} />}
-                    />
-
-                    <InputField
-                      label="Téléphone"
-                      name="telephone"
-                      value={form.telephone}
-                      onChange={handleChange}
-                      icon={<Phone size={18} />}
-                    />
-
-                    <SelectField
-                      label="Nationalité"
-                      name="nationalite"
-                      value={form.nationalite}
-                      onChange={handleChange}
-                      icon={<Globe size={18} />}
-                      options={[
-                        { value: "", label: "Choisir" },
-                        { value: "Mauritanienne", label: "Mauritanienne" },
-                        { value: "Sénégalaise", label: "Sénégalaise" },
-                        { value: "Marocaine", label: "Marocaine" },
-                        { value: "Française", label: "Française" },
-                        { value: "Autre", label: "Autre" },
-                      ]}
-                    />
-
-                    <div className="md:col-span-2">
-                      <InputField
-                        label="Adresse"
-                        name="adresse"
-                        value={form.adresse}
-                        onChange={handleChange}
-                        icon={<MapPin size={18} />}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-5 transition-colors">
-                    <div className="mb-5 flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300">
-                      <Lock size={16} className="text-slate-400" />
-                      Champs non modifiables
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      <MiniReadOnly label="Email" value={form.email} />
-                      <MiniReadOnly label="NNI" value={form.nni} />
-                      <MiniReadOnly label="Sexe" value={form.sexe} />
-                      <MiniReadOnly
-                        label="Numéro d’inscription"
-                        value={form.numeroInscription}
-                      />
-                      <MiniReadOnly label="Statut" value={form.statut} />
-                      <MiniReadOnly label="Spécialités" value={specialitesDisplay} />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-4 pt-2">
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-7 py-3.5 text-sm font-bold text-white transition hover:bg-green-700 shadow-sm disabled:cursor-not-allowed disabled:bg-slate-400 disabled:dark:bg-slate-600"
-                    >
-                      <Save size={18} />
-                      {saving ? "Enregistrement..." : "Enregistrer les modifications"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-7 py-3.5 text-sm font-bold text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 hover:text-red-500 dark:hover:bg-slate-700/50 shadow-sm"
-                    >
-                      <X size={18} />
-                      Annuler
-                    </button>
-                  </div>
-                </form>
-              </section>
-            )}
-          </div>
-
-          <div className="space-y-6">
-            <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-colors">
-              <p className="mb-5 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                Aperçu administratif
-              </p>
-
-              <div className="space-y-1">
-                <AdminRow
-                  icon={<Mail size={16} />}
-                  label="Email"
-                  value={form.email}
-                />
-                <AdminRow
-                  icon={<IdCard size={16} />}
-                  label="NNI"
-                  value={form.nni}
-                />
-                <AdminRow
-                  icon={<FileBadge size={16} />}
-                  label="N° inscription"
-                  value={form.numeroInscription}
-                />
-                <AdminRow
-                  icon={<Stethoscope size={16} />}
-                  label="Spécialités"
-                  value={specialitesDisplay}
-                />
-                <AdminRow
-                  icon={<ShieldCheck size={16} />}
-                  label="Statut"
-                  value={form.statut}
-                />
-              </div>
-            </section>
-
-            <section className="overflow-hidden rounded-3xl bg-slate-900 dark:bg-slate-950 p-6 text-white shadow-lg transition-colors relative">
-              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                 <Lock size={120} className="-mr-4 -mt-4 text-white" />
-              </div>
-              <div className="relative z-10">
-                <div className="mb-5 flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-sm">
-                    <Lock size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-base">Données protégées</h3>
-                    <p className="text-xs font-medium text-slate-400">
-                      Verrouillage administratif
-                    </p>
-                  </div>
-                </div>
-
-                <p className="text-sm leading-relaxed text-slate-300">
-                  Certaines données sont verrouillées car elles proviennent de
-                  votre dossier validé par l'administration de l'Ordre des
-                  Médecins. Pour toute correction, une procédure est
-                  nécessaire.
-                </p>
-              </div>
-            </section>
+              );
+            })}
           </div>
         </div>
+
+        {/* ── Profil personnel ── */}
+        {activeTab === "profil" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <InfoCard title="Informations personnelles" onEdit={!editing ? () => setEditing(true) : undefined}>
+              {editing ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-slate-500 mb-1 block">Prénom</label>
+                      <input className={inp} value={form.prenom} onChange={e => setForm(p => ({ ...p, prenom: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-500 mb-1 block">Nom</label>
+                      <input className={inp} value={form.nom} onChange={e => setForm(p => ({ ...p, nom: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-500 mb-1 block">Téléphone</label>
+                    <input className={inp} value={form.telephone} onChange={e => setForm(p => ({ ...p, telephone: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-500 mb-1 block">Nationalité</label>
+                    <input className={inp} value={form.nationalite} onChange={e => setForm(p => ({ ...p, nationalite: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-500 mb-1 block">Adresse</label>
+                    <input className={inp} value={form.adresse} onChange={e => setForm(p => ({ ...p, adresse: e.target.value }))} />
+                  </div>
+                  {saveErr && <p className="text-xs text-red-600">{saveErr}</p>}
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => { setEditing(false); setSaveErr(""); }}
+                      className="flex-1 rounded-xl border border-slate-200 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-green-700 py-2 text-sm font-bold text-white hover:bg-green-800 disabled:bg-slate-300 transition"
+                    >
+                      {saving && <Loader2 size={13} className="animate-spin" />}
+                      Enregistrer
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                  <Field label="Prénom"      value={profile.prenom} />
+                  <Field label="Nom"         value={profile.nom} />
+                  <Field label="Téléphone"   value={profile.telephone} />
+                  <Field label="Nationalité" value={profile.nationalite} />
+                  <Field label="Adresse"     value={profile.adresse} className="col-span-2" />
+                </div>
+              )}
+            </InfoCard>
+
+            <InfoCard title="Informations professionnelles">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                <Field label="Email" value={profile.email} className="col-span-2" />
+                <Field label="NNI" value={profile.nni} />
+                <Field label="Sexe" value={profile.sexe} />
+                <Field
+                  label="Spécialité"
+                  value={educations.map(e => e.specialiteLibelle).filter(Boolean).join(", ") || "—"}
+                  className="col-span-2"
+                />
+                <Field label="Section" value={profile.sectionOrdre?.replace(/_/g, " ")} />
+                <Field label="Ville d'exercice" value={profile.villeExercice} />
+                <Field label="N° Inscription" value={profile.numeroInscription} />
+                <div>
+                  <p className="text-xs font-medium text-slate-400 mb-1">Statut</p>
+                  <StatutBadge statut={profile.statut} />
+                </div>
+              </div>
+            </InfoCard>
+          </div>
+        )}
+
+        {/* ── Éducation ── */}
+        {activeTab === "education" && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-slate-700">Formations ({educations.length})</h2>
+              <button
+                onClick={() => setShowEduModal(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-green-700 px-4 py-2 text-xs font-bold text-white hover:bg-green-800 transition"
+              >
+                <Plus size={13} /> Ajouter
+              </button>
+            </div>
+            {educations.length === 0 ? (
+              <EmptyState icon={GraduationCap} text="Aucune formation enregistrée" />
+            ) : (
+              <div className="space-y-3">
+                {educations.map(e => (
+                  <div
+                    key={e.id}
+                    className="group flex items-start gap-4 rounded-xl border border-slate-200 bg-white shadow-sm px-5 py-4"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-green-50">
+                      <GraduationCap size={16} className="text-green-700" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-900">{e.diplome}</p>
+                      {e.specialiteLibelle && (
+                        <p className="text-xs font-medium text-green-700 mt-0.5">
+                          {e.specialiteLibelle}
+                          {e.sousSpecialiteLibelle && ` · ${e.sousSpecialiteLibelle}`}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {e.universite} · {e.ville}, {e.pays}
+                      </p>
+                      {e.anneeObtention && (
+                        <p className="text-xs text-slate-400 mt-0.5">Obtenu en {e.anneeObtention}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => deleteMyEducation(e.id).then(() => setEducations(p => p.filter(x => x.id !== e.id)))}
+                      className="opacity-0 group-hover:opacity-100 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-red-100 hover:text-red-500 transition"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Expériences ── */}
+        {activeTab === "experience" && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-slate-700">Expériences ({experiences.length})</h2>
+              <button
+                onClick={() => setShowExpModal(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-green-700 px-4 py-2 text-xs font-bold text-white hover:bg-green-800 transition"
+              >
+                <Plus size={13} /> Ajouter
+              </button>
+            </div>
+            {experiences.length === 0 ? (
+              <EmptyState icon={Briefcase} text="Aucune expérience enregistrée" />
+            ) : (
+              <div className="space-y-3">
+                {experiences.map(e => (
+                  <div
+                    key={e.id}
+                    className="group flex items-start gap-4 rounded-xl border border-slate-200 bg-white shadow-sm px-5 py-4"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+                      <Briefcase size={16} className="text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-900">{e.poste}</p>
+                      <p className="text-xs font-medium text-slate-600 mt-0.5">{e.nomEtablissement}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {e.dateDebut} → {e.dateFin || "Présent"}
+                        {(e.ville || e.pays) && <> · {[e.ville, e.pays].filter(Boolean).join(", ")}</>}
+                      </p>
+                      {e.description && (
+                        <p className="text-xs text-slate-500 mt-1 line-clamp-2">{e.description}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => deleteMyExperience(e.id).then(() => setExperiences(p => p.filter(x => x.id !== e.id)))}
+                      className="opacity-0 group-hover:opacity-100 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-red-100 hover:text-red-500 transition"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Documents ── */}
+        {activeTab === "documents" && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-slate-700">Documents ({documents.length})</h2>
+              <button
+                onClick={() => setShowDocModal(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-green-700 px-4 py-2 text-xs font-bold text-white hover:bg-green-800 transition"
+              >
+                <Upload size={13} /> Téléverser
+              </button>
+            </div>
+            {documents.length === 0 ? (
+              <EmptyState icon={FileText} text="Aucun document téléversé" />
+            ) : (
+              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50/60 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      <th className="px-5 py-3">Fichier</th>
+                      <th className="px-4 py-3">Type</th>
+                      <th className="px-4 py-3">Catégorie</th>
+                      <th className="px-4 py-3">Date</th>
+                      <th className="px-4 py-3">Taille</th>
+                      <th className="px-4 py-3" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {documents.map(d => (
+                      <tr key={d.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-2">
+                            <FileText size={14} className="shrink-0 text-slate-400" />
+                            <span className="font-medium text-slate-800 truncate max-w-[180px]">{d.fileName}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-slate-500">{d.typeDocument}</td>
+                        <td className="px-4 py-3 text-slate-500">{d.categorie}</td>
+                        <td className="px-4 py-3 text-slate-400">{d.uploadDate?.slice(0, 10) || "—"}</td>
+                        <td className="px-4 py-3 text-slate-400">{d.size ? `${(d.size / 1024).toFixed(0)} Ko` : "—"}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1">
+                            <a
+                              href={`${BASE_URL}${d.filePath}`}
+                              download={d.fileName}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-100 hover:text-blue-600 transition"
+                            >
+                              <Download size={13} />
+                            </a>
+                            <button
+                              onClick={() => deleteMyDocument(d.id).then(() => setDocuments(p => p.filter(x => x.id !== d.id)))}
+                              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-red-100 hover:text-red-500 transition"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
     </MedecinLayout>
   );
 }
-
-function InputField({ label, name, value, onChange, icon }) {
-  return (
-    <div>
-      <label className="mb-2.5 block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors">
-        {label}
-      </label>
-
-      <div className="relative">
-        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">
-          {icon}
-        </span>
-
-        <input
-          type="text"
-          name={name}
-          value={value}
-          onChange={onChange}
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 py-3.5 pl-12 pr-4 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:focus:ring-green-500/20"
-        />
-      </div>
-    </div>
-  );
-}
-
-function SelectField({ label, name, value, onChange, icon, options }) {
-  return (
-    <div>
-      <label className="mb-2.5 block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors">
-        {label}
-      </label>
-
-      <div className="relative">
-        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 z-10 text-slate-400 dark:text-slate-500">
-          {icon}
-        </span>
-
-        <select
-          name={name}
-          value={value}
-          onChange={onChange}
-          className="w-full appearance-none rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 py-3.5 pl-12 pr-4 text-slate-800 dark:text-slate-100 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:focus:ring-green-500/20"
-        >
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
-}
-
-function ReadOnlyItem({ label, value, icon }) {
-  return (
-    <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-5 transition hover:border-green-300 dark:hover:border-green-700/50 hover:bg-green-50/30 dark:hover:bg-green-900/10">
-      <div className="mb-2 flex items-center gap-2 text-slate-500 dark:text-slate-400">
-        <span className="text-green-600/80 dark:text-green-500/80">{icon}</span>
-        <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
-      </div>
-
-      <p className={`break-words text-lg font-bold mt-1.5 ${value ? "text-slate-800 dark:text-slate-100" : "text-slate-400 dark:text-slate-600 italic font-medium"}`}>
-        {value || "Non renseigné"}
-      </p>
-    </div>
-  );
-}
-
-function MiniReadOnly({ label, value }) {
-  return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3.5 transition-colors">
-      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</p>
-      <p className={`break-words text-sm font-bold ${value ? "text-slate-800 dark:text-slate-100" : "text-slate-400 dark:text-slate-600 italic"}`}>
-        {value || "Non renseigné"}
-      </p>
-    </div>
-  );
-}
-
-function AdminRow({ icon, label, value }) {
-  return (
-    <div className="flex items-center gap-4 py-3 border-b border-slate-100 dark:border-slate-800 last:border-b-0 transition-colors">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400">
-        {icon}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">{label}</p>
-        <p className={`truncate text-sm font-bold ${value ? "text-slate-800 dark:text-slate-200" : "text-slate-400 dark:text-slate-600 italic"}`}>
-          {value || "Non renseigné"}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-export default MedecinProfilPage;
