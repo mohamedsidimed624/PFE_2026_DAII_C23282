@@ -19,11 +19,11 @@ import { getUnreadCount } from "../../services/notificationApi";
 
 const navItems = [
   { label: "Dashboard",                Icon: LayoutDashboard,      to: "/admin/dashboard" },
-  { label: "Notifications",            Icon: Bell,                 to: "/admin/notifications", badge: true },
   { label: "Gestion des demandes",     Icon: ClipboardList,        to: "/admin/demandes" },
   { label: "Gestion des Médecins",     Icon: Stethoscope,          to: "/admin/medecins" },
   { label: "Gestion des spécialités",  Icon: Tag,                  to: "/admin/specialites" },
   { label: "Gestion des Réclamations", Icon: MessageSquareWarning, to: "/admin/reclamations" },
+  { label: "Notifications",            Icon: Bell,                 to: "/admin/notifications", badge: true },
   { label: "Gestion des Sondages",     Icon: BarChart2,            to: "/admin/sondages" },
   { label: "Diffusion d'information",  Icon: Megaphone,            to: "/admin/diffusion" },
   { label: "Processus Électoral",      Icon: Vote,                 to: "/admin/processus" },
