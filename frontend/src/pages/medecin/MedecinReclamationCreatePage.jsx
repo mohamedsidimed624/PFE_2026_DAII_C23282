@@ -27,14 +27,14 @@ const CATEGORIES = [
 const GROUPS = [...new Set(CATEGORIES.map((c) => c.group))];
 
 const inputCls = (hasError) =>
-  `w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition
+  `w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500
    focus:ring-2 focus:ring-green-500/20 focus:border-green-500
-   ${hasError ? "border-red-300 focus:border-red-400 focus:ring-red-400/20" : "border-slate-200"}`;
+   ${hasError ? "border-red-300 focus:border-red-400 focus:ring-red-400/20 dark:border-red-700" : "border-slate-200 dark:border-slate-700"}`;
 
 function Field({ label, required, hint, error, children }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
         {label}{required && <span className="ml-0.5 text-red-500">*</span>}
       </label>
       {hint && <p className="text-xs text-slate-400 -mt-0.5">{hint}</p>}
@@ -113,8 +113,8 @@ export default function MedecinReclamationCreatePage() {
             <CheckCircle2 size={38} strokeWidth={1.5} />
           </motion.div>
 
-          <h1 className="text-2xl font-bold text-slate-900">Réclamation soumise</h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Réclamation soumise</h1>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
             Votre demande a été transmise à l'administration de l'Ordre.
           </p>
 
@@ -125,8 +125,8 @@ export default function MedecinReclamationCreatePage() {
             </div>
           )}
 
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 text-left space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Prochaines étapes</p>
+          <div className="mt-5 space-y-3 rounded-2xl border border-slate-100 bg-white p-5 text-left dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Prochaines étapes</p>
             {[
               { icon: <Clock size={14} />,      text: "Votre réclamation sera examinée dans les meilleurs délais." },
               { icon: <ShieldCheck size={14} />, text: "L'administration vous contactera si nécessaire." },
@@ -172,7 +172,7 @@ export default function MedecinReclamationCreatePage() {
         </button>
 
         {/* Card */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
 
           {/* Green header */}
           <div className="bg-green-700 px-6 py-5 text-center">
@@ -182,7 +182,7 @@ export default function MedecinReclamationCreatePage() {
             </p>
           </div>
 
-          <div className="px-6 py-6 space-y-5">
+          <div className="space-y-5 px-6 py-6">
 
             {/* Submit error */}
             <AnimatePresence>
@@ -254,9 +254,8 @@ export default function MedecinReclamationCreatePage() {
                   onChange={(e) => setField("message", e.target.value)}
                   maxLength={2000}
                   placeholder="Décrivez votre réclamation en détail…"
-                  className={`w-full rounded-xl border bg-white resize-none px-4 py-3 text-sm text-slate-900 outline-none transition
-                    focus:ring-2 focus:ring-green-500/20 focus:border-green-500
-                    ${errors.message ? "border-red-300 focus:border-red-400 focus:ring-red-400/20" : "border-slate-200"}`}
+                  className={`w-full resize-none rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/20 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500
+                    ${errors.message ? "border-red-300 focus:border-red-400 focus:ring-red-400/20 dark:border-red-700" : "border-slate-200 dark:border-slate-700"}`}
                 />
                 <div className="flex items-center justify-between">
                   {!errors.message && <span className="text-xs text-slate-400">Minimum 20 caractères</span>}
@@ -268,7 +267,7 @@ export default function MedecinReclamationCreatePage() {
 
               {/* Pièce jointe */}
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700">Pièce jointe</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Pièce jointe</label>
                 <p className="text-xs text-slate-400">Optionnel — PDF, PNG ou JPG, max 5 Mo.</p>
 
                 <AnimatePresence mode="wait">
@@ -277,7 +276,7 @@ export default function MedecinReclamationCreatePage() {
                       key="upload"
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                       className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed px-4 py-4 transition
-                        ${errors.file ? "border-red-300 bg-red-50" : "border-slate-200 bg-slate-50 hover:border-green-400 hover:bg-green-50/40"}`}
+                        ${errors.file ? "border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20" : "border-slate-200 bg-slate-50 hover:border-green-400 hover:bg-green-50/40 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-green-700 dark:hover:bg-green-900/10"}`}
                     >
                       <Upload size={18} className="shrink-0 text-slate-400" />
                       <div>
@@ -348,7 +347,7 @@ export default function MedecinReclamationCreatePage() {
             </form>
           </div>
 
-          <div className="border-t border-slate-100 bg-slate-50 px-6 py-3 text-center text-sm text-slate-500">
+          <div className="border-t border-slate-100 bg-slate-50 px-6 py-3 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-400">
             Besoin d'aide ?{" "}
             <span className="font-bold uppercase text-green-700">Contacter l'administration</span>
           </div>

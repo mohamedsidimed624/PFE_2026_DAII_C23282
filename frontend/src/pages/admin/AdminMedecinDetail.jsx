@@ -462,7 +462,7 @@ function AdminMedecinDetail() {
             </button>
             <button
               onClick={handleDelete}
-              disabled={actionLoading}
+              disabled={actionLoading}bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Trash2 size={15} />

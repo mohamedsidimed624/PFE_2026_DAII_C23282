@@ -13,9 +13,9 @@ import {
 // ── Status helpers ────────────────────────────────────────────────────────────
 
 function statutMeta(statut) {
-  if (statut === "PAYEE")      return { label: "Payée",      cls: "border-green-200 bg-green-50 text-green-700",  dot: "bg-green-500"  };
-  if (statut === "EN_RETARD")  return { label: "En retard",  cls: "border-red-200 bg-red-50 text-red-700",        dot: "bg-red-500"    };
-  return                              { label: "En attente", cls: "border-amber-200 bg-amber-50 text-amber-700",  dot: "bg-amber-500"  };
+  if (statut === "PAYEE")      return { label: "Payée",      cls: "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400",  dot: "bg-green-500"  };
+  if (statut === "EN_RETARD")  return { label: "En retard",  cls: "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",              dot: "bg-red-500"    };
+  return                              { label: "En attente", cls: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400",  dot: "bg-amber-500"  };
 }
 
 function StatutBadge({ statut }) {
@@ -70,7 +70,7 @@ function BankilyModal({ data, onConfirm, onClose, loading }) {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.96, opacity: 0, y: 16 }}
         transition={{ duration: 0.2 }}
-        className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl"
+        className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900 dark:border dark:border-slate-700"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
@@ -287,26 +287,26 @@ export default function MedecinCotisationPage() {
       <div className="mx-auto max-w-6xl space-y-8">
 
         {/* ── Current year card ── */}
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {!loading && courante?.statut === "PAYEE" ? (
-            <div className="flex items-center gap-2 border-b border-green-100 bg-green-50 px-5 py-3.5">
-              <CheckCircle2 size={14} className="text-green-600" />
-              <p className="text-sm font-semibold text-green-800">Cotisation {courante.annee} — Payée</p>
+            <div className="flex items-center gap-2 border-b border-green-100 bg-green-50 px-5 py-3.5 dark:border-green-900 dark:bg-green-900/20">
+              <CheckCircle2 size={14} className="text-green-600 dark:text-green-400" />
+              <p className="text-sm font-semibold text-green-800 dark:text-green-300">Cotisation {courante.annee} — Payée</p>
             </div>
           ) : !loading && courante?.statut === "EN_RETARD" ? (
-            <div className="flex items-center gap-2 border-b border-red-100 bg-red-50 px-5 py-3.5">
-              <AlertTriangle size={14} className="text-red-600" />
-              <p className="text-sm font-semibold text-red-800">Cotisation {courante.annee} — En retard</p>
+            <div className="flex items-center gap-2 border-b border-red-100 bg-red-50 px-5 py-3.5 dark:border-red-900 dark:bg-red-900/20">
+              <AlertTriangle size={14} className="text-red-600 dark:text-red-400" />
+              <p className="text-sm font-semibold text-red-800 dark:text-red-300">Cotisation {courante.annee} — En retard</p>
             </div>
           ) : !loading && courante ? (
-            <div className="flex items-center gap-2 border-b border-amber-100 bg-amber-50 px-5 py-3.5">
-              <Clock size={14} className="text-amber-600" />
-              <p className="text-sm font-semibold text-amber-800">Cotisation {courante.annee} — En attente</p>
+            <div className="flex items-center gap-2 border-b border-amber-100 bg-amber-50 px-5 py-3.5 dark:border-amber-900 dark:bg-amber-900/20">
+              <Clock size={14} className="text-amber-600 dark:text-amber-400" />
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Cotisation {courante.annee} — En attente</p>
             </div>
           ) : (
-            <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/60 px-5 py-3.5">
-              <CreditCard size={14} className="text-slate-400" />
-              <p className="text-sm font-semibold text-slate-700">Cotisation annuelle</p>
+            <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/60 px-5 py-3.5 dark:border-slate-800 dark:bg-slate-800/40">
+              <CreditCard size={14} className="text-slate-400 dark:text-slate-500" />
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Cotisation annuelle</p>
             </div>
           )}
 
@@ -325,7 +325,7 @@ export default function MedecinCotisationPage() {
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-slate-900">{courante.montant} MRU</span>
+                    <span className="text-2xl font-bold text-slate-900 dark:text-white">{courante.montant} MRU</span>
                     <StatutBadge statut={courante.statut} />
                   </div>
                   <div className="flex flex-wrap gap-4 text-xs text-slate-500">
@@ -380,24 +380,24 @@ export default function MedecinCotisationPage() {
         {/* ── History ── */}
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-700">Historique des cotisations</h2>
-            <button onClick={load} className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition">
+            <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200">Historique des cotisations</h2>
+            <button onClick={load} className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition dark:text-slate-500 dark:hover:text-slate-300">
               <RefreshCw size={12} /> Actualiser
             </button>
           </div>
 
           {loading ? (
-            <div className="h-24 animate-pulse rounded-xl border border-[#E2E8F0] bg-white" />
+            <div className="h-24 animate-pulse rounded-xl border border-slate-100 dark:border-slate-800 bg-white" />
           ) : history.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E2E8F0] bg-white py-10 text-center">
-              <CreditCard size={20} className="mb-2 text-slate-300" />
-              <p className="text-sm text-slate-500">Aucune cotisation enregistrée</p>
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center dark:border-slate-700 dark:bg-slate-900">
+              <CreditCard size={20} className="mb-2 text-slate-300 dark:text-slate-600" />
+              <p className="text-sm text-slate-500 dark:text-slate-400">Aucune cotisation enregistrée</p>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+            <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[#E2E8F0] bg-slate-50/60 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <tr className="border-b border-slate-100 bg-slate-50/60 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-500">
                     <th className="px-4 py-3">Année</th>
                     <th className="px-4 py-3">Montant</th>
                     <th className="px-4 py-3">Échéance</th>
@@ -405,14 +405,14 @@ export default function MedecinCotisationPage() {
                     <th className="px-4 py-3">Date paiement</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {history.map((c) => (
-                    <tr key={c.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 font-semibold text-slate-800">{c.annee}</td>
-                      <td className="px-4 py-3 text-slate-600">{c.montant} MRU</td>
-                      <td className="px-4 py-3 text-slate-500">{c.dateEcheance}</td>
+                    <tr key={c.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                      <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-100">{c.annee}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{c.montant} MRU</td>
+                      <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{c.dateEcheance}</td>
                       <td className="px-4 py-3"><StatutBadge statut={c.statut} /></td>
-                      <td className="px-4 py-3 text-slate-500">{c.datePaiement || "—"}</td>
+                      <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{c.datePaiement || "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -422,7 +422,7 @@ export default function MedecinCotisationPage() {
         </section>
 
         {/* ── Info strip ── */}
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-slate-400 dark:text-slate-500">
           La cotisation annuelle est de <strong>5 000 MRU</strong>. Elle est due avant le 31 mars de chaque exercice.
           Le paiement est simulé via le service Bankily B-pay.
         </p>

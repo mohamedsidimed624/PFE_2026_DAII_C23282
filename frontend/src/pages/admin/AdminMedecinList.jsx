@@ -128,209 +128,188 @@ function AdminMedecinsList() {
   }
 
   return (
-    <AdminLayout title="Gestion des Médecins">
-      <div className="space-y-4">
+  <AdminLayout title="Gestion des Médecins">
+    <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-7 py-6">
+      
 
-        {/* ── Header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="flex flex-wrap items-center justify-between gap-3"
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20">
-              <Stethoscope size={18} className="text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <h1 className="text-base font-bold text-slate-800 dark:text-slate-100">Gestion des Médecins</h1>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500">{medecins.length} médecin(s) au total</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {[
-              { label: "Actifs",    count: actifs,    bg: "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400", val: "ACTIF"    },
-              { label: "Suspendus", count: suspendus, bg: "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400",         val: "SUSPENDU" },
-            ].map(({ label, count, bg, val }) => (
-              <button
-                key={val}
-                onClick={() => { setStatusFilter(statusFilter === val ? "" : val); setPage(1); }}
-                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${bg} ${statusFilter === val ? "ring-2 ring-offset-1 ring-current" : ""}`}
-              >
-                {label} · {count}
-              </button>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* ── Barre d'outils ── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15, duration: 0.3 }}
-          className="flex flex-wrap items-center justify-between gap-3"
-        >
-          <div className="relative flex-1 min-w-48 max-w-64">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative">
             <input
               type="text"
-              placeholder="Rechercher un médecin…"
+              placeholder="Search by order id"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all"
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="h-10 w-[240px] rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 pr-10 text-[13px] text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400"
+            />
+            <Search
+              size={15}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300"
             />
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="relative">
-              <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              <select
-                value={statusFilter}
-                onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-                className="pl-8 pr-8 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
-              >
-                <option value="">Statut : Tous</option>
-                <option value="ACTIF">Actif</option>
-                <option value="SUSPENDU">Suspendu</option>
-              </select>
-            </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
+          >
+            <option value="">Status : All</option>
+            <option value="ACTIF">Actif</option>
+            <option value="SUSPENDU">Suspendu</option>
+          </select>
+        </div>
+
+        <button className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200">
+          Filter by date range
+        </button>
+      </div>
+
+      <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
+        <table className="w-full table-fixed text-sm">
+          <thead>
+            <tr className="border-b border-slate-100 dark:border-slate-800">
+              <th className="w-[16%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                NOM & PRÉNOM
+              </th>
+              <th className="w-[14%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                NNI
+              </th>
+              <th className="w-[12%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                GENRE
+              </th>
+              <th className="w-[14%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                TÉLÉPHONE
+              </th>
+              <th className="w-[18%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                DATE DE NAISSANCE
+              </th>
+              <th className="w-[16%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                ADRESSE POSTAL
+              </th>
+              <th className="w-[10%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                STATUT
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {paginated.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-7 py-14 text-center text-sm text-slate-400"
+                >
+                  Aucun médecin trouvé.
+                </td>
+              </tr>
+            ) : (
+              paginated.map((m) => (
+                <tr
+                  key={m.id}
+                  onClick={() => navigate(`/admin/medecins/${m.id}`)}
+                  className="cursor-pointer border-b border-slate-100 dark:border-slate-800 transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
+                >
+                  <td className="px-7 py-4 text-[14px] font-semibold text-slate-700 dark:text-slate-200">
+                    {m.nom} {m.prenom}
+                  </td>
+
+                  <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                    {m.nni || "—"}
+                  </td>
+
+                  <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                    {m.sexe || "—"}
+                  </td>
+
+                  <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                    {m.telephone || "—"}
+                  </td>
+
+                  <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                    {formatDate(m.dateNaissance)}
+                  </td>
+
+                  <td className="truncate px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                    {m.adresse || "—"}
+                  </td>
+
+                  <td className="px-7 py-4 text-[14px] font-bold text-green-600">
+                    {m.statut || "Validée"}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        <div className="flex items-center justify-between px-7 py-5">
+          <div className="flex items-center gap-2 text-[13px] text-slate-400">
+            <span>Showing</span>
 
             <select
-              value={sortFilter}
-              onChange={(e) => { setSortFilter(e.target.value); setPage(1); }}
-              className="px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              className="h-9 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-[13px] text-slate-600 dark:text-slate-400 outline-none"
             >
-              <option value="recent">Plus récents</option>
-              <option value="ancien">Plus anciens</option>
-              <option value="oldest">Plus âgés</option>
-              <option value="youngest">Plus jeunes</option>
+              {PAGE_SIZES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
             </select>
 
-            <button className="flex items-center gap-2 px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-              <CalendarDays size={14} className="text-slate-400 dark:text-slate-500" />
-              Filtrer par date
+            <span>of {filtered.length}</span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
+            >
+              <ChevronLeft size={14} />
             </button>
-          </div>
-        </motion.div>
 
-        {/* ── Table ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.35 }}
-          className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden"
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-225">
-              <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                  {["NOM & PRÉNOM", "NNI", "GENRE", "TÉLÉPHONE", "DATE NAISS.", "ADRESSE", "STATUT"].map((h) => (
-                    <th key={h} className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const p = i + 1;
 
-              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                {paginated.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-5 py-14 text-center">
-                      <Stethoscope size={28} className="mx-auto mb-2 text-slate-300 dark:text-slate-600" />
-                      <p className="text-sm text-slate-400 dark:text-slate-500">Aucun médecin trouvé.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  paginated.map((m, i) => {
-                    const sc = getStatusClasses(m.statut);
-                    return (
-                      <motion.tr
-                        key={m.id}
-                        initial={{ opacity: 0, x: -6 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.28 + i * 0.04 }}
-                        onClick={() => navigate(`/admin/medecins/${m.id}`)}
-                        className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
-                      >
-                        <td className="px-5 py-3.5">
-                          <div className="flex items-center gap-2.5">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20 text-xs font-bold text-green-700 dark:text-green-400">
-                              {(m.nom?.[0] || "?").toUpperCase()}
-                            </div>
-                            <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                              {m.nom} {m.prenom}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{m.nni || "—"}</td>
-                        <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{m.sexe || "—"}</td>
-                        <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{m.telephone || "—"}</td>
-                        <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{formatDate(m.dateNaissance)}</td>
-                        <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400 max-w-35 truncate">{m.adresse || "—"}</td>
-                        <td className="px-5 py-3.5">
-                          <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${sc.pill}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-                            {m.statut || "—"}
-                          </span>
-                        </td>
-                      </motion.tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* ── Pagination ── */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-              <span>Affichage</span>
-              <select
-                value={pageSize}
-                onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 outline-none focus:border-green-500"
-              >
-                {PAGE_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <span>sur {filtered.length}</span>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft size={14} />
-              </button>
-
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1).map((p) => (
+              return (
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
+                  className={`flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold ${
                     page === p
-                      ? "bg-green-600 text-white"
-                      : "border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                      ? "bg-green-500 text-white"
+                      : "bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
                   }`}
                 >
                   {p}
                 </button>
-              ))}
+              );
+            })}
 
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
+            >
+              <ChevronRight size={14} />
+            </button>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </AdminLayout>
-  );
+    </div>
+  </AdminLayout>
+);
 }
 
 export default AdminMedecinsList;

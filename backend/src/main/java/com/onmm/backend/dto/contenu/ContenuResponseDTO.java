@@ -27,4 +27,7 @@ public class ContenuResponseDTO {
     private String dateExpiration;
     private String imageUrl;
     private String resume;
+
+    private Long specialiteCibleId;
+    private String specialiteCibleNom;
 }

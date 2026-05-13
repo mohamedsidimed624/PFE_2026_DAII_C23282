@@ -95,11 +95,11 @@ function NotifCard({ n, onRead, onDelete, onNavigate }) {
 
 function EmptyState({ label }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-        <Bell size={20} className="text-slate-400" />
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-md bg-slate-50">
+        <Bell size={20} className="text-slate-300" />
       </div>
-      <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-3 text-sm text-slate-400">{label}</p>
     </div>
   );
 }
@@ -155,77 +155,110 @@ function AdminNotificationsPage() {
   const actionUnread = actionList.filter((n) => !n.lu).length;
 
   return (
-    <AdminLayout title="Notifications">
-      <div className="max-w-3xl mx-auto">
+  <AdminLayout title="Notifications">
+    <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-7 py-6">
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-[17px] font-semibold text-slate-700 dark:text-slate-200">
+            Notifications
+          </h1>
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Notifications</h1>
-            {unreadCount > 0 && (
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
-              </p>
-            )}
-          </div>
           {unreadCount > 0 && (
-            <button
-              onClick={handleMarkAllRead}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-            >
-              <Check size={14} />
-              Tout marquer lu
-            </button>
+            <p className="mt-1 text-[13px] text-slate-400">
+              {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
+            </p>
           )}
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 size={24} className="animate-spin text-slate-400" />
-          </div>
-        ) : (
-          <Tabs defaultValue="all">
-            <TabsList className="mb-4">
-              <TabsTrigger value="all" className="flex items-center gap-1.5">
-                Toutes
-                {notifications.length > 0 && (
-                  <span className="rounded-full bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300">
-                    {notifications.length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="unread" className="flex items-center gap-1.5">
-                Non lues
-                {unreadCount > 0 && (
-                  <span className="rounded-full bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 dark:text-red-400">
-                    {unreadCount}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="action" className="flex items-center gap-1.5">
-                Action requise
-                {actionUnread > 0 && (
-                  <span className="rounded-full bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
-                    {actionUnread}
-                  </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="all">
-              <NotifList items={notifications} onRead={handleRead} onDelete={handleDelete} onNavigate={handleNavigate} />
-            </TabsContent>
-            <TabsContent value="unread">
-              <NotifList items={unreadList} onRead={handleRead} onDelete={handleDelete} onNavigate={handleNavigate} />
-            </TabsContent>
-            <TabsContent value="action">
-              <NotifList items={actionList} onRead={handleRead} onDelete={handleDelete} onNavigate={handleNavigate} />
-            </TabsContent>
-          </Tabs>
+        {unreadCount > 0 && (
+          <button
+            onClick={handleMarkAllRead}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200"
+          >
+            Tout marquer lu
+          </button>
         )}
       </div>
-    </AdminLayout>
-  );
+
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={24} className="animate-spin text-slate-300" />
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
+          <Tabs defaultValue="all">
+            <div className="border-b border-slate-100 dark:border-slate-800 px-7 py-4">
+              <TabsList className="flex gap-3 bg-transparent p-0">
+                <TabsTrigger
+                  value="all"
+                  className="rounded-md px-4 py-2 text-[13px] font-semibold text-slate-400 data-[state=active]:bg-green-500 data-[state=active]:text-white"
+                >
+                  Toutes
+                  {notifications.length > 0 && (
+                    <span className="ml-2 rounded bg-white/20 px-1.5 text-[10px]">
+                      {notifications.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="unread"
+                  className="rounded-md px-4 py-2 text-[13px] font-semibold text-slate-400 data-[state=active]:bg-green-500 data-[state=active]:text-white"
+                >
+                  Non lues
+                  {unreadCount > 0 && (
+                    <span className="ml-2 rounded bg-white/20 px-1.5 text-[10px]">
+                      {unreadCount}
+                    </span>
+                  )}
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="action"
+                  className="rounded-md px-4 py-2 text-[13px] font-semibold text-slate-400 data-[state=active]:bg-green-500 data-[state=active]:text-white"
+                >
+                  Action requise
+                  {actionUnread > 0 && (
+                    <span className="ml-2 rounded bg-white/20 px-1.5 text-[10px]">
+                      {actionUnread}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="all" className="m-0">
+              <NotifList
+                items={notifications}
+                onRead={handleRead}
+                onDelete={handleDelete}
+                onNavigate={handleNavigate}
+              />
+            </TabsContent>
+
+            <TabsContent value="unread" className="m-0">
+              <NotifList
+                items={unreadList}
+                onRead={handleRead}
+                onDelete={handleDelete}
+                onNavigate={handleNavigate}
+              />
+            </TabsContent>
+
+            <TabsContent value="action" className="m-0">
+              <NotifList
+                items={actionList}
+                onRead={handleRead}
+                onDelete={handleDelete}
+                onNavigate={handleNavigate}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
+    </div>
+  </AdminLayout>
+);
 }
 
 export default AdminNotificationsPage;

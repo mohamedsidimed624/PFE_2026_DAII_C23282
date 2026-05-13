@@ -1,25 +1,33 @@
 import { useState } from "react";
 import { useFormData } from "../../context/FormContext";
-import { CloudUpload, FileText, Trash2, Check } from "lucide-react";
+import { CloudUpload, FileText, Trash2 } from "lucide-react";
 
 function StepDocuments({ nextStep, prevStep }) {
   const { formData, updateSection } = useFormData();
   const [error, setError] = useState("");
 
   const files = {
-    diplomes:    formData?.documents?.diplomes    || [],
+    diplomes: formData?.documents?.diplomes || [],
     certificats: formData?.documents?.certificats || [],
-    autres:      formData?.documents?.autres      || [],
+    autres: formData?.documents?.autres || [],
   };
 
   const handleUpload = (fileList, type) => {
     const validFiles = Array.from(fileList)
       .filter((file) => {
-        const allowed = file.type === "application/pdf" || file.type === "image/jpeg" || file.type === "image/png";
+        const allowed =
+          file.type === "application/pdf" ||
+          file.type === "image/jpeg" ||
+          file.type === "image/png";
+
         return allowed && file.size <= 5 * 1024 * 1024;
       })
       .map((file) => ({ file }));
-    updateSection("documents", { ...files, [type]: [...files[type], ...validFiles] });
+
+    updateSection("documents", {
+      ...files,
+      [type]: [...files[type], ...validFiles],
+    });
   };
 
   const handleDrop = (e, type) => {
@@ -34,49 +42,62 @@ function StepDocuments({ nextStep, prevStep }) {
   };
 
   const renderUploader = (title, type) => (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <CloudUpload size={15} className="text-green-600" />
-        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-      </div>
+    <div>
+      <h3 className="mb-2 text-sm font-bold text-slate-700">
+        {title}
+      </h3>
 
-      <div
+      <label
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => handleDrop(e, type)}
-        className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-green-400 hover:bg-green-50/30 transition-colors"
+        className="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-green-300 bg-white text-xs font-semibold text-green-600 transition hover:border-green-500 hover:bg-green-50"
       >
-        <CloudUpload size={28} className="mx-auto mb-3 text-slate-400" />
-        <p className="text-sm text-slate-500 mb-1">Glisser les fichiers ici</p>
-        <label className="text-sm font-medium text-green-600 cursor-pointer hover:text-green-700">
-          ou cliquer pour ajouter
-          <input
-            type="file"
-            accept=".pdf,.jpg,.jpeg,.png"
-            multiple
-            className="hidden"
-            onChange={(e) => handleUpload(e.target.files, type)}
-          />
-        </label>
-        <p className="text-xs text-slate-400 mt-2">PDF / JPG / PNG — max 5MB</p>
-      </div>
+        <CloudUpload size={14} />
+        Importer un document
 
-      <div className="mt-4 space-y-2">
+        <input
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png"
+          multiple
+          className="hidden"
+          onChange={(e) => handleUpload(e.target.files, type)}
+        />
+      </label>
+
+      <div className="mt-5 space-y-4">
         {files[type].map((item, index) => (
-          <div key={index} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-            <FileText size={15} className="shrink-0 text-green-600" />
+          <div
+            key={index}
+            className="flex items-center gap-3 rounded-lg bg-white px-3 py-3 shadow-[0_4px_16px_rgba(15,23,42,0.06)]"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-green-100 text-green-700">
+              <FileText size={17} />
+            </div>
+
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-medium text-slate-800">{item.file.name}</div>
-              <div className="text-xs text-slate-400">{(item.file.size / 1024).toFixed(1)} KB</div>
+              <p className="truncate text-xs font-bold text-slate-700">
+                {item.file.name}
+              </p>
+              <p className="text-[11px] font-medium text-slate-400">
+                {(item.file.size / 1024).toFixed(0)} KB
+              </p>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <span className="flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-600">
-                <Check size={10} />
-                OK
-              </span>
-              <button onClick={() => removeFile(type, index)} className="text-slate-400 transition-colors hover:text-red-500">
-                <Trash2 size={15} />
-              </button>
+
+            <div className="hidden h-1.5 w-24 overflow-hidden rounded-full bg-green-100 sm:block">
+              <div className="h-full w-full rounded-full bg-green-600" />
             </div>
+
+            <span className="text-[11px] font-semibold text-green-700">
+              100%
+            </span>
+
+            <button
+              type="button"
+              onClick={() => removeFile(type, index)}
+              className="ml-1 flex h-7 w-7 items-center justify-center rounded-md text-red-300 transition hover:bg-red-50 hover:text-red-500"
+            >
+              <Trash2 size={14} />
+            </button>
           </div>
         ))}
       </div>
@@ -84,37 +105,45 @@ function StepDocuments({ nextStep, prevStep }) {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="space-y-16">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {renderUploader("Diplômes universitaires", "diplomes")}
         {renderUploader("Certificats de spécialisation", "certificats")}
         {renderUploader("Autres documents", "autres")}
       </div>
 
-      <div className="flex items-center justify-between pt-2">
+      {error && (
+        <p className="text-right text-sm font-medium text-red-500">
+          {error}
+        </p>
+      )}
+
+      <div className="flex justify-end gap-6 pt-20">
         <button
+          type="button"
           onClick={prevStep}
-          className="rounded-xl border border-slate-200 px-6 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          className="h-12 w-36 rounded-lg border border-slate-300 bg-white text-lg font-medium text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
         >
           Retour
         </button>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
         <button
+          type="button"
           onClick={() => {
             if (files.diplomes.length === 0) {
               setError("Veuillez ajouter au moins un diplôme.");
               return;
             }
+
             if (files.certificats.length === 0) {
               setError("Veuillez ajouter au moins un certificat.");
               return;
             }
+
             setError("");
             nextStep();
           }}
-          className="rounded-xl bg-green-600 px-8 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+          className="h-12 w-80 rounded-lg bg-green-600 text-lg font-bold text-white transition hover:bg-green-700"
         >
           Suivant
         </button>

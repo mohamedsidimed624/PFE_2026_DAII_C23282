@@ -47,7 +47,7 @@ function LoginPage() {
             localStorage.setItem("role", data.role);
             localStorage.setItem("email", data.email);
 
-            if (data.role === "ADMIN") navigate("/admin/demandes");
+            if (data.role === "ADMIN") navigate("/admin/dashboard");
             else if (data.role === "MEDECIN") navigate("/medecin/dashboard");
             else navigate("/");
 

@@ -460,253 +460,237 @@ function AdminSpecialitesPage() {
   }
 
   return (
-    <AdminLayout
-      title="Gestion des spécialités"
-      subtitle="Administration du référentiel des spécialités médicales."
-    >
-      <div className="space-y-4">
-        {feedback.message && (
+  <AdminLayout title="Gestion des spécialités">
+    <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-7 py-6">
+      
+
+      {feedback.message && (
+        <div className="mb-4">
           <FeedbackBanner type={feedback.type} message={feedback.message} />
-        )}
+        </div>
+      )}
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="relative w-[260px] max-w-full">
-              <Search
-                size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                type="text"
-                placeholder="Code ou libellé"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
-                className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
-              />
-            </div>
-
-            <div className="relative">
-              <Filter
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <select
-                value={statusFilter}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                className="pl-8 pr-8 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
-              >
-                {STATUS_OPTIONS.map((opt) => (
-                  <option key={opt.label} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <select
-              value={sortBy}
-              onChange={(e) => {
-                setSortBy(e.target.value);
-                setPage(0);
-              }}
-              className="px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={size}
-              onChange={(e) => {
-                setSize(Number(e.target.value));
-                setPage(0);
-              }}
-              className="px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
-            >
-              {PAGE_SIZE_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option} / page
-                </option>
-              ))}
-            </select>
-
-            <button
-              type="button"
-              onClick={handleReset}
-              className="flex items-center gap-2 px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-            >
-              <RotateCcw size={14} />
-              Réinitialiser
-            </button>
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Code ou libellé"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
+              className="h-10 w-[240px] rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 pr-10 text-[13px] text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400"
+            />
+            <Search
+              size={15}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300"
+            />
           </div>
+
+          <select
+            value={statusFilter}
+            onChange={(e) => handleStatusChange(e.target.value)}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.label} value={opt.value}>
+                {opt.label === "Tous" ? "Status : All" : opt.label}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setPage(0);
+            }}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
 
           <button
             type="button"
-            onClick={handleCreate}
-            className="flex items-center gap-2 px-3.5 py-2 text-sm rounded-xl bg-green-600 text-white hover:bg-green-700 transition-colors"
+            onClick={handleReset}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200"
           >
-            <Plus size={14} />
-            Ajouter une spécialité
+            Réinitialiser
           </button>
         </div>
 
-        <div className="text-sm text-slate-500 dark:text-slate-400">
-          <p>
-            {summary.totalSpecialites} spécialité
-            {summary.totalSpecialites > 1 ? "s" : ""},{" "}
-            {summary.totalSousSpecialites} sous-spécialité
-            {summary.totalSousSpecialites > 1 ? "s" : ""}
-          </p>
-        </div>
+        <button
+          type="button"
+          onClick={handleCreate}
+          className="h-10 rounded-md bg-green-500 px-4 text-[13px] font-semibold text-white shadow-sm hover:bg-green-600"
+        >
+          Ajouter une spécialité
+        </button>
+      </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-          {error ? (
-            <ErrorState message={error} onRetry={() => loadSpecialites(search, statusFilter, page)} />
-          ) : specialites.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1050px]">
-                <thead>
-                  <tr className="border-b border-slate-100 dark:border-slate-800">
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                      LIBELLÉ
-                    </th>
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                      CODE
-                    </th>
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                      STATUT
-                    </th>
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                      SOUS-SPÉC.
-                    </th>
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                      MÉDECINS
-                    </th>
-                    <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                      DEMANDES
-                    </th>
-                    <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                      ACTIONS
-                    </th>
-                  </tr>
-                </thead>
+      <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
+        {error ? (
+          <ErrorState
+            message={error}
+            onRetry={() => loadSpecialites(search, statusFilter, page)}
+          />
+        ) : specialites.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1050px] table-fixed text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800 transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                  <th className="w-[22%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    LIBELLÉ
+                  </th>
+                  <th className="w-[13%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    CODE
+                  </th>
+                  <th className="w-[13%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    STATUT
+                  </th>
+                  <th className="w-[13%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    SOUS-SPÉC.
+                  </th>
+                  <th className="w-[12%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    MÉDECINS
+                  </th>
+                  <th className="w-[12%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    DEMANDES
+                  </th>
+                  <th className="w-[15%] px-7 py-5 text-right text-[13px] font-semibold uppercase text-slate-400">
+                    ACTIONS
+                  </th>
+                </tr>
+              </thead>
 
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {specialites.map((specialite) => {
-                    const isExpanded = expandedRows[specialite.id];
-                    const sousSpecialites = sousSpecialitesMap[specialite.id] || [];
-                    const isSousLoading = rowLoading[specialite.id];
+              <tbody>
+                {specialites.map((specialite) => {
+                  const isExpanded = expandedRows[specialite.id];
+                  const sousSpecialites =
+                    sousSpecialitesMap[specialite.id] || [];
+                  const isSousLoading = rowLoading[specialite.id];
 
-                    return (
-                      <SpecialiteRows
-                        key={specialite.id}
-                        specialite={specialite}
-                        isExpanded={isExpanded}
-                        sousSpecialites={sousSpecialites}
-                        isSousLoading={isSousLoading}
-                        actionLoading={actionLoading}
-                        openMenu={openMenu}
-                        setOpenMenu={setOpenMenu}
-                        onToggleExpand={() => handleToggleExpand(specialite.id)}
-                        onEdit={handleEdit}
-                        onAddSousSpecialite={() => handleCreateSousSpecialite(specialite)}
-                        onToggleStatus={() => handleToggleSpecialiteStatus(specialite.id)}
-                        onDelete={() =>
-                          handleDeleteSpecialite(specialite.id, specialite.canDelete)
-                        }
-                        onEditSous={(sous) =>
-                          handleEditSousSpecialite(sous, specialite)
-                        }
-                        onToggleSousStatus={(sousId) =>
-                          handleToggleSousSpecialiteStatus(specialite.id, sousId)
-                        }
-                        onDeleteSous={(sousId, canDelete) =>
-                          handleDeleteSousSpecialite(
-                            specialite.id,
-                            sousId,
-                            canDelete
-                          )
-                        }
-                      />
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-       
+                  return (
+                    <SpecialiteRows
+                      key={specialite.id}
+                      specialite={specialite}
+                      isExpanded={isExpanded}
+                      sousSpecialites={sousSpecialites}
+                      isSousLoading={isSousLoading}
+                      actionLoading={actionLoading}
+                      openMenu={openMenu}
+                      setOpenMenu={setOpenMenu}
+                      onToggleExpand={() =>
+                        handleToggleExpand(specialite.id)
+                      }
+                      onEdit={handleEdit}
+                      onAddSousSpecialite={() =>
+                        handleCreateSousSpecialite(specialite)
+                      }
+                      onToggleStatus={() =>
+                        handleToggleSpecialiteStatus(specialite.id)
+                      }
+                      onDelete={() =>
+                        handleDeleteSpecialite(
+                          specialite.id,
+                          specialite.canDelete
+                        )
+                      }
+                      onEditSous={(sous) =>
+                        handleEditSousSpecialite(sous, specialite)
+                      }
+                      onToggleSousStatus={(sousId) =>
+                        handleToggleSousSpecialiteStatus(
+                          specialite.id,
+                          sousId
+                        )
+                      }
+                      onDeleteSous={(sousId, canDelete) =>
+                        handleDeleteSousSpecialite(
+                          specialite.id,
+                          sousId,
+                          canDelete
+                        )
+                      }
+                    />
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {!error && totalElements > 0 && (
-            <div className="border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3.5">
-                <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-                    <span>Showing</span>
-                    <select
-                    value={size}
-                    onChange={(e) => {
-                        setSize(Number(e.target.value));
-                        setPage(0);
-                    }}
-                    className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 outline-none focus:border-green-500 transition-all"
-                    >
-                    {PAGE_SIZE_OPTIONS.map((s) => (
-                        <option key={s} value={s}>
-                        {s}
-                        </option>
-                    ))}
-                    </select>
-                    <span>of {totalElements}</span>
-                </div>
+          <div className="flex items-center justify-between px-7 py-5">
+            <div className="flex items-center gap-2 text-[13px] text-slate-400">
+              <span>Showing</span>
 
-                <div className="flex items-center gap-1">
-                    <button
-                    type="button"
-                    onClick={() => setPage((prev) => Math.max(0, prev - 1))}
-                    disabled={page === 0 || loading}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                    <ChevronLeft size={14} />
-                    </button>
+              <select
+                value={size}
+                onChange={(e) => {
+                  setSize(Number(e.target.value));
+                  setPage(0);
+                }}
+                className="h-9 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-[13px] text-slate-600 dark:text-slate-400 outline-none"
+              >
+                {PAGE_SIZE_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
 
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const pageIndex = i;
-                    return (
-                        <button
-                        key={pageIndex}
-                        type="button"
-                        onClick={() => setPage(pageIndex)}
-                        className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
-                            page === pageIndex
-                            ? "bg-green-600 text-white"
-                            : "border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                        }`}
-                        >
-                        {pageIndex + 1}
-                        </button>
-                    );
-                    })}
-
-                    <button
-                    type="button"
-                    onClick={() =>
-                        setPage((prev) => Math.min(totalPages - 1, prev + 1))
-                    }
-                    disabled={page >= totalPages - 1 || loading}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                    <ChevronRight size={14} />
-                    </button>
-                </div>
-                </div>
+              <span>of {totalElements}</span>
             </div>
-            )}
-             </div>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setPage((prev) => Math.max(0, prev - 1))}
+                disabled={page === 0 || loading}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
+              >
+                <ChevronLeft size={14} />
+              </button>
+
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const pageIndex = i;
+
+                return (
+                  <button
+                    key={pageIndex}
+                    type="button"
+                    onClick={() => setPage(pageIndex)}
+                    className={`flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold ${
+                      page === pageIndex
+                        ? "bg-green-500 text-white"
+                        : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    {pageIndex + 1}
+                  </button>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setPage((prev) => Math.min(totalPages - 1, prev + 1))
+                }
+                disabled={page >= totalPages - 1 || loading}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <SpecialiteFormModal
@@ -738,8 +722,9 @@ function AdminSpecialitesPage() {
         onConfirm={confirmModal.action}
         onClose={closeConfirmModal}
       />
-    </AdminLayout>
-  );
+    </div>
+  </AdminLayout>
+);
 }
 
 function SpecialiteRows({
@@ -773,11 +758,11 @@ function SpecialiteRows({
             </button>
 
             <div>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+              <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-200">
                 {specialite.libelle}
               </p>
               {specialite.description && (
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-500 mt-0.5">
                   {specialite.description}
                 </p>
               )}
@@ -785,21 +770,21 @@ function SpecialiteRows({
           </div>
         </td>
 
-        <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{specialite.code}</td>
+        <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-400">{specialite.code}</td>
 
         <td className="px-5 py-3.5">
           <StatusBadge active={specialite.active} />
         </td>
 
-        <td className="px-5 py-3.5 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
           {specialite.nombreSousSpecialites ?? 0}
         </td>
 
-        <td className="px-5 py-3.5 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
           {specialite.nombreMedecins ?? 0}
         </td>
 
-        <td className="px-5 py-3.5 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
           {specialite.nombreDemandes ?? 0}
         </td>
 
@@ -876,11 +861,11 @@ function SpecialiteRows({
                   <div className="flex items-center gap-3 pl-10">
                     <div className="h-2 w-2 rounded-full bg-green-500" />
                     <div>
-                      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-300">
                         {sous.libelle}
                       </p>
                       {sous.description && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                        <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-500 mt-0.5">
                           {sous.description}
                         </p>
                       )}
@@ -997,18 +982,11 @@ function RowMenu({ menuKey, openMenu, setOpenMenu, items }) {
 function StatusBadge({ active }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-        active
-          ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+      className={`text-[14px] font-bold ${
+        active ? "text-green-600" : "text-slate-400"
       }`}
     >
-      <span
-        className={`w-1.5 h-1.5 rounded-full ${
-          active ? "bg-green-500" : "bg-slate-400 dark:bg-slate-500"
-        }`}
-      />
-      {active ? "ACTIVE" : "INACTIVE"}
+      {active ? "Active" : "Inactive"}
     </span>
   );
 }

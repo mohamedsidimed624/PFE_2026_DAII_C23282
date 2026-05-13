@@ -29,21 +29,36 @@ function formatDate(value) {
 }
 
 function StatusBadge({ status }) {
-  const config = STATUS_CONFIG[(status || "").toUpperCase()] || { label: status || "—", className: "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700" };
-  return (
-    <span className={cx("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold", config.className)}>
-      {config.label}
-    </span>
-  );
+  const s = (status || "").toUpperCase();
+
+  const label =
+    s === "SUBMITTED"
+      ? "Soumise"
+      : s === "IN_PROGRESS"
+      ? "En cours"
+      : s === "CLOSED"
+      ? "Clôturée"
+      : status || "—";
+
+  const cls =
+    s === "CLOSED"
+      ? "text-green-600 dark:text-green-400"
+      : s === "IN_PROGRESS"
+      ? "text-blue-500 dark:text-blue-400"
+      : "text-yellow-500 dark:text-amber-400";
+
+  return <span className={`text-[14px] font-bold ${cls}`}>{label}</span>;
 }
 
 function AuteurBadge({ type }) {
-  const config = AUTEUR_CONFIG[(type || "").toUpperCase()] || { label: type || "—", className: "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400" };
-  return (
-    <span className={cx("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium", config.className)}>
-      {config.label}
-    </span>
-  );
+  const label =
+    (type || "").toUpperCase() === "MEDECIN"
+      ? "Médecin"
+      : (type || "").toUpperCase() === "CITOYEN"
+      ? "Citoyen"
+      : type || "—";
+
+  return <span className="text-[14px] font-medium text-slate-700 dark:text-slate-300">{label}</span>;
 }
 
 function PagBtn({ children, onClick, disabled, active }) {
@@ -159,190 +174,226 @@ function AdminReclamationsList() {
   const selectCls = "appearance-none rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 pl-3 pr-8 text-sm text-slate-700 dark:text-slate-300 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/10";
 
   return (
-    <AdminLayout title="Gestion des réclamations">
-      <div className="space-y-4">
+  <AdminLayout title="Gestion des réclamations">
+    <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-7 py-6">
 
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between"
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-900/20">
-              <MessageSquareWarning size={18} className="text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <h1 className="text-base font-bold text-slate-800 dark:text-slate-100">Gestion des réclamations</h1>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500">Consultez, filtrez et traitez les réclamations déposées.</p>
-            </div>
-          </div>
-          {!loading && submittedCount > 0 && (
-            <div className="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
-              {submittedCount} à traiter
-            </div>
-          )}
-        </motion.div>
-
-        <div className="space-y-3">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            {/* Search */}
-            <div className="relative min-w-0 flex-1 xl:max-w-md">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              <input
-                type="text"
-                placeholder="Rechercher par numéro, objet ou auteur..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 pl-9 pr-8 text-sm text-slate-700 dark:text-slate-300 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/10"
-              />
-              {search && (
-                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">×</button>
-              )}
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <div className="relative">
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={selectCls}>
-                  <option value="ALL">Tous les statuts</option>
-                  <option value="SUBMITTED">Soumises</option>
-                  <option value="IN_PROGRESS">En cours</option>
-                  <option value="CLOSED">Clôturées</option>
-                </select>
-                <Filter size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              </div>
-
-              <div className="relative">
-                <select value={auteurFilter} onChange={(e) => setAuteurFilter(e.target.value)} className={selectCls}>
-                  <option value="ALL">Tous les auteurs</option>
-                  <option value="MEDECIN">Médecins</option>
-                  <option value="CITOYEN">Citoyens</option>
-                </select>
-                <Filter size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              </div>
-
-              {(search || statusFilter !== "ALL" || auteurFilter !== "ALL") && (
-                <button
-                  type="button"
-                  onClick={handleResetFilters}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 transition hover:bg-slate-50 dark:hover:bg-slate-800"
-                >
-                  <RotateCcw size={14} />
-                  Réinitialiser
-                </button>
-              )}
-            </div>
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by order id"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-10 w-[240px] rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 pr-10 text-[13px] text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400"
+            />
+            <Search
+              size={15}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300"
+            />
           </div>
 
-          {!loading && (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              <span className="font-semibold text-slate-800 dark:text-slate-100">{filtered.length}</span>{" "}
-              résultat{filtered.length > 1 ? "s" : ""}
-            </p>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
+          >
+            <option value="ALL">Status : All</option>
+            <option value="SUBMITTED">Soumises</option>
+            <option value="IN_PROGRESS">En cours</option>
+            <option value="CLOSED">Clôturées</option>
+          </select>
+
+          <select
+            value={auteurFilter}
+            onChange={(e) => setAuteurFilter(e.target.value)}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
+          >
+            <option value="ALL">Auteur : All</option>
+            <option value="MEDECIN">Médecins</option>
+            <option value="CITOYEN">Citoyens</option>
+          </select>
+
+          {(search || statusFilter !== "ALL" || auteurFilter !== "ALL") && (
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200"
+            >
+              Réinitialiser
+            </button>
           )}
         </div>
 
-        {error && (
-          <div className="flex items-start gap-3 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
-            <AlertCircle size={15} className="mt-0.5 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
+        <button className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200">
+          Filter by date range
+        </button>
+      </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.35 }}
-          className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-colors duration-200"
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">
-                  {["N° réclamation","Objet","Auteur","Type","Date","Statut","Action"].map((col) => (
-                    <th key={col} className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                      {col}
-                    </th>
-                  ))}
+      {error && (
+        <div className="mb-4 rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1050px] table-fixed text-sm">
+            <thead>
+              <tr className="border-b border-slate-100 dark:border-slate-800">
+                <th className="w-[16%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                  N° RÉCLAMATION
+                </th>
+                <th className="w-[22%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                  OBJET
+                </th>
+                <th className="w-[16%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                  AUTEUR
+                </th>
+                <th className="w-[12%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                  TYPE
+                </th>
+                <th className="w-[12%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                  DATE
+                </th>
+                <th className="w-[12%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                  STATUT
+                </th>
+                <th className="w-[10%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                  ACTION
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {loading ? (
+                Array.from({ length: pageSize }).map((_, i) => (
+                  <tr key={i} className="border-b border-slate-100 dark:border-slate-800">
+                    {Array.from({ length: 7 }).map((__, j) => (
+                      <td key={j} className="px-7 py-4">
+                        <div className="h-3.5 w-24 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : paginated.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-7 py-14 text-center text-sm text-slate-400"
+                  >
+                    Aucune réclamation trouvée.
+                  </td>
                 </tr>
-              </thead>
+              ) : (
+                paginated.map((r) => (
+                  <tr
+                    key={r.id}
+                    className="border-b border-slate-100 dark:border-slate-800 transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
+                  >
+                    <td className="px-7 py-4 text-[14px] font-semibold text-slate-700 dark:text-slate-200">
+                      {r.numeroReclamation || r.id}
+                    </td>
 
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {loading ? (
-                  Array.from({ length: pageSize }).map((_, i) => (
-                    <tr key={i} className="animate-pulse">
-                      {Array.from({ length: 7 }).map((__, j) => (
-                        <td key={j} className="px-4 py-3">
-                          <div className="h-3.5 rounded bg-slate-100 dark:bg-slate-800" style={{ width: `${60 + Math.random() * 40}%` }} />
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                ) : paginated.length === 0 ? (
-                  <tr>
-                    <td colSpan={7}>
-                      <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500">
-                          <Inbox size={20} />
-                        </div>
-                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Aucune réclamation trouvée</p>
-                        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Modifiez vos filtres pour voir des résultats.</p>
-                      </div>
+                    <td className="truncate px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                      {r.objet || "Sans objet"}
+                    </td>
+
+                    <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                      {r.auteurNom || "—"}
+                    </td>
+
+                    <td className="px-7 py-4">
+                      <AuteurBadge type={r.typeAuteur} />
+                    </td>
+
+                    <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                      {formatDate(r.dateCreation)}
+                    </td>
+
+                    <td className="px-7 py-4">
+                      <StatusBadge status={r.statut} />
+                    </td>
+
+                    <td className="px-7 py-4">
+                      <button
+                        onClick={() => navigate(`/admin/reclamations/${r.id}`)}
+                        className="text-[14px] font-semibold text-blue-500 hover:text-blue-600"
+                      >
+                        View Details
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  paginated.map((r) => {
-                    const isSubmitted = (r.statut || "").toUpperCase() === "SUBMITTED";
-                    return (
-                      <tr key={r.id} className="group transition hover:bg-slate-50/60 dark:hover:bg-slate-800/60">
-                        <td className="px-4 py-3">
-                          <span className="font-mono text-xs font-semibold text-slate-600 dark:text-slate-400">{r.numeroReclamation || r.id}</span>
-                        </td>
-                        <td className="max-w-[260px] px-4 py-3">
-                          <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{r.objet || "Sans objet"}</p>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm text-slate-700 dark:text-slate-300">{r.auteurNom || "—"}</span>
-                        </td>
-                        <td className="px-4 py-3"><AuteurBadge type={r.typeAuteur} /></td>
-                        <td className="px-4 py-3">
-                          <span className="text-xs text-slate-500 dark:text-slate-400">{formatDate(r.dateCreation)}</span>
-                        </td>
-                        <td className="px-4 py-3"><StatusBadge status={r.statut} /></td>
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => navigate(`/admin/reclamations/${r.id}`)}
-                            className={cx(
-                              "inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition",
-                              isSubmitted
-                                ? "bg-green-600 text-white hover:bg-green-700"
-                                : "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-green-300 hover:text-green-700 dark:hover:bg-slate-800"
-                            )}
-                          >
-                            {isSubmitted ? "Traiter" : "Voir détail"}
-                            <ChevronRight size={12} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-          {!loading && filtered.length > 0 && (
-            <Pagination
-              page={page} totalPages={totalPages} pageSize={pageSize} totalItems={filtered.length}
-              onPageChange={setPage}
-              onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
-            />
-          )}
-        </motion.div>
+        {!loading && filtered.length > 0 && (
+          <div className="flex items-center justify-between px-7 py-5">
+            <div className="flex items-center gap-2 text-[13px] text-slate-400">
+              <span>Showing</span>
+
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setPage(1);
+                }}
+                className="h-9 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-[13px] text-slate-600 dark:text-slate-400 outline-none"
+              >
+                {PAGE_SIZE_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+
+              <span>of {filtered.length}</span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
+              >
+                <ChevronLeft size={14} />
+              </button>
+
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const p = i + 1;
+
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold ${
+                      page === p
+                        ? "bg-green-500 text-white"
+                        : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-    </AdminLayout>
-  );
+    </div>
+  </AdminLayout>
+);
 }
 
 export default AdminReclamationsList;

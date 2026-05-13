@@ -122,17 +122,13 @@ function AdminReclamationDetail() {
   );
 
   return (
-    <AdminLayout title="Gestion des réclamations">
-      <motion.div
-        className="space-y-5 max-w-6xl"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
+  <AdminLayout title="Gestion des réclamations">
+    <div className="min-h-screen bg-[#FAFBFC] px-7 py-6">
+      <div className="max-w-6xl space-y-6">
         {/* Back */}
         <button
           onClick={() => navigate("/admin/reclamations")}
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+          className="inline-flex items-center gap-2 text-[14px] font-medium text-slate-400 hover:text-slate-600"
         >
           <ArrowLeft size={15} />
           Retour à la liste
@@ -140,271 +136,186 @@ function AdminReclamationDetail() {
 
         {/* Alerts */}
         {success && (
-          <div className="flex items-center gap-3 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-4 py-3 text-sm text-green-700 dark:text-green-400">
-            <CheckCircle2 size={16} className="shrink-0" />{success}
+          <div className="rounded-md border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-600">
+            {success}
           </div>
         )}
+
         {error && (
-          <div className="flex items-center gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-            <AlertCircle size={16} className="shrink-0" />{error}
+          <div className="rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
           </div>
         )}
 
-        {/* ── Hero ── */}
-        <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-          {/* colored top bar */}
-          <div className={cx("h-1 w-full", cfg.bar)} />
+        {/* Résumé compact */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
+        <section className="rounded-md bg-white p-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="mb-3 flex flex-wrap items-center gap-3">
+                <span className="text-[13px] font-semibold uppercase text-slate-400">
+                  Réclamation
+                </span>
 
-          <div className="px-6 py-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                    Réclamation
-                  </span>
-                  <span className={cx("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold", cfg.badge)}>
-                    {cfg.label}
-                  </span>
-                  <span className="inline-flex rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
-                    {authorLabel}
-                  </span>
-                </div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                  {reclamation.numeroReclamation}
-                </h1>
-                <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                  {reclamation.objet || "Sans objet"}
-                </p>
+                <span
+                  className={`text-[14px] font-bold ${
+                    reclamation.statut === "CLOSED"
+                      ? "text-green-600"
+                      : reclamation.statut === "IN_PROGRESS"
+                      ? "text-blue-500"
+                      : "text-yellow-500"
+                  }`}
+                >
+                  {cfg.label}
+                </span>
 
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-400 dark:text-slate-500">
-                  <span className="flex items-center gap-1.5">
-                    <User size={12} /> {authorName}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <CalendarDays size={12} /> {fmtDate(reclamation.dateCreation)}
-                  </span>
-                  {reclamation.pieceJointePath && (
-                    <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
-                      <Paperclip size={12} /> Pièce jointe
-                    </span>
-                  )}
-                </div>
+                <span className="text-[14px] font-medium text-slate-500">
+                  {authorLabel}
+                </span>
               </div>
 
-              {isSubmitted && (
-                <button
-                  onClick={() => setShowModal(true)}
-                  disabled={actionLoading}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <PlayCircle size={15} />
-                  Prendre en charge
-                </button>
-              )}
+              <h1 className="text-[22px] font-semibold text-slate-800">
+                {reclamation.numeroReclamation}
+              </h1>
+
+              <p className="mt-2 max-w-3xl text-[14px] leading-6 text-slate-500">
+                {reclamation.objet || "Sans objet"}
+              </p>
             </div>
+
+            {isSubmitted && (
+              <button
+                onClick={() => setShowModal(true)}
+                disabled={actionLoading}
+                className="h-10 rounded-md bg-blue-500 px-5 text-[13px] font-semibold text-white shadow-sm hover:bg-blue-600 disabled:opacity-60"
+              >
+                Prendre en charge
+              </button>
+            )}
           </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-4 border-t border-slate-100 pt-5 md:grid-cols-4">
+            <InfoItem label="Déposant" value={authorName} />
+            <InfoItem label="Date" value={fmtDate(reclamation.dateCreation)} />
+            <InfoItem label="Email" value={reclamation.emailAuteur || "—"} />
+            <InfoItem label="Téléphone" value={reclamation.telephoneAuteur || "—"} />
+          </div>
+        </section>
         </div>
 
-        {/* ── Body ── */}
-        <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
-
-          {/* Left — message + attachment + response */}
-          <div className="space-y-5">
-
+        {/* Contenu principal */}
+        <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
+          {/* Left */}
+          <div className="space-y-6">
             {/* Message */}
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-              <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                  <FileText size={15} />
-                </div>
-                <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Message de la réclamation</h2>
-              </div>
-              <div className="px-5 py-5">
-                <p className="whitespace-pre-line text-sm leading-7 text-slate-700 dark:text-slate-300">
-                  {reclamation.message || "—"}
-                </p>
-              </div>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
+            <section className="rounded-md bg-white p-6">
+              <h2 className="mb-4 text-[17px] font-semibold text-slate-700">
+                Message
+              </h2>
+
+              <p className="whitespace-pre-line text-[14px] leading-7 text-slate-600">
+                {reclamation.message || "—"}
+              </p>
+
+              {reclamation.pieceJointePath && (
+                <a
+                  href={`http://localhost:8080${reclamation.pieceJointePath}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 inline-flex h-10 items-center rounded-md border border-slate-100 bg-slate-50 px-4 text-[13px] font-semibold text-slate-500 hover:bg-white hover:text-green-600"
+                >
+                  Pièce jointe : {getFileName(reclamation.pieceJointePath)}
+                </a>
+              )}
+            </section>
             </div>
 
-            {/* Attachment */}
-            {reclamation.pieceJointePath && (
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                    <Paperclip size={15} />
-                  </div>
-                  <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Pièce jointe</h2>
-                </div>
-                <div className="px-5 py-4">
-                  <a
-                    href={`http://localhost:8080${reclamation.pieceJointePath}`}
-                    target="_blank" rel="noreferrer"
-                    className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 transition hover:border-green-300 dark:hover:border-green-700 hover:bg-green-50/30 dark:hover:bg-green-900/10 group"
+            {/* Réponse administrative */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
+            <section className="rounded-md bg-white p-6"></section>
+            <section className="rounded-md bg-white p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-[17px] font-semibold text-slate-700">
+                  Réponse administrative
+                </h2>
+
+                {isClosed && (
+                  <span className="text-[13px] font-semibold text-green-600">
+                    Clôturée
+                  </span>
+                )}
+              </div>
+
+              <textarea
+                value={adminResponse}
+                onChange={(e) => setAdminResponse(e.target.value)}
+                disabled={isClosed}
+                rows={7}
+                placeholder="Rédigez ici la réponse officielle..."
+                className="w-full resize-none rounded-md border border-slate-100 bg-slate-50 px-4 py-3 text-[14px] text-slate-700 outline-none transition focus:border-green-400 focus:bg-white disabled:cursor-not-allowed disabled:text-slate-400"
+              />
+
+              {isInProgress && (
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={handleClose}
+                    disabled={actionLoading || !adminResponse.trim()}
+                    className="h-10 rounded-md bg-green-500 px-5 text-[13px] font-semibold text-white shadow-sm hover:bg-green-600 disabled:opacity-60"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-red-500">
-                        <FileText size={15} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-100">
-                          {getFileName(reclamation.pieceJointePath)}
-                        </p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">Cliquer pour ouvrir</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-semibold text-green-600 dark:text-green-400 group-hover:underline">
-                      Ouvrir
-                    </span>
-                  </a>
+                    Clôturer la réclamation
+                  </button>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Admin response */}
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
-                <div className="flex items-center gap-2.5">
-                  <div className={cx(
-                    "flex h-8 w-8 items-center justify-center rounded-lg",
-                    isClosed ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-                  )}>
-                    <Lock size={15} />
-                  </div>
-                  <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Réponse administrative</h2>
-                </div>
-                {!isClosed && (
-                  <span className="text-xs text-slate-400 dark:text-slate-500">Obligatoire pour clôturer</span>
-                )}
-              </div>
-              <div className="px-5 py-5 space-y-4">
-                <textarea
-                  value={adminResponse}
-                  onChange={(e) => setAdminResponse(e.target.value)}
-                  disabled={isClosed}
-                  rows={8}
-                  placeholder="Rédigez ici la réponse officielle de l'administration…"
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm text-slate-800 dark:text-slate-200 outline-none transition placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-green-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-green-500/15 disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-800/50 resize-none"
-                />
-
-                {isClosed ? (
-                  <div className="flex items-center gap-2 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-4 py-3 text-sm text-green-700 dark:text-green-400">
-                    <CheckCircle2 size={15} className="shrink-0" />
-                    Réclamation clôturée — réponse en lecture seule.
-                  </div>
-                ) : isInProgress ? (
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-5">
-                      La réponse enregistrée sera communiquée comme réponse finale de l'administration.
-                    </p>
-                    <button
-                      onClick={handleClose}
-                      disabled={actionLoading || !adminResponse.trim()}
-                      className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Lock size={14} />
-                      Clôturer
-                    </button>
-                  </div>
-                ) : (
-                  <p className="text-xs text-slate-400 dark:text-slate-500">
-                    La réclamation doit d'abord être prise en charge avant de pouvoir être clôturée.
-                  </p>
-                )}
-              </div>
-            </div>
+              {isSubmitted && (
+                <p className="mt-3 text-[13px] text-slate-400">
+                  La réclamation doit d’abord être prise en charge avant clôture.
+                </p>
+              )}
+            </section>
           </div>
+          </div> 
 
-          {/* Right — author + timeline */}
-          <div className="space-y-5">
+          {/* Right */}
+          <aside className="space-y-6">
+            {/* Suivi */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
+            <section className="rounded-md bg-white p-6"></section>
+            <section className="rounded-md bg-white p-6">
+              <h2 className="mb-5 text-[17px] font-semibold text-slate-700">
+                Suivi
+              </h2>
 
-            {/* Author card */}
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-              <div className="border-b border-slate-100 dark:border-slate-800 px-5 py-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                    <User size={15} />
-                  </div>
-                  <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Déposant</h2>
-                </div>
-              </div>
-
-              <div className="px-5 py-5">
-                {/* Avatar + name */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30 text-sm font-bold text-green-700 dark:text-green-400">
-                    {(reclamation.prenomAuteur?.[0] || "").toUpperCase()}{(reclamation.nomAuteur?.[0] || "").toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{authorName}</p>
-                    <span className="inline-flex rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-                      {authorLabel}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-3 text-sm">
-                  {reclamation.emailAuteur && (
-                    <div className="flex items-center gap-2.5 text-slate-600 dark:text-slate-400">
-                      <Mail size={13} className="shrink-0 text-slate-400" />
-                      <span className="truncate text-xs">{reclamation.emailAuteur}</span>
-                    </div>
-                  )}
-                  {reclamation.telephoneAuteur && (
-                    <div className="flex items-center gap-2.5 text-slate-600 dark:text-slate-400">
-                      <Phone size={13} className="shrink-0 text-slate-400" />
-                      <span className="text-xs">{reclamation.telephoneAuteur}</span>
-                    </div>
-                  )}
-                  {(reclamation.adresseAuteur || reclamation.villeAuteur) && (
-                    <div className="flex items-center gap-2.5 text-slate-600 dark:text-slate-400">
-                      <MapPin size={13} className="shrink-0 text-slate-400" />
-                      <span className="text-xs">{reclamation.adresseAuteur || reclamation.villeAuteur}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Timeline */}
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-              <div className="border-b border-slate-100 dark:border-slate-800 px-5 py-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                    <Clock3 size={15} />
-                  </div>
-                  <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Suivi du traitement</h2>
-                </div>
-              </div>
-              <div className="px-5 py-5">
-                {TIMELINE_STEPS.map((step, i) => {
+              <div className="space-y-5">
+                {TIMELINE_STEPS.map((step) => {
                   const stepOrder = STATUS_ORDER[step.key];
-                  const done      = currentOrder >= stepOrder;
-                  const active    = currentOrder === stepOrder;
-                  const isLast    = i === TIMELINE_STEPS.length - 1;
-                  const date      = reclamation[step.field];
+                  const done = currentOrder >= stepOrder;
+                  const active = currentOrder === stepOrder;
+                  const date = reclamation[step.field];
+
                   return (
-                    <div key={step.key} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <div className={cx(
-                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                          active  ? "border-green-500 bg-green-500 text-white" :
-                          done    ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400" :
-                                    "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-300 dark:text-slate-600"
-                        )}>
-                          {done ? <CheckCircle2 size={13} /> : <Clock3 size={12} />}
-                        </div>
-                        {!isLast && (
-                          <div className={cx(
-                            "mt-1 w-0.5 rounded-full",
-                            done && currentOrder > stepOrder ? "bg-green-300 dark:bg-green-700" : "bg-slate-200 dark:bg-slate-700"
-                          )} style={{ minHeight: 24 }} />
-                        )}
-                      </div>
-                      <div className={cx("pb-4", isLast && "pb-0")}>
-                        <p className={cx("text-sm font-medium", done ? "text-slate-800 dark:text-slate-100" : "text-slate-400 dark:text-slate-600")}>
+                    <div key={step.key} className="flex items-start gap-3">
+                      <span
+                        className={`mt-1 h-2.5 w-2.5 rounded-full ${
+                          active
+                            ? "bg-green-500"
+                            : done
+                            ? "bg-green-300"
+                            : "bg-slate-200"
+                        }`}
+                      />
+
+                      <div>
+                        <p
+                          className={`text-[14px] font-semibold ${
+                            done ? "text-slate-700" : "text-slate-400"
+                          }`}
+                        >
                           {step.label}
                         </p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+
+                        <p className="mt-0.5 text-[13px] text-slate-400">
                           {date ? fmt(date) : "—"}
                         </p>
                       </div>
@@ -412,60 +323,85 @@ function AdminReclamationDetail() {
                   );
                 })}
               </div>
+            </section>
             </div>
 
+            {/* Infos auteur compactes
+            <section className="rounded-md bg-white p-6">
+              <h2 className="mb-5 text-[17px] font-semibold text-slate-700">
+                Informations
+              </h2>
+
+              <div className="space-y-4">
+                <InfoItem label="Type auteur" value={authorLabel} />
+                <InfoItem label="Nom complet" value={authorName} />
+                <InfoItem label="Adresse" value={reclamation.adresseAuteur || reclamation.villeAuteur || "—"} />
+                <InfoItem label="Statut" value={cfg.label} />
+              </div>
+            </section> */}
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    {/* Modal prise en charge */}
+    {showModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4">
+        <div className="w-full max-w-md rounded-md bg-white p-6 shadow-xl">
+          <div className="mb-5 flex items-start justify-between">
+            <div>
+              <h2 className="text-[17px] font-semibold text-slate-800">
+                Prendre en charge
+              </h2>
+              <p className="mt-1 text-[13px] text-slate-400">
+                {reclamation.numeroReclamation}
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowModal(false)}
+              className="text-slate-300 hover:text-slate-500"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <p className="mb-6 text-[14px] leading-6 text-slate-500">
+            Cette réclamation passera au statut En cours.
+          </p>
+
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setShowModal(false)}
+              className="h-10 rounded-md border border-slate-100 bg-white px-4 text-[13px] font-semibold text-slate-400 hover:text-slate-600"
+            >
+              Annuler
+            </button>
+
+            <button
+              onClick={handleStart}
+              disabled={actionLoading}
+              className="h-10 rounded-md bg-blue-500 px-5 text-[13px] font-semibold text-white hover:bg-blue-600 disabled:opacity-60"
+            >
+              {actionLoading ? "Traitement..." : "Confirmer"}
+            </button>
           </div>
         </div>
-      </motion.div>
-
-      {/* Prendre en charge modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                  <PlayCircle size={18} />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Prendre en charge</h2>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{reclamation.numeroReclamation}</p>
-                </div>
-              </div>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                <X size={18} />
-              </button>
-            </div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
-              En confirmant, cette réclamation passera au statut <strong className="text-slate-800 dark:text-slate-200">En cours</strong> et vous serez responsable de son traitement.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleStart}
-                disabled={actionLoading}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <PlayCircle size={14} />
-                {actionLoading ? "Traitement…" : "Confirmer"}
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AdminLayout>
+      </div>
+    )}
+  </AdminLayout>
+);
+}
+function InfoItem({ label, value }) {
+  return (
+    <div>
+      <p className="mb-1 text-[13px] font-semibold uppercase text-slate-400">
+        {label}
+      </p>
+      <p className="break-words text-[14px] font-medium text-slate-700">
+        {value || "—"}
+      </p>
+    </div>
   );
 }
-
 export default AdminReclamationDetail;

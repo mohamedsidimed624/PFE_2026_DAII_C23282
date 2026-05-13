@@ -92,4 +92,7 @@ export const deleteContenu = async (id) => {
   await adminContenuApi.delete(`/contenus/${id}`);
 };
 
+export const getSpecialites = () =>
+  adminContenuApi.get("/specialites", { params: { active: true, page: 0, size: 100 } });
+
 export default adminContenuApi;

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,8 @@ public class ContenuServiceImpl implements ContenuService {
     private final CategorieRepository categorieRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final SpecialiteRepository specialiteRepository;
+    private final MedecinRepository medecinRepository;
 
     @Override
     public ContenuResponseDTO create(ContenuRequestDTO dto, MultipartFile image, Long userId) {
@@ -33,6 +37,8 @@ public class ContenuServiceImpl implements ContenuService {
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
         String imageUrl = fileStorageService.storeContenuImage(image);
+
+        Specialite specialiteCible = resolveSpecialite(dto.getSpecialiteCibleId());
 
         Contenu contenu = Contenu.builder()
                 .titre(dto.getTitre())
@@ -46,6 +52,7 @@ public class ContenuServiceImpl implements ContenuService {
                 .imageUrl(imageUrl)
                 .dateCreation(LocalDateTime.now())
                 .dateExpiration(parseDate(dto.getDateExpiration()))
+                .specialiteCible(specialiteCible)
                 .build();
 
         return ContenuMapper.toDTO(contenuRepository.save(contenu));
@@ -66,6 +73,7 @@ public class ContenuServiceImpl implements ContenuService {
         contenu.setVisibilite(dto.getVisibilite());
         contenu.setCategorie(categorie);
         contenu.setDateExpiration(parseDate(dto.getDateExpiration()));
+        contenu.setSpecialiteCible(resolveSpecialite(dto.getSpecialiteCibleId()));
 
         if (image != null && !image.isEmpty()) {
             String imageUrl = fileStorageService.storeContenuImage(image);
@@ -148,6 +156,33 @@ public class ContenuServiceImpl implements ContenuService {
                 contenuRepository.save(contenu);
             }
         });
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Page<ContenuResponseDTO> getMedecinContenus(Long medecinId, int page, int size) {
+        Medecin medecin = medecinRepository.findById(medecinId)
+                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+
+        List<Long> specialiteIds = medecin.getEducations().stream()
+                .filter(e -> e.getSpecialite() != null)
+                .map(e -> e.getSpecialite().getId())
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+
+        if (specialiteIds.isEmpty()) {
+            specialiteIds = new ArrayList<>(List.of(-1L));
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("datePublication").descending());
+        return contenuRepository.findMedecinContenus(specialiteIds, pageable)
+                .map(ContenuMapper::toDTO);
+    }
+
+    private Specialite resolveSpecialite(Long specialiteCibleId) {
+        if (specialiteCibleId == null) return null;
+        return specialiteRepository.findById(specialiteCibleId)
+                .orElseThrow(() -> new RuntimeException("Spécialité introuvable"));
     }
 
     private LocalDateTime parseDate(String value) {

@@ -32,18 +32,18 @@ function StatutBadge({ statut }) {
   const s = String(statut || "").toUpperCase();
   if (["ACTIF", "ACTIVE"].includes(s))
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
         <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> Actif
       </span>
     );
   if (["EN_ATTENTE", "PENDING"].includes(s))
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
         <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> En attente
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:text-slate-400">
       {statut || "—"}
     </span>
   );
@@ -52,10 +52,10 @@ function StatutBadge({ statut }) {
 function Field({ label, value, className = "" }) {
   return (
     <div className={className}>
-      <p className="mb-1 text-sm font-medium text-slate-400">
+      <p className="mb-1 text-sm font-medium text-slate-400 dark:text-slate-500">
         {label}
       </p>
-      <p className="break-words text-sm font-bold text-slate-800">
+      <p className="break-words text-sm font-bold text-slate-800 dark:text-slate-100">
         {value || "—"}
       </p>
     </div>
@@ -64,14 +64,14 @@ function Field({ label, value, className = "" }) {
 
 function InfoCard({ title, onEdit, children }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
-        <h2 className="text-base font-bold text-slate-800">{title}</h2>
+    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+        <h2 className="text-base font-bold text-slate-800 dark:text-white">{title}</h2>
 
         {onEdit && (
           <button
             onClick={onEdit}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
           >
             <Pencil size={16} />
           </button>
@@ -86,9 +86,9 @@ function InfoCard({ title, onEdit, children }) {
 function EmptyState({ icon, text }) {
   const IconComp = icon;
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-12 text-center">
-      <IconComp size={24} className="text-slate-300 mb-2" />
-      <p className="text-sm text-slate-400">{text}</p>
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-12 text-center dark:border-slate-700 dark:bg-slate-900">
+      <IconComp size={24} className="mb-2 text-slate-300 dark:text-slate-600" />
+      <p className="text-sm text-slate-400 dark:text-slate-500">{text}</p>
     </div>
   );
 }
@@ -103,20 +103,20 @@ function ModalBase({ title, onClose, children, footer }) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.18 }}
-        className="w-full max-w-md rounded-2xl bg-white shadow-2xl flex flex-col max-h-[90vh]"
+        className="flex w-full max-w-md flex-col rounded-2xl bg-white shadow-2xl max-h-[90vh] dark:bg-slate-900 dark:border dark:border-slate-700"
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 shrink-0">
-          <p className="font-bold text-slate-900">{title}</p>
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+          <p className="font-bold text-slate-900 dark:text-white">{title}</p>
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <X size={14} />
           </button>
         </div>
-        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">{children}</div>
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">{children}</div>
         {footer && (
-          <div className="border-t border-slate-100 px-6 py-4 flex gap-2 shrink-0">{footer}</div>
+          <div className="flex shrink-0 gap-2 border-t border-slate-100 px-6 py-4 dark:border-slate-800">{footer}</div>
         )}
       </motion.div>
     </div>
@@ -169,7 +169,7 @@ function EducationModal({ onClose, onSaved }) {
     }
   };
 
-  const inp = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20";
+  const inp = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500";
 
   return (
     <ModalBase
@@ -177,7 +177,7 @@ function EducationModal({ onClose, onSaved }) {
       onClose={onClose}
       footer={
         <>
-          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             Annuler
           </button>
           <button onClick={submit} disabled={saving} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-green-700 py-2.5 text-sm font-bold text-white hover:bg-green-800 disabled:bg-slate-300 transition">
@@ -188,19 +188,19 @@ function EducationModal({ onClose, onSaved }) {
     >
       {err && <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">{err}</p>}
       <div>
-        <label className="text-xs font-semibold text-slate-600 mb-1 block">Diplôme *</label>
+        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Diplôme *</label>
         <input value={f.diplome} onChange={e => setF(p => ({ ...p, diplome: e.target.value }))} placeholder="Ex : Doctorat en médecine" className={inp} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Spécialité</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Spécialité</label>
           <select value={f.specialiteId} onChange={e => handleSpecialite(e.target.value)} className={inp + " cursor-pointer"}>
             <option value="">— Choisir —</option>
             {specialites.map(s => <option key={s.id} value={s.id}>{s.libelle}</option>)}
           </select>
         </div>
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Sous-spécialité</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Sous-spécialité</label>
           <select value={f.sousSpecialiteId} onChange={e => setF(p => ({ ...p, sousSpecialiteId: e.target.value }))} disabled={!sousSpecialites.length} className={inp + " cursor-pointer disabled:opacity-50"}>
             <option value="">— Choisir —</option>
             {sousSpecialites.map(s => <option key={s.id} value={s.id}>{s.libelle}</option>)}
@@ -208,20 +208,20 @@ function EducationModal({ onClose, onSaved }) {
         </div>
       </div>
       <div>
-        <label className="text-xs font-semibold text-slate-600 mb-1 block">Université *</label>
+        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Université *</label>
         <input value={f.universite} onChange={e => setF(p => ({ ...p, universite: e.target.value }))} placeholder="Nom de l'université" className={inp} />
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Pays *</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Pays *</label>
           <input value={f.pays} onChange={e => setF(p => ({ ...p, pays: e.target.value }))} placeholder="France" className={inp} />
         </div>
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Ville *</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Ville *</label>
           <input value={f.ville} onChange={e => setF(p => ({ ...p, ville: e.target.value }))} placeholder="Paris" className={inp} />
         </div>
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Année *</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Année *</label>
           <input type="number" value={f.anneeObtention} onChange={e => setF(p => ({ ...p, anneeObtention: e.target.value }))} placeholder={String(currentYear)} min={1950} max={currentYear} className={inp} />
         </div>
       </div>
@@ -257,7 +257,7 @@ function ExperienceModal({ onClose, onSaved }) {
     }
   };
 
-  const inp = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20";
+  const inp = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500";
 
   return (
     <ModalBase
@@ -265,7 +265,7 @@ function ExperienceModal({ onClose, onSaved }) {
       onClose={onClose}
       footer={
         <>
-          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             Annuler
           </button>
           <button onClick={submit} disabled={saving} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-green-700 py-2.5 text-sm font-bold text-white hover:bg-green-800 disabled:bg-slate-300 transition">
@@ -277,40 +277,40 @@ function ExperienceModal({ onClose, onSaved }) {
       {err && <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">{err}</p>}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Poste *</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Poste *</label>
           <input value={f.poste} onChange={e => setF(p => ({ ...p, poste: e.target.value }))} placeholder="Ex : Médecin généraliste" className={inp} />
         </div>
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Établissement *</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Établissement *</label>
           <input value={f.nomEtablissement} onChange={e => setF(p => ({ ...p, nomEtablissement: e.target.value }))} placeholder="Nom de la structure" className={inp} />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Pays</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Pays</label>
           <input value={f.pays} onChange={e => setF(p => ({ ...p, pays: e.target.value }))} placeholder="Mauritanie" className={inp} />
         </div>
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Ville</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Ville</label>
           <input value={f.ville} onChange={e => setF(p => ({ ...p, ville: e.target.value }))} placeholder="Nouakchott" className={inp} />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Date début *</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Date début *</label>
           <input type="date" value={f.dateDebut} onChange={e => setF(p => ({ ...p, dateDebut: e.target.value }))} className={inp} />
         </div>
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Date fin</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Date fin</label>
           <input type="date" value={f.dateFin} onChange={e => setF(p => ({ ...p, dateFin: e.target.value }))} disabled={actuel} className={inp + (actuel ? " opacity-40" : "")} />
         </div>
       </div>
-      <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
+      <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer select-none">
         <input type="checkbox" checked={actuel} onChange={e => { setActuel(e.target.checked); if (e.target.checked) setF(p => ({ ...p, dateFin: "" })); }} className="rounded" />
         Poste actuel
       </label>
       <div>
-        <label className="text-xs font-semibold text-slate-600 mb-1 block">Description</label>
+        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Description</label>
         <textarea value={f.description} onChange={e => setF(p => ({ ...p, description: e.target.value }))} rows={3} placeholder="Décrivez vos responsabilités..." className={inp + " resize-none"} />
       </div>
     </ModalBase>
@@ -341,7 +341,7 @@ function DocumentModal({ onClose, onSaved }) {
     }
   };
 
-  const sel = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 cursor-pointer";
+  const sel = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 cursor-pointer";
 
   return (
     <ModalBase
@@ -349,7 +349,7 @@ function DocumentModal({ onClose, onSaved }) {
       onClose={onClose}
       footer={
         <>
-          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             Annuler
           </button>
           <button onClick={submit} disabled={saving} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-green-700 py-2.5 text-sm font-bold text-white hover:bg-green-800 disabled:bg-slate-300 transition">
@@ -361,11 +361,11 @@ function DocumentModal({ onClose, onSaved }) {
       {err && <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">{err}</p>}
       <div
         onClick={() => fileRef.current.click()}
-        className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-8 cursor-pointer hover:border-green-400 hover:bg-green-50/30 transition"
+        className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-8 cursor-pointer hover:border-green-400 hover:bg-green-50/30 dark:hover:bg-green-900/10 transition"
       >
         <Upload size={24} className="text-slate-400 mb-2" />
         {file ? (
-          <p className="text-sm font-semibold text-slate-700">{file.name}</p>
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{file.name}</p>
         ) : (
           <>
             <p className="text-sm text-slate-500">Cliquez pour sélectionner un fichier</p>
@@ -376,13 +376,13 @@ function DocumentModal({ onClose, onSaved }) {
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Type</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Type</label>
           <select value={type} onChange={e => setType(e.target.value)} className={sel}>
             {DOC_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
         <div>
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">Catégorie</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">Catégorie</label>
           <select value={cat} onChange={e => setCat(e.target.value)} className={sel}>
             {DOC_CATS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -401,7 +401,7 @@ function ProfileHeader({ profile, educations, onPhotoUpload, uploading }) {
   const initials = (profile.prenom?.[0] || "") + (profile.nom?.[0] || "");
 
   return (
-    <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
         <div className="flex flex-1 items-center gap-5">
           <div
@@ -442,11 +442,11 @@ function ProfileHeader({ profile, educations, onPhotoUpload, uploading }) {
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               Dr. {profile.prenom} {profile.nom}
             </h1>
 
-            <p className="mt-1 text-sm font-medium text-slate-500">
+            <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
               <span className="text-green-700">{specialite}</span>
               {profile.sectionOrdre && (
                 <> | {String(profile.sectionOrdre).replace(/_/g, " ")}</>
@@ -459,7 +459,7 @@ function ProfileHeader({ profile, educations, onPhotoUpload, uploading }) {
           </div>
         </div>
 
-        <div className="grid flex-1 grid-cols-1 gap-4 border-t border-slate-100 pt-5 sm:grid-cols-2 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+        <div className="grid flex-1 grid-cols-1 gap-4 border-t border-slate-100 dark:border-slate-800 pt-5 sm:grid-cols-2 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
           <Field label="N° Inscription" value={profile.numeroInscription} />
           <Field label="Téléphone" value={profile.telephone} />
           <Field label="Email" value={profile.email} />
@@ -530,7 +530,7 @@ export default function MedecinProfilPage() {
     }
   };
 
-  const inp = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20";
+  const inp = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500";
 
   if (loading) {
     return (
@@ -575,7 +575,7 @@ export default function MedecinProfilPage() {
         />
 
         {/* Tab bar */}
-        <div className="rounded-2xl bg-green-50/70 p-2">
+        <div className="rounded-2xl bg-green-50/70 p-2 dark:bg-green-900/20">
           <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
             {TABS.map((tab) => {
               const Icon = tab.icon;
@@ -587,8 +587,8 @@ export default function MedecinProfilPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition ${
                     active
-                      ? "bg-white text-green-700 shadow-sm"
-                      : "text-slate-600 hover:bg-white/70 hover:text-slate-900"
+                      ? "bg-white text-green-700 shadow-sm dark:bg-slate-800 dark:text-green-400"
+                      : "text-slate-600 hover:bg-white/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
                   }`}
                 >
                   <Icon size={16} />
@@ -632,7 +632,7 @@ export default function MedecinProfilPage() {
                   <div className="flex gap-2 pt-1">
                     <button
                       onClick={() => { setEditing(false); setSaveErr(""); }}
-                      className="flex-1 rounded-xl border border-slate-200 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"
+                      className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                     >
                       Annuler
                     </button>
@@ -683,7 +683,7 @@ export default function MedecinProfilPage() {
         {activeTab === "education" && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-slate-700">Formations ({educations.length})</h2>
+              <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200">Formations ({educations.length})</h2>
               <button
                 onClick={() => setShowEduModal(true)}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-green-700 px-4 py-2 text-xs font-bold text-white hover:bg-green-800 transition"
@@ -698,13 +698,13 @@ export default function MedecinProfilPage() {
                 {educations.map(e => (
                   <div
                     key={e.id}
-                    className="group flex items-start gap-4 rounded-xl border border-slate-200 bg-white shadow-sm px-5 py-4"
+                    className="group flex items-start gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm px-5 py-4"
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-green-50">
-                      <GraduationCap size={16} className="text-green-700" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20">
+                      <GraduationCap size={16} className="text-green-700 dark:text-green-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-slate-900">{e.diplome}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{e.diplome}</p>
                       {e.specialiteLibelle && (
                         <p className="text-xs font-medium text-green-700 mt-0.5">
                           {e.specialiteLibelle}
@@ -735,7 +735,7 @@ export default function MedecinProfilPage() {
         {activeTab === "experience" && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-slate-700">Expériences ({experiences.length})</h2>
+              <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200">Expériences ({experiences.length})</h2>
               <button
                 onClick={() => setShowExpModal(true)}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-green-700 px-4 py-2 text-xs font-bold text-white hover:bg-green-800 transition"
@@ -750,14 +750,14 @@ export default function MedecinProfilPage() {
                 {experiences.map(e => (
                   <div
                     key={e.id}
-                    className="group flex items-start gap-4 rounded-xl border border-slate-200 bg-white shadow-sm px-5 py-4"
+                    className="group flex items-start gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm px-5 py-4"
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-                      <Briefcase size={16} className="text-blue-600" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                      <Briefcase size={16} className="text-blue-600 dark:text-blue-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-slate-900">{e.poste}</p>
-                      <p className="text-xs font-medium text-slate-600 mt-0.5">{e.nomEtablissement}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{e.poste}</p>
+                      <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">{e.nomEtablissement}</p>
                       <p className="text-xs text-slate-400 mt-0.5">
                         {e.dateDebut} → {e.dateFin || "Présent"}
                         {(e.ville || e.pays) && <> · {[e.ville, e.pays].filter(Boolean).join(", ")}</>}
@@ -783,7 +783,7 @@ export default function MedecinProfilPage() {
         {activeTab === "documents" && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-slate-700">Documents ({documents.length})</h2>
+              <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200">Documents ({documents.length})</h2>
               <button
                 onClick={() => setShowDocModal(true)}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-green-700 px-4 py-2 text-xs font-bold text-white hover:bg-green-800 transition"
@@ -794,10 +794,10 @@ export default function MedecinProfilPage() {
             {documents.length === 0 ? (
               <EmptyState icon={FileText} text="Aucun document téléversé" />
             ) : (
-              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/60 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    <tr className="border-b border-slate-100 bg-slate-50/60 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-500">
                       <th className="px-5 py-3">Fichier</th>
                       <th className="px-4 py-3">Type</th>
                       <th className="px-4 py-3">Catégorie</th>
@@ -806,19 +806,19 @@ export default function MedecinProfilPage() {
                       <th className="px-4 py-3" />
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {documents.map(d => (
-                      <tr key={d.id} className="hover:bg-slate-50 transition-colors">
+                      <tr key={d.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-2">
-                            <FileText size={14} className="shrink-0 text-slate-400" />
-                            <span className="font-medium text-slate-800 truncate max-w-[180px]">{d.fileName}</span>
+                            <FileText size={14} className="shrink-0 text-slate-400 dark:text-slate-500" />
+                            <span className="max-w-[180px] truncate font-medium text-slate-800 dark:text-slate-100">{d.fileName}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-slate-500">{d.typeDocument}</td>
-                        <td className="px-4 py-3 text-slate-500">{d.categorie}</td>
-                        <td className="px-4 py-3 text-slate-400">{d.uploadDate?.slice(0, 10) || "—"}</td>
-                        <td className="px-4 py-3 text-slate-400">{d.size ? `${(d.size / 1024).toFixed(0)} Ko` : "—"}</td>
+                        <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{d.typeDocument}</td>
+                        <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{d.categorie}</td>
+                        <td className="px-4 py-3 text-slate-400 dark:text-slate-500">{d.uploadDate?.slice(0, 10) || "—"}</td>
+                        <td className="px-4 py-3 text-slate-400 dark:text-slate-500">{d.size ? `${(d.size / 1024).toFixed(0)} Ko` : "—"}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1">
                             <a

@@ -26,6 +26,7 @@ import MedecinReclamationsPage from "./pages/medecin/MedecinReclamationsPage.jsx
 import MedecinReclamationDetailPage from "./pages/medecin/MedecinReclamationDetailPage.jsx";
 import MedecinNotificationsPage from "./pages/medecin/MedecinNotificationsPage.jsx";
 import MedecinCotisationPage from "./pages/medecin/MedecinCotisationPage.jsx";
+import MedecinAnnoncesPage from "./pages/medecin/MedecinAnnoncesPage.jsx";
 
 import Contact from "./pages/ContactPage.jsx";
 import AnnoncesPage from "./pages/AnnoncesPage.jsx";
@@ -147,6 +148,15 @@ function App() {
           element={
             <MedecinRoute>
               <MedecinCotisationPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/annonces"
+          element={
+            <MedecinRoute>
+              <MedecinAnnoncesPage />
             </MedecinRoute>
           }
         />

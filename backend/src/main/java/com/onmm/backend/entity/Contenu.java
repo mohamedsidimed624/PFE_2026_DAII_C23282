@@ -48,6 +48,10 @@ public class Contenu {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specialite_cible_id")
+    private Specialite specialiteCible;
+
     private LocalDateTime dateCreation;
     private LocalDateTime datePublication;
     private LocalDateTime dateExpiration;

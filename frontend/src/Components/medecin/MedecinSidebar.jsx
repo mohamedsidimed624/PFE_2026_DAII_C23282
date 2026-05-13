@@ -11,11 +11,13 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Megaphone,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard",     icon: LayoutDashboard, to: "/medecin/dashboard"    },
   { label: "Mon profil",    icon: User,            to: "/medecin/profil"       },
+  { label: "Annonces",      icon: Megaphone,       to: "/medecin/annonces"     },
   { label: "Réclamations",  icon: TriangleAlert,   to: "/medecin/reclamations" },
   { label: "Cotisation",    icon: CreditCard,      to: "/medecin/cotisation"   },
   { label: "Notifications", icon: Bell,            to: "/medecin/notifications"},
@@ -36,9 +38,9 @@ function MedecinSidebar({ collapsed, onToggle }) {
     <aside
       className={`${
         collapsed ? "w-14" : "w-56"
-      } flex min-h-screen shrink-0 flex-col overflow-hidden border-r border-slate-100 bg-white transition-all duration-300`}
+      } flex min-h-screen shrink-0 flex-col overflow-hidden border-r border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900 transition-all duration-300`}
     >
-      <div className="flex shrink-0 items-center justify-center border-b border-slate-100 py-4">
+      <div className="flex shrink-0 items-center justify-center border-b border-slate-100 dark:border-slate-800 py-4">
         <img
           src="/src/assets/logo.png"
           alt="Ordre des Médecins"
@@ -52,11 +54,11 @@ function MedecinSidebar({ collapsed, onToggle }) {
         <NavSection title="Espace médecin" items={navItems} collapsed={collapsed} />
       </nav>
 
-      <div className="shrink-0 space-y-2 border-t border-slate-100 px-2 py-3">
+      <div className="shrink-0 space-y-2 border-t border-slate-100 dark:border-slate-800 px-2 py-3">
         <button
           onClick={onToggle}
           title={collapsed ? "Développer le menu" : "Réduire le menu"}
-          className="flex w-full items-center justify-center gap-2 rounded-xl py-2 text-sm text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600"
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-2 text-sm text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
         >
           {collapsed ? (
             <ChevronRight size={16} />
@@ -71,7 +73,7 @@ function MedecinSidebar({ collapsed, onToggle }) {
         <button
           onClick={handleLogout}
           title={collapsed ? "Déconnexion" : undefined}
-          className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 ${
+          className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 ${
             collapsed ? "justify-center" : "justify-start"
           }`}
         >
@@ -87,7 +89,7 @@ function NavSection({ title, items, collapsed }) {
   return (
     <div>
       {!collapsed && (
-        <p className="mb-2 px-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+        <p className="mb-2 px-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
           {title}
         </p>
       )}
@@ -101,8 +103,8 @@ function NavSection({ title, items, collapsed }) {
             className={({ isActive }) =>
               `flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-green-50 text-green-700"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                  ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               } ${collapsed ? "justify-center" : ""}`
             }
           >
@@ -110,7 +112,7 @@ function NavSection({ title, items, collapsed }) {
               <>
                 <Icon
                   size={17}
-                  className={`shrink-0 ${isActive ? "text-green-600" : "text-slate-400"}`}
+                  className={`shrink-0 ${isActive ? "text-green-600 dark:text-green-400" : "text-slate-400 dark:text-slate-500"}`}
                 />
                 {!collapsed && <span className="truncate leading-none">{label}</span>}
               </>

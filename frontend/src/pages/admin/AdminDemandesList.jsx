@@ -84,205 +84,193 @@ function AdminDemandesList() {
   const rejected  = demandes.filter(d => d.statut === "REJECTED").length;
 
   return (
-    <AdminLayout title="Gestion des demandes">
-      <div className="space-y-4">
+  <AdminLayout title="Gestion des demandes">
+    <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-7 py-6">
+      {/* Titre */}
+      {/* <h1 className="mb-8 text-[17px] font-semibold text-slate-700">
+        Gestion des demandes
+      </h1> */}
 
-        {/* ── Header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="flex flex-wrap items-center justify-between gap-3"
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20">
-              <ClipboardList size={18} className="text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <h1 className="text-base font-bold text-slate-800 dark:text-slate-100">Gestion des demandes</h1>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500">{demandes.length} demande(s) au total</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            {[
-              { label: "En attente", count: pending,  bg: "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400", status: "PENDING"  },
-              { label: "Acceptées",  count: accepted, bg: "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400", status: "APPROUVED" },
-              { label: "Rejetées",   count: rejected, bg: "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400",         status: "REJECTED"  },
-            ].map(({ label, count, bg, status }) => (
-              <button
-                key={status}
-                onClick={() => { setStatusFilter(statusFilter === status ? "Tous" : status); setPage(1); }}
-                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${bg} ${statusFilter === status ? "ring-2 ring-offset-1 ring-current" : ""}`}
-              >
-                {label} · {count}
-              </button>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* ── Barre d'outils ── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15, duration: 0.3 }}
-          className="flex flex-wrap items-center gap-3 justify-between"
-        >
-
-          {/* Recherche */}
-          <div className="relative flex-1 min-w-48 max-w-72">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+      {/* Filtres */}
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative">
             <input
               type="text"
-              placeholder="Rechercher..."
+              placeholder="Search by order id"
               value={search}
               onChange={handleSearch}
-              className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all"
+              className="h-10 w-[240px] rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 pr-10 text-[13px] text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400"
+            />
+            <Search
+              size={15}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300"
             />
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Filtre statut */}
-            <div className="relative">
-              <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              <select
-                value={statusFilter}
-                onChange={(e) => handleStatus(e.target.value)}
-                className="pl-8 pr-8 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/15 transition-all appearance-none"
-              >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s}>{s === "Tous" ? "Statut : Tous" : s}</option>
-                ))}
-              </select>
-            </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => handleStatus(e.target.value)}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
+          >
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>
+                {s === "Tous" ? "Status : All" : s}
+              </option>
+            ))}
+          </select>
+        </div>
 
-            {/* Filtre date (UI only) */}
-            <button className="flex items-center gap-2 px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-              <CalendarDays size={14} className="text-slate-400 dark:text-slate-500" />
-              Filtrer par date
-            </button>
-          </div>
-        </motion.div>
+        <button className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200">
+          Filter by date range
+        </button>
+      </div>
 
-        {/* ── Table ── */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors duration-200">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-800">
-                  {["ID", "DATE", "DEMANDEUR", "STATUS", "ACTION"].map((h) => (
-                    <th
-                      key={h}
-                      className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500"
+      {/* Table wrapper */}
+      <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
+        <table className="w-full table-fixed text-sm">
+          <thead>
+            <tr className="border-b border-slate-100 dark:border-slate-800">
+              <th className="w-[20%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                ID
+              </th>
+              <th className="w-[25%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                DATE
+              </th>
+              <th className="w-[25%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                DEMANDEUR
+              </th>
+              <th className="w-[15%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                STATUS
+              </th>
+              <th className="w-[15%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                ACTION
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {paginated.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-7 py-14 text-center text-sm text-slate-400"
+                >
+                  Aucune demande trouvée.
+                </td>
+              </tr>
+            ) : (
+              paginated.map((d) => (
+                <tr
+                  key={d.id}
+                  className="border-b border-slate-100 dark:border-slate-800 transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
+                >
+                  <td className="px-7 py-4 text-[14px] font-semibold text-slate-700 dark:text-slate-200">
+                    #{d.id}
+                  </td>
+
+                  <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                    {formatDate(d.dateCreation || d.submissionDate)}
+                  </td>
+
+                  <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                    {d.nom} {d.prenom}
+                  </td>
+
+                  <td className="px-7 py-4">
+                    <span
+                      className={`inline-flex min-w-[95px] items-center justify-center rounded-md px-3 py-1.5 text-[13px] font-semibold ${
+                        d.statut === "APPROUVED"
+                          ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                          : d.statut === "REJECTED"
+                          ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+                          : "bg-yellow-50 dark:bg-amber-900/30 text-yellow-500 dark:text-amber-400"
+                      }`}
                     >
-                      {h}
-                    </th>
-                  ))}
+                      {d.statut === "APPROUVED"
+                        ? "Approved"
+                        : d.statut === "REJECTED"
+                        ? "Rejected"
+                        : "Pending"}
+                    </span>
+                  </td>
+
+                  <td className="px-7 py-4">
+                    <button
+                      onClick={() => navigate(`/admin/demandes/${d.id}`)}
+                      className="text-[14px] font-semibold text-blue-500 hover:text-blue-600"
+                    >
+                      View Details
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                {paginated.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-5 py-12 text-center text-sm text-slate-400 dark:text-slate-500">
-                      Aucune demande trouvée.
-                    </td>
-                  </tr>
-                ) : (
-                  paginated.map((d) => {
-                    const sc = getStatusClasses(d.statut);
-                    return (
-                      <tr key={d.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/60 transition-colors group">
-                        <td className="px-5 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          #{d.id}
-                        </td>
-                        <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">
-                          {formatDate(d.dateCreation || d.date)}
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <div>
-                            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                              {d.nom} {d.prenom}
-                            </p>
-                            {d.email && (
-                              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{d.email}</p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${sc.pill}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-                            {d.statut || "PENDING"}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <button
-                            onClick={() => navigate(`/admin/demandes/${d.id}`)}
-                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors"
-                          >
-                            <Eye size={14} />
-                            Voir détail
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between px-7 py-5">
+          <div className="flex items-center gap-2 text-[13px] text-slate-400">
+            <span>Showing</span>
+
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              className="h-9 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-[13px] text-slate-600 dark:text-slate-400 outline-none"
+            >
+              {PAGE_SIZES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+
+            <span>of {filtered.length}</span>
           </div>
 
-          {/* ── Pagination ── */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-              <span>Affichage</span>
-              <select
-                value={pageSize}
-                onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 outline-none focus:border-green-500 transition-all"
-              >
-                {PAGE_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <span>sur {filtered.length}</span>
-            </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
+            >
+              <ChevronLeft size={14} />
+            </button>
 
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft size={14} />
-              </button>
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const p = i + 1;
 
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const p = i + 1;
-                return (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
-                      page === p
-                        ? "bg-green-600 text-white"
-                        : "border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                );
-              })}
+              return (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold ${
+                    page === p
+                      ? "bg-green-500 text-white"
+                      : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  {p}
+                </button>
+              );
+            })}
 
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
+            >
+              <ChevronRight size={14} />
+            </button>
           </div>
         </div>
       </div>
-    </AdminLayout>
-  );
+    </div>
+  </AdminLayout>
+);
 }
-
 export default AdminDemandesList;

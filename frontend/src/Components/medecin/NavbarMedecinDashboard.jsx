@@ -6,7 +6,9 @@ import {
   ChevronDown,
   LogOut,
   Menu,
+  Moon,
   Settings,
+  Sun,
   User,
 } from "lucide-react";
 import { getMyProfile } from "../../services/medecinApi";
@@ -17,10 +19,27 @@ function NavbarMedecinDashboard({ title = "Tableau de bord", onToggleSidebar }) 
   const [userOpen, setUserOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadBadge, setUnreadBadge] = useState(0);
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem("theme") === "dark"
+  );
 
   const userRef = useRef(null);
   const notifRef = useRef(null);
   const navigate = useNavigate();
+
+  /* ── Dark mode ── */
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.classList.add("dark");
+      root.setAttribute("data-theme", "dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      root.setAttribute("data-theme", "light");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     getMyProfile()
@@ -61,23 +80,32 @@ function NavbarMedecinDashboard({ title = "Tableau de bord", onToggleSidebar }) 
     : "";
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-100 bg-white px-6">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-100 bg-white px-6 dark:border-slate-800 dark:bg-slate-900">
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleSidebar}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
         >
           <Menu size={18} />
         </button>
-        <span className="text-sm font-semibold text-slate-700">{title}</span>
+        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</span>
       </div>
 
       <div className="flex items-center gap-1">
+        {/* Dark mode toggle */}
+        <button
+          onClick={() => setDarkMode((d) => !d)}
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+          title={darkMode ? "Mode clair" : "Mode sombre"}
+        >
+          {darkMode ? <Sun size={17} /> : <Moon size={17} />}
+        </button>
+
         {/* Notification bell */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => { setNotifOpen((o) => !o); setUserOpen(false); }}
-            className="relative flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100"
+            className="relative flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <Bell size={18} />
             {unreadBadge > 0 && (
@@ -88,29 +116,29 @@ function NavbarMedecinDashboard({ title = "Tableau de bord", onToggleSidebar }) 
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl shadow-slate-200/60">
-              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+            <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl shadow-slate-200/60 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">
+              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-slate-800">Notifications</span>
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-100">Notifications</span>
                   {unreadBadge > 0 && (
-                    <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600">
+                    <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600 dark:bg-red-900/30 dark:text-red-400">
                       {unreadBadge}
                     </span>
                   )}
                 </div>
                 {unreadBadge > 0 && (
-                  <button className="flex items-center gap-1 text-[11px] font-semibold text-green-600 hover:text-green-700">
+                  <button className="flex items-center gap-1 text-[11px] font-semibold text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300">
                     <Check size={11} /> Tout marquer lu
                   </button>
                 )}
               </div>
-              <div className="py-4 text-center text-xs text-slate-400">
+              <div className="py-4 text-center text-xs text-slate-400 dark:text-slate-500">
                 Aucune notification pour le moment
               </div>
-              <div className="border-t border-slate-100 px-4 py-2.5">
+              <div className="border-t border-slate-100 px-4 py-2.5 dark:border-slate-800">
                 <button
                   onClick={() => { navigate("/medecin/notifications"); setNotifOpen(false); }}
-                  className="w-full py-0.5 text-center text-xs font-semibold text-green-700 hover:text-green-800"
+                  className="w-full py-0.5 text-center text-xs font-semibold text-green-700 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
                 >
                   Voir toutes les notifications
                 </button>
@@ -119,13 +147,13 @@ function NavbarMedecinDashboard({ title = "Tableau de bord", onToggleSidebar }) 
           )}
         </div>
 
-        <div className="mx-1 h-5 w-px bg-slate-200" />
+        <div className="mx-1 h-5 w-px bg-slate-200 dark:bg-slate-700" />
 
         {/* User menu */}
         <div className="relative" ref={userRef}>
           <button
             onClick={() => { setUserOpen((o) => !o); setNotifOpen(false); }}
-            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 transition-colors hover:bg-slate-50"
+            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
           >
             {profile?.photoProfilPath ? (
               <img
@@ -134,13 +162,13 @@ function NavbarMedecinDashboard({ title = "Tableau de bord", onToggleSidebar }) 
                 className="h-7 w-7 shrink-0 rounded-lg object-cover"
               />
             ) : (
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-700 text-xs font-bold">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-700 text-xs font-bold dark:bg-green-900/40 dark:text-green-400">
                 {initials || <User size={14} />}
               </div>
             )}
             <div className="hidden text-left sm:block">
-              <p className="text-xs font-semibold leading-none text-slate-800">{userName}</p>
-              <p className="mt-0.5 text-[10px] leading-none text-slate-400">Médecin</p>
+              <p className="text-xs font-semibold leading-none text-slate-800 dark:text-slate-100">{userName}</p>
+              <p className="mt-0.5 text-[10px] leading-none text-slate-400 dark:text-slate-500">Médecin</p>
             </div>
             <ChevronDown
               size={13}
@@ -149,25 +177,25 @@ function NavbarMedecinDashboard({ title = "Tableau de bord", onToggleSidebar }) 
           </button>
 
           {userOpen && (
-            <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border border-slate-100 bg-white py-1 shadow-lg shadow-slate-100/60">
+            <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border border-slate-100 bg-white py-1 shadow-lg shadow-slate-100/60 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">
               <button
                 onClick={() => { navigate("/medecin/profil"); setUserOpen(false); }}
-                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
+                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
               >
-                <User size={14} className="text-slate-400" />
+                <User size={14} className="text-slate-400 dark:text-slate-500" />
                 Mon profil
               </button>
               <button
                 onClick={() => { navigate("/medecin/parametres"); setUserOpen(false); }}
-                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
+                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
               >
-                <Settings size={14} className="text-slate-400" />
+                <Settings size={14} className="text-slate-400 dark:text-slate-500" />
                 Paramètres
               </button>
-              <div className="my-1 border-t border-slate-100" />
+              <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-red-500 hover:bg-red-50"
+                className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
               >
                 <LogOut size={14} />
                 Déconnexion

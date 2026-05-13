@@ -22,5 +22,5 @@ public interface ContenuService {
 
     void expireContenus();
 
-
+    Page<ContenuResponseDTO> getMedecinContenus(Long medecinId, int page, int size);
 }

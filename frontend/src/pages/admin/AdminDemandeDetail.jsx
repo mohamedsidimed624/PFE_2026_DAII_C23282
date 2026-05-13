@@ -138,7 +138,11 @@ function AdminDemandeDetail() {
         <div className="flex flex-col items-center gap-3 py-16 text-slate-400 dark:text-slate-500">
           <AlertTriangle size={32} />
           <p className="text-sm">Demande introuvable.</p>
-          <button onClick={() => navigate("/admin/demandes")} className="text-green-600 dark:text-green-400 text-sm font-medium hover:underline">
+          <button
+            onClick={() => navigate("/admin/demandes")}
+            className="mb-2 inline-flex items-center gap-2 text-[14px] font-medium text-slate-400 hover:text-slate-600"
+          >
+            <ArrowLeft size={15} />
             Retour à la liste
           </button>
         </div>
@@ -159,8 +163,8 @@ function AdminDemandeDetail() {
         </div>
       )}
 
-      <div className="space-y-5 max-w-5xl">
-
+      <div className="min-h-secreen bg-[#FAFBFC] px-7 py-6">
+        <div className="max-w-6xl space-y-6">
         {/* Back */}
         <button
           onClick={() => navigate("/admin/demandes")}
@@ -172,23 +176,35 @@ function AdminDemandeDetail() {
 
         {/* ── Info cards (header) ── */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
-          <h1 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">
+          <h1 className="mb-5 text-[17px] font-semibold texr-slate-700">
             Détail de la demande
           </h1>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <InfoCard icon={<Hash size={15} />}          label="ID Demande"  value={`#${demande.id}`} />
             <InfoCard icon={<User size={15} />}          label="Demandeur"   value={`${demande.nom} ${demande.prenom}`} />
-            <InfoCard icon={<CalendarDays size={15} />}  label="Date"        value={formatDate(demande.dateCreation || demande.date)} />
-            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-3.5">
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="text-green-500 dark:text-green-400"><ShieldCheck size={15} /></span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Statut</span>
+            <InfoCard icon={<CalendarDays size={15} />}  label="Date"        value={formatDate(demande.submissionDate || demande.date)} />
+            <div className="rounded-md bg-white px-5 py-4">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="text-green-500">
+                <ShieldCheck size={15} />
+                  </span>
+                  <span className="text-[13px] font-semibold uppercase text-slate-400">
+                    Statut
+                  </span>
+                </div>
+
+                <span
+                  className={`text-[14px] font-bold ${
+                    demande.statut === "REJECTED"
+                      ? "text-red-500"
+                      : demande.statut === "PENDING"
+                      ? "text-yellow-500"
+                      : "text-green-600"
+                  }`}
+                >
+                  {sc.label}
+                </span>
               </div>
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold ${sc.pill}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-                {sc.label}
-              </span>
-            </div>
           </div>
 
           {/* Contact */}
@@ -199,11 +215,12 @@ function AdminDemandeDetail() {
         </div>
 
         {/* ── Éducation + Expérience ── */}
-        <div className="grid sm:grid-cols-2 gap-5">
-
+        
+        <div className="grid sm:grid-cols-2 gap-5 ">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
           <SectionCard icon={<GraduationCap size={17} />} title="Éducation">
             {demande.educations?.length ? (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="divide-y divide-slate-100 dark:divide-slate-800 ">
                 {demande.educations.map((edu) => (
                   <div key={edu.id} className="py-3 first:pt-0 last:pb-0">
                     <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{edu.diplome}</p>
@@ -220,7 +237,9 @@ function AdminDemandeDetail() {
               <EmptyState label="Aucune formation renseignée" />
             )}
           </SectionCard>
+          </div>
 
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
           <SectionCard icon={<Briefcase size={17} />} title="Expérience">
             {demande.experiences?.length ? (
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -240,12 +259,14 @@ function AdminDemandeDetail() {
               <EmptyState label="Aucune expérience renseignée" />
             )}
           </SectionCard>
+          </div>
         </div>
 
         {/* ── Documents ── */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
         <SectionCard icon={<FileText size={17} />} title="Documents">
           {demande.documents?.length ? (
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-slate-100 dark:divide-slate-800 ">
               {demande.documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0 gap-3">
                   <div className="flex items-center gap-3 min-w-0">
@@ -279,28 +300,29 @@ function AdminDemandeDetail() {
             <EmptyState label="Aucun document joint" />
           )}
         </SectionCard>
+        </div>
 
         {/* ── Actions ── */}
         {isPending && (
-          <div className="flex flex-wrap gap-3 pt-1">
+          <div className="flex flex-wrap gap-3 pt-2">
             <button
               onClick={() => setShowApprouveModal(true)}
               disabled={actionLoading}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+              className="h-10 rounded-md bg-green-500 px-5 text-[13px] font-semibold text-white shadow-sm hover:bg-green-600 disabled:opacity-60"
             >
-              <CheckCircle2 size={16} />
               Approuver la demande
             </button>
+
             <button
               onClick={() => setShowRejectModal(true)}
               disabled={actionLoading}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 transition-all disabled:opacity-60 shadow-sm"
+              className="h-10 rounded-md border border-red-100 bg-white px-5 text-[13px] font-semibold text-red-500 shadow-sm hover:bg-red-50 disabled:opacity-60"
             >
-              <XCircle size={16} />
               Rejeter la demande
             </button>
           </div>
         )}
+        </div>
       </div>
 
       {/* ── Modal Approuve ── */}
@@ -393,13 +415,16 @@ function AdminDemandeDetail() {
 
 function InfoCard({ icon, label, value }) {
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-3.5 transition-colors duration-200">
-      <div className="flex items-center gap-1.5 mb-2">
-        <span className="text-green-500 dark:text-green-400">{icon}</span>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">{label}</span>
+    <div className="rounded-md bg-white px-5 py-4">
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-green-500">{icon}</span>
+        <span className="text-[13px] font-semibold uppercase text-slate-400">
+          {label}
+        </span>
       </div>
-      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 break-words">
-        {value || <span className="text-slate-300 dark:text-slate-600 font-normal">—</span>}
+
+      <p className="text-[14px] font-semibold text-slate-700">
+        {value || "—"}
       </p>
     </div>
   );
@@ -407,13 +432,14 @@ function InfoCard({ icon, label, value }) {
 
 function SectionCard({ icon, title, children }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
-      <div className="flex items-center gap-2.5 mb-4">
-        <div className="w-7 h-7 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center">
-          {icon}
-        </div>
-        <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">{title}</h2>
+    <div className="rounded-md bg-white p-6">
+      <div className="mb-5 flex items-center gap-2">
+        <span className="text-green-500">{icon}</span>
+        <h2 className="text-[17px] font-semibold text-slate-700">
+          {title}
+        </h2>
       </div>
+
       {children}
     </div>
   );

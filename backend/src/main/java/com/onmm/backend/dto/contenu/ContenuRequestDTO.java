@@ -26,4 +26,6 @@ public class ContenuRequestDTO {
     private String description;
 
     private String imageUrl;
+
+    private Long specialiteCibleId;
 }

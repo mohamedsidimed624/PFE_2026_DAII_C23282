@@ -21,6 +21,8 @@ public class ContenuMapper {
                 .dateExpiration(contenu.getDateExpiration() != null ? contenu.getDateExpiration().toString() : null)
                 .imageUrl(contenu.getImageUrl())
                 .resume(contenu.getResume())
+                .specialiteCibleId(contenu.getSpecialiteCible() != null ? contenu.getSpecialiteCible().getId() : null)
+                .specialiteCibleNom(contenu.getSpecialiteCible() != null ? contenu.getSpecialiteCible().getLibelle() : null)
                 .build();
     }
 }

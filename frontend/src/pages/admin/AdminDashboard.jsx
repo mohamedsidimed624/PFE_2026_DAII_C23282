@@ -43,13 +43,12 @@ const CARD_VARIANTS = {
 };
 
 function StatCard({ Icon, label, value, color, loading, index }) {
-  const colors = {
-    green:  { bg: "from-green-500 to-green-600",  shadow: "shadow-green-200 dark:shadow-green-900/40",  iconBg: "bg-white/20" },
-    amber:  { bg: "from-amber-400 to-amber-500",  shadow: "shadow-amber-200 dark:shadow-amber-900/40",  iconBg: "bg-white/20" },
-    blue:   { bg: "from-blue-500 to-blue-600",    shadow: "shadow-blue-200 dark:shadow-blue-900/40",    iconBg: "bg-white/20" },
-    purple: { bg: "from-purple-500 to-purple-600",shadow: "shadow-purple-200 dark:shadow-purple-900/40",iconBg: "bg-white/20" },
+  const colorMap = {
+    green: "text-green-500",
+    amber: "text-yellow-500",
+    blue: "text-blue-500",
+    purple: "text-red-400",
   };
-  const c = colors[color] || colors.green;
 
   return (
     <motion.div
@@ -57,28 +56,33 @@ function StatCard({ Icon, label, value, color, loading, index }) {
       initial="hidden"
       animate="show"
       transition={{ delay: index * 0.08, duration: 0.4, ease: "easeOut" }}
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${c.bg} p-5 shadow-lg ${c.shadow} text-white`}
+      className="flex h-28 items-center gap-4 rounded-2xl bg-green-100/70 px-6 shadow-sm"
     >
-      {/* decorative circle */}
-      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10" />
-      <div className="absolute -right-8 -bottom-8 h-32 w-32 rounded-full bg-white/5" />
-
-      <div className="relative flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-white/80">{label}</p>
-          {loading
-            ? <div className="mt-2 h-8 w-20 animate-pulse rounded-lg bg-white/30" />
-            : <p className="mt-1 text-3xl font-bold">{value ?? 0}</p>
-          }
-        </div>
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${c.iconBg}`}>
-          <Icon size={22} />
-        </div>
+      {/* Icon */}
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+        <Icon
+          size={24}
+          className={colorMap[color] || "text-green-500"}
+        />
       </div>
 
-      <div className="relative mt-3 flex items-center gap-1.5 text-xs text-white/70">
-        <TrendingUp size={12} />
-        <span>Données en temps réel</span>
+      {/* Text */}
+      <div>
+        <p className="text-sm font-medium text-slate-400 leading-5">
+          {label}
+        </p>
+
+        {loading ? (
+          <div className="mt-2 h-6 w-16 animate-pulse rounded bg-white/70" />
+        ) : (
+          <p
+            className={`mt-1 text-2xl font-semibold ${
+              colorMap[color] || "text-green-500"
+            }`}
+          >
+            {value ?? 0}
+          </p>
+        )}
       </div>
     </motion.div>
   );

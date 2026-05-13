@@ -178,39 +178,35 @@ function StatCard({ label, value, icon, color, active, onClick }) {
 /* ── Inline Actions ─────────────────────────────────── */
 function InlineActions({ contenu, onEdit, onConfirmAction }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-3">
       <button
         onClick={() => onEdit(contenu)}
-        title="Modifier"
-        className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-800 dark:hover:text-slate-200"
+        className="text-[13px] font-semibold text-blue-500 hover:text-blue-600"
       >
-        <Pencil size={13} />
+        Modifier
       </button>
 
       {contenu.statut === "PUBLISHED" ? (
         <button
           onClick={() => onConfirmAction("unpublish", contenu)}
-          title="Dépublier"
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 transition hover:bg-amber-100 dark:hover:bg-amber-900/30"
+          className="text-[13px] font-semibold text-yellow-500 hover:text-yellow-600"
         >
-          <EyeOff size={13} />
+          Dépublier
         </button>
       ) : (
         <button
           onClick={() => onConfirmAction("publish", contenu)}
-          title="Publier"
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 transition hover:bg-green-100 dark:hover:bg-green-900/30"
+          className="text-[13px] font-semibold text-green-600 hover:text-green-700"
         >
-          <Send size={13} />
+          Publier
         </button>
       )}
 
       <button
         onClick={() => onConfirmAction("delete", contenu)}
-        title="Supprimer"
-        className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 transition hover:bg-red-100 dark:hover:bg-red-900/30"
+        className="text-[13px] font-semibold text-red-500 hover:text-red-600"
       >
-        <Trash2 size={13} />
+        Supprimer
       </button>
     </div>
   );
@@ -298,35 +294,65 @@ function EmptyState() {
 }
 
 /* ── Pagination ─────────────────────────────────────── */
-function Pagination({ page, totalPages, pageSize, totalItems, onPageChange, onPageSizeChange }) {
-  const from = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
-  const to   = Math.min(page * pageSize, totalItems);
-
+function Pagination({
+  page,
+  totalPages,
+  pageSize,
+  totalItems,
+  onPageChange,
+  onPageSizeChange,
+}) {
   return (
-    <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 px-5 py-3.5">
-      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-        <span>Lignes</span>
+    <div className="flex items-center justify-between px-7 py-5">
+      <div className="flex items-center gap-2 text-[13px] text-slate-400">
+        <span>Showing</span>
+
         <select
           value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 text-xs outline-none focus:border-green-500"
+          className="h-9 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-[13px] text-slate-600 dark:text-slate-400 outline-none"
         >
-          {PAGE_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
+          {PAGE_SIZES.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
         </select>
-        <span className="text-slate-400 dark:text-slate-500">{from}–{to} sur {totalItems}</span>
+
+        <span>of {totalItems}</span>
       </div>
 
       <div className="flex items-center gap-1">
         <button
-          onClick={() => onPageChange(page - 1)} disabled={page === 1}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 transition hover:bg-slate-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+          onClick={() => onPageChange(Math.max(1, page - 1))}
+          disabled={page === 1}
+          className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
         >
           <ChevronLeft size={14} />
         </button>
-        <span className="px-3 text-xs font-semibold text-slate-600 dark:text-slate-400">{page} / {totalPages}</span>
+
+        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+          const p = i + 1;
+
+          return (
+            <button
+              key={p}
+              onClick={() => onPageChange(p)}
+              className={`flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold ${
+                page === p
+                  ? "bg-green-500 text-white"
+                  : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+              }`}
+            >
+              {p}
+            </button>
+          );
+        })}
+
         <button
-          onClick={() => onPageChange(page + 1)} disabled={page === totalPages}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 transition hover:bg-slate-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+          onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+          disabled={page === totalPages}
+          className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
         >
           <ChevronRight size={14} />
         </button>
@@ -468,261 +494,278 @@ function AdminContenusPage() {
   const hasFilters = search || statusFilter || typeFilter || visibilityFilter;
 
   return (
-    <AdminLayout title="Gestion des contenus" subtitle="Créez, publiez et gérez les informations diffusées.">
-      <div className="space-y-5">
+  <AdminLayout title="Gestion des contenus">
+    <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-7 py-6">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-[17px] font-semibold text-slate-700 dark:text-slate-200">
+          Gestion des contenus
+        </h1>
 
-        {/* ── HEADER ── */}
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Contenus</h1>
-            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-              {stats.total} contenu{stats.total !== 1 ? "s" : ""} —{" "}
-              <span className="text-green-700 dark:text-green-400 font-medium">{stats.published} publié{stats.published !== 1 ? "s" : ""}</span>,{" "}
-              <span className="text-slate-600 dark:text-slate-400">{stats.draft} brouillon{stats.draft !== 1 ? "s" : ""}</span>,{" "}
-              <span className="text-red-600 dark:text-red-400">{stats.expired} expiré{stats.expired !== 1 ? "s" : ""}</span>
-            </p>
+        <button
+          onClick={handleCreate}
+          className="h-10 rounded-md bg-green-500 px-4 text-[13px] font-semibold text-white shadow-sm hover:bg-green-600"
+        >
+          Nouveau contenu
+        </button>
+      </div>
+
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by order id"
+              className="h-10 w-[240px] rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 pr-10 text-[13px] text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400"
+            />
+            <Search
+              size={15}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300"
+            />
           </div>
 
-          <button
-            onClick={handleCreate}
-            className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700"
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
           >
-            <Plus size={15} />
-            Nouveau contenu
-          </button>
-        </div>
-
-        {/* ── STAT CARDS ── */}
-        {!loading && (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatCard
-              label="Total" value={stats.total}
-              icon={<TrendingUp size={16} />} color="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-              active={!statusFilter} onClick={() => setStatusFilter("")}
-            />
-            <StatCard
-              label="Publiés" value={stats.published}
-              icon={<FileCheck size={16} />} color="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-              active={statusFilter === "PUBLISHED"} onClick={() => setStatusFilter(statusFilter === "PUBLISHED" ? "" : "PUBLISHED")}
-            />
-            <StatCard
-              label="Brouillons" value={stats.draft}
-              icon={<FileClock size={16} />} color="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-              active={statusFilter === "DRAFT"} onClick={() => setStatusFilter(statusFilter === "DRAFT" ? "" : "DRAFT")}
-            />
-            <StatCard
-              label="Expirés" value={stats.expired}
-              icon={<FileX size={16} />} color="bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400"
-              active={statusFilter === "EXPIRED"} onClick={() => setStatusFilter(statusFilter === "EXPIRED" ? "" : "EXPIRED")}
-            />
-          </div>
-        )}
-
-        {/* ── TOOLBAR ── */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-          <div className="flex flex-wrap items-center gap-2 px-4 py-3">
-            {/* Search */}
-            <div className="relative min-w-0 flex-1 sm:max-w-xs">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Titre, résumé, catégorie..."
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 py-2 pl-9 pr-8 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:focus:bg-slate-700 focus:ring-2 focus:ring-green-500/10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-              />
-              {search && (
-                <button onClick={() => setSearch("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                  ×
-                </button>
-              )}
-            </div>
-
-            {/* Filters */}
-            {[
-              { value: typeFilter, onChange: setTypeFilter, options: TYPE_OPTIONS },
-              { value: visibilityFilter, onChange: setVisibilityFilter, options: VISIBILITY_OPTIONS },
-            ].map((f, i) => (
-              <div key={i} className="relative">
-                <Filter size={12} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <select
-                  value={f.value} onChange={(e) => f.onChange(e.target.value)}
-                  className="appearance-none rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 pl-7 pr-7 text-sm text-slate-700 dark:text-slate-200 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/10"
-                >
-                  {f.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-              </div>
+            {TYPE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
             ))}
+          </select>
 
-            {hasFilters && (
-              <button
-                onClick={() => { setSearch(""); setStatusFilter(""); setTypeFilter(""); setVisibilityFilter(""); }}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700"
-              >
-                <RotateCcw size={12} /> Reset
-              </button>
-            )}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
+          >
+            {STATUS_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.value === "" ? "Status : All" : o.label}
+              </option>
+            ))}
+          </select>
 
-            <div className="ml-auto flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1">
-              {[
-                { mode: "table", icon: <List size={14} /> },
-                { mode: "grid",  icon: <LayoutGrid size={14} /> },
-              ].map(({ mode, icon }) => (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  className={cx(
-                    "flex h-7 w-7 items-center justify-center rounded-md transition",
-                    viewMode === mode ? "bg-slate-900 dark:bg-slate-600 text-white" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
-                  )}
-                >
-                  {icon}
-                </button>
-              ))}
-            </div>
-          </div>
+          <select
+            value={visibilityFilter}
+            onChange={(e) => setVisibilityFilter(e.target.value)}
+            className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
+          >
+            {VISIBILITY_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
 
-          {!loading && (
-            <div className="border-t border-slate-100 dark:border-slate-800 px-4 py-2">
-              <p className="text-xs text-slate-400 dark:text-slate-500">
-                <span className="font-semibold text-slate-700 dark:text-slate-300">{filtered.length}</span> résultat{filtered.length !== 1 ? "s" : ""}
-                {search && <span> · "<em>{search}</em>"</span>}
-              </p>
-            </div>
+          {hasFilters && (
+            <button
+              onClick={() => {
+                setSearch("");
+                setStatusFilter("");
+                setTypeFilter("");
+                setVisibilityFilter("");
+              }}
+              className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200"
+            >
+              Reset
+            </button>
           )}
         </div>
 
-        {/* ── TABLE VIEW ── */}
-        {viewMode === "table" && (
-          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-sm">
-                <thead>
-                  <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">
-                    {["Titre & résumé","Type","Statut","Visibilité","Créé le","Publié le","Expire le","Actions"].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {loading ? (
-                    Array.from({ length: 8 }).map((_, i) => (
-                      <tr key={i} className="animate-pulse">
-                        {Array.from({ length: 8 }).map((__, j) => (
-                          <td key={j} className="px-4 py-3.5">
-                            <div className="h-3 rounded bg-slate-100 dark:bg-slate-800" style={{ width: `${50 + (j*13)%45}%` }} />
-                          </td>
-                        ))}
-                      </tr>
-                    ))
-                  ) : paginated.length === 0 ? (
-                    <tr><td colSpan={8}><EmptyState /></td></tr>
-                  ) : (
-                    paginated.map((c) => (
-                      <tr key={c.id} className="group transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                        {/* Titre */}
-                        <td className="max-w-[260px] px-4 py-3.5">
-                          <div className="flex items-center gap-2.5">
-                            {c.imageUrl ? (
-                              <img
-                                src={`http://localhost:8080${c.imageUrl}`}
-                                alt=""
-                                className="h-8 w-8 shrink-0 rounded-lg object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500">
-                                <FileText size={14} />
-                              </div>
-                            )}
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">{c.titre}</p>
-                              <p className="truncate text-xs text-slate-400 dark:text-slate-500">{c.resume || "—"}</p>
-                            </div>
-                          </div>
-                        </td>
+        <div className="flex items-center gap-1 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 p-1 shadow-sm">
+          <button
+            onClick={() => setViewMode("table")}
+            className={`flex h-8 w-8 items-center justify-center rounded-md ${
+              viewMode === "table"
+                ? "bg-green-500 text-white"
+                : "text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
+            }`}
+          >
+            <List size={14} />
+          </button>
 
-                        {/* Type */}
-                        <td className="px-4 py-3.5">
-                          <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
-                            {c.type || "—"}
-                          </span>
-                        </td>
-
-                        {/* Statut */}
-                        <td className="px-4 py-3.5">
-                          <StatusBadge status={c.statut} />
-                        </td>
-
-                        {/* Visibilité */}
-                        <td className="px-4 py-3.5">
-                          <VisibilityBadge visibility={c.visibilite} />
-                        </td>
-
-                        {/* Dates */}
-                        <td className="px-4 py-3.5 text-xs text-slate-500 dark:text-slate-400">{formatDate(c.dateCreation)}</td>
-                        <td className="px-4 py-3.5 text-xs text-slate-500 dark:text-slate-400">{formatDate(c.datePublication)}</td>
-                        <td className="px-4 py-3.5 text-xs text-slate-500 dark:text-slate-400">{formatDate(c.dateExpiration)}</td>
-
-                        {/* Actions */}
-                        <td className="px-4 py-3.5">
-                          <InlineActions contenu={c} onEdit={handleEdit} onConfirmAction={openConfirm} />
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {!loading && filtered.length > 0 && (
-              <Pagination
-                page={page} totalPages={totalPages} pageSize={pageSize} totalItems={filtered.length}
-                onPageChange={setPage}
-                onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
-              />
-            )}
-          </div>
-        )}
-
-        {/* ── GRID VIEW ── */}
-        {viewMode === "grid" && (
-          <>
-            <ContentGrid
-              contenus={paginated} loading={loading} error={error}
-              onEdit={handleEdit} onConfirmAction={openConfirm}
-            />
-            {!loading && filtered.length > 0 && (
-              <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-                <Pagination
-                  page={page} totalPages={totalPages} pageSize={pageSize} totalItems={filtered.length}
-                  onPageChange={setPage}
-                  onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
-                />
-              </div>
-            )}
-          </>
-        )}
-
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`flex h-8 w-8 items-center justify-center rounded-md ${
+              viewMode === "grid"
+                ? "bg-green-500 text-white"
+                : "text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
+            }`}
+          >
+            <LayoutGrid size={14} />
+          </button>
+        </div>
       </div>
 
-      {/* ── Modals ── */}
-      <ContenuWizardModal
-        isOpen={modalOpen} mode={modalMode}
-        initialData={selectedContenu} loading={actionLoading}
-        onClose={() => setModalOpen(false)} onSubmit={handleSubmit}
-      />
+      {viewMode === "table" && (
+        <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1100px] table-fixed text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800">
+                  <th className="w-[24%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    TITRE & RÉSUMÉ
+                  </th>
+                  <th className="w-[11%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    TYPE
+                  </th>
+                  <th className="w-[11%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    STATUT
+                  </th>
+                  <th className="w-[11%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    VISIBILITÉ
+                  </th>
+                  <th className="w-[11%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    CRÉÉ LE
+                  </th>
+                  <th className="w-[11%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    PUBLIÉ LE
+                  </th>
+                  <th className="w-[11%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    EXPIRE LE
+                  </th>
+                  <th className="w-[10%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                    ACTIONS
+                  </th>
+                </tr>
+              </thead>
 
-      <ConfirmModal
-        open={confirmOpen}
-        onClose={() => !confirmLoading && setConfirmOpen(false)}
-        onConfirm={handleConfirm}
-        loading={confirmLoading}
-        config={confirmConfig}
-      />
-    </AdminLayout>
-  );
+              <tbody>
+                {loading ? (
+                  Array.from({ length: 8 }).map((_, i) => (
+                    <tr key={i} className="border-b border-slate-100 dark:border-slate-800">
+                      {Array.from({ length: 8 }).map((__, j) => (
+                        <td key={j} className="px-7 py-4">
+                          <div className="h-3.5 w-24 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : paginated.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-7 py-14 text-center text-sm text-slate-400">
+                      Aucun contenu trouvé.
+                    </td>
+                  </tr>
+                ) : (
+                  paginated.map((c) => (
+                    <tr
+                      key={c.id}
+                      className="border-b border-slate-100 dark:border-slate-800 transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
+                    >
+                      <td className="px-7 py-4">
+                        <p className="truncate text-[14px] font-semibold text-slate-700 dark:text-slate-200">
+                          {c.titre || "Sans titre"}
+                        </p>
+                        <p className="truncate text-[13px] text-slate-400 dark:text-slate-500">
+                          {c.resume || "—"}
+                        </p>
+                      </td>
+
+                      <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                        {c.type || "—"}
+                      </td>
+
+                      <td className="px-7 py-4">
+                        <StatusBadge status={c.statut} />
+                      </td>
+
+                      <td className="px-7 py-4">
+                        <VisibilityBadge visibility={c.visibilite} />
+                      </td>
+
+                      <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                        {formatDate(c.dateCreation)}
+                      </td>
+
+                      <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                        {formatDate(c.datePublication)}
+                      </td>
+
+                      <td className="px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                        {formatDate(c.dateExpiration)}
+                      </td>
+
+                      <td className="px-7 py-4">
+                        <InlineActions
+                          contenu={c}
+                          onEdit={handleEdit}
+                          onConfirmAction={openConfirm}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {!loading && filtered.length > 0 && (
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              totalItems={filtered.length}
+              onPageChange={setPage}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(1);
+              }}
+            />
+          )}
+        </div>
+      )}
+
+      {viewMode === "grid" && (
+        <>
+          <ContentGrid
+            contenus={paginated}
+            loading={loading}
+            error={error}
+            onEdit={handleEdit}
+            onConfirmAction={openConfirm}
+          />
+
+          {!loading && filtered.length > 0 && (
+            <div className="mt-4 overflow-hidden rounded-md bg-white">
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={filtered.length}
+                onPageChange={setPage}
+                onPageSizeChange={(s) => {
+                  setPageSize(s);
+                  setPage(1);
+                }}
+              />
+            </div>
+          )}
+        </>
+      )}
+    </div>
+
+    <ContenuWizardModal
+      isOpen={modalOpen}
+      mode={modalMode}
+      initialData={selectedContenu}
+      loading={actionLoading}
+      onClose={() => setModalOpen(false)}
+      onSubmit={handleSubmit}
+    />
+
+    <ConfirmModal
+      open={confirmOpen}
+      onClose={() => !confirmLoading && setConfirmOpen(false)}
+      onConfirm={handleConfirm}
+      loading={confirmLoading}
+      config={confirmConfig}
+    />
+  </AdminLayout>
+);
 }
 
 export default AdminContenusPage;
