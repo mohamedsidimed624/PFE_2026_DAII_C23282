@@ -225,6 +225,48 @@ public class SondageServiceImpl implements SondageService {
     }
 
     @Override
+    public void publishResultats(Long id) {
+        Sondage s = findSondage(id);
+        if (s.getStatut() != SondageStatut.ACTIF && s.getStatut() != SondageStatut.CLOS) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Les résultats ne peuvent être publiés que pour un sondage actif ou clôturé"
+            );
+        }
+        s.setResultatsPublies(true);
+        sondageRepo.save(s);
+
+        participationRepo.findBySondageId(id).stream()
+                .filter(p -> p.getStatut() == StatutParticipation.COMPLETE && p.getMedecin() != null)
+                .forEach(p -> notificationService.createMedecinNotification(
+                        p.getMedecin().getEmail(),
+                        "RESULTATS_PUBLIES",
+                        "Résultats disponibles",
+                        "Les résultats du sondage \"" + s.getTitre() + "\" sont maintenant disponibles.",
+                        "/medecin/sondages/" + s.getId() + "/resultats",
+                        false
+                ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SondageStatsDto getResultatsForMedecin(Long id, String email) {
+        Sondage s = findSondage(id);
+        if (!s.isResultatsPublies()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Les résultats de ce sondage ne sont pas encore disponibles");
+        }
+        Medecin medecin = findMedecin(email);
+        String hash = buildRepondantHash(id, medecin);
+        boolean completed = participationRepo.findBySondageIdAndRepondantHash(id, hash)
+                .map(p -> p.getStatut() == StatutParticipation.COMPLETE)
+                .orElse(false);
+        if (!completed) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vous n'avez pas complété ce sondage");
+        }
+        return getSondageStats(id);
+    }
+
+    @Override
     public void archiveSondage(Long id) {
         Sondage s = findSondage(id);
         if (s.getStatut() != SondageStatut.CLOS) {
@@ -866,6 +908,7 @@ public class SondageServiceImpl implements SondageService {
         dto.setNbParticipants(nbParticipants);
         dto.setNbCompletes(nbCompletes);
         dto.setTauxCompletion(taux);
+        dto.setResultatsPublies(s.isResultatsPublies());
         return dto;
     }
 
@@ -903,6 +946,7 @@ public class SondageServiceImpl implements SondageService {
         dto.setNbParticipants(nbCompletes);
         dto.setNbCompletes(nbCompletes);
         dto.setTauxCompletion(taux);
+        dto.setResultatsPublies(s.isResultatsPublies());
 
         return dto;
     }
@@ -927,6 +971,7 @@ public class SondageServiceImpl implements SondageService {
         dto.setDateFin(s.getDateFin());
         dto.setNbQuestions(questions.size());
         dto.setQuestions(questions);
+        dto.setResultatsPublies(s.isResultatsPublies());
         participation.ifPresent(p -> dto.setParticipation(toParticipationStatusDto(p)));
 
         return dto;

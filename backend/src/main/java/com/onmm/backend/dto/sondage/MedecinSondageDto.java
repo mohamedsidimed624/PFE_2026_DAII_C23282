@@ -19,6 +19,7 @@ public class MedecinSondageDto {
     private int nbQuestions;
     private List<QuestionDto> questions;
     private ParticipationStatusDto participation;
+    private boolean resultatsPublies;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -52,4 +53,7 @@ public class MedecinSondageDto {
 
     public ParticipationStatusDto getParticipation() { return participation; }
     public void setParticipation(ParticipationStatusDto participation) { this.participation = participation; }
+
+    public boolean isResultatsPublies() { return resultatsPublies; }
+    public void setResultatsPublies(boolean resultatsPublies) { this.resultatsPublies = resultatsPublies; }
 }

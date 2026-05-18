@@ -53,6 +53,11 @@ public class MedecinSondageController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{id}/resultats")
+    public SondageStatsDto getResultats(@PathVariable Long id, Authentication auth) {
+        return sondageService.getResultatsForMedecin(id, currentEmail(auth));
+    }
+
     @GetMapping("/mes-participations")
     public List<ParticipationStatusDto> getMesParticipations(Authentication auth) {
         return sondageService.getMesParticipations(currentEmail(auth));

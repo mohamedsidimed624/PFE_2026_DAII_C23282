@@ -13,10 +13,12 @@ public interface SondageService {
     SondageDetailDto createSondage(SondageCreateRequest req, String adminEmail);
     SondageDetailDto updateSondage(Long id, SondageCreateRequest req);
     void publishSondage(Long id, LocalDateTime dateDebut, LocalDateTime dateFin);
+    void publishResultats(Long id);
     void closeSondage(Long id);
     void archiveSondage(Long id);
     void deleteSondage(Long id);
     SondageStatsDto getSondageStats(Long id);
+    SondageStatsDto getResultatsForMedecin(Long id, String email);
 
     Page<SondageListDto> getAllSondages(String type, String statut, int page, int size);
 

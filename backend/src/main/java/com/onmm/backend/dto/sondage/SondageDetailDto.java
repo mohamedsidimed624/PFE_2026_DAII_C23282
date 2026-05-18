@@ -29,6 +29,7 @@ public class SondageDetailDto {
     private double tauxCompletion;
 
     private List<QuestionDto> questions;
+    private boolean resultatsPublies;
 
     private long nbParticipationsDemarrees;
 
@@ -99,4 +100,7 @@ public class SondageDetailDto {
 
     public List<QuestionDto> getQuestions() { return questions; }
     public void setQuestions(List<QuestionDto> questions) { this.questions = questions; }
+
+    public boolean isResultatsPublies() { return resultatsPublies; }
+    public void setResultatsPublies(boolean resultatsPublies) { this.resultatsPublies = resultatsPublies; }
 }

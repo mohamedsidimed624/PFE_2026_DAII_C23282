@@ -20,6 +20,7 @@ public class SondageListDto {
     private long nbCompletes;
     private double tauxCompletion;
     private long nbParticipationsDemarrees;
+    private boolean resultatsPublies;
 
     public long getNbParticipationsDemarrees() {
         return nbParticipationsDemarrees;
@@ -64,4 +65,7 @@ public class SondageListDto {
 
     public double getTauxCompletion() { return tauxCompletion; }
     public void setTauxCompletion(double tauxCompletion) { this.tauxCompletion = tauxCompletion; }
+
+    public boolean isResultatsPublies() { return resultatsPublies; }
+    public void setResultatsPublies(boolean resultatsPublies) { this.resultatsPublies = resultatsPublies; }
 }

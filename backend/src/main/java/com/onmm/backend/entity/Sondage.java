@@ -55,6 +55,9 @@ public class Sondage {
     private String filtreStatut;
     private String filtreGenre;
 
+    @Column(nullable = false)
+    private boolean resultatsPublies = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cree_par_id")
     private Admin creePar;
@@ -109,6 +112,9 @@ public class Sondage {
 
     public String getFiltreGenre() { return filtreGenre; }
     public void setFiltreGenre(String filtreGenre) { this.filtreGenre = filtreGenre; }
+
+    public boolean isResultatsPublies() { return resultatsPublies; }
+    public void setResultatsPublies(boolean resultatsPublies) { this.resultatsPublies = resultatsPublies; }
 
     public Admin getCreePar() { return creePar; }
     public void setCreePar(Admin creePar) { this.creePar = creePar; }

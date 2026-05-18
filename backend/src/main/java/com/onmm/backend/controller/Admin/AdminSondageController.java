@@ -70,6 +70,12 @@ public class AdminSondageController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{id}/publish-results")
+    public ResponseEntity<Void> publishResultats(@PathVariable Long id) {
+        sondageService.publishResultats(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/{id}/close")
     public ResponseEntity<Void> close(@PathVariable Long id) {
         sondageService.closeSondage(id);
