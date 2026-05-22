@@ -163,7 +163,7 @@ function AdminDemandeDetail() {
         </div>
       )}
 
-      <div className="min-h-secreen bg-[#FAFBFC] px-7 py-6">
+      <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-7 py-6">
         <div className="max-w-6xl space-y-6">
         {/* Back */}
         <button
@@ -176,14 +176,14 @@ function AdminDemandeDetail() {
 
         {/* ── Info cards (header) ── */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
-          <h1 className="mb-5 text-[17px] font-semibold texr-slate-700">
+          <h1 className="mb-5 text-[17px] font-semibold text-slate-700 dark:text-slate-100">
             Détail de la demande
           </h1>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <InfoCard icon={<Hash size={15} />}          label="ID Demande"  value={`#${demande.id}`} />
             <InfoCard icon={<User size={15} />}          label="Demandeur"   value={`${demande.nom} ${demande.prenom}`} />
             <InfoCard icon={<CalendarDays size={15} />}  label="Date"        value={formatDate(demande.submissionDate || demande.date)} />
-            <div className="rounded-md bg-white px-5 py-4">
+            <div className="rounded-md bg-white dark:bg-slate-800 px-5 py-4">
             <div className="mb-2 flex items-center gap-2">
               <span className="text-green-500">
                 <ShieldCheck size={15} />
@@ -415,7 +415,7 @@ function AdminDemandeDetail() {
 
 function InfoCard({ icon, label, value }) {
   return (
-    <div className="rounded-md bg-white px-5 py-4">
+    <div className="rounded-md bg-white dark:bg-slate-800 px-5 py-4">
       <div className="mb-2 flex items-center gap-2">
         <span className="text-green-500">{icon}</span>
         <span className="text-[13px] font-semibold uppercase text-slate-400">
@@ -423,7 +423,7 @@ function InfoCard({ icon, label, value }) {
         </span>
       </div>
 
-      <p className="text-[14px] font-semibold text-slate-700">
+      <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-200">
         {value || "—"}
       </p>
     </div>
@@ -432,10 +432,10 @@ function InfoCard({ icon, label, value }) {
 
 function SectionCard({ icon, title, children }) {
   return (
-    <div className="rounded-md bg-white p-6">
+    <div className="rounded-md bg-white dark:bg-slate-900 p-6">
       <div className="mb-5 flex items-center gap-2">
         <span className="text-green-500">{icon}</span>
-        <h2 className="text-[17px] font-semibold text-slate-700">
+        <h2 className="text-[17px] font-semibold text-slate-700 dark:text-slate-200">
           {title}
         </h2>
       </div>

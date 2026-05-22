@@ -47,11 +47,11 @@ const slideVariant = {
 function inp(err) {
   return cx(
     "w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition",
-    "bg-white text-slate-800 placeholder:text-slate-400",
+    "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500",
     "focus:ring-2 focus:ring-green-500/20",
     err
       ? "border-red-400 focus:border-red-400"
-      : "border-slate-200 focus:border-green-500"
+      : "border-slate-200 dark:border-slate-700 focus:border-green-500"
   );
 }
 
@@ -59,10 +59,10 @@ function Field({ label, hint, error, required, children }) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2">
-        <label className="block text-sm font-semibold text-slate-700">
+        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
           {label}{required && <span className="ml-0.5 text-green-600">*</span>}
         </label>
-        {hint && <span className="text-xs text-slate-400 shrink-0">{hint}</span>}
+        {hint && <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">{hint}</span>}
       </div>
       {children}
       <AnimatePresence>
@@ -94,13 +94,13 @@ function Stepper({ currentStep }) {
                 "flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-all duration-300",
                 done    ? "bg-green-600 text-white"
                 : current ? "bg-green-600 text-white ring-4 ring-green-100"
-                : "bg-slate-100 text-slate-400"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
               )}>
                 {done ? <Check size={15} /> : s.id}
               </div>
               <span className={cx(
                 "whitespace-nowrap text-[11px] font-semibold transition-colors",
-                current ? "text-green-700" : done ? "text-slate-500" : "text-slate-400"
+                current ? "text-green-700 dark:text-green-400" : done ? "text-slate-500 dark:text-slate-400" : "text-slate-400 dark:text-slate-600"
               )}>
                 {s.label}
               </span>
@@ -108,7 +108,7 @@ function Stepper({ currentStep }) {
             {i < STEPS.length - 1 && (
               <div className={cx(
                 "mx-2 flex-1 h-0.5 mb-4 rounded-full transition-all duration-500",
-                currentStep > s.id ? "bg-green-500" : "bg-slate-200"
+                currentStep > s.id ? "bg-green-500" : "bg-slate-200 dark:bg-slate-700"
               )} />
             )}
           </div>
@@ -246,22 +246,22 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="relative z-10 w-full max-w-2xl rounded-2xl bg-white shadow-2xl flex flex-col overflow-hidden"
+            className="relative z-10 w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 shadow-2xl flex flex-col overflow-hidden"
             style={{ maxHeight: "92vh" }}
           >
             {/* Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-6 py-4">
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 py-4">
               <div>
-                <h2 className="text-base font-bold text-slate-900">
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
                   {mode === "create" ? "Nouvelle publication" : "Modifier la publication"}
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                   Étape {step} sur {STEPS.length} — {STEPS[step - 1]?.label}
                 </p>
               </div>
               <button
                 onClick={() => !loading && onClose()}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
               >
                 <X size={16} />
               </button>
@@ -271,7 +271,7 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
             <Stepper currentStep={step} />
 
             {/* Divider */}
-            <div className="shrink-0 border-t border-slate-100" />
+            <div className="shrink-0 border-t border-slate-100 dark:border-slate-800" />
 
             {/* Step content */}
             <div className="flex-1 overflow-y-auto px-6 py-6">
@@ -289,12 +289,12 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
                                 "flex flex-col items-center gap-2 rounded-xl border p-3 text-center transition-all",
                                 form.type === t.value
                                   ? cx("ring-2 ring-green-500/30", t.accent)
-                                  : "border-slate-200 bg-white hover:border-slate-300"
+                                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600"
                               )}
                             >
                               <div className={cx(
                                 "flex h-9 w-9 items-center justify-center rounded-xl transition",
-                                form.type === t.value ? "bg-white/70" : "bg-slate-100 text-slate-500"
+                                form.type === t.value ? "bg-white/70" : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
                               )}>
                                 <t.Icon size={17} />
                               </div>
@@ -313,7 +313,7 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
                                 "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
                                 Number(form.categorieId) === c.id
                                   ? "border-green-500 bg-green-600 text-white"
-                                  : "border-slate-200 bg-white text-slate-600 hover:border-green-300 hover:text-green-700"
+                                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-green-300 hover:text-green-700"
                               )}
                             >
                               {Number(form.categorieId) === c.id && <Check size={10} />}
@@ -331,18 +331,18 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
                                 "flex items-center gap-3 rounded-xl border p-4 text-left transition-all",
                                 form.visibilite === v.value
                                   ? "border-green-500 bg-green-50 ring-2 ring-green-500/20"
-                                  : "border-slate-200 bg-white hover:border-green-200"
+                                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-green-200 dark:hover:border-green-700"
                               )}
                             >
                               <span className={cx(
                                 "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition",
-                                form.visibilite === v.value ? "bg-green-100 text-green-600" : "bg-slate-100 text-slate-500"
+                                form.visibilite === v.value ? "bg-green-100 dark:bg-green-900/30 text-green-600" : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
                               )}>
                                 <v.Icon size={16} />
                               </span>
                               <div>
-                                <p className={cx("text-sm font-bold", form.visibilite === v.value ? "text-green-700" : "text-slate-800")}>{v.label}</p>
-                                <p className="text-xs text-slate-400">{v.desc}</p>
+                                <p className={cx("text-sm font-bold", form.visibilite === v.value ? "text-green-700 dark:text-green-400" : "text-slate-800 dark:text-slate-100")}>{v.label}</p>
+                                <p className="text-xs text-slate-400 dark:text-slate-500">{v.desc}</p>
                               </div>
                             </button>
                           ))}
@@ -384,7 +384,7 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
                   {step === 2 && (
                     <div className="space-y-5">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-900">Image de couverture</h3>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Image de couverture</h3>
                         <p className="mt-1 text-sm text-slate-500">Une image attrayante augmente l'engagement de votre publication.</p>
                       </div>
 
@@ -395,10 +395,10 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
                               "group flex cursor-pointer flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed p-14 text-center transition-all",
                               stepErrors.image
                                 ? "border-red-300 bg-red-50"
-                                : "border-slate-200 bg-slate-50 hover:border-green-400 hover:bg-green-50/40"
+                                : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-green-400 hover:bg-green-50/40 dark:hover:bg-green-900/10"
                             )}
                           >
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-200 text-slate-400 group-hover:border-green-300 group-hover:text-green-600 transition-colors">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-600 text-slate-400 group-hover:border-green-300 group-hover:text-green-600 transition-colors">
                               <UploadCloud size={28} />
                             </div>
                             <div>
@@ -440,7 +440,7 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
                   {step === 3 && (
                     <div className="space-y-5">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-900">Rédaction du contenu</h3>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Rédaction du contenu</h3>
                         <p className="mt-1 text-sm text-slate-500">Titre clair, résumé accrocheur et corps complet.</p>
                       </div>
 
@@ -471,9 +471,9 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
                       </Field>
 
                       <Field label="Corps du contenu" required error={stepErrors.contenu}>
-                        <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-500/15 transition">
-                          <div className="border-b border-slate-100 bg-white px-4 py-2">
-                            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Corps du texte</span>
+                        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-500/15 transition">
+                          <div className="border-b border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2">
+                            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Corps du texte</span>
                           </div>
                           <textarea rows={10} value={form.contenu} onChange={(e) => update("contenu", e.target.value)}
                             placeholder="Rédigez le corps complet de la publication. Soyez précis, structuré et factuel…"
@@ -487,16 +487,16 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
                   {step === 4 && (
                     <div className="space-y-5">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-900">Vérification finale</h3>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Vérification finale</h3>
                         <p className="mt-1 text-sm text-slate-500">Relisez avant d'enregistrer le brouillon.</p>
                       </div>
 
                       {/* Summary */}
-                      <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
-                        <div className="border-b border-slate-100 bg-slate-50 px-5 py-2.5">
-                          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Récapitulatif</p>
+                      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div className="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-5 py-2.5">
+                          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Récapitulatif</p>
                         </div>
-                        <div className="divide-y divide-slate-100 bg-white">
+                        <div className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                           {[
                             { label: "Type",        value: TYPE_OPTIONS.find((t) => t.value === form.type)?.label },
                             { label: "Catégorie",   value: selectedCategory },
@@ -508,8 +508,8 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
                             { label: "Image",       value: imagePreview ? <span className="text-green-600 font-semibold flex items-center gap-1"><Check size={12}/>Image ajoutée</span> : <span className="text-amber-500">Aucune image</span> },
                           ].filter(r => r.label !== "Cible" || form.visibilite === "PRIVEE").map(({ label, value }) => (
                             <div key={label} className="flex items-center justify-between gap-4 px-5 py-3">
-                              <span className="text-xs font-semibold text-slate-400 shrink-0 w-20">{label}</span>
-                              <span className="text-right text-xs text-slate-800 truncate">{value}</span>
+                              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 shrink-0 w-20">{label}</span>
+                              <span className="text-right text-xs text-slate-800 dark:text-slate-200 truncate">{value}</span>
                             </div>
                           ))}
                         </div>
@@ -524,9 +524,9 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
                         </div>
                       </Field>
 
-                      <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3.5">
-                        <Check size={15} className="mt-0.5 shrink-0 text-green-600" />
-                        <p className="text-xs text-green-800 leading-5">
+                      <div className="flex items-start gap-3 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-4 py-3.5">
+                        <Check size={15} className="mt-0.5 shrink-0 text-green-600 dark:text-green-400" />
+                        <p className="text-xs text-green-800 dark:text-green-300 leading-5">
                           La publication sera sauvegardée en <strong>Brouillon</strong>. Elle ne sera visible qu'après publication manuelle depuis le panneau de gestion.
                         </p>
                       </div>
@@ -551,9 +551,9 @@ function ContenuWizardModal({ isOpen, mode = "create", initialData = null, loadi
             </AnimatePresence>
 
             {/* Footer */}
-            <div className="flex shrink-0 items-center justify-between border-t border-slate-100 bg-white px-6 py-4">
+            <div className="flex shrink-0 items-center justify-between border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4">
               <button type="button" onClick={step === 1 ? onClose : prev}
-                className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
               >
                 <ArrowLeft size={14} />
                 {step === 1 ? "Annuler" : "Retour"}

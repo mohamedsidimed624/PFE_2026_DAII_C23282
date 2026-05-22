@@ -17,19 +17,30 @@ function ApplicationSteps() {
   const prevStep = () => setStep(step - 1);
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Soumettre votre dossier</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Remplissez les étapes ci-dessous pour adhérer à l'Ordre National des Médecins de Mauritanie.
+    <div className="mx-auto w-full max-w-[1240px]">
+      <div className="mb-5">
+        <h1 className="text-[21px] font-semibold tracking-tight text-slate-900">
+          Soumettre votre dossier
+        </h1>
+        <p className="mt-1 text-[13px] text-slate-400">
+          Remplissez les étapes ci-dessous pour adhérer à l'Ordre National des
+          Médecins de Mauritanie.
         </p>
       </div>
+
       <StepIndicator />
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+
+      <div className="mt-6">
         {step === 1 && <StepPersonal nextStep={nextStep} />}
-        {step === 2 && <StepEducation nextStep={nextStep} prevStep={prevStep} />}
-        {step === 3 && <StepExperience nextStep={nextStep} prevStep={prevStep} />}
-        {step === 4 && <StepDocuments nextStep={nextStep} prevStep={prevStep} />}
+        {step === 2 && (
+          <StepEducation nextStep={nextStep} prevStep={prevStep} />
+        )}
+        {step === 3 && (
+          <StepExperience nextStep={nextStep} prevStep={prevStep} />
+        )}
+        {step === 4 && (
+          <StepDocuments nextStep={nextStep} prevStep={prevStep} />
+        )}
         {step === 5 && <ConsentStep prevStep={prevStep} />}
       </div>
     </div>
@@ -38,12 +49,22 @@ function ApplicationSteps() {
 
 function SubmitApplication() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
-      <Breadcrumb items={[{ label: "Accueil", to: "/" }, { label: "Déposer votre dossier" }]} />
-      <main className="pt-8 px-6 pb-16">
-        <ApplicationSteps />
-      </main>
+
+      {/* pt-[74px] clears the fixed navbar (74px height) */}
+      <div className="pt-[74px]">
+        <Breadcrumb
+          items={[
+            { label: "Accueil", to: "/" },
+            { label: "Déposer votre dossier" },
+          ]}
+        />
+
+        <main className="px-6 pb-12 pt-7">
+          <ApplicationSteps />
+        </main>
+      </div>
     </div>
   );
 }

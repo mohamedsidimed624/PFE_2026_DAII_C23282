@@ -9,21 +9,12 @@ const STEPS = [
   "Déclaration et consentement",
 ];
 
-const W = 260;
-const H = 54;
-const N = 22;
+const W = 240;
+const H = 44;
+const N = 18;
 
-function chevronPoints(i, total) {
+function chevronPoints() {
   const mid = H / 2;
-
-  if (i === 0) {
-    return `0,0 ${W - N},0 ${W},${mid} ${W - N},${H} 0,${H} ${N},${mid}`;
-  }
-
-  if (i === total - 1) {
-    return `0,0 ${W - N},0 ${W},${mid} ${W - N},${H} 0,${H} ${N},${mid}`;
-  }
-
   return `0,0 ${W - N},0 ${W},${mid} ${W - N},${H} 0,${H} ${N},${mid}`;
 }
 
@@ -36,89 +27,50 @@ export default function StepIndicator() {
 
   if (submitted) return null;
 
-  const total = STEPS.length;
-
   return (
-    <div
-      className="w-full mb-10 overflow-x-auto"
-      style={{
-        padding: "6px 0",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          gap: "14px",
-          minWidth: "100%",
-        }}
-      >
+    <div className="mb-7 w-full overflow-x-auto">
+      <div className="flex min-w-[900px] gap-[3px]">
         {STEPS.map((label, i) => {
           const num = i + 1;
           const active = step === num;
           const completed = step > num;
           const clickable = num <= step;
-
           const isGreen = active || completed;
 
-          const fill = isGreen ? "#2fbe73" : "#ffffff";
-          const stroke = isGreen ? "#2fbe73" : "#dfe7e4";
-          const color = isGreen ? "#ffffff" : "#374151";
-
           return (
-            <div
-              key={i}
-              onClick={() => {
-                if (clickable) setStep(num);
-              }}
+            <button
+              key={label}
+              type="button"
+              onClick={() => clickable && setStep(num)}
+              className="relative flex-1"
               style={{
-                position: "relative",
-                flex: 1,
-                minWidth: 0,
-                height: "54px",
+                height: `${H}px`,
                 cursor: clickable ? "pointer" : "default",
-                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.08))",
+                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.06))",
               }}
             >
               <svg
                 viewBox={`0 0 ${W} ${H}`}
                 preserveAspectRatio="none"
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  overflow: "visible",
-                }}
+                className="absolute inset-0 h-full w-full overflow-visible"
               >
                 <polygon
-                  points={chevronPoints(i, total)}
-                  fill={fill}
-                  stroke={stroke}
-                  strokeWidth="1.4"
+                  points={chevronPoints()}
+                  fill={isGreen ? "#16a34a" : "#ffffff"}
+                  stroke={isGreen ? "#16a34a" : "#cbd5e1"}
+                  strokeWidth="1"
                   vectorEffect="non-scaling-stroke"
                 />
               </svg>
 
-              <div
-                style={{
-                  position: "relative",
-                  zIndex: 2,
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingLeft: "32px",
-                  paddingRight: "32px",
-                  color,
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  textAlign: "center",
-                  whiteSpace: "normal",
-                }}
+              <span
+                className={`relative z-10 flex h-full items-center justify-center px-6 text-center text-[12px] font-medium leading-tight ${
+                  isGreen ? "text-white" : "text-slate-600"
+                }`}
               >
                 {label}
-              </div>
-            </div>
+              </span>
+            </button>
           );
         })}
       </div>

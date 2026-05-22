@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -26,12 +26,13 @@ const navItems = [
   { label: "Notifications",            Icon: Bell,                 to: "/admin/notifications", badge: true },
   { label: "Gestion des Sondages",     Icon: BarChart2,            to: "/admin/sondages" },
   { label: "Diffusion d'information",  Icon: Megaphone,            to: "/admin/diffusion" },
-  { label: "Processus Électoral",      Icon: Vote,                 to: "/admin/processus" },
 ];
 
 function AdminSidebar({ collapsed, onToggle }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [electionOpen, setElectionOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchCount = () => {
@@ -98,6 +99,66 @@ function AdminSidebar({ collapsed, onToggle }) {
             )}
           </NavLink>
         ))}
+
+        {/* Processus Électoral avec sous-menu */}
+        <div>
+          <button
+            title={collapsed ? "Processus Électoral" : undefined}
+            onClick={() => !collapsed && setElectionOpen((o) => !o)}
+            className={`flex w-full items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              location.pathname.startsWith("/admin/processus")
+                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+                : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
+            }`}
+          >
+            <Vote
+              size={17}
+              className={`shrink-0 ${
+                location.pathname.startsWith("/admin/processus")
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-slate-400 dark:text-slate-500"
+              }`}
+            />
+            {!collapsed && (
+              <>
+                <span className="flex-1 leading-none">Processus Électoral</span>
+                <ChevronDown
+                  size={13}
+                  className={`text-slate-400 transition-transform duration-200 ${electionOpen ? "rotate-180" : ""}`}
+                />
+              </>
+            )}
+          </button>
+
+          {!collapsed && electionOpen && (
+            <div className="ml-6 mt-0.5 space-y-0.5">
+              <NavLink
+                to="/admin/processus/elections"
+                className={({ isActive }) =>
+                  `flex items-center px-3 py-2 rounded-lg text-xs transition-colors ${
+                    isActive
+                      ? "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/10"
+                      : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
+                  }`
+                }
+              >
+                Gestion des Élections
+              </NavLink>
+              <NavLink
+                to="/admin/processus/candidats"
+                className={({ isActive }) =>
+                  `flex items-center px-3 py-2 rounded-lg text-xs transition-colors ${
+                    isActive
+                      ? "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/10"
+                      : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
+                  }`
+                }
+              >
+                Gestion des Candidats
+              </NavLink>
+            </div>
+          )}
+        </div>
 
         {/* Paramètres avec sous-menu */}
         <div>

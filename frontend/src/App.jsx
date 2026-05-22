@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import "./App.css";
 
 import Home from "./pages/Home";
@@ -27,28 +27,35 @@ import MedecinReclamationDetailPage from "./pages/medecin/MedecinReclamationDeta
 import MedecinNotificationsPage from "./pages/medecin/MedecinNotificationsPage.jsx";
 import MedecinCotisationPage from "./pages/medecin/MedecinCotisationPage.jsx";
 import MedecinAnnoncesPage from "./pages/medecin/MedecinAnnoncesPage.jsx";
+import MedecinSondagesPage from "./pages/medecin/MedecinSondagesPage.jsx";
+import MedecinSondageParticipationPage from "./pages/medecin/MedecinSondageParticipationPage.jsx";
+import MedecinSondageResultatsPage from "./pages/medecin/MedecinSondageResultatsPage.jsx";
+import MedecinElectionsPage from "./pages/medecin/MedecinElectionsPage.jsx";
+import MedecinElectionDetailPage from "./pages/medecin/MedecinElectionDetailPage.jsx";
+import MedecinVotingPage from "./pages/medecin/MedecinVotingPage.jsx";
+import MedecinCandidaturesPage from "./pages/medecin/MedecinCandidaturesPage.jsx";
+import CandidatureFormPage from "./pages/medecin/CandidatureFormPage.jsx";
+import MedecinElectionResultsPage from "./pages/medecin/MedecinElectionResultsPage.jsx";
 
 import Contact from "./pages/ContactPage.jsx";
 import AnnoncesPage from "./pages/AnnoncesPage.jsx";
 import AnnonceDetailPage from "./pages/AnnonceDetailPage.jsx";
 import GaleriePage from "./pages/GaleriePage.jsx";
 import AProposPage from "./pages/AProposPage.jsx";
-import ChatbotPage from "./pages/ChatbotPage.jsx";
-import AssistantButton from "./components/public/AssistantButton.jsx";
 
-function PublicChatbot() {
-  const { pathname } = useLocation();
-  if (
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/medecin") ||
-    pathname === "/login" ||
-    pathname === "/set-password" ||
-    pathname === "/forgot-password" ||
-    pathname === "/activate" ||
-    pathname === "/assistant"
-  ) return null;
-  return <AssistantButton />;
-}
+// function PublicChatbot() {
+//   const { pathname } = useLocation();
+//   if (
+//     pathname.startsWith("/admin") ||
+//     pathname.startsWith("/medecin") ||
+//     pathname === "/login" ||
+//     pathname === "/set-password" ||
+//     pathname === "/forgot-password" ||
+//     pathname === "/activate" ||
+//     pathname === "/assistant"
+//   ) return null;
+//   return <AssistantButton />;
+// }
 
 function App() {
   return (
@@ -69,7 +76,6 @@ function App() {
         <Route path="/reclamations" element={<PublicReclamationPage />} />
         <Route path="/galerie" element={<GaleriePage />} />
         <Route path="/a-propos" element={<AProposPage />} />
-        <Route path="/assistant" element={<ChatbotPage />} />
 
         <Route
           path="/medecin/reclamations"
@@ -174,7 +180,25 @@ function App() {
           path="/medecin/sondages"
           element={
             <MedecinRoute>
-              <PlaceholderPage title="Sondage" />
+              <MedecinSondagesPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/sondages/:id"
+          element={
+            <MedecinRoute>
+              <MedecinSondageParticipationPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/sondages/:id/resultats"
+          element={
+            <MedecinRoute>
+              <MedecinSondageResultatsPage />
             </MedecinRoute>
           }
         />
@@ -183,7 +207,52 @@ function App() {
           path="/medecin/elections"
           element={
             <MedecinRoute>
-              <PlaceholderPage title="Élection" />
+              <MedecinElectionsPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/elections/:id"
+          element={
+            <MedecinRoute>
+              <MedecinElectionDetailPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/elections/:id/voter"
+          element={
+            <MedecinRoute>
+              <MedecinVotingPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/elections/:id/candidater"
+          element={
+            <MedecinRoute>
+              <CandidatureFormPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/elections/:id/resultats"
+          element={
+            <MedecinRoute>
+              <MedecinElectionResultsPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
+          path="/medecin/candidatures"
+          element={
+            <MedecinRoute>
+              <MedecinCandidaturesPage />
             </MedecinRoute>
           }
         />
@@ -198,7 +267,7 @@ function App() {
         />
       </Routes>
 
-      <PublicChatbot />
+      
     </>
   );
 }

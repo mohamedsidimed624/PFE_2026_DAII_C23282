@@ -47,6 +47,13 @@ public class FileStorageService {
         return storeFile(image, "contenus");
     }
 
+    public String storeCandidatureFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("Le fichier est vide");
+        }
+        return storeFile(file, "candidatures");
+    }
+
     private String storeFile(MultipartFile file, String folder) {
         try {
             String originalName = file.getOriginalFilename();

@@ -1,18 +1,13 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Search, ArrowRight, BarChart3, PieChart } from "lucide-react";
 import { getSuiviDossier } from "../services/demandeSuiviApi";
 import hero from "../assets/hero.jpg";
-import { heroLogos } from "../constant/data";
-import Marquee from "react-fast-marquee";
-
 
 function Hero() {
   const [numero, setNumero] = useState("");
   const [error, setError] = useState("");
   const [loadingSearch, setLoadingSearch] = useState(false);
-
   const navigate = useNavigate();
 
   const handleSearch = async () => {
@@ -26,140 +21,114 @@ function Hero() {
     try {
       setLoadingSearch(true);
       setError("");
-
       await getSuiviDossier(valeur);
-
       navigate(`/suivi-dossier?numero=${encodeURIComponent(valeur)}`);
-    } catch (err) {
-      console.error(err);
-      setError(
-        "Aucun dossier trouvé pour ce numéro. Vérifiez votre numéro de dossier."
-      );
+    } catch {
+      setError("Aucun dossier trouvé pour ce numéro.");
     } finally {
       setLoadingSearch(false);
     }
   };
 
   return (
-    <section className="relative overflow-hidden bg-white pt-28 pb-20">
-      <div className="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-gray-100/80 blur-3xl"></div>
-      <div className="absolute top-20 right-0 h-[28rem] w-[28rem] rounded-full bg-gray-100/70 blur-2xl"></div>
+    <section className="relative overflow-hidden bg-white pt-[92px] pb-16">
+      {/* Background shapes */}
+      <div className="pointer-events-none absolute -left-48 -top-40 h-[560px] w-[560px] rounded-full bg-slate-100/70" />
+      <div className="pointer-events-none absolute right-10 top-28 h-[470px] w-[470px] rounded-full bg-slate-100/80" />
 
-      <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-14 items-center">
-        {/* LEFT */}
-        <div className="relative z-10">
-          <p className="text-xl md:text-2xl font-semibold text-gray-800 mb-4 leading-relaxed">
+      <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-12 px-8 lg:grid-cols-[1.05fr_0.95fr]">
+        {/* LEFT CONTENT */}
+        <div className="max-w-[680px]">
+          <p className="mb-6 text-[25px] font-semibold leading-tight text-slate-900">
             السلك الوطني للأطباء الموريتانيين
           </p>
 
-          <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight mb-6">
-            Ordre National des 
-            <span className="block text-green-600">Médecins Mauritaniens</span>
+          <h1 className="mb-6 text-[42px] font-semibold leading-[1.18] tracking-[-0.03em] text-slate-950 lg:text-[50px]">
+            Ordre National des
+            <span className="block text-green-600">
+              Médecins Mauritaniens
+            </span>
           </h1>
 
-          <p className="max-w-2xl text-gray-600 text-base md:text-lg leading-8 mb-10">
+          <p className="mb-10 max-w-[680px] text-[18px] leading-[1.9] text-slate-600">
             L’ONMM joue un rôle essentiel dans l’organisation, la régulation et
             le développement de la profession médicale en Mauritanie, à travers
-            la gestion des adhésions, la publication des informations
-            officielles et le suivi du registre des médecins.
+            la gestion des adhésions, la publication des informations officielles
+            et le suivi du registre des médecins.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-start">
-            <div className="w-full sm:max-w-md">
-              <div className="flex items-center bg-white border border-green-200 rounded-full shadow-sm px-4 h-14">
-                <input
-                  type="text"
-                  value={numero}
-                  onChange={(e) => setNumero(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSearch();
-                    }
-                  }}
-                  placeholder="Entrez votre numéro de dossier"
-                  className="flex-1 bg-transparent outline-none text-gray-700 placeholder:text-gray-400"
-                />
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+  <div className="w-full sm:w-[330px]">
+    <div className="flex h-[48px] items-center rounded-full border border-green-200 bg-white px-5 shadow-sm">
+      <input
+        value={numero}
+        onChange={(e) => setNumero(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+        placeholder="Entrez votre numéro de dossier"
+        className="min-w-0 flex-1 bg-transparent text-[15px] text-slate-700 outline-none placeholder:text-slate-400"
+      />
 
-                <button
-                  onClick={handleSearch}
-                  type="button"
-                  disabled={loadingSearch}
-                  className="group flex items-center justify-center h-10 w-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition disabled:opacity-60 focus-within:border-green-400 focus-within:shadow-md"
-                  aria-label="Rechercher un dossier"
-                >
-                  <Search size={18} />
-                </button>
-              </div>
+      <button
+        onClick={handleSearch}
+        disabled={loadingSearch}
+        className="flex h-8 w-8 items-center justify-center rounded-full text-green-600 transition hover:bg-green-50 disabled:opacity-50"
+      >
+        <Search size={20} />
+      </button>
+    </div>
 
-              {error && (
-                <p className="mt-3 text-sm text-red-600 bg-white-50 border border-none px-2 py-1">
-                  {error}
-                </p>
-              )}
-            </div>
+    {error && (
+      <p className="mt-2 px-2 text-sm text-red-600">{error}</p>
+    )}
+  </div>
 
-            <Link
-              to="/adhesion"
-              className="inline-flex items-center justify-center gap-2 h-14 w-110 px-7 rounded-full bg-green-600 text-white font-medium shadow-sm hover:bg-green-700 transition"
-            >
-              Soumettre votre dossier
-              <ArrowRight size={18} />
-            </Link>
-          </div>
+  <Link
+    to="/adhesion"
+    className="inline-flex h-[48px] w-full items-center justify-center gap-4 rounded-full bg-green-600 px-8 text-[16px] font-semibold text-white shadow-sm transition hover:bg-green-700 sm:w-[250px]"
+  >
+    <span className="whitespace-nowrap">Soumettre votre dossier</span>
+    <ArrowRight size={20} />
+  </Link>
+</div>
         </div>
 
-        {/* RIGHT */}
-        <div className="relative z-10 flex justify-center lg:justify-end">
-          <div className="relative w-full max-w-[540px] h-[460px]">
-            <div className="absolute right-2 top-2 h-[420px] w-[420px] rounded-full bg-gray-100"></div>
-            <div className="absolute right-14 top-16 h-[320px] w-[320px] rounded-full bg-green-50"></div>
-            <div className="absolute left-10 top-16 h-16 w-16 rounded-tl-full rounded-tr-full rounded-br-full bg-green-500"></div>
+        {/* RIGHT VISUAL */}
+        <div className="relative hidden h-[560px] lg:block">
+          <div className="absolute right-0 top-12 h-[470px] w-[470px] rounded-full bg-slate-100" />
+          <div className="absolute right-[65px] top-[125px] h-[340px] w-[340px] rounded-full bg-green-50" />
 
-            <div className="absolute right-24 top-24 h-[270px] w-[270px] overflow-hidden rounded-[2rem] shadow-2xl bg-white">
-              <img
-                src={hero}
-                alt="Médecin"
-                className="h-full w-full object-cover"
-              />
-            </div>
+          <div className="absolute left-[60px] top-[125px] h-[70px] w-[70px] rounded-tl-full rounded-tr-full rounded-br-full bg-green-500" />
 
-            <div className="absolute left-2 top-52 bg-white rounded-2xl shadow-xl px-5 py-4 flex items-center gap-3">
-              <div className="h-12 w-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
-                <BarChart3 size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Suivi</p>
-                <p className="font-semibold text-gray-800">Dossiers</p>
-              </div>
-            </div>
+          <div className="absolute right-[105px] top-[118px] h-[300px] w-[300px] overflow-hidden rounded-[34px] bg-white shadow-[0_30px_70px_rgba(15,23,42,0.18)]">
+            <img
+              src={hero}
+              alt="Médecin"
+              className="h-full w-full object-cover"
+            />
+          </div>
 
-            <div className="absolute right-4 top-28 bg-green-500 text-white rounded-2xl shadow-xl p-4">
-              <PieChart size={28} />
+          <div className="absolute left-[20px] top-[260px] flex items-center gap-4 rounded-2xl bg-white px-5 py-4 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600">
+              <BarChart3 size={25} />
             </div>
+            <div>
+              <p className="text-sm text-slate-400">Suivi</p>
+              <p className="text-xl font-semibold text-slate-900">Dossiers</p>
+            </div>
+          </div>
 
-            <div className="absolute right-10 bottom-10 bg-white rounded-2xl shadow-xl px-5 py-3">
-              <p className="text-sm text-gray-500">Registre actif</p>
-              <p className="text-xl font-bold text-green-600">500 Docteurs</p>
-            </div>
+          <div className="absolute right-[15px] top-[150px] flex h-[72px] w-[72px] items-center justify-center rounded-2xl bg-green-600 text-white shadow-[0_18px_45px_rgba(22,163,74,0.28)]">
+            <PieChart size={34} />
+          </div>
+
+          <div className="absolute bottom-[85px] right-[45px] rounded-2xl bg-white px-7 py-4 shadow-[0_18px_45px_rgba(15,23,42,0.18)]">
+            <p className="text-[15px] text-slate-500">Registre actif</p>
+            <p className="text-[24px] font-bold leading-tight text-green-600">
+              500 Docteurs
+            </p>
           </div>
         </div>
       </div>
-      {/* Clients logo */}
-      <div className="mt-8 lg:mt-[100px] relative overflow-hidden">
-        <Marquee pauseOnHover={true}>
-          {heroLogos.map((logo) => (
-
-            <div className="px-20 py-5" key={logo.id}>
-              <img src={logo.img} alt="logo" width={logo.width} height={28} />
-            </div>
-            
-          ))}
-        </Marquee>
-
-        <div className="absolute top-0 left-0 bg-gradient-to-r from-white-97 via-white-97/80 to-transparent w-24 h-full z-10 pointer-events-none" />
-        <div className="absolute top-0 right-0 bg-gradient-to-l from-white-97 via-white-97/80 to-transparent w-24 h-full z-10 pointer-events-none" />
-      </div>
-
     </section>
   );
 }

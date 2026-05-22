@@ -11,6 +11,14 @@ import AdminContenusPage from "../pages/admin/AdminContenusPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminParametresPage from "../pages/admin/AdminParametresPage";
 import AdminNotificationsPage from "../pages/admin/AdminNotificationsPage";
+import AdminSondagesPage from "../pages/admin/AdminSondagesPage";
+import AdminSondageCreationPage from "../pages/admin/AdminSondageCreationPage";
+import AdminSondageDetailPage from "../pages/admin/AdminSondageDetailPage";
+import AdminElectionsPage from "../pages/admin/AdminElectionsPage";
+import AdminElectionCreationPage from "../pages/admin/AdminElectionCreationPage";
+import AdminElectionDetailPage from "../pages/admin/AdminElectionDetailPage";
+import AdminCandidaturesPage from "../pages/admin/AdminCandidaturesPage";
+import AdminElectionCandidatesPage from "../pages/admin/AdminElectionCandidatesPage";
 
 
 function AdminRoutes() {
@@ -35,6 +43,18 @@ function AdminRoutes() {
 
       <Route path="parametres" element={<AdminParametresPage />} />
       <Route path="parametres/securite" element={<AdminParametresPage />} />
+
+      <Route path="sondages" element={<AdminSondagesPage />} />
+      <Route path="sondages/nouveau" element={<AdminSondageCreationPage />} />
+      <Route path="sondages/:id/modifier" element={<AdminSondageCreationPage />} />
+      <Route path="sondages/:id" element={<AdminSondageDetailPage />} />
+
+      <Route path="processus/elections" element={<AdminElectionsPage />} />
+      <Route path="processus/elections/nouveau" element={<AdminElectionCreationPage />} />
+      <Route path="processus/elections/:id/modifier" element={<AdminElectionCreationPage />} />
+      <Route path="processus/elections/:id" element={<AdminElectionDetailPage />} />
+      <Route path="processus/elections/:id/candidats" element={<AdminElectionCandidatesPage />} />
+      <Route path="processus/candidats" element={<AdminCandidaturesPage />} />
     </Routes>
   );
 }

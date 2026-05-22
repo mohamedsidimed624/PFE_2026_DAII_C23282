@@ -1,12 +1,12 @@
 import React from 'react'
-import { Link } from "react-router-dom";
 import Hero from '../components/Hero'
 import Services from '../components/Services'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
 import About from '../components/About'
 import Contact from '../components/Contact'
-import Teams from '../components/Teams';
+import Teams from '../components/Teams'
+import DernieresAnnonces from '../components/DernieresAnnonces'
 
 export default function Home() {
     return (
@@ -15,6 +15,7 @@ export default function Home() {
             <main>
                 <Hero />
                 <Services />
+                <DernieresAnnonces />
                 <About />
                 <Teams />
                 <Contact />

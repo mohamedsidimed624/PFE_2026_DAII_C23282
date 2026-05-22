@@ -14,35 +14,61 @@ import java.util.Optional;
 @Repository
 public interface MedecinRepository extends JpaRepository<Medecin, Long>, JpaSpecificationExecutor<Medecin> {
 
-    @Query("""
-        select distinct m
-        from Medecin m
-        left join fetch m.educations edu
-        left join fetch edu.specialite
-        left join fetch edu.sousSpecialite
-        where m.id = :userId
-    """)
-    Optional<Medecin> findProfileByUserId(Long userId);
-
-    @Query("""
-        select distinct m
-        from Medecin m
-        left join fetch m.educations edu
-        left join fetch edu.specialite
-        left join fetch edu.sousSpecialite
-        where m.id = :id
-    """)
-    Optional<Medecin> findPublicDetailById(Long id);
-
-    Optional<Medecin> findByDemandeOrigine(DemandeAdhesion demande);
+    long countByStatut(StatutMedecin statut);
 
     Optional<Medecin> findByEmail(String email);
 
-    long countByStatut(StatutMedecin statut);
+
 
     long countBySexe(String sexe);
 
     long countByNationaliteIgnoreCase(String nationalite);
 
     List<Medecin> findAllByStatut(StatutMedecin statut);
+
+
+    @Query("""
+    select count(m)
+    from Medecin m
+    where m.statut = :statut
+      and m.numeroInscription is not null
+      and trim(m.numeroInscription) <> ''
+""")
+    long countElecteursEligiblesTous(StatutMedecin statut);
+
+    @Query("""
+    select count(m)
+    from Medecin m
+    where m.statut = :statut
+      and lower(m.villeExercice) = lower(:region)
+      and m.numeroInscription is not null
+      and trim(m.numeroInscription) <> ''
+""")
+    long countElecteursEligiblesRegion(StatutMedecin statut, String region);
+
+    @Query("""
+    select m
+    from Medecin m
+    where m.statut = :statut
+      and m.numeroInscription is not null
+      and trim(m.numeroInscription) <> ''
+""")
+    List<Medecin> findElecteursEligiblesTous(StatutMedecin statut);
+
+    @Query("""
+    select m
+    from Medecin m
+    where m.statut = :statut
+      and lower(m.villeExercice) = lower(:region)
+      and m.numeroInscription is not null
+      and trim(m.numeroInscription) <> ''
+""")
+    List<Medecin> findElecteursEligiblesRegion(StatutMedecin statut, String region);
+
+    Optional<Medecin> findPublicDetailById(Long id);
+
+    Optional<Medecin> findByDemandeOrigine(DemandeAdhesion demande);
+
+
+    long countByStatutAndVilleExerciceIgnoreCase(StatutMedecin statut, String villeExercice);
 }

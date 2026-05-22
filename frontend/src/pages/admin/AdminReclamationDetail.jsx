@@ -123,7 +123,7 @@ function AdminReclamationDetail() {
 
   return (
   <AdminLayout title="Gestion des réclamations">
-    <div className="min-h-screen bg-[#FAFBFC] px-7 py-6">
+    <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-7 py-6">
       <div className="max-w-6xl space-y-6">
         {/* Back */}
         <button
@@ -149,7 +149,7 @@ function AdminReclamationDetail() {
 
         {/* Résumé compact */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
-        <section className="rounded-md bg-white p-6">
+        <section className="rounded-md bg-white dark:bg-slate-900 p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
               <div className="mb-3 flex flex-wrap items-center gap-3">
@@ -174,11 +174,11 @@ function AdminReclamationDetail() {
                 </span>
               </div>
 
-              <h1 className="text-[22px] font-semibold text-slate-800">
+              <h1 className="text-[22px] font-semibold text-slate-800 dark:text-slate-100">
                 {reclamation.numeroReclamation}
               </h1>
 
-              <p className="mt-2 max-w-3xl text-[14px] leading-6 text-slate-500">
+              <p className="mt-2 max-w-3xl text-[14px] leading-6 text-slate-500 dark:text-slate-400">
                 {reclamation.objet || "Sans objet"}
               </p>
             </div>
@@ -194,7 +194,7 @@ function AdminReclamationDetail() {
             )}
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-4 border-t border-slate-100 pt-5 md:grid-cols-4">
+          <div className="mt-6 grid grid-cols-1 gap-4 border-t border-slate-100 dark:border-slate-800 pt-5 md:grid-cols-4">
             <InfoItem label="Déposant" value={authorName} />
             <InfoItem label="Date" value={fmtDate(reclamation.dateCreation)} />
             <InfoItem label="Email" value={reclamation.emailAuteur || "—"} />
@@ -209,12 +209,12 @@ function AdminReclamationDetail() {
           <div className="space-y-6">
             {/* Message */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
-            <section className="rounded-md bg-white p-6">
-              <h2 className="mb-4 text-[17px] font-semibold text-slate-700">
+            <section className="rounded-md bg-white dark:bg-slate-900 p-6">
+              <h2 className="mb-4 text-[17px] font-semibold text-slate-700 dark:text-slate-200">
                 Message
               </h2>
 
-              <p className="whitespace-pre-line text-[14px] leading-7 text-slate-600">
+              <p className="whitespace-pre-line text-[14px] leading-7 text-slate-600 dark:text-slate-300">
                 {reclamation.message || "—"}
               </p>
 
@@ -233,8 +233,7 @@ function AdminReclamationDetail() {
 
             {/* Réponse administrative */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
-            <section className="rounded-md bg-white p-6"></section>
-            <section className="rounded-md bg-white p-6">
+                        <section className="rounded-md bg-white dark:bg-slate-900 p-6">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-[17px] font-semibold text-slate-700">
                   Réponse administrative
@@ -253,7 +252,7 @@ function AdminReclamationDetail() {
                 disabled={isClosed}
                 rows={7}
                 placeholder="Rédigez ici la réponse officielle..."
-                className="w-full resize-none rounded-md border border-slate-100 bg-slate-50 px-4 py-3 text-[14px] text-slate-700 outline-none transition focus:border-green-400 focus:bg-white disabled:cursor-not-allowed disabled:text-slate-400"
+                className="w-full resize-none rounded-md border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-[14px] text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 outline-none transition focus:border-green-400 focus:bg-white dark:focus:bg-slate-800 disabled:cursor-not-allowed disabled:text-slate-400"
               />
 
               {isInProgress && (
@@ -281,9 +280,8 @@ function AdminReclamationDetail() {
           <aside className="space-y-6">
             {/* Suivi */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 transition-colors duration-200">
-            <section className="rounded-md bg-white p-6"></section>
-            <section className="rounded-md bg-white p-6">
-              <h2 className="mb-5 text-[17px] font-semibold text-slate-700">
+                        <section className="rounded-md bg-white dark:bg-slate-900 p-6">
+              <h2 className="mb-5 text-[17px] font-semibold text-slate-700 dark:text-slate-200">
                 Suivi
               </h2>
 
@@ -309,7 +307,7 @@ function AdminReclamationDetail() {
                       <div>
                         <p
                           className={`text-[14px] font-semibold ${
-                            done ? "text-slate-700" : "text-slate-400"
+                            done ? "text-slate-700 dark:text-slate-200" : "text-slate-400 dark:text-slate-600"
                           }`}
                         >
                           {step.label}
@@ -327,7 +325,7 @@ function AdminReclamationDetail() {
             </div>
 
             {/* Infos auteur compactes
-            <section className="rounded-md bg-white p-6">
+            <section className="rounded-md bg-white dark:bg-slate-900 p-6">
               <h2 className="mb-5 text-[17px] font-semibold text-slate-700">
                 Informations
               </h2>
@@ -347,10 +345,10 @@ function AdminReclamationDetail() {
     {/* Modal prise en charge */}
     {showModal && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4">
-        <div className="w-full max-w-md rounded-md bg-white p-6 shadow-xl">
+        <div className="w-full max-w-md rounded-md bg-white dark:bg-slate-900 dark:border dark:border-slate-800 p-6 shadow-xl">
           <div className="mb-5 flex items-start justify-between">
             <div>
-              <h2 className="text-[17px] font-semibold text-slate-800">
+              <h2 className="text-[17px] font-semibold text-slate-800 dark:text-slate-100">
                 Prendre en charge
               </h2>
               <p className="mt-1 text-[13px] text-slate-400">
@@ -366,14 +364,14 @@ function AdminReclamationDetail() {
             </button>
           </div>
 
-          <p className="mb-6 text-[14px] leading-6 text-slate-500">
+          <p className="mb-6 text-[14px] leading-6 text-slate-500 dark:text-slate-400">
             Cette réclamation passera au statut En cours.
           </p>
 
           <div className="flex justify-end gap-3">
             <button
               onClick={() => setShowModal(false)}
-              className="h-10 rounded-md border border-slate-100 bg-white px-4 text-[13px] font-semibold text-slate-400 hover:text-slate-600"
+              className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] font-semibold text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-slate-100"
             >
               Annuler
             </button>
@@ -398,7 +396,7 @@ function InfoItem({ label, value }) {
       <p className="mb-1 text-[13px] font-semibold uppercase text-slate-400">
         {label}
       </p>
-      <p className="break-words text-[14px] font-medium text-slate-700">
+      <p className="break-words text-[14px] font-medium text-slate-700 dark:text-slate-300">
         {value || "—"}
       </p>
     </div>
