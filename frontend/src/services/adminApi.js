@@ -22,8 +22,9 @@ export const getDemandeById = async (id) => {
   return res.data;
 };
 
-export const approveDemande = async (id) => {
-  const res = await axios.put(`${API_URL}/${id}/approve`, {}, getAuthConfig());
+export const approveDemande = async (id, sectionValidee) => {
+  const body = sectionValidee ? { sectionValidee } : {};
+  const res = await axios.put(`${API_URL}/${id}/approve`, body, getAuthConfig());
   return res.data;
 };
 

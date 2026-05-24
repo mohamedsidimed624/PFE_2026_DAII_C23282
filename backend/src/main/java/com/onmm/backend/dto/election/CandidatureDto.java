@@ -1,5 +1,8 @@
 package com.onmm.backend.dto.election;
 
+import com.onmm.backend.entity.enums.CorpsElectoral;
+import com.onmm.backend.entity.enums.ElectionStatut;
+import com.onmm.backend.entity.enums.ElectionType;
 import com.onmm.backend.entity.enums.StatutCandidature;
 
 import java.time.LocalDateTime;
@@ -10,6 +13,10 @@ public class CandidatureDto {
     private Long id;
     private Long electionId;
     private String electionTitre;
+    private ElectionType electionType;
+    private ElectionStatut electionStatut;
+    private String electionRegion;
+    private CorpsElectoral electionCorpsElectoral;
     private PositionElectoraleDto position;
     private Long medecinId;
     private String medecinNom;
@@ -23,9 +30,16 @@ public class CandidatureDto {
     private StatutCandidature statut;
     private String commentaireValidation;
     private LocalDateTime dateDepot;
+    private LocalDateTime dateValidation;
     private long nbVotes;
     private boolean exAequo;
     private List<CandidatureDocumentDto> documents = new ArrayList<>();
+
+    // Flags d'état calculés côté backend
+    private boolean peutModifier;
+    private boolean peutUploaderDocuments;
+    private boolean peutFinaliser;
+    private boolean peutRetirer;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -35,6 +49,18 @@ public class CandidatureDto {
 
     public String getElectionTitre() { return electionTitre; }
     public void setElectionTitre(String electionTitre) { this.electionTitre = electionTitre; }
+
+    public ElectionType getElectionType() { return electionType; }
+    public void setElectionType(ElectionType electionType) { this.electionType = electionType; }
+
+    public ElectionStatut getElectionStatut() { return electionStatut; }
+    public void setElectionStatut(ElectionStatut electionStatut) { this.electionStatut = electionStatut; }
+
+    public String getElectionRegion() { return electionRegion; }
+    public void setElectionRegion(String electionRegion) { this.electionRegion = electionRegion; }
+
+    public CorpsElectoral getElectionCorpsElectoral() { return electionCorpsElectoral; }
+    public void setElectionCorpsElectoral(CorpsElectoral electionCorpsElectoral) { this.electionCorpsElectoral = electionCorpsElectoral; }
 
     public PositionElectoraleDto getPosition() { return position; }
     public void setPosition(PositionElectoraleDto position) { this.position = position; }
@@ -75,6 +101,9 @@ public class CandidatureDto {
     public LocalDateTime getDateDepot() { return dateDepot; }
     public void setDateDepot(LocalDateTime dateDepot) { this.dateDepot = dateDepot; }
 
+    public LocalDateTime getDateValidation() { return dateValidation; }
+    public void setDateValidation(LocalDateTime dateValidation) { this.dateValidation = dateValidation; }
+
     public long getNbVotes() { return nbVotes; }
     public void setNbVotes(long nbVotes) { this.nbVotes = nbVotes; }
 
@@ -83,4 +112,16 @@ public class CandidatureDto {
 
     public List<CandidatureDocumentDto> getDocuments() { return documents; }
     public void setDocuments(List<CandidatureDocumentDto> documents) { this.documents = documents; }
+
+    public boolean isPeutModifier() { return peutModifier; }
+    public void setPeutModifier(boolean peutModifier) { this.peutModifier = peutModifier; }
+
+    public boolean isPeutUploaderDocuments() { return peutUploaderDocuments; }
+    public void setPeutUploaderDocuments(boolean peutUploaderDocuments) { this.peutUploaderDocuments = peutUploaderDocuments; }
+
+    public boolean isPeutFinaliser() { return peutFinaliser; }
+    public void setPeutFinaliser(boolean peutFinaliser) { this.peutFinaliser = peutFinaliser; }
+
+    public boolean isPeutRetirer() { return peutRetirer; }
+    public void setPeutRetirer(boolean peutRetirer) { this.peutRetirer = peutRetirer; }
 }

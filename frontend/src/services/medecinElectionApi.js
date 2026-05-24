@@ -32,3 +32,9 @@ export const uploadCandidatureDocument = (candidatureId, formData) =>
   api.post(`/medecin/elections/candidatures/${candidatureId}/documents`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+
+export const finaliserCandidature = (candidatureId) =>
+  api.put(`/medecin/elections/candidatures/${candidatureId}/soumettre`);
+
+export const deleteDocument = (candidatureId, documentId) =>
+  api.delete(`/medecin/elections/candidatures/${candidatureId}/documents/${documentId}`);

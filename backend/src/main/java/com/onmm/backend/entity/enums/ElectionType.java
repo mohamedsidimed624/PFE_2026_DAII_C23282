@@ -2,7 +2,9 @@ package com.onmm.backend.entity.enums;
 
 public enum ElectionType {
     CONSEIL_NATIONAL,
-    CONSEIL_REGIONAL,
     BUREAU_EXECUTIF,
-    COMMISSION_SPECIALISEE
+    BUREAU_SECTION_A,
+    BUREAU_SECTION_B,
+    BUREAU_SECTION_C,
+    REPRESENTANTS_REGIONAUX
 }

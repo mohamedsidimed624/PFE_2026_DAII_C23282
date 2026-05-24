@@ -69,6 +69,7 @@ function AdminDemandeDetail() {
   const [rejectComment,     setRejectComment]     = useState("");
   const [showRejectModal,   setShowRejectModal]   = useState(false);
   const [showApprouveModal, setShowApprouveModal] = useState(false);
+  const [selectedSection,   setSelectedSection]   = useState("");
   const [actionLoading,     setActionLoading]     = useState(false);
   const [toastMsg,          setToastMsg]          = useState("");
 
@@ -95,7 +96,7 @@ function AdminDemandeDetail() {
   const handleApprove = async () => {
     try {
       setActionLoading(true);
-      await approveDemande(id);
+      await approveDemande(id, selectedSection || demande.sectionProposee);
       setShowApprouveModal(false);
       showToast("Demande approuvée avec succès.");
       setTimeout(() => navigate("/admin/demandes"), 1500);
@@ -212,6 +213,17 @@ function AdminDemandeDetail() {
             {demande.email     && <span>✉ {demande.email}</span>}
             {demande.telephone && <span>📞 {demande.telephone}</span>}
           </div>
+
+          {/* Section proposée */}
+          {demande.sectionProposee && (
+            <div className="mt-3 flex items-center gap-2 text-[13px] text-slate-500 dark:text-slate-400">
+              <span className="font-medium">Section proposée :</span>
+              <SectionBadge section={demande.sectionProposee} />
+              {demande.estEnseignantChercheur && (
+                <span className="text-[11px] text-slate-400">(déclaré enseignant-chercheur)</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── Éducation + Expérience ── */}
@@ -306,7 +318,7 @@ function AdminDemandeDetail() {
         {isPending && (
           <div className="flex flex-wrap gap-3 pt-2">
             <button
-              onClick={() => setShowApprouveModal(true)}
+              onClick={() => { setSelectedSection(demande.sectionProposee || "GENERALISTE"); setShowApprouveModal(true); }}
               disabled={actionLoading}
               className="h-10 rounded-md bg-green-500 px-5 text-[13px] font-semibold text-white shadow-sm hover:bg-green-600 disabled:opacity-60"
             >
@@ -338,6 +350,25 @@ function AdminDemandeDetail() {
                 <X size={18} />
               </button>
             </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                Section à attribuer
+              </label>
+              <select
+                value={selectedSection}
+                onChange={(e) => setSelectedSection(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10"
+              >
+                <option value="GENERALISTE">Section A — Médecins généralistes</option>
+                <option value="SPECIALISTE">Section B — Médecins spécialistes</option>
+                <option value="ENSEIGNANT_CHERCHEUR">Section C — Médecins enseignants-chercheurs</option>
+              </select>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
+                Section proposée automatiquement : <span className="font-medium">{demande.sectionProposee ?? "—"}</span>
+              </p>
+            </div>
+
             <div className="flex gap-3 justify-end pt-1">
               <button
                 onClick={() => setShowApprouveModal(false)}
@@ -448,6 +479,22 @@ function SectionCard({ icon, title, children }) {
 function EmptyState({ label }) {
   return (
     <p className="text-xs text-slate-400 dark:text-slate-500 py-4 text-center">{label}</p>
+  );
+}
+
+const SECTION_META = {
+  GENERALISTE:          { label: "Section A — Généraliste",          cls: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800" },
+  SPECIALISTE:          { label: "Section B — Spécialiste",          cls: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800" },
+  ENSEIGNANT_CHERCHEUR: { label: "Section C — Enseignant-chercheur", cls: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800" },
+};
+
+function SectionBadge({ section }) {
+  const meta = SECTION_META[section];
+  if (!meta) return <span className="text-xs text-slate-400">{section}</span>;
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${meta.cls}`}>
+      {meta.label}
+    </span>
   );
 }
 

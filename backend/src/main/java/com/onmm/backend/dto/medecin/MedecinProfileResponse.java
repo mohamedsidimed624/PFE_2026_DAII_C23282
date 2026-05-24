@@ -21,6 +21,7 @@ public class MedecinProfileResponse {
     private String photoProfilPath;
     private String sectionOrdre;
     private String villeExercice;
+    private String wilayaExercice;
 
     private List<MedecinEducationDto> educations;
 

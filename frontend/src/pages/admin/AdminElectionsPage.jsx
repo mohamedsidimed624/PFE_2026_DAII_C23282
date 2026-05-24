@@ -43,32 +43,37 @@ import {
 const PAGE_SIZE = 10;
 
 const TYPE_LABELS = {
-  CONSEIL_NATIONAL: "Conseil national",
-  CONSEIL_REGIONAL: "Conseil régional",
-  BUREAU_EXECUTIF: "Bureau exécutif",
-  COMMISSION_SPECIALISEE: "Commission",
+  CONSEIL_NATIONAL:      "Conseil National de l'Ordre",
+  BUREAU_EXECUTIF:       "Bureau exécutif",
+  BUREAU_SECTION_A:      "Bureau de Section A",
+  BUREAU_SECTION_B:      "Bureau de Section B",
+  BUREAU_SECTION_C:      "Bureau de Section C",
+  REPRESENTANTS_REGIONAUX: "Représentants régionaux",
 };
 
 const CORPS_LABELS = {
-  TOUS_MEDECINS_ACTIFS: "Tous les médecins actifs",
-  MEDECINS_REGION: "Médecins de la région",
+  TOUS_MEDECINS_ACTIFS:     "Tous les médecins actifs",
+  MEDECINS_REGION:          "Médecins de la région",
+  MEDECINS_PAR_SECTION:     "Médecins inscrits, répartis par section",
+  MEMBRES_CONSEIL_NATIONAL: "Membres du Conseil National",
+  CONSEIL_SECTION_A:        "Membres du conseil de Section A",
+  CONSEIL_SECTION_B:        "Membres du conseil de Section B",
+  CONSEIL_SECTION_C:        "Membres du conseil de Section C",
 };
 
 const NIVEAU_LABELS = {
   NATIONAL: "National",
   REGIONAL: "Régional",
-  LOCAL: "Local",
+  SECTION:  "Section",
 };
 
 const TYPE_COLORS = {
-  CONSEIL_NATIONAL:
-    "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300",
-  CONSEIL_REGIONAL:
-    "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300",
-  BUREAU_EXECUTIF:
-    "bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300",
-  COMMISSION_SPECIALISEE:
-    "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300",
+  CONSEIL_NATIONAL:        "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300",
+  BUREAU_EXECUTIF:         "bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300",
+  BUREAU_SECTION_A:        "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300",
+  BUREAU_SECTION_B:        "bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300",
+  BUREAU_SECTION_C:        "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300",
+  REPRESENTANTS_REGIONAUX: "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300",
 };
 
 const STATUT_LABELS = {
@@ -148,7 +153,7 @@ const ACTION_META = {
   publierResultats: {
     title: "Publier les résultats",
     message:
-      "Les résultats deviendront visibles officiellement. Le backend vérifiera le quorum et la validité des résultats.",
+      "Les résultats deviendront visibles officiellement pour les utilisateurs concernés.",
     confirmLabel: "Publier",
     icon: Trophy,
     tone: "primary",
@@ -164,7 +169,7 @@ const ACTION_META = {
   annuler: {
     title: "Annuler l’élection",
     message:
-      "Cette action est sensible. Une raison d’annulation est obligatoire et sera enregistrée dans l’audit.",
+      "Cette action est sensible. Une raison d’annulation est obligatoire et sera enregistrée dans l’historique de l’élection.",
     confirmLabel: "Annuler l’élection",
     icon: Ban,
     tone: "danger",
@@ -273,6 +278,7 @@ function ActionMenu({ election, onAction }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const statut = election.statut;
+  const now = new Date();
 
   const goDetail = () => {
     setOpen(false);
@@ -329,11 +335,26 @@ function ActionMenu({ election, onAction }) {
               {statut === "BROUILLON" && (
                 <>
                   <DropItem icon={Pencil} label="Modifier" onClick={goEdit} />
-                  <DropItem
-                    icon={PlayCircle}
-                    label="Ouvrir candidatures"
-                    onClick={() => run("ouvrirCandidatures")}
-                  />
+                  {election.candidatureStartDate &&
+                  now >= new Date(election.candidatureStartDate) &&
+                  election.candidatureEndDate &&
+                  now < new Date(election.candidatureEndDate) ? (
+                    <DropItem
+                      icon={PlayCircle}
+                      label="Ouvrir candidatures"
+                      onClick={() => run("ouvrirCandidatures")}
+                    />
+                  ) : (
+                    <DropItem
+                      icon={PlayCircle}
+                      label={
+                        election.candidatureStartDate
+                          ? `Ouverture prévue le ${formatDate(election.candidatureStartDate)}`
+                          : "Ouvrir candidatures"
+                      }
+                      disabled
+                    />
+                  )}
                 </>
               )}
 

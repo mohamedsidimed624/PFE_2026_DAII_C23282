@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -70,6 +71,9 @@ public class ElectionServiceImpl implements ElectionService {
         this.fileStorageService = fileStorageService;
     }
 
+    private static final List<ElectionStatut> STATUTS_INACTIFS =
+            List.of(ElectionStatut.ARCHIVEE, ElectionStatut.ANNULEE);
+
     // ── Admin: list ──────────────────────────────────────────────────────────
 
     @Override
@@ -114,6 +118,8 @@ public class ElectionServiceImpl implements ElectionService {
         applyRequest(e, req);
         e.setCreePar(admin);
 
+        validateNoActiveElectionSameType(e);
+        validateElectionDates(e);
         e = electionRepo.save(e);
 
         notificationService.createNotification(
@@ -167,6 +173,7 @@ public class ElectionServiceImpl implements ElectionService {
                 : CorpsElectoral.TOUS_MEDECINS_ACTIFS);
 
         e.setQuorumPourcentage(req.getQuorumPourcentage());
+        e.setPresetCode(req.getPresetCode());
     }
 
     private void validateDates(ElectionCreateRequest req) {
@@ -236,6 +243,25 @@ public class ElectionServiceImpl implements ElectionService {
                         "Le quorum doit être compris entre 0 et 100"
                 );
             }
+        }
+    }
+
+    private void validateNoActiveElectionSameType(Election election) {
+        boolean conflit;
+        if (election.getType() == ElectionType.REPRESENTANTS_REGIONAUX) {
+            String region = election.getRegion();
+            if (region == null || region.isBlank()) {
+                return; // déjà rejeté par validateElectionConfig
+            }
+            conflit = electionRepo.existsByTypeAndRegionIgnoreCaseAndStatutNotIn(
+                    ElectionType.REPRESENTANTS_REGIONAUX, region, STATUTS_INACTIFS);
+        } else {
+            conflit = electionRepo.existsByTypeAndStatutNotIn(election.getType(), STATUTS_INACTIFS);
+        }
+        if (conflit) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Une élection active du même type existe déjà. " +
+                    "Veuillez l'archiver ou l'annuler avant d'en créer une nouvelle.");
         }
     }
 
@@ -328,19 +354,19 @@ public class ElectionServiceImpl implements ElectionService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        if (e.getCandidatureStartDate() != null && now.isBefore(e.getCandidatureStartDate())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Les candidatures ne peuvent pas être ouvertes avant le " + e.getCandidatureStartDate()
-            );
-        }
-
-        if (e.getCandidatureEndDate() != null && !now.isBefore(e.getCandidatureEndDate())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Impossible d'ouvrir les candidatures : la date de fin est déjà dépassée"
-            );
-        }
+//        if (e.getCandidatureStartDate() != null && now.isBefore(e.getCandidatureStartDate())) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.BAD_REQUEST,
+//                    "Les candidatures ne peuvent pas être ouvertes avant le " + e.getCandidatureStartDate()
+//            );
+//        }
+//
+//        if (e.getCandidatureEndDate() != null && !now.isBefore(e.getCandidatureEndDate())) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.BAD_REQUEST,
+//                    "Impossible d'ouvrir les candidatures : la date de fin est déjà dépassée"
+//            );
+//        }
 
         e.setStatut(ElectionStatut.CANDIDATURE_OUVERTE);
         electionRepo.save(e);
@@ -718,26 +744,33 @@ public class ElectionServiceImpl implements ElectionService {
             );
         }
 
-        if (req.getDeclarationCandidature() == null || req.getDeclarationCandidature().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "La déclaration de candidature est obligatoire"
-            );
-        }
-
-        if (req.getProgrammeElectoral() == null || req.getProgrammeElectoral().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Le programme électoral est obligatoire"
-            );
+        if (req.isSoumettre()) {
+            if (req.getDeclarationCandidature() == null || req.getDeclarationCandidature().isBlank()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "La déclaration de candidature est obligatoire"
+                );
+            }
+            if (req.getProgrammeElectoral() == null || req.getProgrammeElectoral().isBlank()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Le programme électoral est obligatoire"
+                );
+            }
         }
 
         PositionElectorale position = resolveAndValidatePositionForCandidature(e, req);
+
+        validateCandidatureEligibility(e, position, medecin);
 
         Optional<Candidature> existingOpt =
                 candidatureRepo.findByElectionIdAndMedecinEmail(electionId, email);
 
         Candidature c;
+
+        StatutCandidature statutCible = req.isSoumettre()
+                ? StatutCandidature.SOUMISE
+                : StatutCandidature.BROUILLON;
 
         if (existingOpt.isPresent()) {
             Candidature existing = existingOpt.get();
@@ -751,31 +784,32 @@ public class ElectionServiceImpl implements ElectionService {
                 );
             }
 
-            if (existing.getStatut() != StatutCandidature.REJETEE
-                    && existing.getStatut() != StatutCandidature.RETIREE) {
-                throw new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "Cette candidature ne peut pas être redéposée"
-                );
-            }
-
             c = existing;
             c.setPosition(position);
-            c.setDeclarationCandidature(req.getDeclarationCandidature().trim());
-            c.setProgrammeElectoral(req.getProgrammeElectoral().trim());
-            c.setStatut(StatutCandidature.SOUMISE);
-            c.setCommentaireValidation(null);
-            c.setDateValidation(null);
-            c.setDateDepot(LocalDateTime.now());
+            if (req.getDeclarationCandidature() != null)
+                c.setDeclarationCandidature(req.getDeclarationCandidature().trim());
+            if (req.getProgrammeElectoral() != null)
+                c.setProgrammeElectoral(req.getProgrammeElectoral().trim());
+            c.setStatut(statutCible);
+
+            if (existing.getStatut() == StatutCandidature.REJETEE
+                    || existing.getStatut() == StatutCandidature.RETIREE) {
+                c.setCommentaireValidation(null);
+                c.setDateValidation(null);
+            }
+            c.setDateDepot(req.isSoumettre() ? LocalDateTime.now() : null);
 
         } else {
             c = new Candidature();
             c.setElection(e);
             c.setMedecin(medecin);
             c.setPosition(position);
-            c.setDeclarationCandidature(req.getDeclarationCandidature().trim());
-            c.setProgrammeElectoral(req.getProgrammeElectoral().trim());
-            c.setStatut(StatutCandidature.SOUMISE);
+            if (req.getDeclarationCandidature() != null)
+                c.setDeclarationCandidature(req.getDeclarationCandidature().trim());
+            if (req.getProgrammeElectoral() != null)
+                c.setProgrammeElectoral(req.getProgrammeElectoral().trim());
+            c.setStatut(statutCible);
+            if (req.isSoumettre()) c.setDateDepot(LocalDateTime.now());
         }
 
         c = candidatureRepo.save(c);
@@ -874,6 +908,57 @@ public class ElectionServiceImpl implements ElectionService {
         audit(e, "CANDIDATURE_RETIREE", email, "MEDECIN", null);
     }
 
+    @Override
+    public CandidatureDto finaliserCandidature(Long candidatureId, String email) {
+        Candidature c = candidatureRepo.findById(candidatureId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidature introuvable"));
+
+        if (!c.getMedecin().getEmail().equals(email))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès refusé");
+
+        if (c.getStatut() != StatutCandidature.BROUILLON)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Seul un brouillon peut être soumis définitivement");
+
+        Election e = c.getElection();
+        if (e.getStatut() != ElectionStatut.CANDIDATURE_OUVERTE)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Les candidatures ne sont pas ouvertes pour cette élection");
+
+        LocalDateTime now = LocalDateTime.now();
+        if (e.getCandidatureEndDate() != null && now.isAfter(e.getCandidatureEndDate()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La période de candidature est clôturée");
+
+        if (c.getDeclarationCandidature() == null || c.getDeclarationCandidature().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La déclaration de candidature est obligatoire avant la soumission");
+
+        List<CandidatureDocument> docs = documentRepo.findByCandidatureId(candidatureId);
+        Set<TypeDocumentCandidature> types = docs.stream()
+                .map(CandidatureDocument::getTypeDocument)
+                .collect(Collectors.toSet());
+
+        if (!types.contains(TypeDocumentCandidature.PHOTO))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La photo professionnelle est obligatoire");
+        if (!types.contains(TypeDocumentCandidature.LETTRE_CANDIDATURE))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La lettre de candidature est obligatoire");
+
+        c.setStatut(StatutCandidature.SOUMISE);
+        c.setDateDepot(now);
+        candidatureRepo.save(c);
+
+        audit(e, "CANDIDATURE_SOUMISE", email, "MEDECIN",
+                c.getPosition() != null
+                        ? "Candidature finalisée au poste : " + c.getPosition().getLibelle()
+                        : "Candidature finalisée",
+                "INFO", "Candidature", c.getId());
+
+        return toCandidatureDto(c, false);
+    }
+
     // ── Médecin: vote ────────────────────────────────────────────────────────
 
     @Override
@@ -883,11 +968,17 @@ public class ElectionServiceImpl implements ElectionService {
         Medecin medecin = findMedecin(email);
 
         if (req == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Données de vote manquantes");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Données de vote manquantes"
+            );
         }
 
         if (e.getStatut() != ElectionStatut.VOTE_EN_COURS) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le vote n'est pas ouvert");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Le vote n'est pas ouvert"
+            );
         }
 
         if (!isMedecinConcerneParElection(e, medecin)) {
@@ -916,7 +1007,10 @@ public class ElectionServiceImpl implements ElectionService {
         List<BulletinVote> bulletins = buildAndValidateBulletins(e, req);
 
         if (bulletins.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aucun vote valide fourni");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Aucun vote valide fourni"
+            );
         }
 
         ParticipationElectorale participation = new ParticipationElectorale();
@@ -924,8 +1018,20 @@ public class ElectionServiceImpl implements ElectionService {
         participation.setVotantHash(votantHash);
 
         try {
-            participationRepo.saveAndFlush(participation);
-            bulletinRepo.saveAll(bulletins);
+            participation = participationRepo.saveAndFlush(participation);
+
+            for (BulletinVote bulletin : bulletins) {
+                bulletin.setParticipation(participation);
+
+                // À garder seulement si ton entity BulletinVote contient ces champs.
+                // Normalement buildAndValidateBulletins les remplit déjà.
+                if (bulletin.getElection() == null) {
+                    bulletin.setElection(e);
+                }
+            }
+
+            bulletinRepo.saveAllAndFlush(bulletins);
+
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
@@ -946,6 +1052,47 @@ public class ElectionServiceImpl implements ElectionService {
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private void validateElectionDates(Election election) {
+        LocalDateTime now = LocalDateTime.now();
+
+//        if (election.getCandidatureStartDate() == null ||
+//                election.getCandidatureEndDate() == null ||
+//                election.getVoteStartDate() == null ||
+//                election.getVoteEndDate() == null) {
+//            throw new IllegalArgumentException("Toutes les dates de l'élection sont obligatoires.");
+//        }
+//
+//        if (election.getCandidatureStartDate().isBefore(now)) {
+//            throw new IllegalArgumentException("L'ouverture des candidatures ne peut pas être dans le passé.");
+//        }
+//
+//        if (!election.getCandidatureEndDate().isAfter(election.getCandidatureStartDate())) {
+//            throw new IllegalArgumentException("La clôture des candidatures doit être après l'ouverture.");
+//        }
+//
+//        if (!election.getVoteStartDate().isAfter(election.getCandidatureEndDate())) {
+//            throw new IllegalArgumentException("L'ouverture du vote doit être après la clôture des candidatures.");
+//        }
+//
+//        if (!election.getVoteEndDate().isAfter(election.getVoteStartDate())) {
+//            throw new IllegalArgumentException("La clôture du vote doit être après son ouverture.");
+//        }
+//
+//        if (Duration.between(
+//                election.getCandidatureStartDate(),
+//                election.getCandidatureEndDate()
+//        ).toDays() < 3) {
+//            throw new IllegalArgumentException("La période de candidatures doit durer au moins 3 jours.");
+//        }
+//
+//        if (Duration.between(
+//                election.getVoteStartDate(),
+//                election.getVoteEndDate()
+//        ).toDays() < 1) {
+//            throw new IllegalArgumentException("La période de vote doit durer au moins 1 jour.");
+//        }
+    }
 
     private void audit(
             Election e,
@@ -1097,51 +1244,37 @@ public class ElectionServiceImpl implements ElectionService {
             );
         }
 
-        if (!types.contains(TypeDocumentCandidature.PROGRAMME_ELECTORAL)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Le programme électoral officiel est obligatoire"
-            );
-        }
-
         if (c.getDeclarationCandidature() == null || c.getDeclarationCandidature().isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "La déclaration de candidature est obligatoire"
             );
         }
-
-        if (c.getProgrammeElectoral() == null || c.getProgrammeElectoral().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Le résumé du programme électoral est obligatoire"
-            );
-        }
     }
 
     private void validateElectionBeforeOpeningVote(Election e) {
-        LocalDateTime now = LocalDateTime.now();
-
+//        LocalDateTime now = LocalDateTime.now();
+//
         if (e.getVoteStartDate() == null || e.getVoteEndDate() == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Les dates de vote sont obligatoires"
             );
         }
-
-        if (now.isBefore(e.getVoteStartDate())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Le vote ne peut pas être ouvert avant le " + e.getVoteStartDate()
-            );
-        }
-
-        if (!now.isBefore(e.getVoteEndDate())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Impossible d'ouvrir le vote : la date de fin du vote est déjà dépassée"
-            );
-        }
+//
+//        if (now.isBefore(e.getVoteStartDate())) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.BAD_REQUEST,
+//                    "Le vote ne peut pas être ouvert avant le " + e.getVoteStartDate()
+//            );
+//        }
+//
+//        if (!now.isBefore(e.getVoteEndDate())) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.BAD_REQUEST,
+//                    "Impossible d'ouvrir le vote : la date de fin du vote est déjà dépassée"
+//            );
+//        }
 
         long candidaturesEnAttente = candidatureRepo
                 .findByElectionId(e.getId())
@@ -1248,9 +1381,9 @@ public class ElectionServiceImpl implements ElectionService {
             }
         }
 
-        for (PositionElectorale position : positions) {
-            validatePositionBeforeVote(e, position, candidaturesValidees);
-        }
+//        for (PositionElectorale position : positions) {
+//            validatePositionBeforeVote(e, position, candidaturesValidees);
+//        }
     }
 
     private void validatePositionBeforeVote(
@@ -2123,11 +2256,24 @@ public class ElectionServiceImpl implements ElectionService {
 
         if (e.getCorpsElectoral() == CorpsElectoral.MEDECINS_REGION) {
             return e.getRegion() != null
-                    && medecin.getVilleExercice() != null
-                    && e.getRegion().equalsIgnoreCase(medecin.getVilleExercice());
+                    && medecin.getWilayaExercice() != null
+                    && e.getRegion().equalsIgnoreCase(medecin.getWilayaExercice());
         }
 
-        return false;
+        if (e.getCorpsElectoral() == CorpsElectoral.CONSEIL_SECTION_B) {
+            return medecin.getSectionOrdre() == SectionOrdre.SPECIALISTE;
+        }
+
+        if (e.getCorpsElectoral() == CorpsElectoral.CONSEIL_SECTION_A) {
+            return medecin.getSectionOrdre() == SectionOrdre.GENERALISTE;
+        }
+
+        if (e.getCorpsElectoral() == CorpsElectoral.CONSEIL_SECTION_C) {
+            return medecin.getSectionOrdre() == SectionOrdre.ENSEIGNANT_CHERCHEUR;
+        }
+
+        // MEDECINS_PAR_SECTION, MEMBRES_CONSEIL_NATIONAL : tous médecins actifs
+        return true;
     }
 
     private boolean isCandidatEligible(Election e, Medecin medecin) {
@@ -2136,6 +2282,147 @@ public class ElectionServiceImpl implements ElectionService {
         }
 
         return isMedecinConcerneParElection(e, medecin);
+    }
+
+    private static final Set<String> WILAYAS_INTERIEUR_EXCLUES = Set.of(
+            "Nouakchott Nord", "Nouakchott Ouest", "Nouakchott Sud"
+    );
+
+    private String getRaisonIneligibiliteCandidature(Election e, Medecin medecin) {
+        if (medecin.getStatut() != StatutMedecin.ACTIF)
+            return "Votre statut médecin n'est pas actif.";
+
+        CorpsElectoral corps = e.getCorpsElectoral();
+        ElectionType type = e.getType();
+        SectionOrdre section = medecin.getSectionOrdre();
+        String wilaya = medecin.getWilayaExercice();
+
+        if (type == ElectionType.BUREAU_SECTION_A && section != SectionOrdre.GENERALISTE)
+            return "Cette élection est réservée aux médecins de la Section A (Généralistes). Votre section : "
+                    + (section != null ? section.name() : "non renseignée") + ".";
+        if (type == ElectionType.BUREAU_SECTION_B && section != SectionOrdre.SPECIALISTE)
+            return "Cette élection est réservée aux médecins de la Section B (Spécialistes). Votre section : "
+                    + (section != null ? section.name() : "non renseignée") + ".";
+        if (type == ElectionType.BUREAU_SECTION_C && section != SectionOrdre.ENSEIGNANT_CHERCHEUR)
+            return "Cette élection est réservée aux médecins de la Section C (Enseignants-Chercheurs). Votre section : "
+                    + (section != null ? section.name() : "non renseignée") + ".";
+
+        if (corps == CorpsElectoral.CONSEIL_SECTION_A && section != SectionOrdre.GENERALISTE)
+            return "Cette élection concerne le Conseil de la Section A. Votre section : "
+                    + (section != null ? section.name() : "non renseignée") + ".";
+        if (corps == CorpsElectoral.CONSEIL_SECTION_B && section != SectionOrdre.SPECIALISTE)
+            return "Cette élection concerne le Conseil de la Section B. Votre section : "
+                    + (section != null ? section.name() : "non renseignée") + ".";
+        if (corps == CorpsElectoral.CONSEIL_SECTION_C && section != SectionOrdre.ENSEIGNANT_CHERCHEUR)
+            return "Cette élection concerne le Conseil de la Section C. Votre section : "
+                    + (section != null ? section.name() : "non renseignée") + ".";
+
+        if (corps == CorpsElectoral.MEDECINS_REGION || type == ElectionType.REPRESENTANTS_REGIONAUX) {
+            if (wilaya == null || wilaya.isBlank())
+                return "Votre wilaya d'exercice n'est pas renseignée dans votre profil.";
+            if (e.getRegion() != null && !e.getRegion().equalsIgnoreCase(wilaya))
+                return "Cette élection concerne la région " + e.getRegion()
+                        + ". Votre wilaya enregistrée est " + wilaya + ".";
+        }
+
+        return null;
+    }
+
+    private boolean isPositionEligiblePourMedecin(Election e, PositionElectorale p, Medecin medecin) {
+        if (e.getType() != ElectionType.CONSEIL_NATIONAL) return true;
+        String libelle = p.getLibelle() != null ? p.getLibelle() : "";
+        if (libelle.contains("Section A")) return medecin.getSectionOrdre() == SectionOrdre.GENERALISTE;
+        if (libelle.contains("Section B")) return medecin.getSectionOrdre() == SectionOrdre.SPECIALISTE;
+        if (libelle.contains("Section C")) return medecin.getSectionOrdre() == SectionOrdre.ENSEIGNANT_CHERCHEUR;
+        if (libelle.contains("régions de l'intérieur")) {
+            String w = medecin.getWilayaExercice();
+            return w != null && !WILAYAS_INTERIEUR_EXCLUES.contains(w);
+        }
+        return true;
+    }
+
+    private void validateCandidatureEligibility(Election election, PositionElectorale position, Medecin medecin) {
+        if (medecin.getStatut() != StatutMedecin.ACTIF) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Seuls les médecins actifs peuvent déposer une candidature.");
+        }
+
+        if (election.getStatut() != ElectionStatut.CANDIDATURE_OUVERTE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Les candidatures ne sont pas ouvertes pour cette élection.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (election.getCandidatureStartDate() != null && now.isBefore(election.getCandidatureStartDate())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La période de candidature n'est pas encore ouverte.");
+        }
+        if (election.getCandidatureEndDate() != null && now.isAfter(election.getCandidatureEndDate())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La période de candidature est clôturée.");
+        }
+
+        ElectionType type = election.getType();
+
+        if (type == ElectionType.BUREAU_SECTION_A) {
+            if (medecin.getSectionOrdre() != SectionOrdre.GENERALISTE) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Vous ne pouvez pas candidater à un poste réservé à une autre section.");
+            }
+        } else if (type == ElectionType.BUREAU_SECTION_B) {
+            if (medecin.getSectionOrdre() != SectionOrdre.SPECIALISTE) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Vous ne pouvez pas candidater à un poste réservé à une autre section.");
+            }
+        } else if (type == ElectionType.BUREAU_SECTION_C) {
+            if (medecin.getSectionOrdre() != SectionOrdre.ENSEIGNANT_CHERCHEUR) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Vous ne pouvez pas candidater à un poste réservé à une autre section.");
+            }
+        } else if (type == ElectionType.REPRESENTANTS_REGIONAUX) {
+            String wilaya = medecin.getWilayaExercice();
+            if (wilaya == null || wilaya.isBlank()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Votre wilaya d'exercice n'est pas renseignée.");
+            }
+            if (WILAYAS_INTERIEUR_EXCLUES.contains(wilaya)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Ce poste est réservé aux représentants des régions de l'intérieur.");
+            }
+            if (!wilaya.equalsIgnoreCase(election.getRegion())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Vous ne pouvez candidater que dans votre wilaya d'exercice.");
+            }
+        } else if (type == ElectionType.CONSEIL_NATIONAL && position != null) {
+            String libelle = position.getLibelle() != null ? position.getLibelle() : "";
+            if (libelle.contains("Section A")) {
+                if (medecin.getSectionOrdre() != SectionOrdre.GENERALISTE) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "Vous ne pouvez pas candidater à un poste réservé à une autre section.");
+                }
+            } else if (libelle.contains("Section B")) {
+                if (medecin.getSectionOrdre() != SectionOrdre.SPECIALISTE) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "Vous ne pouvez pas candidater à un poste réservé à une autre section.");
+                }
+            } else if (libelle.contains("Section C")) {
+                if (medecin.getSectionOrdre() != SectionOrdre.ENSEIGNANT_CHERCHEUR) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "Vous ne pouvez pas candidater à un poste réservé à une autre section.");
+                }
+            } else if (libelle.contains("régions de l'intérieur")) {
+                String wilaya = medecin.getWilayaExercice();
+                if (wilaya == null || wilaya.isBlank()) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "Votre wilaya d'exercice n'est pas renseignée.");
+                }
+                if (WILAYAS_INTERIEUR_EXCLUES.contains(wilaya)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "Ce poste est réservé aux représentants des régions de l'intérieur.");
+                }
+            }
+        }
+        // BUREAU_EXECUTIF : pas de vérification de section/wilaya en version PFE
     }
 
     private boolean isElecteurEligible(Election e, Medecin medecin) {
@@ -2156,6 +2443,10 @@ public class ElectionServiceImpl implements ElectionService {
                     StatutMedecin.ACTIF,
                     e.getRegion()
             );
+        }
+
+        if (e.getCorpsElectoral() == CorpsElectoral.CONSEIL_SECTION_B) {
+            return medecinRepo.countBySectionOrdreAndStatut(SectionOrdre.SPECIALISTE, StatutMedecin.ACTIF);
         }
 
         return medecinRepo.countElecteursEligiblesTous(StatutMedecin.ACTIF);
@@ -2349,20 +2640,59 @@ public class ElectionServiceImpl implements ElectionService {
         fillListDto(dto, e);
         dto.setDescription(e.getDescription());
         dto.setMaxVotesParElecteur(e.getMaxVotesParElecteur());
-        dto.setPositions(
-                positionRepo.findByElectionIdOrderByOrdreAsc(e.getId()).stream()
-                        .map(this::toPositionDto)
-                        .collect(Collectors.toList())
-        );
+
+        List<PositionElectorale> allPositions = positionRepo.findByElectionIdOrderByOrdreAsc(e.getId())
+                .stream().filter(PositionElectorale::isActif).collect(Collectors.toList());
+        dto.setPositions(allPositions.stream().map(this::toPositionDto).collect(Collectors.toList()));
+
+        List<PositionElectoraleDto> positionsEligibles = allPositions.stream()
+                .filter(p -> isPositionEligiblePourMedecin(e, p, medecin))
+                .map(this::toPositionDto)
+                .collect(Collectors.toList());
+        dto.setPositionsEligibles(positionsEligibles);
+
         String votantHash = buildVotantHash(e.getId(), medecin);
         dto.setAVote(participationRepo.existsByElectionIdAndVotantHash(e.getId(), votantHash));
-        candidatureRepo.findByElectionIdAndMedecinEmail(e.getId(), medecin.getEmail())
-                .ifPresent(c -> dto.setMaCandidature(toCandidatureDto(c, isResultsVisible(e))));
+
+        Optional<Candidature> maCand = candidatureRepo.findByElectionIdAndMedecinEmail(e.getId(), medecin.getEmail());
+        maCand.ifPresent(c -> dto.setMaCandidature(toCandidatureDto(c, isResultsVisible(e))));
+
         dto.setCandidatures(
                 candidatureRepo.findByElectionIdAndStatut(e.getId(), StatutCandidature.VALIDEE).stream()
                         .map(c -> toCandidatureDto(c, isResultsVisible(e)))
                         .collect(Collectors.toList())
         );
+
+        // peutCandidater + raisonIneligibilite
+        boolean candidaturesOuvertes = e.getStatut() == ElectionStatut.CANDIDATURE_OUVERTE;
+        boolean aDejaUneBlocage = maCand.isPresent() && (
+                maCand.get().getStatut() == StatutCandidature.SOUMISE
+                || maCand.get().getStatut() == StatutCandidature.EN_REVUE
+                || maCand.get().getStatut() == StatutCandidature.VALIDEE);
+
+        String raison = null;
+        boolean peutCandidater = false;
+        if (!candidaturesOuvertes) {
+            raison = "Les candidatures ne sont pas ouvertes pour cette élection.";
+        } else if (aDejaUneBlocage) {
+            raison = "Vous avez déjà une candidature en cours pour cette élection.";
+        } else {
+            raison = getRaisonIneligibiliteCandidature(e, medecin);
+            peutCandidater = (raison == null);
+        }
+        dto.setPeutCandidater(peutCandidater);
+        dto.setRaisonIneligibilite(raison);
+
+        // peutVoter
+        dto.setPeutVoter(e.getStatut() == ElectionStatut.VOTE_EN_COURS
+                && isMedecinConcerneParElection(e, medecin));
+
+        // prochaineEtapeCandidature
+        if (maCand.isPresent() && maCand.get().getStatut() == StatutCandidature.BROUILLON) {
+            long nbDocs = documentRepo.countByCandidatureId(maCand.get().getId());
+            dto.setProchaineEtapeCandidature(nbDocs == 0 ? "DOCUMENTS" : "CONFIRMATION");
+        }
+
         return dto;
     }
 
@@ -2403,9 +2733,24 @@ public class ElectionServiceImpl implements ElectionService {
         dto.setStatut(c.getStatut());
         dto.setCommentaireValidation(c.getCommentaireValidation());
         dto.setDateDepot(c.getDateDepot());
+        dto.setDateValidation(c.getDateValidation());
         dto.setNbVotes(showVotes ? bulletinRepo.countByElectionIdAndCandidatureId(c.getElection().getId(), c.getId()) : 0);
         dto.setDocuments(documentRepo.findByCandidatureId(c.getId()).stream()
                 .map(this::toDocumentDto).collect(Collectors.toList()));
+
+        // Champs élection enrichis
+        dto.setElectionType(c.getElection().getType());
+        dto.setElectionStatut(c.getElection().getStatut());
+        dto.setElectionRegion(c.getElection().getRegion());
+        dto.setElectionCorpsElectoral(c.getElection().getCorpsElectoral());
+
+        // Flags d'état
+        StatutCandidature sc = c.getStatut();
+        dto.setPeutModifier(sc == StatutCandidature.BROUILLON);
+        dto.setPeutUploaderDocuments(sc == StatutCandidature.BROUILLON);
+        dto.setPeutFinaliser(sc == StatutCandidature.BROUILLON);
+        dto.setPeutRetirer(sc == StatutCandidature.BROUILLON || sc == StatutCandidature.SOUMISE);
+
         return dto;
     }
 
@@ -2462,10 +2807,10 @@ public class ElectionServiceImpl implements ElectionService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidature introuvable"));
         if (!c.getMedecin().getEmail().equals(email))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès refusé");
-        if (c.getStatut() != StatutCandidature.SOUMISE) {
+        if (c.getStatut() != StatutCandidature.BROUILLON && c.getStatut() != StatutCandidature.SOUMISE) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Impossible d'ajouter un document après la soumission de la candidature"
+                    "Les documents peuvent uniquement être ajoutés sur une candidature en brouillon ou soumise"
             );
         }
 
@@ -2484,6 +2829,10 @@ public class ElectionServiceImpl implements ElectionService {
             );
         }
 
+        // Remplacer un document existant du même type
+        documentRepo.findByCandidatureIdAndTypeDocument(candidatureId, type)
+                .ifPresent(documentRepo::delete);
+
         String path = fileStorageService.storeCandidatureFile(file);
         CandidatureDocument doc = new CandidatureDocument();
         doc.setCandidature(c);
@@ -2492,6 +2841,21 @@ public class ElectionServiceImpl implements ElectionService {
         doc.setOriginalFilename(file.getOriginalFilename());
         documentRepo.save(doc);
         return toDocumentDto(doc);
+    }
+
+    @Override
+    public void supprimerDocument(Long candidatureId, Long documentId, String email) {
+        Candidature c = candidatureRepo.findById(candidatureId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidature introuvable"));
+        if (!c.getMedecin().getEmail().equals(email))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès refusé");
+        if (c.getStatut() != StatutCandidature.BROUILLON)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Les documents ne peuvent être supprimés que sur un brouillon");
+        CandidatureDocument doc = documentRepo.findById(documentId)
+                .filter(d -> d.getCandidature().getId().equals(candidatureId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document introuvable"));
+        documentRepo.delete(doc);
     }
 
     private ElectionStatut parseStatut(String s) {

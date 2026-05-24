@@ -123,6 +123,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void verifyActivationEmail(String tokenValue, String email) {
         ActivationToken token = tokenRepository.findByToken(tokenValue)
                 .orElseThrow(() -> new RuntimeException("Lien invalide ou expiré."));

@@ -91,15 +91,23 @@ export default function MedecinVotingPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const candidates = election?.candidatures ?? [];
-  const positions = election?.positions ?? [];
+  const peutVoter = election?.peutVoter ?? (election?.statut === "VOTE_EN_COURS" && !election?.aVote);
+  const candidates = election?.candidaturesEligibles ?? election?.candidatures ?? [];
+  const positions = election?.positionsEligibles ?? election?.positions ?? [];
   const hasPositions = positions.length > 0;
+
+  const getMaxVotes = (pos) =>
+    pos?.maxVotesParElecteur
+    ?? pos?.nombreSieges
+    ?? election?.maxVotesParElecteur
+    ?? election?.seatsCount
+    ?? 1;
 
   const byPosition = hasPositions
     ? positions.map((pos) => ({
         pos,
         candidates: candidates.filter((c) => c.position?.id === pos.id),
-      })).filter((g) => g.candidates.length > 0)
+      }))
     : [{ pos: null, candidates }];
 
   const toggleVote = (posId, cid, maxVotes) => {
@@ -128,6 +136,7 @@ export default function MedecinVotingPage() {
   };
 
   const handleVote = async () => {
+    if (submitting || totalSelected === 0) return;
     setSubmitting(true);
     setError("");
     try {
@@ -150,14 +159,15 @@ export default function MedecinVotingPage() {
     );
   }
 
-  if (!election || election.statut !== "VOTE_EN_COURS" || election.aVote) {
+  if (!election || !peutVoter) {
+    const msg = election?.aVote
+      ? "Vous avez déjà voté pour cette élection."
+      : election?.raisonIneligibilite ?? "Le vote n'est pas disponible.";
     return (
       <MedecinLayout title="Vote">
         <div className="flex h-64 flex-col items-center justify-center gap-3 text-slate-400">
           <Vote size={32} className="text-slate-200 dark:text-slate-700" />
-          <p className="text-[13px]">
-            {election?.aVote ? "Vous avez déjà voté pour cette élection." : "Le vote n'est pas disponible."}
-          </p>
+          <p className="text-[13px]">{msg}</p>
           <button
             onClick={() => navigate(`/medecin/elections/${id}`)}
             className="text-[12px] font-semibold text-blue-600 hover:underline"
@@ -203,7 +213,7 @@ export default function MedecinVotingPage() {
                     <div>
                       <p className="font-bold text-slate-800 dark:text-slate-100 text-[15px]">{election.titre}</p>
                       <p className="text-[12px] text-slate-400">
-                        {candidates.length} candidat(s) · {hasPositions ? `${positions.length} poste(s)` : `${election.seatsCount} siège(s)`}
+                        {candidates.length} candidat(s) · {hasPositions ? `${positions.length} poste(s)` : `${election.seatsCount ?? getMaxVotes(null)} siège(s)`}
                       </p>
                     </div>
                   </div>
@@ -213,22 +223,30 @@ export default function MedecinVotingPage() {
                     <div>
                       <p className="text-[13px] font-semibold text-blue-800 dark:text-blue-300 mb-0.5">Confidentialité du vote</p>
                       <p className="text-[12px] text-blue-700 dark:text-blue-400">
-                        Votre participation est enregistrée afin d'empêcher le double vote. Le contenu de votre vote reste confidentiel.
+                        Votre participation est enregistrée afin d'empêcher le double vote. Le contenu du vote est traité uniquement dans le cadre du scrutin.
                       </p>
                     </div>
                   </div>
 
-                  <div className="text-[13px] text-slate-600 dark:text-slate-400 space-y-1">
+                  <div className="text-[13px] text-slate-600 dark:text-slate-400 space-y-1.5">
+                    <p>
+                      Cette élection comporte <strong>{candidates.length} candidat(s)</strong>
+                      {hasPositions ? ` répartis sur ${positions.length} poste(s)` : ""}.
+                    </p>
                     {hasPositions ? (
-                      positions.map((pos) => (
-                        <p key={pos.id}>
-                          <strong>{pos.libelle}</strong> — sélectionnez {pos.nombreSieges === 1 ? "un candidat" : `jusqu'à ${pos.nombreSieges} candidats`}
-                        </p>
-                      ))
+                      positions.map((pos) => {
+                        const max = getMaxVotes(pos);
+                        return (
+                          <p key={pos.id}>
+                            <strong>{pos.libelle}</strong> — {max === 1 ? "1 candidat à sélectionner" : `jusqu'à ${max} candidats à sélectionner`}
+                          </p>
+                        );
+                      })
                     ) : (
-                      <p>Sélectionnez jusqu'à <strong>{election.maxVotesParElecteur ?? election.seatsCount}</strong> candidat(s).</p>
+                      <p>Sélectionnez jusqu'à <strong>{getMaxVotes(null)}</strong> candidat(s).</p>
                     )}
-                    <p className="pt-1">Ce vote est <strong>définitif et irréversible</strong>.</p>
+                    <p className="pt-1">Vous pouvez laisser un poste sans sélection (vote partiel autorisé).</p>
+                    <p>Ce vote est <strong>définitif et irréversible</strong>.</p>
                   </div>
 
                   <button
@@ -252,7 +270,7 @@ export default function MedecinVotingPage() {
               >
                 {byPosition.map(({ pos, candidates: posCandidates }) => {
                   const key = pos?.id ?? "flat";
-                  const maxVotes = pos?.nombreSieges ?? election.maxVotesParElecteur ?? election.seatsCount;
+                  const maxVotes = getMaxVotes(pos);
                   const isRadio = maxVotes === 1;
                   const selected = positionVotes[key] ?? [];
 
@@ -334,37 +352,42 @@ export default function MedecinVotingPage() {
                   {byPosition.map(({ pos, candidates: posCandidates }) => {
                     const key = pos?.id ?? "flat";
                     const selected = positionVotes[key] ?? [];
-                    if (selected.length === 0) return null;
                     return (
-                      <div key={key}>
+                      <div key={key} className="border-b last:border-b-0 border-slate-100 dark:border-slate-800">
                         {pos && (
                           <div className="bg-slate-50 dark:bg-slate-800/50 px-4 py-2 border-b border-slate-100 dark:border-slate-800">
                             <p className="text-[11px] font-semibold uppercase text-slate-400">{pos.libelle}</p>
                           </div>
                         )}
-                        {selected.map((cid) => {
-                          const c = posCandidates.find((x) => x.id === cid);
-                          if (!c) return null;
-                          const initials = `${c.medecinPrenom?.[0] ?? ""}${c.medecinNom?.[0] ?? ""}`.toUpperCase();
-                          return (
-                            <div key={cid} className="flex items-center gap-3 px-4 py-3.5 border-b last:border-b-0 border-slate-50 dark:border-slate-800">
-                              {c.medecinPhotoUrl ? (
-                                <img src={c.medecinPhotoUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
-                              ) : (
-                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-700 text-white text-[12px] font-bold">
-                                  {initials}
+                        {selected.length === 0 ? (
+                          <p className="px-4 py-3 text-[12px] text-slate-400 italic">
+                            Aucun choix sélectionné pour ce poste.
+                          </p>
+                        ) : (
+                          selected.map((cid) => {
+                            const c = posCandidates.find((x) => x.id === cid);
+                            if (!c) return null;
+                            const initials = `${c.medecinPrenom?.[0] ?? ""}${c.medecinNom?.[0] ?? ""}`.toUpperCase();
+                            return (
+                              <div key={cid} className="flex items-center gap-3 px-4 py-3.5 border-b last:border-b-0 border-slate-50 dark:border-slate-800">
+                                {c.medecinPhotoUrl ? (
+                                  <img src={c.medecinPhotoUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
+                                ) : (
+                                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-700 text-white text-[12px] font-bold">
+                                    {initials}
+                                  </div>
+                                )}
+                                <div>
+                                  <p className="font-semibold text-slate-800 dark:text-slate-100">
+                                    Dr. {c.medecinPrenom} {c.medecinNom}
+                                  </p>
+                                  {c.specialite && <p className="text-[11px] text-slate-400">{c.specialite}</p>}
                                 </div>
-                              )}
-                              <div>
-                                <p className="font-semibold text-slate-800 dark:text-slate-100">
-                                  Dr. {c.medecinPrenom} {c.medecinNom}
-                                </p>
-                                {c.specialite && <p className="text-[11px] text-slate-400">{c.specialite}</p>}
+                                <CheckCircle2 size={16} className="ml-auto text-green-500 shrink-0" />
                               </div>
-                              <CheckCircle2 size={16} className="ml-auto text-green-500 shrink-0" />
-                            </div>
-                          );
-                        })}
+                            );
+                          })
+                        )}
                       </div>
                     );
                   })}
@@ -380,7 +403,7 @@ export default function MedecinVotingPage() {
                 <div className="rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 p-4 flex gap-3">
                   <Shield size={14} className="mt-0.5 shrink-0 text-blue-600" />
                   <p className="text-[12px] text-blue-700 dark:text-blue-400">
-                    Votre participation est enregistrée afin d'empêcher le double vote. Le contenu de votre vote reste confidentiel.
+                    Votre participation est enregistrée afin d'empêcher le double vote. Le contenu du vote est traité uniquement dans le cadre du scrutin.
                   </p>
                 </div>
 
@@ -432,7 +455,7 @@ export default function MedecinVotingPage() {
                   Votre vote a bien été pris en compte.
                 </p>
                 <p className="text-[12px] text-slate-400 mb-8">
-                  Votre participation a été enregistrée. Le contenu de votre vote reste confidentiel.
+                  Votre participation a été enregistrée. Le contenu du vote est traité uniquement dans le cadre du scrutin.
                 </p>
 
                 <button

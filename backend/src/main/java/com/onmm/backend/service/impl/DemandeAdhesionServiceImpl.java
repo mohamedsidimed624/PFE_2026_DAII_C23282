@@ -100,6 +100,7 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService {
         demande.setEmail(request.getEmail());
         demande.setTelephone(request.getTelephone());
         demande.setAdresse(request.getAdresse());
+        demande.setWilayaExercice(request.getWilayaExercice());
         demande.setNumeroDossier(genererNumeroDossier());
 
         demande.setStatut(ApplicationStatus.PENDING);

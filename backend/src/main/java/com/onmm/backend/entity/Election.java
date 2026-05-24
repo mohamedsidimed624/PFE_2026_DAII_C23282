@@ -70,6 +70,9 @@ public class Election {
     @Column(columnDefinition = "TEXT")
     private String raisonAnnulation;
 
+    @Column(name = "preset_code", length = 50)
+    private String presetCode;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cree_par_id")
     private Admin creePar;
@@ -143,4 +146,7 @@ public class Election {
 
     public List<PositionElectorale> getPositions() { return positions; }
     public void setPositions(List<PositionElectorale> positions) { this.positions = positions; }
+
+    public String getPresetCode() { return presetCode; }
+    public void setPresetCode(String presetCode) { this.presetCode = presetCode; }
 }

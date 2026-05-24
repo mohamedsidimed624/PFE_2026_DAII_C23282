@@ -79,6 +79,25 @@ public class MedecinElectionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
+    @PutMapping("/candidatures/{candidatureId}/soumettre")
+    public ResponseEntity<CandidatureDto> finaliserCandidature(
+            @PathVariable Long candidatureId,
+            Authentication auth
+    ) {
+        return ResponseEntity.ok(
+                electionService.finaliserCandidature(candidatureId, currentEmail(auth))
+        );
+    }
+
+    @DeleteMapping("/candidatures/{candidatureId}/documents/{documentId}")
+    public ResponseEntity<Void> supprimerDocument(
+            @PathVariable Long candidatureId,
+            @PathVariable Long documentId,
+            Authentication auth) {
+        electionService.supprimerDocument(candidatureId, documentId, currentEmail(auth));
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/mes-candidatures")
     public List<CandidatureDto> getMesCandidatures(Authentication auth) {
         return electionService.getMesCandidatures(currentEmail(auth));

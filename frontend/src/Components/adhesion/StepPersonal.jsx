@@ -2,6 +2,12 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+const WILAYAS = [
+  "Adrar", "Assaba", "Brakna", "Dakhlet Nouadhibou", "Gorgol", "Guidimakha",
+  "Hodh Ech Chargui", "Hodh El Gharbi", "Inchiri", "Nouakchott Nord",
+  "Nouakchott Ouest", "Nouakchott Sud", "Tagant", "Tiris Zemmour", "Trarza",
+];
+
 import { personalSchema } from "../../validation/validationSchemas";
 import { useFormData } from "../../context/FormContext";
 import { checkUnique } from "../../services/api";
@@ -197,6 +203,19 @@ function StepPersonal({ nextStep }) {
             className={inputCls(Boolean(errors.adresse))}
           />
         </Field>
+
+        <Field label="Wilaya d'exercice" required error={errors.wilayaExercice?.message}>
+          <select
+            {...register("wilayaExercice")}
+            className={inputCls(Boolean(errors.wilayaExercice))}
+          >
+            <option value="">— Sélectionner une wilaya —</option>
+            {WILAYAS.map((w) => (
+              <option key={w} value={w}>{w}</option>
+            ))}
+          </select>
+        </Field>
+
       </div>
 
       <div className="mt-8 flex justify-end">

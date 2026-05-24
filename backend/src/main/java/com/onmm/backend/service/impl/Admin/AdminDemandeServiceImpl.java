@@ -41,17 +41,12 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         return "OM-" + java.time.Year.now().getValue() + "-" + System.currentTimeMillis();
     }
 
-    private SectionOrdre determineSectionOrdreFromEducations(Set<DemandeEducation> educations) {
-
-        boolean hasGeneralMedicine = educations.stream()
+    private SectionOrdre determinerSection(boolean estEnseignantChercheur, Set<DemandeEducation> educations) {
+        if (estEnseignantChercheur) return SectionOrdre.ENSEIGNANT_CHERCHEUR;
+        boolean hasSpecialite = educations != null && educations.stream()
                 .anyMatch(e -> e.getSpecialite() != null
-                        && "Médecine Générale".equalsIgnoreCase(e.getSpecialite().getLibelle()));
-
-        if (hasGeneralMedicine) {
-            return SectionOrdre.GENERALISTE;
-        }
-
-        return SectionOrdre.SPECIALISTE;
+                        && !"Médecine Générale".equalsIgnoreCase(e.getSpecialite().getLibelle()));
+        return hasSpecialite ? SectionOrdre.SPECIALISTE : SectionOrdre.GENERALISTE;
     }
 
     public AdminDemandeServiceImpl(DemandeAdhesionRepository repository, EmailService emailService, UserRepository userRepository, ActivationTokenRepository tokenRepository, MedecinRepository medecinRepository, NotificationService notificationService) {
@@ -101,6 +96,9 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         dto.setNationalite(demande.getNationalite());
         dto.setDateNaissance(demande.getDateNaissance());
         dto.setStatut(demande.getStatut().toString());
+        dto.setEstEnseignantChercheur(demande.isEstEnseignantChercheur());
+        dto.setSectionProposee(determinerSection(demande.isEstEnseignantChercheur(), demande.getEducations()).name());
+        dto.setWilayaExercice(demande.getWilayaExercice());
         dto.setSubmissionDate(demande.getSubmissionDate());
 
         dto.setEducations(
@@ -199,7 +197,7 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
 
     @Override
     @Transactional
-    public void approveDemande(Long id) {
+    public void approveDemande(Long id, SectionOrdre sectionValidee) {
 
         DemandeAdhesion demande = repository.findWithDetailsById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
@@ -243,8 +241,12 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
         medecin.setDateApprouvement(java.time.LocalDate.now());
         medecin.setDateNaissance(demande.getDateNaissance());
 
-        // Section ordre : règle simple basée sur les formations
-        medecin.setSectionOrdre(determineSectionOrdreFromEducations(demande.getEducations()));
+        // Section ordre : priorité à la correction admin, sinon règle automatique
+        SectionOrdre section = (sectionValidee != null)
+                ? sectionValidee
+                : determinerSection(demande.isEstEnseignantChercheur(), demande.getEducations());
+        medecin.setSectionOrdre(section);
+        medecin.setWilayaExercice(demande.getWilayaExercice());
 
         DemandeExperience experienceActuelle = demande.getExperiences()
                 .stream()

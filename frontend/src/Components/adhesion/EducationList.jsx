@@ -6,6 +6,12 @@ function EducationList({ setIsAdding, setEditingIndex, nextStep, prevStep }) {
   const { formData, updateSection } = useFormData();
   const [error, setError] = useState("");
 
+  const estEnseignantChercheur = formData.personal?.estEnseignantChercheur ?? false;
+
+  const toggleEnseignant = (e) => {
+    updateSection("personal", { ...(formData.personal || {}), estEnseignantChercheur: e.target.checked });
+  };
+
   const education = formData.education || [];
 
   const deleteEducation = (index) => {
@@ -59,6 +65,25 @@ function EducationList({ setIsAdding, setEditingIndex, nextStep, prevStep }) {
           </div>
         </div>
       ))}
+
+      <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+        <label className="flex cursor-pointer items-center gap-3">
+          <input
+            type="checkbox"
+            checked={estEnseignantChercheur}
+            onChange={toggleEnseignant}
+            className="h-4 w-4 rounded border-slate-300 accent-green-600"
+          />
+          <span className="text-[13px] font-medium text-[#123F4A]">
+            Je suis médecin enseignant-chercheur <span className="text-slate-500">(Section C)</span>
+          </span>
+        </label>
+        <p className="mt-1.5 text-[11px] text-slate-400 pl-7">
+          {estEnseignantChercheur
+            ? "Section C — Médecins enseignants-chercheurs"
+            : "Section déterminée selon votre spécialité — vérifiée par l'administration."}
+        </p>
+      </div>
 
       <div className="flex justify-between pt-4">
         <button

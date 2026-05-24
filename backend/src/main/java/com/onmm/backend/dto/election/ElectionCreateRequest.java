@@ -24,6 +24,7 @@ public class ElectionCreateRequest {
 
     private CorpsElectoral corpsElectoral = CorpsElectoral.TOUS_MEDECINS_ACTIFS;
     private Double quorumPourcentage;
+    private String presetCode;
 
     public String getTitre() { return titre; }
     public void setTitre(String titre) { this.titre = titre; }
@@ -63,4 +64,7 @@ public class ElectionCreateRequest {
 
     public Double getQuorumPourcentage() { return quorumPourcentage; }
     public void setQuorumPourcentage(Double quorumPourcentage) { this.quorumPourcentage = quorumPourcentage; }
+
+    public String getPresetCode() { return presetCode; }
+    public void setPresetCode(String presetCode) { this.presetCode = presetCode; }
 }

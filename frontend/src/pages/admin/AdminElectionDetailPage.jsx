@@ -3,8 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Loader2, Trophy, CheckCircle2,
-  XCircle, PlayCircle, StopCircle, Archive, Ban, Star,
-  Plus, Trash2, Clock,
+  XCircle, PlayCircle, StopCircle, Archive, Ban, Star, Clock,
 } from "lucide-react";
 
 import AdminLayout from "../../components/admin/AdminLayout";
@@ -12,14 +11,26 @@ import {
   getElectionById, getResultats, ouvrirCandidatures, cloturerCandidatures,
   validerCandidature, rejeterCandidature, ouvrirVotes, cloturerVotes,
   terminerDepouillement, publierResultats, archiverElection, annulerElection,
-  getPositions, addPosition, deletePosition, getAuditLog,
+  getPositions, getAuditLog,
 } from "../../services/adminElectionApi";
 
 const TYPE_LABELS = {
-  CONSEIL_NATIONAL:       "Conseil national",
-  CONSEIL_REGIONAL:       "Conseil régional",
-  BUREAU_EXECUTIF:        "Bureau exécutif",
-  COMMISSION_SPECIALISEE: "Commission spécialisée",
+  CONSEIL_NATIONAL:        "Conseil National de l'Ordre",
+  BUREAU_EXECUTIF:         "Bureau exécutif",
+  BUREAU_SECTION_A:        "Bureau de Section A",
+  BUREAU_SECTION_B:        "Bureau de Section B",
+  BUREAU_SECTION_C:        "Bureau de Section C",
+  REPRESENTANTS_REGIONAUX: "Représentants régionaux",
+};
+
+const CORPS_LABELS = {
+  TOUS_MEDECINS_ACTIFS:     "Tous les médecins actifs",
+  MEDECINS_REGION:          "Médecins de la région",
+  MEDECINS_PAR_SECTION:     "Médecins répartis selon leur section",
+  MEMBRES_CONSEIL_NATIONAL: "Membres du Conseil National",
+  CONSEIL_SECTION_A:        "Membres du conseil de Section A",
+  CONSEIL_SECTION_B:        "Membres du conseil de Section B",
+  CONSEIL_SECTION_C:        "Membres du conseil de Section C",
 };
 
 const STATUT_STYLES = {
@@ -100,14 +111,13 @@ export default function AdminElectionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
   const [rejComment, setRejComment] = useState({});
-  const [posForm, setPosForm] = useState({ libelle: "", ordre: 0, nombreSieges: 1 });
-  const [posErr, setPosErr] = useState("");
   const [annulerModal, setAnnulerModal] = useState(false);
   const [annulerRaison, setAnnulerRaison] = useState("");
   const [actionErr, setActionErr] = useState("");
 
   const load = async () => {
     setLoading(true);
+    setResultats(null);
     try {
       const res = await getElectionById(id);
       setElection(res.data);
@@ -137,6 +147,10 @@ export default function AdminElectionDetailPage() {
     }
   };
 
+  const confirmThenDo = (message, fn) => {
+    if (window.confirm(message)) doAction(fn);
+  };
+
   const loadAudit = async () => {
     if (auditLogs !== null) return;
     try {
@@ -144,28 +158,6 @@ export default function AdminElectionDetailPage() {
       setAuditLogs(res.data);
     } catch {
       setAuditLogs([]);
-    }
-  };
-
-  const handleAddPosition = async () => {
-    if (!posForm.libelle.trim()) { setPosErr("Le libellé est requis"); return; }
-    setPosErr("");
-    try {
-      await addPosition(id, { libelle: posForm.libelle.trim(), ordre: parseInt(posForm.ordre) || 0, nombreSieges: parseInt(posForm.nombreSieges) || 1 });
-      setPosForm({ libelle: "", ordre: 0, nombreSieges: 1 });
-      const pRes = await getPositions(id);
-      setPositions(pRes.data);
-    } catch (err) {
-      setPosErr(err?.response?.data?.message ?? "Erreur");
-    }
-  };
-
-  const handleDeletePosition = async (pid) => {
-    try {
-      await deletePosition(id, pid);
-      setPositions((p) => p.filter((pos) => pos.id !== pid));
-    } catch (err) {
-      setPosErr(err?.response?.data?.message ?? "Erreur lors de la suppression");
     }
   };
 
@@ -200,7 +192,13 @@ export default function AdminElectionDetailPage() {
   }
 
   const s = election.statut;
-  const canEditPositions = s === "BROUILLON";
+  const now = new Date();
+  const canOpenCandidatures =
+    s === "BROUILLON" &&
+    election.candidatureStartDate &&
+    now >= new Date(election.candidatureStartDate) &&
+    election.candidatureEndDate &&
+    now < new Date(election.candidatureEndDate);
 
   return (
     <AdminLayout title={election.titre}>
@@ -260,11 +258,11 @@ export default function AdminElectionDetailPage() {
                   )}
                   <span className="text-[12px] text-slate-400">· {election.seatsCount} siège(s)</span>
                   {election.corpsElectoral && (
-                    <span className="rounded-full bg-[#0F766E]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#0F766E]">
-                      {election.corpsElectoral === "TOUS_MEDECINS_ACTIFS" ? "Tous les médecins"
-                        : election.corpsElectoral === "MEDECINS_REGION" ? `Région ${election.region ?? ""}`
-                        : election.corpsElectoral === "MEMBRES_SPECIALISTE" ? "Spécialistes"
-                        : election.corpsElectoral}
+                    <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+                      {CORPS_LABELS[election.corpsElectoral] ?? election.corpsElectoral}
+                      {election.corpsElectoral === "MEDECINS_REGION" && election.region
+                        ? ` · ${election.region}`
+                        : ""}
                     </span>
                   )}
                 </div>
@@ -275,33 +273,41 @@ export default function AdminElectionDetailPage() {
             {/* Action buttons */}
             <div className="flex flex-wrap gap-2">
               {actionErr && <p className="w-full text-[12px] text-red-500">{actionErr}</p>}
-              {s === "BROUILLON" && (
+              {s === "BROUILLON" && canOpenCandidatures && (
                 <ActionBtn icon={PlayCircle} label="Ouvrir candidatures" color="blue"
                   onClick={() => doAction(() => ouvrirCandidatures(id))} />
               )}
+              {s === "BROUILLON" && !canOpenCandidatures && (
+                <ActionBtn icon={PlayCircle}
+                  label={election.candidatureStartDate
+                    ? `Ouverture prévue le ${formatDt(election.candidatureStartDate)}`
+                    : "Ouvrir candidatures"}
+                  color="slate"
+                  disabled />
+              )}
               {s === "CANDIDATURE_OUVERTE" && (
                 <ActionBtn icon={StopCircle} label="Clôturer candidatures" color="amber"
-                  onClick={() => doAction(() => cloturerCandidatures(id))} />
+                  onClick={() => confirmThenDo("Clôturer les candidatures ? Aucune nouvelle candidature ne pourra être déposée.", () => cloturerCandidatures(id))} />
               )}
               {s === "VALIDATION_CANDIDATURES" && (
                 <ActionBtn icon={PlayCircle} label="Ouvrir le vote" color="green"
-                  onClick={() => doAction(() => ouvrirVotes(id))} />
+                  onClick={() => confirmThenDo("Ouvrir le vote ? Les médecins éligibles pourront voter.", () => ouvrirVotes(id))} />
               )}
               {s === "VOTE_EN_COURS" && (
                 <ActionBtn icon={StopCircle} label="Clôturer le vote" color="amber"
-                  onClick={() => doAction(() => cloturerVotes(id))} />
+                  onClick={() => confirmThenDo("Clôturer le vote ? L'élection passera en phase de dépouillement.", () => cloturerVotes(id))} />
               )}
               {s === "DEPOUILLEMENT" && (
                 <ActionBtn icon={CheckCircle2} label="Terminer dépouillement" color="amber"
-                  onClick={() => doAction(() => terminerDepouillement(id))} />
+                  onClick={() => confirmThenDo("Terminer le dépouillement ? Les résultats pourront ensuite être publiés.", () => terminerDepouillement(id))} />
               )}
               {s === "TERMINEE" && (
                 <ActionBtn icon={Trophy} label="Publier résultats" color="green"
-                  onClick={() => doAction(() => publierResultats(id))} />
+                  onClick={() => confirmThenDo("Publier les résultats ? Ils deviendront visibles pour les utilisateurs concernés.", () => publierResultats(id))} />
               )}
               {(s === "TERMINEE" || s === "RESULTATS_PUBLIES") && (
                 <ActionBtn icon={Archive} label="Archiver" color="slate"
-                  onClick={() => doAction(() => archiverElection(id))} />
+                  onClick={() => confirmThenDo("Archiver cette élection ? Elle ne pourra plus être modifiée.", () => archiverElection(id))} />
               )}
               {s !== "ARCHIVEE" && s !== "ANNULEE" && (
                 <ActionBtn icon={Ban} label="Annuler" color="red"
@@ -351,7 +357,7 @@ export default function AdminElectionDetailPage() {
                     { label: "Candidatures", value: `${formatDt(election.candidatureStartDate)} → ${formatDt(election.candidatureEndDate)}` },
                     { label: "Vote", value: `${formatDt(election.voteStartDate)} → ${formatDt(election.voteEndDate)}` },
                     { label: "Sièges", value: election.seatsCount },
-                    { label: "Votes / électeur", value: election.maxVotesParElecteur },
+                    { label: "Votes max.", value: election.maxVotesParElecteur },
                   ].map(({ label, value }) => (
                     <div key={label} className="rounded-md bg-slate-50 dark:bg-slate-800 p-4">
                       <p className="text-[10px] font-semibold uppercase text-slate-400 mb-1">{label}</p>
@@ -427,7 +433,8 @@ export default function AdminElectionDetailPage() {
                               />
                               <button
                                 onClick={() => doAction(() => rejeterCandidature(id, c.id, rejComment[c.id] ?? ""))}
-                                className="flex items-center gap-1 rounded-md border border-red-200 px-3 py-1 text-[11px] font-semibold text-red-500 hover:bg-red-50"
+                                disabled={!rejComment[c.id]?.trim()}
+                                className="flex items-center gap-1 rounded-md border border-red-200 px-3 py-1 text-[11px] font-semibold text-red-500 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed"
                               >
                                 <XCircle size={12} /> Rejeter
                               </button>
@@ -444,68 +451,21 @@ export default function AdminElectionDetailPage() {
             {/* Tab 2: Postes électoraux */}
             {tab === 2 && (
               <div className="space-y-4">
-                {positions.length === 0 && !canEditPositions && (
+                <p className="text-[12px] text-slate-400 italic">
+                  Les postes sont générés automatiquement selon le type d'élection et ne sont pas modifiables depuis cette page.
+                </p>
+                {positions.length === 0 ? (
                   <p className="py-8 text-center text-[13px] text-slate-400">Aucun poste défini.</p>
-                )}
-                {positions.length > 0 && (
+                ) : (
                   <ul className="divide-y divide-slate-100 dark:divide-slate-800 rounded-md border border-slate-100 dark:border-slate-800 overflow-hidden">
                     {positions.map((p) => (
-                      <li key={p.id} className="flex items-center justify-between px-4 py-3">
-                        <div>
-                          <span className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">{p.libelle}</span>
-                          <span className="ml-2 text-[11px] text-slate-400">ordre {p.ordre} · {p.nombreSieges} siège(s)</span>
-                        </div>
-                        {canEditPositions && (
-                          <button
-                            onClick={() => handleDeletePosition(p.id)}
-                            className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        )}
+                      <li key={p.id} className="px-4 py-3">
+                        <span className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">{p.libelle}</span>
+                        <span className="ml-2 text-[11px] text-slate-400">ordre {p.ordre} · {p.nombreSieges} siège(s)</span>
                       </li>
                     ))}
                   </ul>
                 )}
-
-                {canEditPositions && (
-                  <div className="rounded-md border border-dashed border-slate-200 dark:border-slate-700 p-4 space-y-3">
-                    <p className="text-[12px] font-semibold uppercase text-slate-400">Ajouter un poste</p>
-                    <div className="flex gap-3">
-                      <input
-                        placeholder="Libellé du poste…"
-                        className="h-9 flex-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-[13px] text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        value={posForm.libelle}
-                        onChange={(e) => setPosForm((f) => ({ ...f, libelle: e.target.value }))}
-                        onKeyDown={(e) => { if (e.key === "Enter") handleAddPosition(); }}
-                      />
-                      <input
-                        type="number"
-                        placeholder="Ordre"
-                        className="h-9 w-20 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-[13px] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        value={posForm.ordre}
-                        onChange={(e) => setPosForm((f) => ({ ...f, ordre: e.target.value }))}
-                      />
-                      <input
-                        type="number"
-                        placeholder="Sièges"
-                        min={1}
-                        className="h-9 w-20 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-[13px] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        value={posForm.nombreSieges}
-                        onChange={(e) => setPosForm((f) => ({ ...f, nombreSieges: e.target.value }))}
-                      />
-                      <button
-                        onClick={handleAddPosition}
-                        className="flex items-center gap-1.5 rounded-md bg-blue-700 px-4 py-2 text-[12px] font-semibold text-white hover:bg-blue-800"
-                      >
-                        <Plus size={13} /> Ajouter
-                      </button>
-                    </div>
-                    {posErr && <p className="text-[12px] text-red-500">{posErr}</p>}
-                  </div>
-                )}
-
-                {!canEditPositions && positions.length === 0 && null}
               </div>
             )}
 
@@ -520,7 +480,7 @@ export default function AdminElectionDetailPage() {
                   </p>
                 ) : (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="rounded-md bg-slate-50 dark:bg-slate-800 p-4">
                         <p className="text-[10px] uppercase text-slate-400 mb-1">Votants</p>
                         <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{resultats.nbVotants}</p>
@@ -531,19 +491,6 @@ export default function AdminElectionDetailPage() {
                           {resultats.tauxParticipation?.toFixed(1)}%
                         </p>
                       </div>
-                      {resultats.quorumPourcentage != null && (
-                        <div className={`rounded-md p-4 border col-span-2 ${resultats.quorumAtteint
-                          ? "bg-green-50 border-green-100 dark:bg-green-900/10 dark:border-green-800"
-                          : "bg-red-50 border-red-100 dark:bg-red-900/10 dark:border-red-800"}`}>
-                          <p className="text-[10px] uppercase text-slate-400 mb-1">Quorum</p>
-                          <p className="text-[13px] font-semibold">
-                            {resultats.quorumPourcentage}% requis —{" "}
-                            <span className={resultats.quorumAtteint ? "text-green-700 dark:text-green-400" : "text-red-500"}>
-                              {resultats.quorumAtteint ? "✓ Atteint" : "✗ Non atteint"}
-                            </span>
-                          </p>
-                        </div>
-                      )}
                     </div>
 
                     {/* Validity banner */}

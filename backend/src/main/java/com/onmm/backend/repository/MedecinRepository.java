@@ -2,6 +2,7 @@ package com.onmm.backend.repository;
 
 import com.onmm.backend.entity.DemandeAdhesion;
 import com.onmm.backend.entity.Medecin;
+import com.onmm.backend.entity.enums.SectionOrdre;
 import com.onmm.backend.entity.enums.StatutMedecin;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -40,7 +41,7 @@ public interface MedecinRepository extends JpaRepository<Medecin, Long>, JpaSpec
     select count(m)
     from Medecin m
     where m.statut = :statut
-      and lower(m.villeExercice) = lower(:region)
+      and lower(m.wilayaExercice) = lower(:region)
       and m.numeroInscription is not null
       and trim(m.numeroInscription) <> ''
 """)
@@ -59,7 +60,7 @@ public interface MedecinRepository extends JpaRepository<Medecin, Long>, JpaSpec
     select m
     from Medecin m
     where m.statut = :statut
-      and lower(m.villeExercice) = lower(:region)
+      and lower(m.wilayaExercice) = lower(:region)
       and m.numeroInscription is not null
       and trim(m.numeroInscription) <> ''
 """)
@@ -71,4 +72,8 @@ public interface MedecinRepository extends JpaRepository<Medecin, Long>, JpaSpec
 
 
     long countByStatutAndVilleExerciceIgnoreCase(StatutMedecin statut, String villeExercice);
+
+    long countBySectionOrdreAndStatut(SectionOrdre sectionOrdre, StatutMedecin statut);
+
+    List<Medecin> findBySectionOrdreAndStatut(SectionOrdre sectionOrdre, StatutMedecin statut);
 }

@@ -29,10 +29,12 @@ public interface ElectionService {
     MedecinElectionDto getElectionDetailForMedecin(Long id, String email);
     CandidatureDto soumettreCandidature(Long electionId, CandidatureCreateRequest req, String email);
     void retirerCandidature(Long electionId, String email);
+    CandidatureDto finaliserCandidature(Long candidatureId, String email);
     void voter(Long electionId, VoteRequest req, String email);
     List<CandidatureDto> getMesCandidatures(String email);
     List<CandidatureDto> getCandidaturesForElection(Long electionId);
     CandidatureDocumentDto ajouterDocument(Long candidatureId, MultipartFile file, TypeDocumentCandidature type, String email);
+    void supprimerDocument(Long candidatureId, Long documentId, String email);
 
 
     void ouvrirCandidatures(Long id, String adminEmail);

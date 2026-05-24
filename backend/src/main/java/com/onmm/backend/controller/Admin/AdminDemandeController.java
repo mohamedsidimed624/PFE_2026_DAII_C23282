@@ -2,7 +2,9 @@ package com.onmm.backend.controller.Admin;
 
 import com.onmm.backend.dto.Admin.AdminDemandeDetailResponse;
 import com.onmm.backend.dto.Admin.AdminDemandeResponse;
+import com.onmm.backend.dto.Admin.ApproveRequest;
 import com.onmm.backend.dto.Admin.RejectRequest;
+import com.onmm.backend.entity.enums.SectionOrdre;
 import com.onmm.backend.service.Admin.AdminDemandeService;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,10 +33,10 @@ public class AdminDemandeController {
     }
 
     @PutMapping("/{id}/approve")
-    public void approveDemande(@PathVariable Long id) {
-
-        adminService.approveDemande(id);
-
+    public void approveDemande(@PathVariable Long id,
+                               @RequestBody(required = false) ApproveRequest body) {
+        SectionOrdre section = (body != null) ? body.getSectionValidee() : null;
+        adminService.approveDemande(id, section);
     }
 
     @PutMapping("/{id}/reject")

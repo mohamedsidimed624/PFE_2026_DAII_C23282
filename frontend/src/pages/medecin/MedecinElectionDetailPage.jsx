@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
-  ArrowLeft, Loader2, Vote, ChevronDown, ChevronUp, CheckCircle2,
+  ArrowLeft, Loader2, ChevronDown, ChevronUp, CheckCircle2,
 } from "lucide-react";
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { getElectionDetail, retirerCandidature } from "../../services/medecinElectionApi";
+import { extractApiError } from "../../utils/apiUtils";
 
 const STATUT_LABELS = {
   BROUILLON:               "Brouillon",
   CANDIDATURE_OUVERTE:     "Candidatures ouvertes",
-  VALIDATION_CANDIDATURES: "Validation",
+  VALIDATION_CANDIDATURES: "Candidatures en validation",
   VOTE_EN_COURS:           "Vote en cours",
   DEPOUILLEMENT:           "Dépouillement",
   TERMINEE:                "Terminée",
@@ -20,16 +20,56 @@ const STATUT_LABELS = {
 };
 
 const STATUT_STYLES = {
-  CANDIDATURE_OUVERTE: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-  VOTE_EN_COURS:       "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  DEPOUILLEMENT:       "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  TERMINEE:            "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
-  RESULTATS_PUBLIES:   "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  ANNULEE:             "bg-red-100 text-red-500",
+  BROUILLON:               "bg-slate-100 text-slate-500",
+  CANDIDATURE_OUVERTE:     "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  VALIDATION_CANDIDATURES: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  VOTE_EN_COURS:           "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  DEPOUILLEMENT:           "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+  TERMINEE:                "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+  RESULTATS_PUBLIES:       "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  ARCHIVEE:                "bg-slate-100 text-slate-400",
+  ANNULEE:                 "bg-red-100 text-red-500",
 };
 
-const formatDate = (d) =>
-  d ? new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }) : "—";
+const TYPE_LABELS = {
+  CONSEIL_NATIONAL:        "Conseil National de l'Ordre",
+  BUREAU_EXECUTIF:         "Bureau exécutif",
+  BUREAU_SECTION_A:        "Bureau de Section A",
+  BUREAU_SECTION_B:        "Bureau de Section B",
+  BUREAU_SECTION_C:        "Bureau de Section C",
+  REPRESENTANTS_REGIONAUX: "Représentants régionaux",
+};
+
+const CORPS_LABELS = {
+  TOUS_MEDECINS_ACTIFS:     "Tous les médecins actifs",
+  MEDECINS_REGION:          "Médecins de la région",
+  MEDECINS_PAR_SECTION:     "Médecins répartis selon leur section",
+  MEMBRES_CONSEIL_NATIONAL: "Membres du Conseil National",
+  CONSEIL_SECTION_A:        "Membres du conseil de Section A",
+  CONSEIL_SECTION_B:        "Membres du conseil de Section B",
+  CONSEIL_SECTION_C:        "Membres du conseil de Section C",
+};
+
+const CANDIDATURE_LABELS = {
+  BROUILLON: "Brouillon",
+  SOUMISE:   "Soumise",
+  EN_REVUE:  "En revue",
+  VALIDEE:   "Validée",
+  REJETEE:   "Rejetée",
+  RETIREE:   "Retirée",
+};
+
+const CAND_STYLES = {
+  BROUILLON: "bg-slate-100 text-slate-400",
+  SOUMISE:   "bg-slate-100 text-slate-500",
+  EN_REVUE:  "bg-amber-100 text-amber-600",
+  VALIDEE:   "bg-green-100 text-green-700",
+  REJETEE:   "bg-red-100 text-red-500",
+  RETIREE:   "bg-slate-50 text-slate-400",
+};
+
+const formatDateTime = (d) =>
+  d ? new Date(d).toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
 
 function CandidatCard({ c, showVotes }) {
   const [expanded, setExpanded] = useState(false);
@@ -96,14 +136,17 @@ export default function MedecinElectionDetailPage() {
   const navigate = useNavigate();
   const [election, setElection] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [actionError, setActionError] = useState(null);
 
   const load = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await getElectionDetail(id);
       setElection(res.data);
-    } catch {
+    } catch (err) {
+      setLoadError(extractApiError(err));
       setElection(null);
     } finally {
       setLoading(false);
@@ -113,12 +156,13 @@ export default function MedecinElectionDetailPage() {
   useEffect(() => { load(); }, [id]);
 
   const handleRetirer = async () => {
+    if (!window.confirm("Confirmer le retrait de votre candidature ?")) return;
     setActionError(null);
     try {
       await retirerCandidature(id);
       load();
     } catch (err) {
-      setActionError(err?.response?.data?.message ?? "Erreur lors du retrait de la candidature");
+      setActionError(extractApiError(err));
     }
   };
 
@@ -135,14 +179,19 @@ export default function MedecinElectionDetailPage() {
   if (!election) {
     return (
       <MedecinLayout title="Introuvable">
-        <div className="px-4 py-12 text-center text-slate-400">Élection introuvable.</div>
+        <div className="px-4 py-12 text-center text-slate-400">
+          {loadError
+            ? <span className="text-red-500">{loadError}</span>
+            : "Élection introuvable."}
+        </div>
       </MedecinLayout>
     );
   }
 
   const s = election.statut;
-  const canVote = s === "VOTE_EN_COURS" && !election.aVote;
-  const candidatures = election.candidatures ?? [];
+  const canCandidater = election.peutCandidater ?? (s === "CANDIDATURE_OUVERTE" && !election.maCandidature);
+  const canVote       = election.peutVoter       ?? (s === "VOTE_EN_COURS"       && !election.aVote);
+  const candidatures  = election.candidatures ?? [];
 
   return (
     <MedecinLayout title={election.titre}>
@@ -158,7 +207,7 @@ export default function MedecinElectionDetailPage() {
             </button>
 
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                   <span className={`rounded px-2.5 py-0.5 text-[11px] font-bold ${STATUT_STYLES[s] ?? "bg-slate-100 text-slate-500"}`}>
                     {STATUT_LABELS[s] ?? s}
@@ -170,20 +219,45 @@ export default function MedecinElectionDetailPage() {
                   )}
                 </div>
                 <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">{election.titre}</h1>
-                <div className="mt-1 flex flex-wrap gap-3 text-[12px] text-slate-400">
-                  <span>{election.seatsCount} siège(s) à pourvoir</span>
+
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-slate-500">
+                  {election.type && (
+                    <span>{TYPE_LABELS[election.type] ?? election.type}</span>
+                  )}
+                  {election.corpsElectoral && (
+                    <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                      {CORPS_LABELS[election.corpsElectoral] ?? election.corpsElectoral}
+                      {election.corpsElectoral === "MEDECINS_REGION" && election.region
+                        ? ` · ${election.region}`
+                        : ""}
+                    </span>
+                  )}
+                  <span>{election.seatsCount} siège(s)</span>
+                </div>
+
+                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-slate-400">
+                  {election.candidatureStartDate && (
+                    <span>
+                      Candidatures : {formatDateTime(election.candidatureStartDate)} → {formatDateTime(election.candidatureEndDate)}
+                    </span>
+                  )}
                   {election.voteStartDate && (
-                    <span>Vote: {formatDate(election.voteStartDate)} → {formatDate(election.voteEndDate)}</span>
+                    <span>
+                      Vote : {formatDateTime(election.voteStartDate)} → {formatDateTime(election.voteEndDate)}
+                    </span>
                   )}
                 </div>
-                {election.corpsElectoral === "MEDECINS_REGION" && election.region && (
-                  <div className="mt-2 inline-flex items-center rounded-full bg-[#0F766E]/10 px-3 py-0.5 text-[11px] font-semibold text-[#0F766E]">
-                    Réservé aux médecins de la région {election.region}
-                  </div>
-                )}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex shrink-0 gap-2">
+                {canCandidater && (
+                  <button
+                    onClick={() => navigate(`/medecin/elections/${id}/candidater`)}
+                    className="rounded-xl bg-[#16A34A] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[#15803d]"
+                  >
+                    Candidater
+                  </button>
+                )}
                 {canVote && (
                   <button
                     onClick={() => navigate(`/medecin/elections/${id}/voter`)}
@@ -209,7 +283,7 @@ export default function MedecinElectionDetailPage() {
           </div>
 
           {/* Candidature section */}
-          {s === "CANDIDATURE_OUVERTE" && (
+          {(canCandidater || election.maCandidature || election.raisonIneligibilite) && (
             <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 p-5 space-y-3">
               {actionError && (
                 <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-[13px] text-red-700">
@@ -218,12 +292,14 @@ export default function MedecinElectionDetailPage() {
               )}
               {election.maCandidature ? (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="font-semibold text-slate-800 dark:text-slate-100 text-[14px]">Votre candidature</p>
-                      <p className="text-[12px] text-slate-400 mt-0.5">
-                        Statut: <span className="font-semibold">{election.maCandidature.statut}</span>
-                      </p>
+                      <div className="mt-1">
+                        <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${CAND_STYLES[election.maCandidature.statut] ?? "bg-slate-100 text-slate-400"}`}>
+                          {CANDIDATURE_LABELS[election.maCandidature.statut] ?? election.maCandidature.statut}
+                        </span>
+                      </div>
                     </div>
                     {(election.maCandidature.statut === "SOUMISE" || election.maCandidature.statut === "BROUILLON") && (
                       <button
@@ -240,17 +316,22 @@ export default function MedecinElectionDetailPage() {
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="flex items-center justify-between">
+              ) : canCandidater ? (
+                <div className="flex items-center justify-between gap-3">
                   <p className="text-[13px] text-slate-600 dark:text-slate-400">
                     Les candidatures sont ouvertes. Soumettez votre dossier de candidature.
                   </p>
                   <button
                     onClick={() => navigate(`/medecin/elections/${id}/candidater`)}
-                    className="rounded-lg bg-[#0F766E] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[#0e6560]"
+                    className="shrink-0 rounded-lg bg-[#16A34A] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[#15803d]"
                   >
                     Candidater
                   </button>
+                </div>
+              ) : null}
+              {!canCandidater && !election.maCandidature && election.raisonIneligibilite && (
+                <div className="rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-800 px-4 py-3 text-[13px] text-amber-700 dark:text-amber-400">
+                  <span className="font-semibold">Non éligible : </span>{election.raisonIneligibilite}
                 </div>
               )}
             </div>

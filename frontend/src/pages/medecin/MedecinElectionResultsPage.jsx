@@ -7,6 +7,25 @@ import {
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { getElectionDetail } from "../../services/medecinElectionApi";
 
+const TYPE_LABELS = {
+  CONSEIL_NATIONAL:        "Conseil National de l'Ordre",
+  BUREAU_EXECUTIF:         "Bureau exécutif",
+  BUREAU_SECTION_A:        "Bureau de Section A",
+  BUREAU_SECTION_B:        "Bureau de Section B",
+  BUREAU_SECTION_C:        "Bureau de Section C",
+  REPRESENTANTS_REGIONAUX: "Représentants régionaux",
+};
+
+const CORPS_LABELS = {
+  TOUS_MEDECINS_ACTIFS:     "Tous les médecins actifs",
+  MEDECINS_REGION:          "Médecins de la région",
+  MEDECINS_PAR_SECTION:     "Médecins répartis selon leur section",
+  MEMBRES_CONSEIL_NATIONAL: "Membres du Conseil National",
+  CONSEIL_SECTION_A:        "Membres du conseil de Section A",
+  CONSEIL_SECTION_B:        "Membres du conseil de Section B",
+  CONSEIL_SECTION_C:        "Membres du conseil de Section C",
+};
+
 export default function MedecinElectionResultsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -30,7 +49,9 @@ export default function MedecinElectionResultsPage() {
     );
   }
 
-  if (!election || (election.statut !== "RESULTATS_PUBLIES" && election.statut !== "ARCHIVEE")) {
+  if (!election ||
+      (election.statut !== "RESULTATS_PUBLIES" &&
+       !(election.statut === "ARCHIVEE" && election.resultatsPublies))) {
     return (
       <MedecinLayout title="Résultats">
         <div className="flex h-64 flex-col items-center justify-center gap-3 text-slate-400">
@@ -60,9 +81,7 @@ export default function MedecinElectionResultsPage() {
     : [{ pos: null, candidates: [...candidatures].sort((a, b) => b.nbVotes - a.nbVotes) }];
 
   const contientExAequo = candidatures.some((c) => c.exAequo);
-  const quorumPourcentage = election.quorumPourcentage;
   const tauxParticipation = election.tauxParticipation ?? 0;
-  const quorumAtteint = quorumPourcentage == null || tauxParticipation >= quorumPourcentage;
   const nbVotants = election.nbVotants ?? 0;
   const nbElecteursEligibles = election.nbElecteursEligibles ?? 0;
 
@@ -79,15 +98,28 @@ export default function MedecinElectionResultsPage() {
 
           {/* Header */}
           <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 p-6">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-900/20">
                 <Trophy size={22} className="text-amber-600" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h1 className="font-bold text-slate-800 dark:text-slate-100 text-[16px]">{election.titre}</h1>
-                <span className="inline-block rounded bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-400 mt-0.5">
-                  Résultats publiés
-                </span>
+                <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                  <span className="rounded bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-400">
+                    Résultats publiés
+                  </span>
+                  {election.type && (
+                    <span className="text-[11px] text-slate-400">{TYPE_LABELS[election.type] ?? election.type}</span>
+                  )}
+                  {election.corpsElectoral && (
+                    <span className="rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                      {CORPS_LABELS[election.corpsElectoral] ?? election.corpsElectoral}
+                      {election.corpsElectoral === "MEDECINS_REGION" && election.region
+                        ? ` · ${election.region}`
+                        : ""}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -112,112 +144,100 @@ export default function MedecinElectionResultsPage() {
               </div>
             </div>
 
-            {/* Quorum banner */}
-            {quorumPourcentage != null && (
-              <div className={`mt-3 rounded-xl px-4 py-3 flex items-center gap-2 ${
-                quorumAtteint
-                  ? "bg-green-50 border border-green-200 text-green-800"
-                  : "bg-orange-50 border border-orange-200 text-orange-800"
-              }`}>
-                <CheckCircle2 size={14} className={quorumAtteint ? "text-green-600" : "text-orange-500"} />
-                <p className="text-[12px] font-semibold">
-                  {quorumAtteint
-                    ? `Quorum atteint (${tauxParticipation.toFixed(1)}% ≥ ${quorumPourcentage}%)`
-                    : `Quorum non atteint (${tauxParticipation.toFixed(1)}% < ${quorumPourcentage}% requis)`
-                  }
-                </p>
-              </div>
-            )}
-
             {/* Ex-aequo warning */}
             {contientExAequo && (
-              <div className="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
-                <p className="text-[12px] font-semibold text-amber-800">
-                  Des candidats sont à égalité de voix. Un tirage au sort ou une procédure complémentaire peut être nécessaire.
+              <div className="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 dark:bg-amber-900/10 dark:border-amber-700">
+                <p className="text-[12px] font-semibold text-amber-800 dark:text-amber-300">
+                  Des candidats sont à égalité de voix. Une décision administrative peut être nécessaire selon les règles internes applicables.
                 </p>
               </div>
             )}
           </div>
 
           {/* Results per position */}
-          {byPosition.map(({ pos, candidates }, gi) => (
-            <motion.div
-              key={pos?.id ?? "flat"}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: gi * 0.06 }}
-              className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-            >
-              {pos && (
-                <div className="border-b border-slate-100 dark:border-slate-800 px-5 py-3.5 flex items-center justify-between">
-                  <h2 className="font-bold text-[14px] text-slate-800 dark:text-slate-100">{pos.libelle}</h2>
-                  <span className="text-[11px] text-slate-400">{pos.nombreSieges} siège(s)</span>
-                </div>
-              )}
+          {byPosition.map(({ pos, candidates }, gi) => {
+            const totalVotesPosition = candidates.reduce((sum, c) => sum + (c.nbVotes ?? 0), 0);
+            return (
+              <motion.div
+                key={pos?.id ?? "flat"}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: gi * 0.06 }}
+                className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+              >
+                {pos && (
+                  <div className="border-b border-slate-100 dark:border-slate-800 px-5 py-3.5 flex items-center justify-between">
+                    <h2 className="font-bold text-[14px] text-slate-800 dark:text-slate-100">{pos.libelle}</h2>
+                    <span className="text-[11px] text-slate-400">{pos.nombreSieges} siège(s)</span>
+                  </div>
+                )}
 
-              {candidates.length === 0 ? (
-                <div className="flex items-center justify-center py-8 text-[13px] text-slate-400">
-                  <Users size={18} className="mr-2 text-slate-300" /> Aucun candidat
-                </div>
-              ) : (
-                candidates.map((c, rank) => {
-                  const isWinner = pos ? rank < (pos.nombreSieges ?? 1) : rank < election.seatsCount;
-                  const initials = `${c.medecinPrenom?.[0] ?? ""}${c.medecinNom?.[0] ?? ""}`.toUpperCase();
-                  return (
-                    <div
-                      key={c.id}
-                      className={`flex items-center gap-4 px-5 py-4 border-b last:border-b-0 border-slate-50 dark:border-slate-800/60 ${
-                        isWinner ? "bg-green-50/40 dark:bg-green-900/5" : ""
-                      }`}
-                    >
-                      <span className={`shrink-0 w-6 text-center text-[13px] font-bold ${
-                        isWinner ? "text-green-700 dark:text-green-400" : "text-slate-400"
-                      }`}>
-                        {rank + 1}
-                      </span>
-
-                      {c.medecinPhotoUrl ? (
-                        <img src={c.medecinPhotoUrl} alt="" className="h-11 w-11 shrink-0 rounded-full object-cover" />
-                      ) : (
-                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[14px] font-bold text-white ${
-                          isWinner ? "bg-green-600" : "bg-slate-400"
+                {candidates.length === 0 ? (
+                  <div className="flex items-center justify-center py-8 text-[13px] text-slate-400">
+                    <Users size={18} className="mr-2 text-slate-300" /> Aucun candidat
+                  </div>
+                ) : (
+                  candidates.map((c, rank) => {
+                    const nombreSieges = pos?.nombreSieges ?? election.seatsCount ?? 1;
+                    const isWinner = c.estElu ?? c.elu ?? (rank < nombreSieges);
+                    const votePct = totalVotesPosition > 0 ? ((c.nbVotes ?? 0) / totalVotesPosition) * 100 : 0;
+                    const initials = `${c.medecinPrenom?.[0] ?? ""}${c.medecinNom?.[0] ?? ""}`.toUpperCase();
+                    return (
+                      <div
+                        key={c.id}
+                        className={`flex items-center gap-4 px-5 py-4 border-b last:border-b-0 border-slate-50 dark:border-slate-800/60 ${
+                          isWinner ? "bg-green-50/40 dark:bg-green-900/5" : ""
+                        }`}
+                      >
+                        <span className={`shrink-0 w-6 text-center text-[13px] font-bold ${
+                          isWinner ? "text-green-700 dark:text-green-400" : "text-slate-400"
                         }`}>
-                          {initials}
-                        </div>
-                      )}
+                          {rank + 1}
+                        </span>
 
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-semibold text-slate-800 dark:text-slate-100">
-                            Dr. {c.medecinPrenom} {c.medecinNom}
+                        {c.medecinPhotoUrl ? (
+                          <img src={c.medecinPhotoUrl} alt="" className="h-11 w-11 shrink-0 rounded-full object-cover" />
+                        ) : (
+                          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[14px] font-bold text-white ${
+                            isWinner ? "bg-green-600" : "bg-slate-400"
+                          }`}>
+                            {initials}
+                          </div>
+                        )}
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-slate-800 dark:text-slate-100">
+                              Dr. {c.medecinPrenom} {c.medecinNom}
+                            </p>
+                            {isWinner && (
+                              <span className="flex items-center gap-1 rounded bg-green-100 dark:bg-green-900/20 px-1.5 py-0.5 text-[10px] font-bold text-green-700 dark:text-green-400">
+                                <CheckCircle2 size={9} /> Élu(e)
+                              </span>
+                            )}
+                            {c.exAequo && (
+                              <span className="rounded bg-amber-100 dark:bg-amber-900/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                                Ex-æquo
+                              </span>
+                            )}
+                          </div>
+                          {c.specialite && <p className="text-[11px] text-slate-400">{c.specialite}</p>}
+                          {c.region && <p className="text-[11px] text-slate-400">{c.region}</p>}
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <p className={`text-[15px] font-bold ${isWinner ? "text-green-700 dark:text-green-400" : "text-slate-500"}`}>
+                            {c.nbVotes ?? 0}
                           </p>
-                          {isWinner && (
-                            <span className="flex items-center gap-1 rounded bg-green-100 dark:bg-green-900/20 px-1.5 py-0.5 text-[10px] font-bold text-green-700 dark:text-green-400">
-                              <CheckCircle2 size={9} /> Élu(e)
-                            </span>
-                          )}
-                          {c.exAequo && (
-                            <span className="rounded bg-amber-100 dark:bg-amber-900/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
-                              Ex-æquo
-                            </span>
-                          )}
+                          <p className="text-[10px] text-slate-400">{votePct.toFixed(1)}%</p>
                         </div>
-                        {c.specialite && <p className="text-[11px] text-slate-400">{c.specialite}</p>}
-                        {c.region && <p className="text-[11px] text-slate-400">{c.region}</p>}
                       </div>
-
-                      <div className="shrink-0 text-right">
-                        <p className={`text-[15px] font-bold ${isWinner ? "text-green-700 dark:text-green-400" : "text-slate-500"}`}>
-                          {c.nbVotes}
-                        </p>
-                        <p className="text-[10px] text-slate-400">vote(s)</p>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </motion.div>
-          ))}
+                    );
+                  })
+                )}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </MedecinLayout>

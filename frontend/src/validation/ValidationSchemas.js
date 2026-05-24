@@ -11,6 +11,8 @@ export const personalSchema = z.object({
 
   adresse: z.string().min(2, "L'adresse est requise"),
 
+  wilayaExercice: z.string().min(1, "La wilaya d'exercice est requise"),
+
   nni: z
     .string()
     .regex(/^[0-9]{10}$/, "Le NNI doit contenir exactement 10 chiffres"),

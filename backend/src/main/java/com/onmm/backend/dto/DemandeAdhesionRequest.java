@@ -17,4 +17,6 @@ public class DemandeAdhesionRequest {
     private String telephone;
     private String adresse;
 
+    private String wilayaExercice;
+
 }

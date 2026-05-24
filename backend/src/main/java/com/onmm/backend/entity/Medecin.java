@@ -68,6 +68,9 @@ public class Medecin extends User {
     @Column(name = "ville_exercice", length = 100)
     private String villeExercice;
 
+    @Column(name = "wilaya_exercice", length = 100)
+    private String wilayaExercice;
+
     @Column(name = "structure_exercice", length = 100)
     private String structureExercice;
 

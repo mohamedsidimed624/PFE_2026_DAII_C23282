@@ -39,8 +39,8 @@ public class Candidature {
     @Column(columnDefinition = "TEXT")
     private String commentaireValidation;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime dateDepot = LocalDateTime.now();
+    @Column(name = "date_depot")
+    private LocalDateTime dateDepot;
 
     private LocalDateTime dateValidation;
 

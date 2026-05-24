@@ -26,6 +26,10 @@ public class AdminDemandeDetailResponse {
 
     private String statut;
 
+    private String sectionProposee;
+
+    private boolean estEnseignantChercheur;
+
     private LocalDateTime submissionDate;
 
     private List<DemandeEducationResponse> educations;
@@ -129,4 +133,14 @@ public class AdminDemandeDetailResponse {
     public void setDocuments(List<DemandeDocumentResponse> documents) {
         this.documents = documents;
     }
+
+    public String getSectionProposee() { return sectionProposee; }
+    public void setSectionProposee(String sectionProposee) { this.sectionProposee = sectionProposee; }
+
+    public boolean isEstEnseignantChercheur() { return estEnseignantChercheur; }
+    public void setEstEnseignantChercheur(boolean estEnseignantChercheur) { this.estEnseignantChercheur = estEnseignantChercheur; }
+
+    private String wilayaExercice;
+    public String getWilayaExercice() { return wilayaExercice; }
+    public void setWilayaExercice(String w) { this.wilayaExercice = w; }
 }

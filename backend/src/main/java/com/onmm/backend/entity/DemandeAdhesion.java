@@ -48,6 +48,12 @@ public class DemandeAdhesion {
     @Column(nullable = false)
     private String adresse;
 
+    @Column(name = "wilaya_exercice", length = 100)
+    private String wilayaExercice;
+
+    @Column(name = "est_enseignant_chercheur", nullable = false, columnDefinition = "BOOLEAN NOT NULL DEFAULT FALSE")
+    private boolean estEnseignantChercheur = false;
+
     private String numeroDossier;
 
     @Enumerated(EnumType.STRING)
