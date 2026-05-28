@@ -51,11 +51,13 @@ function AdminSidebar({ collapsed, onToggle }) {
     >
       {/* Logo */}
       <div className="flex items-center justify-center py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
-        <img
-          src="/src/assets/logo.png"
-          alt="Ordre des Médecins"
-          className={`object-contain transition-all duration-300 ${collapsed ? "h-8 w-8" : "h-16 w-16"}`}
-        />
+        <div className="h-24 w-24 overflow-hidden rounded-full">
+          <img
+            src="/src/assets/logo.png"
+            alt="Ordre des Médecins"
+            className="h-full w-full object-cover scale-[1.20]"
+          />
+        </div>
       </div>
 
       {/* Nav */}

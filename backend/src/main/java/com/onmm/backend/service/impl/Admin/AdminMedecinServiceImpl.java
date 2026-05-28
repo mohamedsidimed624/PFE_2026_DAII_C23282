@@ -52,6 +52,7 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
             response.setSexe(medecin.getSexe());
             response.setDateNaissance(medecin.getDateNaissance());
             response.setStatut(medecin.getStatut());
+            response.setWilayaExercice(medecin.getWilayaExercice());
 
             MedecinEducation educationReference = getEducationReference(medecin);
 
@@ -87,7 +88,7 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
         response.setNni(medecin.getNni());
         response.setSexe(medecin.getSexe());
         response.setNationalite(medecin.getNationalite());
-        response.setAdresse(medecin.getAdresse());
+        response.setWilayaExercice(medecin.getAdresse());
         response.setNumeroInscription(medecin.getNumeroInscription());
         response.setStatut(medecin.getStatut());
         response.setPhotoProfilPath(medecin.getPhotoProfilPath());

@@ -10,7 +10,7 @@ const STEPS = [
 ];
 
 const W = 240;
-const H = 44;
+const H = 48;
 const N = 18;
 
 function chevronPoints() {
@@ -28,8 +28,8 @@ export default function StepIndicator() {
   if (submitted) return null;
 
   return (
-    <div className="mb-7 w-full overflow-x-auto">
-      <div className="flex min-w-[900px] gap-[3px]">
+    <div className="mb-9 w-full overflow-hidden">
+      <div className="grid grid-cols-5 gap-4">
         {STEPS.map((label, i) => {
           const num = i + 1;
           const active = step === num;
@@ -42,11 +42,9 @@ export default function StepIndicator() {
               key={label}
               type="button"
               onClick={() => clickable && setStep(num)}
-              className="relative flex-1"
+              className="relative h-[48px] min-w-0"
               style={{
-                height: `${H}px`,
                 cursor: clickable ? "pointer" : "default",
-                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.06))",
               }}
             >
               <svg
@@ -56,16 +54,16 @@ export default function StepIndicator() {
               >
                 <polygon
                   points={chevronPoints()}
-                  fill={isGreen ? "#16a34a" : "#ffffff"}
-                  stroke={isGreen ? "#16a34a" : "#cbd5e1"}
-                  strokeWidth="1"
+                  fill={isGreen ? "#35C878" : "#ffffff"}
+                  stroke={isGreen ? "#35C878" : "#D9E7E2"}
+                  strokeWidth="1.2"
                   vectorEffect="non-scaling-stroke"
                 />
               </svg>
 
               <span
-                className={`relative z-10 flex h-full items-center justify-center px-6 text-center text-[12px] font-medium leading-tight ${
-                  isGreen ? "text-white" : "text-slate-600"
+                className={`relative z-10 flex h-full items-center justify-center px-5 text-center text-[13px] font-semibold leading-tight ${
+                  isGreen ? "text-white" : "text-slate-700"
                 }`}
               >
                 {label}

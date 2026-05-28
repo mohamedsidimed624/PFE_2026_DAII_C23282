@@ -338,108 +338,152 @@ function AdminDemandeDetail() {
       </div>
 
       {/* ── Modal Approuve ── */}
-      {showApprouveModal && (
-        <div className="fixed inset-0 bg-black/35 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 space-y-4">
-            <div className="flex items-start justify-between">
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Approuver la demande</h2>
-              <button
-                onClick={() => setShowApprouveModal(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
-                Section à attribuer
-              </label>
-              <select
-                value={selectedSection}
-                onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10"
-              >
-                <option value="GENERALISTE">Section A — Médecins généralistes</option>
-                <option value="SPECIALISTE">Section B — Médecins spécialistes</option>
-                <option value="ENSEIGNANT_CHERCHEUR">Section C — Médecins enseignants-chercheurs</option>
-              </select>
-              <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
-                Section proposée automatiquement : <span className="font-medium">{demande.sectionProposee ?? "—"}</span>
-              </p>
-            </div>
-
-            <div className="flex gap-3 justify-end pt-1">
-              <button
-                onClick={() => setShowApprouveModal(false)}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleApprove}
-                disabled={actionLoading}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <CheckCircle2 size={15} />
-                Confirmer l'approbation
-              </button>
-            </div>
+      {/* ── Modal Approuve ── */}
+{showApprouveModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+      
+      <div className="flex items-start justify-between border-b border-slate-100 bg-green-50/70 px-5 py-4 dark:border-slate-800 dark:bg-green-900/10">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+            <CheckCircle2 size={20} />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              Approuver la demande
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              Valider le dossier et attribuer une section.
+            </p>
           </div>
         </div>
-      )}
 
-      {/* ── Modal Rejet ── */}
-      {showRejectModal && (
-        <div className="fixed inset-0 bg-black/35 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Rejeter la demande</h2>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                  Veuillez saisir un motif de rejet.
-                </p>
-              </div>
-              <button
-                onClick={() => setShowRejectModal(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
+        <button
+          onClick={() => setShowApprouveModal(false)}
+          className="rounded-lg p-1 text-slate-400 transition hover:bg-white hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+        >
+          <X size={17} />
+        </button>
+      </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
-                Commentaire <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                placeholder="Ex: Documents insuffisants, diplôme non reconnu…"
-                value={rejectComment}
-                onChange={(e) => setRejectComment(e.target.value)}
-                rows={4}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/15 transition-all resize-none"
-              />
-            </div>
+      <div className="space-y-4 px-5 py-5">
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+            Section à attribuer
+          </label>
 
-            <div className="flex gap-3 justify-end pt-1">
-              <button
-                onClick={() => setShowRejectModal(false)}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleReject}
-                disabled={!rejectComment.trim() || actionLoading}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <XCircle size={15} />
-                Confirmer le rejet
-              </button>
-            </div>
+          <select
+            value={selectedSection}
+            onChange={(e) => setSelectedSection(e.target.value)}
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+          >
+            <option value="GENERALISTE">Section A — Médecins généralistes</option>
+            <option value="SPECIALISTE">Section B — Médecins spécialistes</option>
+            <option value="ENSEIGNANT_CHERCHEUR">Section C — Médecins enseignants-chercheurs</option>
+          </select>
+
+          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-800/60">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Section proposée automatiquement :
+              <span className="ml-1 font-semibold text-slate-700 dark:text-slate-200">
+                {demande.sectionProposee ?? "—"}
+              </span>
+            </p>
           </div>
         </div>
-      )}
+      </div>
+
+      <div className="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/70 px-5 py-4 dark:border-slate-800 dark:bg-slate-800/40">
+        <button
+          onClick={() => setShowApprouveModal(false)}
+          disabled={actionLoading}
+          className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800"
+        >
+          Annuler
+        </button>
+
+        <button
+          onClick={handleApprove}
+          disabled={actionLoading}
+          className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <CheckCircle2 size={15} />
+          Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* ── Modal Rejet ── */}
+{showRejectModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+    <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+      
+      <div className="flex items-start justify-between border-b border-slate-100 bg-red-50/70 px-5 py-4 dark:border-slate-800 dark:bg-red-900/10">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+            <XCircle size={20} />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              Rejeter la demande
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              Le motif sera conservé dans le dossier.
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowRejectModal(false)}
+          className="rounded-lg p-1 text-slate-400 transition hover:bg-white hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+        >
+          <X size={17} />
+        </button>
+      </div>
+
+      <div className="space-y-4 px-5 py-5">
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+            Commentaire <span className="text-red-500">*</span>
+          </label>
+
+          <textarea
+            placeholder="Ex : Documents insuffisants, diplôme non reconnu…"
+            value={rejectComment}
+            onChange={(e) => setRejectComment(e.target.value)}
+            rows={5}
+            className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-red-400 focus:ring-2 focus:ring-red-400/15 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+          />
+
+          <p className="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
+            Donnez un motif clair pour faciliter la correction du dossier.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/70 px-5 py-4 dark:border-slate-800 dark:bg-slate-800/40">
+        <button
+          onClick={() => setShowRejectModal(false)}
+          disabled={actionLoading}
+          className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800"
+        >
+          Annuler
+        </button>
+
+        <button
+          onClick={handleReject}
+          disabled={!rejectComment.trim() || actionLoading}
+          className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <XCircle size={15} />
+          Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </AdminLayout>
   );
 }

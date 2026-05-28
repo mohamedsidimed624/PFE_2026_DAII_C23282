@@ -13,6 +13,8 @@ import {
   ArrowLeft,
   Send,
   Home,
+  Copy,
+  Check,
   FolderSearch,
   ShieldCheck,
 } from "lucide-react";
@@ -25,6 +27,7 @@ function ConsentStep({ prevStep }) {
   const [success,           setSuccess]           = useState(false);
   const [loading,           setLoading]           = useState(false);
   const [submissionResult,  setSubmissionResult]  = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const navigate = useNavigate();
 
@@ -96,6 +99,21 @@ function ConsentStep({ prevStep }) {
     }
   };
 
+  const handleCopyDossier = async () => {
+  if (!submissionResult?.numeroDossier) return;
+
+  try {
+    await navigator.clipboard.writeText(submissionResult.numeroDossier);
+    setCopied(true);
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 1800);
+  } catch (err) {
+    console.error("Erreur lors de la copie :", err);
+  }
+};
+
   /* ── Écran de succès ── */
   if (success && submissionResult) {
     return (
@@ -116,14 +134,36 @@ function ConsentStep({ prevStep }) {
         </div>
 
         {/* Numéro de dossier */}
-        <div className="bg-green-50 border border-green-200 rounded-2xl px-8 py-5 w-full max-w-xs">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">
-            Numéro de dossier
-          </p>
-          <p className="text-2xl font-bold text-green-700 tracking-tight">
-            {submissionResult.numeroDossier}
-          </p>
-        </div>
+        <div className="w-full max-w-xs rounded-2xl border border-green-200 bg-green-50 px-6 py-5">
+  <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+    Numéro de dossier
+  </p>
+
+  <div className="flex items-center justify-center gap-3">
+    <p className="text-2xl font-bold tracking-tight text-green-700">
+      {submissionResult.numeroDossier}
+    </p>
+
+    <button
+      type="button"
+      onClick={handleCopyDossier}
+      className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-green-700 shadow-sm transition hover:bg-green-100 active:scale-95"
+      title="Copier le numéro de dossier"
+    >
+      {copied ? (
+        <Check size={18} strokeWidth={2.5} />
+      ) : (
+        <Copy size={18} strokeWidth={2.5} />
+      )}
+    </button>
+  </div>
+
+  {copied && (
+    <p className="mt-2 text-xs font-medium text-green-700">
+      Numéro copié
+    </p>
+  )}
+</div>
 
         <p className="text-xs text-slate-400">
           Vous recevrez également un e-mail de confirmation.

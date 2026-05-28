@@ -190,7 +190,7 @@ function AdminMedecinsList() {
                 DATE DE NAISSANCE
               </th>
               <th className="w-[16%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
-                ADRESSE POSTAL
+                WILAYA
               </th>
               <th className="w-[10%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
                 STATUT
@@ -236,7 +236,7 @@ function AdminMedecinsList() {
                   </td>
 
                   <td className="truncate px-7 py-4 text-[14px] font-medium text-slate-700 dark:text-slate-300">
-                    {m.adresse || "—"}
+                    {m.wilayaExercice || "—"}
                   </td>
 
                   <td className="px-7 py-4 text-[14px] font-bold text-green-600">

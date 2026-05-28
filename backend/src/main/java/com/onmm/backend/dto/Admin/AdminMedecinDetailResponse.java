@@ -18,7 +18,7 @@ public class AdminMedecinDetailResponse {
     private String nni;
     private String sexe;
     private String nationalite;
-    private String adresse;
+    private String wilayaExercice;
     private String numeroInscription;
     private StatutMedecin statut;
     private Long specialiteId;

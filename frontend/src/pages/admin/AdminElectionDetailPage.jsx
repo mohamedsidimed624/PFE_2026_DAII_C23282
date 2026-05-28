@@ -13,6 +13,25 @@ import {
   terminerDepouillement, publierResultats, archiverElection, annulerElection,
   getPositions, getAuditLog,
 } from "../../services/adminElectionApi";
+import ElectionStatusBadge from "../../components/elections/ElectionStatusBadge";
+import ElectionTypeBadge from "../../components/elections/ElectionTypeBadge";
+import CandidatureStatusBadge from "../../components/elections/CandidatureStatusBadge";
+import ElectionTimeline from "../../components/elections/ElectionTimeline";
+
+const STATUT_ORDER = [
+  "BROUILLON", "CANDIDATURE_OUVERTE", "VALIDATION_CANDIDATURES",
+  "VOTE_EN_COURS", "DEPOUILLEMENT", "RESULTATS_PUBLIES", "ARCHIVEE",
+];
+function computeTimelineStatus(currentStatut, targetStatut) {
+  const curr = STATUT_ORDER.indexOf(currentStatut);
+  const tgt  = STATUT_ORDER.indexOf(targetStatut);
+  if (curr < 0 || tgt < 0) return "pending";
+  if (curr > tgt) return "done";
+  if (curr === tgt) return "active";
+  return "pending";
+}
+const formatDateShort = (d) =>
+  d ? new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : null;
 
 const TYPE_LABELS = {
   CONSEIL_NATIONAL:        "Conseil National de l'Ordre",
@@ -246,13 +265,9 @@ export default function AdminElectionDetailPage() {
                 <ArrowLeft size={16} className="text-slate-500" />
               </button>
               <div>
-                <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                  <span className={`inline-flex items-center rounded px-2.5 py-0.5 text-[11px] font-bold ${STATUT_STYLES[s] ?? "bg-slate-100 text-slate-500"}`}>
-                    {STATUT_LABELS[s] ?? s}
-                  </span>
-                  <span className="text-[12px] text-slate-400">
-                    {TYPE_LABELS[election.type] ?? election.type}
-                  </span>
+                <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                  <ElectionStatusBadge statut={s} />
+                  <ElectionTypeBadge type={election.type} />
                   {election.region && (
                     <span className="text-[12px] text-slate-400">· {election.region}</span>
                   )}
@@ -326,7 +341,7 @@ export default function AdminElectionDetailPage() {
                 onClick={() => { setTab(i); if (i === 4) loadAudit(); }}
                 className={`whitespace-nowrap px-6 py-3.5 text-[13px] font-semibold border-b-2 transition-colors ${
                   tab === i
-                    ? "border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400"
+                    ? "border-[#16A34A] text-[#16A34A]"
                     : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400"
                 }`}
               >
@@ -365,6 +380,17 @@ export default function AdminElectionDetailPage() {
                     </div>
                   ))}
                 </div>
+                {/* Process timeline */}
+                <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-4">
+                  <p className="text-[11px] font-bold uppercase text-slate-400 mb-3">Avancement du processus</p>
+                  <ElectionTimeline steps={[
+                    { label: "Candidatures",  date: formatDateShort(election.candidatureStartDate), status: computeTimelineStatus(s, "CANDIDATURE_OUVERTE") },
+                    { label: "Validation",    date: formatDateShort(election.candidatureEndDate),   status: computeTimelineStatus(s, "VALIDATION_CANDIDATURES") },
+                    { label: "Vote",          date: formatDateShort(election.voteStartDate),        status: computeTimelineStatus(s, "VOTE_EN_COURS") },
+                    { label: "Dépouillement", date: null,                                           status: computeTimelineStatus(s, "DEPOUILLEMENT") },
+                    { label: "Résultats",     date: null,                                           status: computeTimelineStatus(s, "RESULTATS_PUBLIES") },
+                  ]} />
+                </div>
                 {election.raisonAnnulation && (
                   <div className="rounded-md bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-800 p-4">
                     <p className="text-[12px] font-semibold text-red-600 mb-1">Raison d'annulation</p>
@@ -396,9 +422,7 @@ export default function AdminElectionDetailPage() {
                             <span className="font-semibold text-slate-800 dark:text-slate-100">
                               Dr. {c.medecinPrenom} {c.medecinNom}
                             </span>
-                            <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${CAND_STYLES[c.statut] ?? "bg-slate-100 text-slate-400"}`}>
-                              {CAND_LABELS[c.statut] ?? c.statut}
-                            </span>
+                            <CandidatureStatusBadge statut={c.statut} />
                             {c.position && (
                               <span className="rounded bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-500 dark:text-slate-400">
                                 {c.position.libelle}

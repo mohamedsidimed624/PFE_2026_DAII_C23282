@@ -44,10 +44,10 @@ const CARD_VARIANTS = {
 
 function StatCard({ Icon, label, value, color, loading, index }) {
   const colorMap = {
-    green: "text-green-500",
-    amber: "text-yellow-500",
-    blue: "text-blue-500",
-    purple: "text-red-400",
+    green: "text-green-500 dark:text-green-400",
+    amber: "text-yellow-500 dark:text-yellow-400",
+    blue: "text-blue-500 dark:text-blue-400",
+    purple: "text-red-400 dark:text-red-400",
   };
 
   return (
@@ -56,28 +56,28 @@ function StatCard({ Icon, label, value, color, loading, index }) {
       initial="hidden"
       animate="show"
       transition={{ delay: index * 0.08, duration: 0.4, ease: "easeOut" }}
-      className="flex h-28 items-center gap-4 rounded-2xl bg-green-100/70 px-6 shadow-sm"
+      className="flex h-28 items-center gap-4 rounded-2xl bg-green-100/70 dark:bg-slate-900 dark:border dark:border-slate-800 px-6 shadow-sm dark:shadow-none"
     >
       {/* Icon */}
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white dark:bg-slate-800">
         <Icon
           size={24}
-          className={colorMap[color] || "text-green-500"}
+          className={colorMap[color] || "text-green-500 dark:text-green-400"}
         />
       </div>
 
       {/* Text */}
       <div>
-        <p className="text-sm font-medium text-slate-400 leading-5">
+        <p className="text-sm font-medium text-slate-400 dark:text-slate-500 leading-5">
           {label}
         </p>
 
         {loading ? (
-          <div className="mt-2 h-6 w-16 animate-pulse rounded bg-white/70" />
+          <div className="mt-2 h-6 w-16 animate-pulse rounded bg-white/70 dark:bg-slate-700" />
         ) : (
           <p
             className={`mt-1 text-2xl font-semibold ${
-              colorMap[color] || "text-green-500"
+              colorMap[color] || "text-green-500 dark:text-green-400"
             }`}
           >
             {value ?? 0}
@@ -225,22 +225,22 @@ export default function AdminDashboard() {
           transition={{ duration: 0.35 }}
           className="flex items-center justify-between"
         >
-          <div>
+          {/* <div>
             <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Dashboard</h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Vue d'ensemble de l'activité</p>
-          </div>
-          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-green-50 dark:bg-green-900/20 px-3 py-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
+          </div> */}
+          {/* <span className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-green-50 dark:bg-green-900/20 px-3 py-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
             En direct
-          </span>
+          </span> */}
         </motion.div>
 
         {/* 4 stat cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard index={0} Icon={Clock}         color="amber"  label="Demandes en attente"      value={stats?.demandesEnAttente}    loading={loading} />
-          <StatCard index={1} Icon={Users}          color="green"  label="Médecins inscrits"         value={stats?.totalMedecins}         loading={loading} />
-          <StatCard index={2} Icon={AlertTriangle}  color="purple" label="Réclamations en attente"   value={stats?.reclamationsEnAttente} loading={loading} />
-          <StatCard index={3} Icon={Stethoscope}    color="blue"   label="Spécialités avec médecins" value={stats?.specialitesAvecMedecins} loading={loading} />
+          <StatCard index={0} Icon={Clock} color="amber" label="Demandes en attente" value={stats?.demandesEnAttente} loading={loading} />
+          <StatCard index={1} Icon={Users} color="green" label="Médecins inscrits" value={stats?.totalMedecins} loading={loading} />
+          <StatCard index={2} Icon={AlertTriangle} color="purple" label="Réclamations en attente" value={stats?.reclamationsEnAttente} loading={loading} />
+          <StatCard index={3} Icon={Stethoscope} color="blue" label="Spécialités avec médecins" value={stats?.specialitesAvecMedecins} loading={loading} />
         </div>
 
         {/* Charts row */}

@@ -27,6 +27,8 @@ import {
 
 import AdminLayout from "../../components/admin/AdminLayout";
 import StatCard from "../../components/shared/StatCard";
+import ElectionStatusBadge from "../../components/elections/ElectionStatusBadge";
+import ElectionTypeBadge from "../../components/elections/ElectionTypeBadge";
 
 import {
   getAllElections,
@@ -212,27 +214,11 @@ const extractApiError = (err) => {
 };
 
 function TypeBadge({ type }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded px-2 py-0.5 text-[11px] font-semibold ${
-        TYPE_COLORS[type] ?? "bg-slate-100 text-slate-500"
-      }`}
-    >
-      {TYPE_LABELS[type] ?? type ?? "—"}
-    </span>
-  );
+  return <ElectionTypeBadge type={type} />;
 }
 
 function StatutBadge({ statut }) {
-  return (
-    <span
-      className={`inline-flex min-w-[120px] items-center justify-center rounded px-2 py-0.5 text-[11px] font-semibold ${
-        STATUT_STYLES[statut] ?? "bg-slate-100 text-slate-500"
-      }`}
-    >
-      {STATUT_LABELS[statut] ?? statut ?? "—"}
-    </span>
-  );
+  return <ElectionStatusBadge statut={statut} />;
 }
 
 function SmallBadge({ children, color = "slate" }) {

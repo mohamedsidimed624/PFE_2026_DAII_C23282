@@ -128,32 +128,33 @@ function LoginPage() {
                     className="relative w-full max-w-lg flex flex-col items-center"
                 >
                     {/* Floating Logo */}
-                    <motion.div 
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", delay: 0.2, stiffness: 200, damping: 20 }}
-                        className="relative z-20 -mb-10"
-                    >
-                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl ring-4 ring-slate-50/50 p-2">
-                            <img
-                                src={logo}
-                                alt="Logo"
-                                className="w-full h-full object-contain"
-                                onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                    e.currentTarget.nextElementSibling.style.display = "flex";
-                                }}
-                            />
-                            <span className="hidden items-center justify-center">
-                                {isMedecin ? <Stethoscope size={32} className="text-green-600" /> : <Shield size={32} className="text-green-600" />}
-                            </span>
-                        </div>
-                    </motion.div>
+<motion.div
+  initial={{ scale: 0 }}
+  animate={{ scale: 1 }}
+  transition={{ type: "spring", delay: 0.2, stiffness: 200, damping: 20 }}
+  className="relative z-20 -mb-12"
+>
+  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-slate-100">
+    {isMedecin ? (
+      <Stethoscope size={46} strokeWidth={1.8} className="text-green-600" />
+    ) : (
+      <img
+        src={ordreLogo}
+        alt="Logo ONMM"
+        className="h-24 w-24 scale-125 rounded-full object-cover"
+        style={{
+          clipPath: "circle(42% at 50% 50%)",
+          mixBlendMode: "multiply",
+        }}
+      />
+    )}
+  </div>
+</motion.div>
 
                     {/* Card Container */}
                     <div className="w-full bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/50 pt-16 pb-10 px-10 relative overflow-hidden">
                         {/* Decorative inner glow */}
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-green-500/10 blur-[40px] rounded-full pointer-events-none" />
+                        
 
                         <h2 className="text-2xl font-bold text-slate-800 text-center mb-8">
                             Espace {isMedecin ? "Médecin" : "Ordre"}

@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Loader2, Trophy, CheckCircle2, Users,
+  ArrowLeft, Loader2, Trophy, CheckCircle2, Users, BarChart2,
 } from "lucide-react";
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { getElectionDetail } from "../../services/medecinElectionApi";
+import CandidateAvatar from "../../components/elections/CandidateAvatar";
+import ElectionStatusBadge from "../../components/elections/ElectionStatusBadge";
+import ElectionTypeBadge from "../../components/elections/ElectionTypeBadge";
+import StatCard from "../../components/elections/StatCard";
 
 const TYPE_LABELS = {
   CONSEIL_NATIONAL:        "Conseil National de l'Ordre",
@@ -98,21 +102,17 @@ export default function MedecinElectionResultsPage() {
 
           {/* Header */}
           <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 p-6">
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-900/20">
                 <Trophy size={22} className="text-amber-600" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <h1 className="font-bold text-slate-800 dark:text-slate-100 text-[16px]">{election.titre}</h1>
                 <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                  <span className="rounded bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-400">
-                    Résultats publiés
-                  </span>
-                  {election.type && (
-                    <span className="text-[11px] text-slate-400">{TYPE_LABELS[election.type] ?? election.type}</span>
-                  )}
+                  <ElectionStatusBadge statut={election.statut} />
+                  <ElectionTypeBadge type={election.type} />
                   {election.corpsElectoral && (
-                    <span className="rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                    <span className="rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
                       {CORPS_LABELS[election.corpsElectoral] ?? election.corpsElectoral}
                       {election.corpsElectoral === "MEDECINS_REGION" && election.region
                         ? ` · ${election.region}`
@@ -125,23 +125,25 @@ export default function MedecinElectionResultsPage() {
 
             {/* Participation summary */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-center">
-                <p className="text-[11px] text-slate-400 mb-0.5">Votants</p>
-                <p className="text-[18px] font-bold text-[#0F172A] dark:text-slate-100">{nbVotants}</p>
-                {nbElecteursEligibles > 0 && (
-                  <p className="text-[10px] text-slate-400">sur {nbElecteursEligibles}</p>
-                )}
-              </div>
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-center">
-                <p className="text-[11px] text-slate-400 mb-0.5">Participation</p>
-                <p className="text-[18px] font-bold text-[#0F172A] dark:text-slate-100">
-                  {tauxParticipation.toFixed(1)}%
-                </p>
-              </div>
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-center">
-                <p className="text-[11px] text-slate-400 mb-0.5">Sièges</p>
-                <p className="text-[18px] font-bold text-[#0F172A] dark:text-slate-100">{election.seatsCount}</p>
-              </div>
+              <StatCard
+                label="Votants"
+                value={nbVotants}
+                icon={Users}
+                color="blue"
+                sub={nbElecteursEligibles > 0 ? `sur ${nbElecteursEligibles}` : undefined}
+              />
+              <StatCard
+                label="Participation"
+                value={`${tauxParticipation.toFixed(1)}%`}
+                icon={BarChart2}
+                color="emerald"
+              />
+              <StatCard
+                label="Sièges"
+                value={election.seatsCount ?? "—"}
+                icon={Trophy}
+                color="amber"
+              />
             </div>
 
             {/* Ex-aequo warning */}
@@ -181,12 +183,13 @@ export default function MedecinElectionResultsPage() {
                     const nombreSieges = pos?.nombreSieges ?? election.seatsCount ?? 1;
                     const isWinner = c.estElu ?? c.elu ?? (rank < nombreSieges);
                     const votePct = totalVotesPosition > 0 ? ((c.nbVotes ?? 0) / totalVotesPosition) * 100 : 0;
-                    const initials = `${c.medecinPrenom?.[0] ?? ""}${c.medecinNom?.[0] ?? ""}`.toUpperCase();
                     return (
                       <div
                         key={c.id}
-                        className={`flex items-center gap-4 px-5 py-4 border-b last:border-b-0 border-slate-50 dark:border-slate-800/60 ${
-                          isWinner ? "bg-green-50/40 dark:bg-green-900/5" : ""
+                        className={`flex items-center gap-4 px-5 py-4 border-b last:border-b-0 border-slate-50 dark:border-slate-800/60 transition-colors ${
+                          isWinner
+                            ? "bg-green-50/60 dark:bg-green-900/10"
+                            : ""
                         }`}
                       >
                         <span className={`shrink-0 w-6 text-center text-[13px] font-bold ${
@@ -195,15 +198,11 @@ export default function MedecinElectionResultsPage() {
                           {rank + 1}
                         </span>
 
-                        {c.medecinPhotoUrl ? (
-                          <img src={c.medecinPhotoUrl} alt="" className="h-11 w-11 shrink-0 rounded-full object-cover" />
-                        ) : (
-                          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[14px] font-bold text-white ${
-                            isWinner ? "bg-green-600" : "bg-slate-400"
-                          }`}>
-                            {initials}
-                          </div>
-                        )}
+                        <CandidateAvatar
+                          candidate={c}
+                          size={44}
+                          bgClass={isWinner ? "bg-green-600" : "bg-slate-400"}
+                        />
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -238,6 +237,13 @@ export default function MedecinElectionResultsPage() {
               </motion.div>
             );
           })}
+
+          {/* Official ONMM footer */}
+          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-center shadow-sm">
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">
+              Résultats publiés officiellement par l'administration de l'Ordre National des Médecins de Mauritanie (ONMM).
+            </p>
+          </div>
         </div>
       </div>
     </MedecinLayout>

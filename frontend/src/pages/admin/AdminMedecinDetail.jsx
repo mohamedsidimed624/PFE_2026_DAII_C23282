@@ -268,7 +268,7 @@ function AdminMedecinDetail() {
             <InfoCell label="DATE DE NAISSANCE" value={formatDate(medecin.dateNaissance)} />
             <InfoCell label="NATIONALITÉ"     value={medecin.nationalite} />
             <InfoCell label="ADRESSE MAIL"    value={medecin.email} />
-            <InfoCell label="ADRESSE"         value={medecin.adresse} />
+            <InfoCell label="WILAYA"         value={medecin.wilayaExercice} />
           </InfoGrid>
 
           {/* Statut + commentaire admin */}
@@ -302,7 +302,7 @@ function AdminMedecinDetail() {
                     <InfoCell label="PAYS"                        value={edu.pays} />
                     <InfoCell label="VILLE"                       value={edu.ville} />
                     <InfoCell label="UNIVERSITÉ"                  value={edu.universite} />
-                    <InfoCell label="SOUS-SPÉCIALITÉ"             value={edu.sousSpecialiteLibelle} />
+                    {/* <InfoCell label="SOUS-SPÉCIALITÉ"             value={edu.sousSpecialiteLibelle} /> */}
                     <InfoCell label="DIPLÔME OBTENU"              value={edu.diplome} />
                     <InfoCell label="ANNÉE D'OBTENTION DE DIPLÔME" value={edu.anneeObtention} />
                     <InfoCell label="VILLE"                       value={edu.ville} />

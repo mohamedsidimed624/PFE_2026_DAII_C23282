@@ -1,44 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, Loader2, ChevronDown, ChevronUp, CheckCircle2,
+  ArrowLeft, Loader2, ChevronDown, ChevronUp, CheckCircle2, Calendar, Users,
 } from "lucide-react";
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { getElectionDetail, retirerCandidature } from "../../services/medecinElectionApi";
 import { extractApiError } from "../../utils/apiUtils";
-
-const STATUT_LABELS = {
-  BROUILLON:               "Brouillon",
-  CANDIDATURE_OUVERTE:     "Candidatures ouvertes",
-  VALIDATION_CANDIDATURES: "Candidatures en validation",
-  VOTE_EN_COURS:           "Vote en cours",
-  DEPOUILLEMENT:           "Dépouillement",
-  TERMINEE:                "Terminée",
-  RESULTATS_PUBLIES:       "Résultats publiés",
-  ARCHIVEE:                "Archivée",
-  ANNULEE:                 "Annulée",
-};
-
-const STATUT_STYLES = {
-  BROUILLON:               "bg-slate-100 text-slate-500",
-  CANDIDATURE_OUVERTE:     "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-  VALIDATION_CANDIDATURES: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  VOTE_EN_COURS:           "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  DEPOUILLEMENT:           "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  TERMINEE:                "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
-  RESULTATS_PUBLIES:       "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  ARCHIVEE:                "bg-slate-100 text-slate-400",
-  ANNULEE:                 "bg-red-100 text-red-500",
-};
-
-const TYPE_LABELS = {
-  CONSEIL_NATIONAL:        "Conseil National de l'Ordre",
-  BUREAU_EXECUTIF:         "Bureau exécutif",
-  BUREAU_SECTION_A:        "Bureau de Section A",
-  BUREAU_SECTION_B:        "Bureau de Section B",
-  BUREAU_SECTION_C:        "Bureau de Section C",
-  REPRESENTANTS_REGIONAUX: "Représentants régionaux",
-};
+import CandidateAvatar from "../../components/elections/CandidateAvatar";
+import ElectionStatusBadge from "../../components/elections/ElectionStatusBadge";
+import ElectionTypeBadge from "../../components/elections/ElectionTypeBadge";
+import CandidatureStatusBadge from "../../components/elections/CandidatureStatusBadge";
+import ElectionTimeline from "../../components/elections/ElectionTimeline";
 
 const CORPS_LABELS = {
   TOUS_MEDECINS_ACTIFS:     "Tous les médecins actifs",
@@ -50,37 +22,33 @@ const CORPS_LABELS = {
   CONSEIL_SECTION_C:        "Membres du conseil de Section C",
 };
 
-const CANDIDATURE_LABELS = {
-  BROUILLON: "Brouillon",
-  SOUMISE:   "Soumise",
-  EN_REVUE:  "En revue",
-  VALIDEE:   "Validée",
-  REJETEE:   "Rejetée",
-  RETIREE:   "Retirée",
-};
+const STATUT_ORDER = [
+  "BROUILLON", "CANDIDATURE_OUVERTE", "VALIDATION_CANDIDATURES",
+  "VOTE_EN_COURS", "DEPOUILLEMENT", "RESULTATS_PUBLIES", "ARCHIVEE",
+];
 
-const CAND_STYLES = {
-  BROUILLON: "bg-slate-100 text-slate-400",
-  SOUMISE:   "bg-slate-100 text-slate-500",
-  EN_REVUE:  "bg-amber-100 text-amber-600",
-  VALIDEE:   "bg-green-100 text-green-700",
-  REJETEE:   "bg-red-100 text-red-500",
-  RETIREE:   "bg-slate-50 text-slate-400",
-};
+function computeTimelineStatus(currentStatut, targetStatut) {
+  const curr = STATUT_ORDER.indexOf(currentStatut);
+  const tgt  = STATUT_ORDER.indexOf(targetStatut);
+  if (curr < 0 || tgt < 0) return "pending";
+  if (curr > tgt) return "done";
+  if (curr === tgt) return "active";
+  return "pending";
+}
+
+const formatDate = (d) =>
+  d ? new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : null;
 
 const formatDateTime = (d) =>
   d ? new Date(d).toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
 
 function CandidatCard({ c, showVotes }) {
   const [expanded, setExpanded] = useState(false);
-  const initials = `${c.medecinPrenom?.[0] ?? ""}${c.medecinNom?.[0] ?? ""}`.toUpperCase();
 
   return (
     <div className="border-b border-slate-100 last:border-b-0 dark:border-slate-800 px-5 py-5">
       <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white text-[15px] font-bold">
-          {initials}
-        </div>
+        <CandidateAvatar candidate={c} size={48} />
         <div className="min-w-0 flex-1">
           <p className="font-bold text-slate-800 dark:text-slate-100">
             Dr. {c.medecinPrenom} {c.medecinNom}
@@ -208,52 +176,56 @@ export default function MedecinElectionDetailPage() {
 
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <span className={`rounded px-2.5 py-0.5 text-[11px] font-bold ${STATUT_STYLES[s] ?? "bg-slate-100 text-slate-500"}`}>
-                    {STATUT_LABELS[s] ?? s}
-                  </span>
+                {/* Badges */}
+                <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                  <ElectionStatusBadge statut={s} />
+                  <ElectionTypeBadge type={election.type} />
                   {election.aVote && (
-                    <span className="flex items-center gap-1 rounded bg-green-100 dark:bg-green-900/20 px-2.5 py-0.5 text-[11px] font-bold text-green-700 dark:text-green-400">
-                      <CheckCircle2 size={11} /> J'ai voté
+                    <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/20 px-2 py-0.5 text-[10px] font-bold text-green-700 dark:text-green-400">
+                      <CheckCircle2 size={10} /> Votre vote est enregistré
                     </span>
                   )}
                 </div>
+
                 <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">{election.titre}</h1>
 
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-slate-500">
-                  {election.type && (
-                    <span>{TYPE_LABELS[election.type] ?? election.type}</span>
-                  )}
+                {/* Corps + region */}
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {election.corpsElectoral && (
-                    <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                    <span className="inline-flex rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
                       {CORPS_LABELS[election.corpsElectoral] ?? election.corpsElectoral}
-                      {election.corpsElectoral === "MEDECINS_REGION" && election.region
-                        ? ` · ${election.region}`
-                        : ""}
+                      {election.corpsElectoral === "MEDECINS_REGION" && election.region ? ` · ${election.region}` : ""}
                     </span>
                   )}
-                  <span>{election.seatsCount} siège(s)</span>
+                  {election.seatsCount > 0 && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                      <Users size={9} /> {election.seatsCount} siège(s)
+                    </span>
+                  )}
                 </div>
 
-                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-slate-400">
+                {/* Calendar */}
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-slate-400">
                   {election.candidatureStartDate && (
-                    <span>
+                    <span className="flex items-center gap-1">
+                      <Calendar size={10} />
                       Candidatures : {formatDateTime(election.candidatureStartDate)} → {formatDateTime(election.candidatureEndDate)}
                     </span>
                   )}
                   {election.voteStartDate && (
-                    <span>
+                    <span className="flex items-center gap-1">
+                      <Calendar size={10} />
                       Vote : {formatDateTime(election.voteStartDate)} → {formatDateTime(election.voteEndDate)}
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="flex shrink-0 gap-2">
+              <div className="flex shrink-0 flex-col gap-2">
                 {canCandidater && (
                   <button
                     onClick={() => navigate(`/medecin/elections/${id}/candidater`)}
-                    className="rounded-xl bg-[#16A34A] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[#15803d]"
+                    className="rounded-xl bg-[#16A34A] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[#15803d] transition"
                   >
                     Candidater
                   </button>
@@ -261,7 +233,7 @@ export default function MedecinElectionDetailPage() {
                 {canVote && (
                   <button
                     onClick={() => navigate(`/medecin/elections/${id}/voter`)}
-                    className="rounded-xl bg-green-700 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-green-800"
+                    className="rounded-xl bg-[#16A34A] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[#15803d] transition"
                   >
                     Voter maintenant
                   </button>
@@ -269,7 +241,7 @@ export default function MedecinElectionDetailPage() {
                 {s === "RESULTATS_PUBLIES" && (
                   <button
                     onClick={() => navigate(`/medecin/elections/${id}/resultats`)}
-                    className="rounded-xl bg-amber-500 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-amber-600"
+                    className="rounded-xl bg-amber-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-amber-700 transition"
                   >
                     Voir les résultats
                   </button>
@@ -280,7 +252,34 @@ export default function MedecinElectionDetailPage() {
             {election.description && (
               <p className="mt-4 text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed">{election.description}</p>
             )}
+
+            {/* Process timeline */}
+            <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <p className="text-[11px] font-bold uppercase text-slate-400 mb-3">Processus électoral</p>
+              <ElectionTimeline steps={[
+                { label: "Candidatures",  date: formatDate(election.candidatureStartDate), status: computeTimelineStatus(s, "CANDIDATURE_OUVERTE") },
+                { label: "Validation",    date: formatDate(election.candidatureEndDate),   status: computeTimelineStatus(s, "VALIDATION_CANDIDATURES") },
+                { label: "Vote",          date: formatDate(election.voteStartDate),        status: computeTimelineStatus(s, "VOTE_EN_COURS") },
+                { label: "Dépouillement", date: null,                                      status: computeTimelineStatus(s, "DEPOUILLEMENT") },
+                { label: "Résultats",     date: null,                                      status: computeTimelineStatus(s, "RESULTATS_PUBLIES") },
+              ]} />
+            </div>
           </div>
+
+          {/* Already voted banner */}
+          {election.aVote && (
+            <div className="overflow-hidden rounded-2xl border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/10 p-5 flex items-center gap-3">
+              <CheckCircle2 size={20} className="shrink-0 text-green-600 dark:text-green-400" />
+              <div>
+                <p className="font-semibold text-green-800 dark:text-green-300 text-[14px]">
+                  Votre vote a été enregistré
+                </p>
+                <p className="text-[12px] text-green-700 dark:text-green-400 mt-0.5">
+                  Votre participation à cette élection est confirmée. Un seul vote est autorisé par élection.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Candidature section */}
           {(canCandidater || election.maCandidature || election.raisonIneligibilite) && (
@@ -296,9 +295,7 @@ export default function MedecinElectionDetailPage() {
                     <div>
                       <p className="font-semibold text-slate-800 dark:text-slate-100 text-[14px]">Votre candidature</p>
                       <div className="mt-1">
-                        <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${CAND_STYLES[election.maCandidature.statut] ?? "bg-slate-100 text-slate-400"}`}>
-                          {CANDIDATURE_LABELS[election.maCandidature.statut] ?? election.maCandidature.statut}
-                        </span>
+                        <CandidatureStatusBadge statut={election.maCandidature.statut} />
                       </div>
                     </div>
                     {(election.maCandidature.statut === "SOUMISE" || election.maCandidature.statut === "BROUILLON") && (

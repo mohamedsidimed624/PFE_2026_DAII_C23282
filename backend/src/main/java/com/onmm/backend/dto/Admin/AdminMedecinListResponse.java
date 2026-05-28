@@ -23,6 +23,6 @@ public class AdminMedecinListResponse {
     private LocalDate dateNaissance;
     private String sexe;
     private String nni;
-    private String adresse;
+    private String wilayaExercice;
 
 }

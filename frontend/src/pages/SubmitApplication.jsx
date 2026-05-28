@@ -17,20 +17,16 @@ function ApplicationSteps() {
   const prevStep = () => setStep(step - 1);
 
   return (
-    <div className="mx-auto w-full max-w-[1240px]">
+    <div className="mx-auto w-full max-w-310">
       <div className="mb-5">
         <h1 className="text-[21px] font-semibold tracking-tight text-slate-900">
-          Soumettre votre dossier
+          Soumis votre dossier
         </h1>
-        <p className="mt-1 text-[13px] text-slate-400">
-          Remplissez les étapes ci-dessous pour adhérer à l'Ordre National des
-          Médecins de Mauritanie.
-        </p>
       </div>
 
-      <StepIndicator />
+      <StepIndicator className="" />
 
-      <div className="mt-6">
+      <div className="mt-10">
         {step === 1 && <StepPersonal nextStep={nextStep} />}
         {step === 2 && (
           <StepEducation nextStep={nextStep} prevStep={prevStep} />
@@ -53,7 +49,7 @@ function SubmitApplication() {
       <Navbar />
 
       {/* pt-[74px] clears the fixed navbar (74px height) */}
-      <div className="pt-[74px]">
+      <div className="pt-18.5">
         <Breadcrumb
           items={[
             { label: "Accueil", to: "/" },

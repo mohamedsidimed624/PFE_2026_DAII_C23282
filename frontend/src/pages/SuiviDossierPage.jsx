@@ -100,8 +100,13 @@ function Timeline({ statut }) {
   return (
     <div className="flex items-start gap-0">
       {TIMELINE_STEPS.map((s, idx) => {
-        const done    = activeStep > idx;
-        const current = activeStep === idx;
+        const isCompleted = activeStep >= TIMELINE_STEPS.length - 1;
+
+        const done =
+          activeStep > idx || (isCompleted && idx === activeStep);
+
+        const current =
+          activeStep === idx && !isCompleted;
         const isLast  = idx === TIMELINE_STEPS.length - 1;
         return (
           <div key={s.key} className="flex flex-1 flex-col items-center">
@@ -189,9 +194,9 @@ function SuiviDossierPage() {
   /* ── Loading ── */
   if (loading) return (
     <>
-      <Navbar />
+      <Navbar className="mb-6" />
       <Breadcrumb items={[{ label: "Accueil", to: "/" }, { label: "Suivi de dossier" }]} />
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen mt-15 bg-slate-50">
         <main className="mx-auto max-w-3xl px-6 py-10">
           <div className="space-y-4 animate-pulse">
             <div className="h-32 rounded-2xl bg-slate-200" />
@@ -344,11 +349,11 @@ function SuiviDossierPage() {
             variants={fadeUp} initial="hidden" animate="visible" custom={3}
             className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
           >
-            <div className="flex items-center gap-2.5 border-b border-slate-100 bg-slate-50/60 px-5 py-3.5">
+            {/* <div className="flex items-center gap-2.5 border-b border-slate-100 bg-slate-50/60 px-5 py-3.5">
               <ShieldCheck size={14} className="text-green-600" />
               <h2 className="text-sm font-semibold text-slate-800">Que se passe-t-il ?</h2>
-            </div>
-            <div className="p-5">
+            </div> */}
+            {/* <div className="p-5">
               {result.statut === "PENDING" && (
                 <p className="text-sm leading-6 text-slate-600">
                   Votre dossier est en cours d'examen par l'administration de l'Ordre.
@@ -373,7 +378,7 @@ function SuiviDossierPage() {
                   Vous pouvez consulter le motif ci-dessus, corriger votre dossier et le resoumettre.
                 </p>
               )}
-            </div>
+            </div> */}
           </motion.div>
 
           {/* ── Actions ── */}

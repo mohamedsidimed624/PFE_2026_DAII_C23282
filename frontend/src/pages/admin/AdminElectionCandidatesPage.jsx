@@ -12,6 +12,9 @@ import {
   rejeterCandidature,
   getElectionById,
 } from "../../services/adminElectionApi";
+import CandidateAvatar from "../../components/elections/CandidateAvatar";
+import CandidatureStatusBadge from "../../components/elections/CandidatureStatusBadge";
+import EmptyState from "../../components/elections/EmptyState";
 
 const STATUT_STYLES = {
   BROUILLON:  "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400",
@@ -76,8 +79,6 @@ function CandidatureCard({ c, electionId, onRefresh }) {
   const [loading, setLoading] = useState(false);
   const [showReject, setShowReject] = useState(false);
   const [error, setError] = useState(null);
-  const initials = `${c.medecinPrenom?.[0] ?? ""}${c.medecinNom?.[0] ?? ""}`.toUpperCase();
-
   const handleValider = async () => {
     setError(null);
     setLoading(true);
@@ -102,13 +103,7 @@ function CandidatureCard({ c, electionId, onRefresh }) {
       {showReject && <RejectModal onClose={() => setShowReject(false)} onConfirm={handleRejeter} />}
 
       <div className="flex items-start gap-4 px-5 py-4">
-        {c.medecinPhotoUrl ? (
-          <img src={c.medecinPhotoUrl} alt="" className="h-11 w-11 shrink-0 rounded-full object-cover" />
-        ) : (
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white text-[13px] font-bold">
-            {initials}
-          </div>
-        )}
+        <CandidateAvatar candidate={c} size={44} />
 
         <div className="min-w-0 flex-1">
           {error && (
@@ -120,9 +115,7 @@ function CandidatureCard({ c, electionId, onRefresh }) {
             <p className="font-bold text-slate-800 dark:text-slate-100">
               Dr. {c.medecinPrenom} {c.medecinNom}
             </p>
-            <span className={`rounded px-2 py-0.5 text-[10px] font-bold ${STATUT_STYLES[c.statut] ?? "bg-slate-100 text-slate-500"}`}>
-              {STATUT_LABELS[c.statut] ?? c.statut}
-            </span>
+            <CandidatureStatusBadge statut={c.statut} />
           </div>
           {c.medecinNumeroInscription && (
             <p className="text-[11px] text-slate-400">N° {c.medecinNumeroInscription}</p>
@@ -313,10 +306,11 @@ export default function AdminElectionCandidatesPage() {
                   )}
 
                   {candidates.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-8 text-slate-400">
-                      <Users size={22} className="mb-2 text-slate-200 dark:text-slate-700" />
-                      <p className="text-[12px]">Aucune candidature {filterStatut !== "ALL" ? "dans ce statut" : ""}</p>
-                    </div>
+                    <EmptyState
+                      icon={Users}
+                      title="Aucune candidature"
+                      subtitle={filterStatut !== "ALL" ? "Essayez un autre filtre de statut." : "Aucune candidature n'a encore été déposée."}
+                    />
                   ) : (
                     candidates.map((c) => (
                       <CandidatureCard key={c.id} c={c} electionId={id} onRefresh={load} />

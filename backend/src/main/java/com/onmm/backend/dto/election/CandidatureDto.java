@@ -22,6 +22,7 @@ public class CandidatureDto {
     private String medecinNom;
     private String medecinPrenom;
     private String medecinPhotoUrl;
+    private String photoCandidatureUrl;
     private String medecinNumeroInscription;
     private String specialite;
     private String region;
@@ -40,6 +41,9 @@ public class CandidatureDto {
     private boolean peutUploaderDocuments;
     private boolean peutFinaliser;
     private boolean peutRetirer;
+
+    // Pour la page de vote : indique que c'est la propre candidature du votant
+    private boolean estMaCandidature;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -76,6 +80,9 @@ public class CandidatureDto {
 
     public String getMedecinPhotoUrl() { return medecinPhotoUrl; }
     public void setMedecinPhotoUrl(String medecinPhotoUrl) { this.medecinPhotoUrl = medecinPhotoUrl; }
+
+    public String getPhotoCandidatureUrl() { return photoCandidatureUrl; }
+    public void setPhotoCandidatureUrl(String photoCandidatureUrl) { this.photoCandidatureUrl = photoCandidatureUrl; }
 
     public String getMedecinNumeroInscription() { return medecinNumeroInscription; }
     public void setMedecinNumeroInscription(String medecinNumeroInscription) { this.medecinNumeroInscription = medecinNumeroInscription; }
@@ -124,4 +131,7 @@ public class CandidatureDto {
 
     public boolean isPeutRetirer() { return peutRetirer; }
     public void setPeutRetirer(boolean peutRetirer) { this.peutRetirer = peutRetirer; }
+
+    public boolean isEstMaCandidature() { return estMaCandidature; }
+    public void setEstMaCandidature(boolean estMaCandidature) { this.estMaCandidature = estMaCandidature; }
 }

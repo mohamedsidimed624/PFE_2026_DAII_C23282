@@ -1000,8 +1000,40 @@ public class ElectionServiceImpl implements ElectionService {
         if (participationRepo.existsByElectionIdAndVotantHash(electionId, votantHash)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Vous avez déjà voté dans cette élection"
+                    "Vous avez déjà voté pour cette élection."
             );
+        }
+
+        // Auto-vote check
+        List<Long> allSelectedIds = new ArrayList<>();
+        if (req.getCandidatureIds() != null) allSelectedIds.addAll(req.getCandidatureIds());
+        if (req.getVotes() != null) {
+            req.getVotes().forEach(pv -> {
+                if (pv.getCandidatureIds() != null) allSelectedIds.addAll(pv.getCandidatureIds());
+            });
+        }
+        if (!allSelectedIds.isEmpty()) {
+            candidatureRepo.findByElectionIdAndMedecinEmail(electionId, email)
+                    .ifPresent(maCand -> {
+                        if (allSelectedIds.contains(maCand.getId())) {
+                            throw new ResponseStatusException(
+                                    HttpStatus.BAD_REQUEST,
+                                    "Vous ne pouvez pas voter pour votre propre candidature."
+                            );
+                        }
+                    });
+        }
+
+        // Section/région eligibility check per voted candidature
+        for (Long cid : allSelectedIds) {
+            candidatureRepo.findById(cid).ifPresent(cand -> {
+                if (cand.getPosition() != null && !isPositionEligiblePourMedecin(e, cand.getPosition(), medecin)) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "Vous ne pouvez pas voter pour une candidature hors de votre section ou région."
+                    );
+                }
+            });
         }
 
         List<BulletinVote> bulletins = buildAndValidateBulletins(e, req);
@@ -1035,7 +1067,7 @@ public class ElectionServiceImpl implements ElectionService {
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Vous avez déjà voté dans cette élection"
+                    "Vous avez déjà voté pour cette élection."
             );
         }
 
@@ -2288,6 +2320,16 @@ public class ElectionServiceImpl implements ElectionService {
             "Nouakchott Nord", "Nouakchott Ouest", "Nouakchott Sud"
     );
 
+    private String sectionLabel(SectionOrdre s) {
+        if (s == null) return "non renseignée";
+        switch (s) {
+            case GENERALISTE:         return "Section A – Généraliste";
+            case SPECIALISTE:         return "Section B – Spécialiste";
+            case ENSEIGNANT_CHERCHEUR: return "Section C – Enseignant-Chercheur";
+            default:                  return s.name();
+        }
+    }
+
     private String getRaisonIneligibiliteCandidature(Election e, Medecin medecin) {
         if (medecin.getStatut() != StatutMedecin.ACTIF)
             return "Votre statut médecin n'est pas actif.";
@@ -2298,31 +2340,25 @@ public class ElectionServiceImpl implements ElectionService {
         String wilaya = medecin.getWilayaExercice();
 
         if (type == ElectionType.BUREAU_SECTION_A && section != SectionOrdre.GENERALISTE)
-            return "Cette élection est réservée aux médecins de la Section A (Généralistes). Votre section : "
-                    + (section != null ? section.name() : "non renseignée") + ".";
+            return "Cette élection est réservée aux médecins de la Section A. Votre section : " + sectionLabel(section) + ".";
         if (type == ElectionType.BUREAU_SECTION_B && section != SectionOrdre.SPECIALISTE)
-            return "Cette élection est réservée aux médecins de la Section B (Spécialistes). Votre section : "
-                    + (section != null ? section.name() : "non renseignée") + ".";
+            return "Cette élection est réservée aux médecins de la Section B. Votre section : " + sectionLabel(section) + ".";
         if (type == ElectionType.BUREAU_SECTION_C && section != SectionOrdre.ENSEIGNANT_CHERCHEUR)
-            return "Cette élection est réservée aux médecins de la Section C (Enseignants-Chercheurs). Votre section : "
-                    + (section != null ? section.name() : "non renseignée") + ".";
+            return "Cette élection est réservée aux médecins de la Section C. Votre section : " + sectionLabel(section) + ".";
 
         if (corps == CorpsElectoral.CONSEIL_SECTION_A && section != SectionOrdre.GENERALISTE)
-            return "Cette élection concerne le Conseil de la Section A. Votre section : "
-                    + (section != null ? section.name() : "non renseignée") + ".";
+            return "Cette élection concerne le Conseil de la Section A. Votre section : " + sectionLabel(section) + ".";
         if (corps == CorpsElectoral.CONSEIL_SECTION_B && section != SectionOrdre.SPECIALISTE)
-            return "Cette élection concerne le Conseil de la Section B. Votre section : "
-                    + (section != null ? section.name() : "non renseignée") + ".";
+            return "Cette élection concerne le Conseil de la Section B. Votre section : " + sectionLabel(section) + ".";
         if (corps == CorpsElectoral.CONSEIL_SECTION_C && section != SectionOrdre.ENSEIGNANT_CHERCHEUR)
-            return "Cette élection concerne le Conseil de la Section C. Votre section : "
-                    + (section != null ? section.name() : "non renseignée") + ".";
+            return "Cette élection concerne le Conseil de la Section C. Votre section : " + sectionLabel(section) + ".";
 
         if (corps == CorpsElectoral.MEDECINS_REGION || type == ElectionType.REPRESENTANTS_REGIONAUX) {
             if (wilaya == null || wilaya.isBlank())
-                return "Votre wilaya d'exercice n'est pas renseignée dans votre profil.";
+                return "Votre région n'est pas renseignée dans votre profil. Veuillez compléter votre profil.";
             if (e.getRegion() != null && !e.getRegion().equalsIgnoreCase(wilaya))
-                return "Cette élection concerne la région " + e.getRegion()
-                        + ". Votre wilaya enregistrée est " + wilaya + ".";
+                return "Cette élection est réservée aux médecins de la région " + e.getRegion()
+                        + ". Votre région enregistrée est « " + wilaya + " ».";
         }
 
         return null;
@@ -2657,11 +2693,16 @@ public class ElectionServiceImpl implements ElectionService {
         Optional<Candidature> maCand = candidatureRepo.findByElectionIdAndMedecinEmail(e.getId(), medecin.getEmail());
         maCand.ifPresent(c -> dto.setMaCandidature(toCandidatureDto(c, isResultsVisible(e))));
 
-        dto.setCandidatures(
-                candidatureRepo.findByElectionIdAndStatut(e.getId(), StatutCandidature.VALIDEE).stream()
-                        .map(c -> toCandidatureDto(c, isResultsVisible(e)))
-                        .collect(Collectors.toList())
-        );
+        List<Candidature> allValidee = candidatureRepo.findByElectionIdAndStatut(e.getId(), StatutCandidature.VALIDEE);
+        boolean showVotes = isResultsVisible(e);
+        String viewerEmail = medecin.getEmail();
+        dto.setCandidatures(allValidee.stream()
+                .map(c -> toCandidatureDto(c, showVotes, viewerEmail))
+                .collect(Collectors.toList()));
+        dto.setCandidaturesEligibles(allValidee.stream()
+                .filter(c -> c.getPosition() == null || isPositionEligiblePourMedecin(e, c.getPosition(), medecin))
+                .map(c -> toCandidatureDto(c, showVotes, viewerEmail))
+                .collect(Collectors.toList()));
 
         // peutCandidater + raisonIneligibilite
         boolean candidaturesOuvertes = e.getStatut() == ElectionStatut.CANDIDATURE_OUVERTE;
@@ -2683,8 +2724,9 @@ public class ElectionServiceImpl implements ElectionService {
         dto.setPeutCandidater(peutCandidater);
         dto.setRaisonIneligibilite(raison);
 
-        // peutVoter
+        // peutVoter — false si déjà voté
         dto.setPeutVoter(e.getStatut() == ElectionStatut.VOTE_EN_COURS
+                && !dto.isAVote()
                 && isMedecinConcerneParElection(e, medecin));
 
         // prochaineEtapeCandidature
@@ -2737,6 +2779,11 @@ public class ElectionServiceImpl implements ElectionService {
         dto.setNbVotes(showVotes ? bulletinRepo.countByElectionIdAndCandidatureId(c.getElection().getId(), c.getId()) : 0);
         dto.setDocuments(documentRepo.findByCandidatureId(c.getId()).stream()
                 .map(this::toDocumentDto).collect(Collectors.toList()));
+        documentRepo.findByCandidatureIdAndTypeDocument(c.getId(), TypeDocumentCandidature.PHOTO)
+                .ifPresent(photoDoc -> {
+                    String path = photoDoc.getFilePath();
+                    dto.setPhotoCandidatureUrl(path.startsWith("/") ? path : "/" + path);
+                });
 
         // Champs élection enrichis
         dto.setElectionType(c.getElection().getType());
@@ -2751,6 +2798,14 @@ public class ElectionServiceImpl implements ElectionService {
         dto.setPeutFinaliser(sc == StatutCandidature.BROUILLON);
         dto.setPeutRetirer(sc == StatutCandidature.BROUILLON || sc == StatutCandidature.SOUMISE);
 
+        return dto;
+    }
+
+    private CandidatureDto toCandidatureDto(Candidature c, boolean showVotes, String viewerEmail) {
+        CandidatureDto dto = toCandidatureDto(c, showVotes);
+        if (viewerEmail != null) {
+            dto.setEstMaCandidature(c.getMedecin().getEmail().equals(viewerEmail));
+        }
         return dto;
     }
 

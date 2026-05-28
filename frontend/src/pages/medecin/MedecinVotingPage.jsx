@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { getElectionDetail, voter } from "../../services/medecinElectionApi";
+import { extractApiError } from "../../utils/apiUtils";
+import CandidateAvatar from "../../components/elections/CandidateAvatar";
 
 const VIEWS = ["intro", "selection", "confirmation", "success"];
 
@@ -23,15 +25,16 @@ function ProgressBar({ step, total }) {
   );
 }
 
-function CandidateCard({ c, isSelected, isDisabled, isRadio, onToggle }) {
-  const initials = `${c.medecinPrenom?.[0] ?? ""}${c.medecinNom?.[0] ?? ""}`.toUpperCase();
-  const photo = c.medecinPhotoUrl;
+function CandidateCard({ c, isSelected, isDisabled, isRadio, onToggle, isOwnCandidature }) {
+  const effectiveDisabled = isDisabled || isOwnCandidature;
 
   return (
     <button
-      onClick={() => !isDisabled && onToggle(c.id)}
+      onClick={() => !effectiveDisabled && onToggle(c.id)}
       className={`w-full text-left rounded-xl border p-4 transition ${
-        isSelected
+        isOwnCandidature
+          ? "border-amber-200 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-900/5 cursor-not-allowed"
+          : isSelected
           ? "border-green-500 bg-green-50 dark:bg-green-900/10"
           : isDisabled
           ? "border-slate-100 dark:border-slate-800 opacity-50 cursor-not-allowed"
@@ -39,36 +42,50 @@ function CandidateCard({ c, isSelected, isDisabled, isRadio, onToggle }) {
       }`}
     >
       <div className="flex items-center gap-4">
-        {photo ? (
-          <img src={photo} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
-        ) : (
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[13px] font-bold text-white ${
-            isSelected ? "bg-green-600" : "bg-blue-700"
-          }`}>
-            {initials}
-          </div>
-        )}
+        <CandidateAvatar
+          candidate={c}
+          size={40}
+          bgClass={isOwnCandidature ? "bg-amber-400" : isSelected ? "bg-green-600" : "bg-blue-700"}
+          imgClassName={isOwnCandidature ? "opacity-70" : ""}
+        />
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-slate-800 dark:text-slate-100">
-            Dr. {c.medecinPrenom} {c.medecinNom}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className={`font-semibold ${isOwnCandidature ? "text-amber-800 dark:text-amber-300" : "text-slate-800 dark:text-slate-100"}`}>
+              Dr. {c.medecinPrenom} {c.medecinNom}
+            </p>
+            {isOwnCandidature && (
+              <span className="rounded bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                Votre candidature
+              </span>
+            )}
+          </div>
           {c.specialite && <p className="text-[12px] text-slate-400">{c.specialite}</p>}
           {c.region && <p className="text-[11px] text-slate-400">{c.region}</p>}
-          {c.declarationCandidature && (
-            <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400 line-clamp-1">
-              {c.declarationCandidature}
+          {isOwnCandidature ? (
+            <p className="mt-0.5 text-[11px] text-amber-600 dark:text-amber-400">
+              Vous ne pouvez pas voter pour vous-même.
             </p>
+          ) : (
+            c.declarationCandidature && (
+              <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                {c.declarationCandidature}
+              </p>
+            )
           )}
         </div>
-        <div className={`flex h-5 w-5 shrink-0 items-center justify-center ${
-          isRadio ? "rounded-full" : "rounded"
-        } border-2 ${
-          isSelected
-            ? "border-green-500 bg-green-500"
-            : "border-slate-300 dark:border-slate-600"
-        }`}>
-          {isSelected && <CheckCircle2 size={12} className="text-white" />}
-        </div>
+        {isOwnCandidature ? (
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-amber-200 dark:border-amber-700" />
+        ) : (
+          <div className={`flex h-5 w-5 shrink-0 items-center justify-center ${
+            isRadio ? "rounded-full" : "rounded"
+          } border-2 ${
+            isSelected
+              ? "border-green-500 bg-green-500"
+              : "border-slate-300 dark:border-slate-600"
+          }`}>
+            {isSelected && <CheckCircle2 size={12} className="text-white" />}
+          </div>
+        )}
       </div>
     </button>
   );
@@ -143,7 +160,7 @@ export default function MedecinVotingPage() {
       await voter(id, buildPayload());
       setView("success");
     } catch (err) {
-      setError(err?.response?.data?.message ?? "Erreur lors du vote");
+      setError(extractApiError(err));
     } finally {
       setSubmitting(false);
     }
@@ -160,20 +177,46 @@ export default function MedecinVotingPage() {
   }
 
   if (!election || !peutVoter) {
-    const msg = election?.aVote
-      ? "Vous avez déjà voté pour cette élection."
-      : election?.raisonIneligibilite ?? "Le vote n'est pas disponible.";
+    const alreadyVoted = election?.aVote === true;
     return (
-      <MedecinLayout title="Vote">
-        <div className="flex h-64 flex-col items-center justify-center gap-3 text-slate-400">
-          <Vote size={32} className="text-slate-200 dark:text-slate-700" />
-          <p className="text-[13px]">{msg}</p>
-          <button
-            onClick={() => navigate(`/medecin/elections/${id}`)}
-            className="text-[12px] font-semibold text-blue-600 hover:underline"
-          >
-            Retour à l'élection
-          </button>
+      <MedecinLayout title={alreadyVoted ? "Vote déjà enregistré" : "Vote"}>
+        <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-4 py-8 sm:px-6 flex items-start justify-center">
+          <div className="w-full max-w-md mt-8">
+            <button
+              onClick={() => navigate(`/medecin/elections/${id}`)}
+              className="mb-5 flex items-center gap-1.5 text-[12px] font-semibold text-slate-500 hover:text-slate-700"
+            >
+              <ArrowLeft size={13} /> Retour à l'élection
+            </button>
+            <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 p-8 flex flex-col items-center text-center gap-4">
+              <div className={`flex h-16 w-16 items-center justify-center rounded-full ${
+                alreadyVoted
+                  ? "bg-green-50 dark:bg-green-900/20"
+                  : "bg-amber-50 dark:bg-amber-900/20"
+              }`}>
+                {alreadyVoted
+                  ? <CheckCircle2 size={32} className="text-green-600 dark:text-green-400" />
+                  : <Shield size={32} className="text-amber-500" />
+                }
+              </div>
+              <div>
+                <h2 className="text-[16px] font-bold text-slate-800 dark:text-slate-100 mb-1">
+                  {alreadyVoted ? "Vote déjà enregistré" : "Accès au vote impossible"}
+                </h2>
+                <p className="text-[13px] text-slate-500 dark:text-slate-400">
+                  {alreadyVoted
+                    ? "Vous avez déjà voté pour cette élection. Un seul vote est autorisé."
+                    : (election?.raisonIneligibilite ?? "Le vote n'est pas disponible pour cette élection.")}
+                </p>
+              </div>
+              <button
+                onClick={() => navigate(`/medecin/elections/${id}`)}
+                className="mt-2 rounded-xl bg-[#16A34A] px-6 py-2.5 text-[13px] font-semibold text-white hover:bg-[#15803d] transition"
+              >
+                Retour à l'élection
+              </button>
+            </div>
+          </div>
         </div>
       </MedecinLayout>
     );
@@ -320,6 +363,7 @@ export default function MedecinVotingPage() {
                             isDisabled={!selected.includes(c.id) && selected.length >= maxVotes && !isRadio}
                             isRadio={isRadio}
                             onToggle={(cid) => toggleVote(pos?.id ?? null, cid, maxVotes)}
+                            isOwnCandidature={!!c.estMaCandidature}
                           />
                         ))}
                       </div>
@@ -367,16 +411,9 @@ export default function MedecinVotingPage() {
                           selected.map((cid) => {
                             const c = posCandidates.find((x) => x.id === cid);
                             if (!c) return null;
-                            const initials = `${c.medecinPrenom?.[0] ?? ""}${c.medecinNom?.[0] ?? ""}`.toUpperCase();
                             return (
                               <div key={cid} className="flex items-center gap-3 px-4 py-3.5 border-b last:border-b-0 border-slate-50 dark:border-slate-800">
-                                {c.medecinPhotoUrl ? (
-                                  <img src={c.medecinPhotoUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
-                                ) : (
-                                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-700 text-white text-[12px] font-bold">
-                                    {initials}
-                                  </div>
-                                )}
+                                <CandidateAvatar candidate={c} size={36} bgClass="bg-green-700" />
                                 <div>
                                   <p className="font-semibold text-slate-800 dark:text-slate-100">
                                     Dr. {c.medecinPrenom} {c.medecinNom}
@@ -452,10 +489,10 @@ export default function MedecinVotingPage() {
                   Vote enregistré avec succès
                 </h2>
                 <p className="text-[14px] text-slate-500 dark:text-slate-400 mb-1">
-                  Votre vote a bien été pris en compte.
+                  Votre vote pour <strong>{election?.titre}</strong> a bien été enregistré.
                 </p>
                 <p className="text-[12px] text-slate-400 mb-8">
-                  Votre participation a été enregistrée. Le contenu du vote est traité uniquement dans le cadre du scrutin.
+                  Un seul vote est autorisé par élection. Votre participation est confirmée et ne peut pas être modifiée.
                 </p>
 
                 <button
