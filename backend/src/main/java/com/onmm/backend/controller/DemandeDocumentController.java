@@ -8,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/demandes")
-@CrossOrigin(origins = "http://localhost:5173")
 public class DemandeDocumentController {
 
     private final DemandeDocumentService documentService;

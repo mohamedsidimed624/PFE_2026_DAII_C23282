@@ -225,9 +225,9 @@ function AdminReclamationsList() {
           )}
         </div>
 
-        <button className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200">
+        {/* <button className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200">
           Filter by date range
-        </button>
+        </button> */}
       </div>
 
       {error && (

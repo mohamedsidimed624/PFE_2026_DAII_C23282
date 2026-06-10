@@ -9,6 +9,7 @@ import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.entity.enums.TokenType;
 import com.onmm.backend.repository.ActivationTokenRepository;
 import com.onmm.backend.repository.UserRepository;
+import com.onmm.backend.exception.BusinessException;
 import com.onmm.backend.service.AuthService;
 import com.onmm.backend.service.JWTService;
 import com.onmm.backend.service.email.EmailService;
@@ -17,7 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final ActivationTokenRepository tokenRepository;
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authManager;
     private final JWTService jwtService;
     private final EmailService emailService;
@@ -38,12 +39,14 @@ public class AuthServiceImpl implements AuthService {
 
     public AuthServiceImpl(ActivationTokenRepository tokenRepository,
                            UserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
                            AuthenticationManager authManager,
                            JWTService jwtService,
                            EmailService emailService
     ) {
         this.tokenRepository = tokenRepository;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
         this.authManager = authManager;
         this.jwtService = jwtService;
         this.emailService = emailService;
@@ -53,14 +56,14 @@ public class AuthServiceImpl implements AuthService {
     public String activateAccount(String tokenValue) {
 
         ActivationToken token = tokenRepository.findByToken(tokenValue)
-                .orElseThrow(() -> new RuntimeException("Token invalide"));
+                .orElseThrow(() -> new BusinessException("Token invalide"));
 
         if (token.isUsed()) {
-            throw new RuntimeException("Token déjà utilisé");
+            throw new BusinessException("Token déjà utilisé");
         }
 
         if (token.getExpirationDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token expiré");
+            throw new BusinessException("Token expiré");
         }
 
         User user = token.getUser();
@@ -74,27 +77,31 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void setPassword(SetPasswordRequest request) {
 
+        if (request.getPassword() == null || request.getPassword().length() < 8) {
+            throw new BusinessException("Le mot de passe doit contenir au moins 8 caractères");
+        }
+
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Les mots de passe ne correspondent pas");
+            throw new BusinessException("Les mots de passe ne correspondent pas");
         }
 
         ActivationToken token = tokenRepository.findByToken(request.getToken())
-                .orElseThrow(() -> new RuntimeException("Token invalide"));
+                .orElseThrow(() -> new BusinessException("Token invalide"));
 
         if (token.isUsed()) {
-            throw new RuntimeException("Token déjà utilisé");
+            throw new BusinessException("Token déjà utilisé");
         }
 
         if (token.getExpirationDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token expiré");
+            throw new BusinessException("Token expiré");
         }
 
         if (token.getType() == TokenType.ACTIVATION) {
-            throw new RuntimeException("Token invalide pour définir le mot de passe");
+            throw new BusinessException("Token invalide pour définir le mot de passe");
         }
 
         User user = token.getUser();
-        user.setPassword(encoder.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEnabled(true);
 
         userRepository.save(user);
@@ -126,15 +133,15 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void verifyActivationEmail(String tokenValue, String email) {
         ActivationToken token = tokenRepository.findByToken(tokenValue)
-                .orElseThrow(() -> new RuntimeException("Lien invalide ou expiré."));
+                .orElseThrow(() -> new BusinessException("Lien invalide ou expiré."));
         if (token.isUsed()) {
-            throw new RuntimeException("Ce lien a déjà été utilisé.");
+            throw new BusinessException("Ce lien a déjà été utilisé.");
         }
         if (token.getExpirationDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Ce lien a expiré.");
+            throw new BusinessException("Ce lien a expiré.");
         }
         if (token.getType() == TokenType.ACTIVATION) {
-            throw new RuntimeException("Type de token invalide.");
+            throw new BusinessException("Type de token invalide.");
         }
         if (!token.getUser().getEmail().equalsIgnoreCase(email)) {
             throw new RuntimeException("Email incorrect. Vérifiez l'adresse email associée à votre compte.");
@@ -151,13 +158,10 @@ public class AuthServiceImpl implements AuthService {
                 )
         );
 
-
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         User user = userPrincipal.getUser();
 
-
         String token = jwtService.generateToken(user);
-
 
         return new LoginResponse(
                 token,
@@ -165,30 +169,4 @@ public class AuthServiceImpl implements AuthService {
                 user.getEmail()
         );
     }
-
-//        User user = userRepository.findByEmail(request.getEmail())
-//                .orElseThrow(() -> new RuntimeException("Email ou mot de passe invalide"));
-//
-//        if (!user.isEnabled()) {
-//            throw new RuntimeException("Votre compte n'est pas encore activé");
-//        }
-//
-//        boolean passwordMatches = encoder.matches(
-//                request.getPassword(),
-//                user.getPassword()
-//        );
-//
-//        if (!passwordMatches) {
-//            throw new RuntimeException("Email ou mot de passe invalide");
-//        }
-//
-//        // JWT viendra à l’étape suivante
-//       // String token = jwtService.generateToken(user);
-//
-//        return new LoginResponse(
-//               // token,
-//                user.getRole().name(),
-//                user.getEmail()
-//        );
-//    }
 }

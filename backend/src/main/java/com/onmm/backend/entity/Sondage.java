@@ -3,6 +3,8 @@ package com.onmm.backend.entity;
 import com.onmm.backend.entity.enums.SondageStatut;
 import com.onmm.backend.entity.enums.SondageType;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,6 +13,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "sondages")
+@Getter
+@Setter
 public class Sondage {
 
     @Id

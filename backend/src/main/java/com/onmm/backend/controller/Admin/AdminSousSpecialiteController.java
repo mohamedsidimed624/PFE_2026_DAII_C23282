@@ -3,6 +3,7 @@ package com.onmm.backend.controller.Admin;
 import com.onmm.backend.dto.Admin.specialite.AdminSousSpecialiteResponse;
 import com.onmm.backend.dto.Admin.specialite.SousSpecialiteRequest;
 import com.onmm.backend.service.Admin.AdminSousSpecialiteService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,14 +26,14 @@ public class AdminSousSpecialiteController {
 
     @PostMapping("/sous-specialites")
     @ResponseStatus(HttpStatus.CREATED)
-    public AdminSousSpecialiteResponse createSousSpecialite(@RequestBody SousSpecialiteRequest request) {
+    public AdminSousSpecialiteResponse createSousSpecialite(@Valid @RequestBody SousSpecialiteRequest request) {
         return adminSousSpecialiteService.createSousSpecialite(request);
     }
 
     @PutMapping("/sous-specialites/{id}")
     public AdminSousSpecialiteResponse updateSousSpecialite(
             @PathVariable Long id,
-            @RequestBody SousSpecialiteRequest request
+            @Valid @RequestBody SousSpecialiteRequest request
     ) {
         return adminSousSpecialiteService.updateSousSpecialite(id, request);
     }

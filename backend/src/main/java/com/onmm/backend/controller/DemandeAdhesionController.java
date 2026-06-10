@@ -4,6 +4,7 @@ import com.onmm.backend.dto.DemandeAdhesionRequest;
 import com.onmm.backend.dto.DemandeAdhesionResponse;
 import com.onmm.backend.entity.DemandeAdhesion;
 import com.onmm.backend.service.DemandeAdhesionService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.onmm.backend.dto.demande.SuiviDossierResponse;
@@ -11,7 +12,6 @@ import com.onmm.backend.dto.demande.RepriseDemandeResponse;
 
 @RestController
 @RequestMapping("/api/demandes")
-@CrossOrigin(origins = "http://localhost:5173")
 public class DemandeAdhesionController {
 
     private final DemandeAdhesionService demandeAdhesionService;
@@ -22,7 +22,7 @@ public class DemandeAdhesionController {
 
     @PostMapping
     public ResponseEntity<DemandeAdhesionResponse> createDemande(
-            @RequestBody DemandeAdhesionRequest request
+            @Valid @RequestBody DemandeAdhesionRequest request
     ) {
         DemandeAdhesion demande = demandeAdhesionService.createDemande(request);
 

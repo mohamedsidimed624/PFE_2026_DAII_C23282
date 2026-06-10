@@ -32,3 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 /backend/target/
+
+# Fichiers de configuration locaux contenant des secrets (ne jamais committer)
+src/main/resources/application-local.properties
+src/main/resources/*.env

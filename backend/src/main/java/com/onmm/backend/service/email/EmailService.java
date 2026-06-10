@@ -16,4 +16,6 @@ public interface EmailService {
 
     void sendPasswordResetEmail(String to, String name, String resetLink);
 
+    void sendContactMessage(String fromName, String fromEmail, String fromPhone, String sujet, String body);
+
 }

@@ -1,7 +1,13 @@
 package com.onmm.backend.service.impl.Admin;
 import java.util.Set;
 import java.util.UUID;
+import com.onmm.backend.exception.BusinessException;
+import com.onmm.backend.exception.ForbiddenException;
+import com.onmm.backend.exception.ResourceNotFoundException;
 import com.onmm.backend.dto.Admin.AdminDemandeDetailResponse;
+import com.onmm.backend.exception.BusinessException;
+import com.onmm.backend.exception.ForbiddenException;
+import com.onmm.backend.exception.ResourceNotFoundException;
 import com.onmm.backend.dto.Admin.AdminDemandeResponse;
 import com.onmm.backend.dto.DemandeDocumentResponse;
 import com.onmm.backend.dto.DemandeEducationResponse;
@@ -84,7 +90,7 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
     public AdminDemandeDetailResponse getDemandeDetail(Long id) {
 
         DemandeAdhesion demande = repository.findWithDetailsById(id)
-                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Demande introuvable"));
 
         AdminDemandeDetailResponse dto = new AdminDemandeDetailResponse();
 
@@ -168,10 +174,10 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
     public void rejectDemande(Long id, String comment) {
 
         DemandeAdhesion demande = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Demande introuvable"));
 
         if (!demande.isPending()) {
-            throw new RuntimeException("Demande déjà traitée");
+            throw new BusinessException("Demande déjà traitée");
         }
 
         demande.setStatut(ApplicationStatus.REJECTED);
@@ -200,19 +206,19 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
     public void approveDemande(Long id, SectionOrdre sectionValidee) {
 
         DemandeAdhesion demande = repository.findWithDetailsById(id)
-                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Demande introuvable"));
 
         if (!demande.isPending()) {
-            throw new RuntimeException("Cette demande a déjà été traitée");
+            throw new BusinessException("Cette demande a déjà été traitée");
         }
 
         Optional<User> existingUser = userRepository.findByEmail(demande.getEmail());
         if (existingUser.isPresent()) {
-            throw new RuntimeException("Un utilisateur existe déjà avec cet email");
+            throw new BusinessException("Un utilisateur existe déjà avec cet email");
         }
 
         if (demande.getEducations() == null || demande.getEducations().isEmpty()) {
-            throw new RuntimeException("Impossible d'approuver une demande sans formation");
+            throw new BusinessException("Impossible d'approuver une demande sans formation");
         }
 
         demande.setStatut(ApplicationStatus.APPROUVED);
@@ -265,7 +271,7 @@ public class AdminDemandeServiceImpl implements AdminDemandeService {
                 .count();
 
         if (nombreExperiencesActuelles > 1) {
-            throw new RuntimeException("Une seule expérience professionnelle actuelle est autorisée");
+            throw new BusinessException("Une seule expérience professionnelle actuelle est autorisée");
         }
 
         // Copier les formations

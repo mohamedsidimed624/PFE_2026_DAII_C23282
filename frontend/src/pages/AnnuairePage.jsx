@@ -34,11 +34,22 @@ const TRIS = [
   { value: "ancien", label: "Plus anciens" },
 ];
 
-const VILLES_MAURITANIE = [
-  "Nouakchott", "Nouadhibou", "Rosso", "Kaédi", "Zouérate", "Atar",
-  "Kiffa", "Néma", "Aioun", "Boghé", "Aleg", "Tidjikja", "Sélibaby",
-  "Akjoujt", "Boutilimit", "Chinguetti", "Ouadane", "Oualata", "Maghama",
-  "Moudjéria", "Bababé", "Tintane", "Guerou", "M'Bout",
+const WILAYAS_MAURITANIE = [
+  "Hodh Ech Chargui",
+  "Hodh El Gharbi",
+  "Assaba",
+  "Gorgol",
+  "Brakna",
+  "Trarza",
+  "Adrar",
+  "Dakhlet Nouadhibou",
+  "Tagant",
+  "Guidimagha",
+  "Tiris Zemmour",
+  "Inchiri",
+  "Nouakchott-Ouest",
+  "Nouakchott-Nord",
+  "Nouakchott-Sud",
 ];
 
 function AnnuairePage() {
@@ -50,7 +61,7 @@ function AnnuairePage() {
 
   const [searchInput, setSearchInput] = useState("");
   const [specialite, setSpecialite] = useState("Toutes spécialités");
-  const [ville, setVille] = useState("Toutes les villes");
+  const [wilaya, setWilaya] = useState("Toutes les wilayas");
   const [tri, setTri] = useState("alpha");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -66,7 +77,7 @@ function AnnuairePage() {
   const [specialitesDisponibles, setSpecialitesDisponibles] = useState([]);
 
   const [submittedFilters, setSubmittedFilters] = useState({
-    nom: "", prenom: "", numeroInscription: "", specialite: "", ville: "",
+    nom: "", prenom: "", numeroInscription: "", specialite: "", wilaya: "",
   });
 
   useEffect(() => {
@@ -79,7 +90,7 @@ function AnnuairePage() {
           prenom: submittedFilters.prenom,
           numeroInscription: submittedFilters.numeroInscription,
           specialite: submittedFilters.specialite,
-          ville: submittedFilters.ville,
+          wilaya: submittedFilters.wilaya,
           page: page - 1,
           size: PAGE_SIZE,
           sort: tri,
@@ -114,7 +125,7 @@ function AnnuairePage() {
     ...specialitesDisponibles.map((s) => s.libelle).filter(Boolean).sort((a, b) => a.localeCompare(b)),
   ], [specialitesDisponibles]);
 
-  const villesOptions = useMemo(() => ["Toutes les villes", ...VILLES_MAURITANIE], []);
+  const wilayasOptions = useMemo(() => ["Toutes les wilayas", ...WILAYAS_MAURITANIE], []);
 
   const startItem = totalElements === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const endItem = Math.min(page * PAGE_SIZE, totalElements);
@@ -128,14 +139,14 @@ function AnnuairePage() {
             prenom: advancedPrenom.trim(),
             numeroInscription: advancedNumero.trim(),
             specialite: specialite === "Toutes spécialités" ? "" : specialite,
-            ville: ville === "Toutes les villes" ? "" : ville,
+            wilaya: wilaya === "Toutes les wilayas" ? "" : wilaya,
           }
         : {
             nom: searchInput.trim(),
             prenom: "",
             numeroInscription: "",
             specialite: specialite === "Toutes spécialités" ? "" : specialite,
-            ville: ville === "Toutes les villes" ? "" : ville,
+            wilaya: wilaya === "Toutes les wilayas" ? "" : wilaya,
           }
     );
     setPage(1);
@@ -147,10 +158,10 @@ function AnnuairePage() {
     setAdvancedPrenom("");
     setAdvancedNumero("");
     setSpecialite("Toutes spécialités");
-    setVille("Toutes les villes");
+    setWilaya("Toutes les wilayas");
     setTri("alpha");
     setPage(1);
-    setSubmittedFilters({ nom: "", prenom: "", numeroInscription: "", specialite: "", ville: "" });
+    setSubmittedFilters({ nom: "", prenom: "", numeroInscription: "", specialite: "", wilaya: "" });
   };
 
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -172,26 +183,19 @@ return (
       <div className="mx-auto max-w-7xl px-6">
         <Breadcrumb items={BREADCRUMB} />
 
-        {/* Header proche Home */}
-        <section className="pb-10 pt-8">
-          <span className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-green-600">
-            <BadgeCheck size={15} />
-            Registre officiel ONMM
-          </span>
-
-          <h1 className="max-w-3xl text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">
-            Annuaire des{" "}
-            <span className="text-green-600">médecins inscrits</span>
+        <section className="pb-7 pt-7">
+          <h1 className="text-[30px] font-medium tracking-tight text-slate-950">
+            Annuaire médical
           </h1>
 
-          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-500">
+          <p className="mt-2 max-w-[620px] text-[15px] leading-6 text-slate-500">
             Recherchez un médecin inscrit à l’Ordre National des Médecins par nom,
-            spécialité ou ville d’exercice.
+            spécialité ou wilaya d’exercice.
           </p>
         </section>
 
         {/* Recherche */}
-        <section className="mb-10 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+        <section className="mb-10 rounded-2xl border bg-[#F7F7F7] p-7">
           <form onSubmit={handleSearch}>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr_1fr_auto]">
               <div className="relative">
@@ -220,11 +224,11 @@ return (
               </select>
 
               <select
-                value={ville}
-                onChange={(e) => setVille(e.target.value)}
+                value={wilaya}
+                onChange={(e) => setWilaya(e.target.value)}
                 className="h-13 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-600 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-500/10"
               >
-                {villesOptions.map((option) => (
+                {wilayasOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
                   </option>
@@ -417,7 +421,7 @@ function MedecinCard({ medecin, onClick }) {
     medecin.experiences?.[0]?.nomEtablissement ||
     "Lieu d’exercice non renseigné";
 
-  const ville = medecin.villeExercice || medecin.ville || null;
+  const wilaya = medecin.wilayaExercice || null;
 
   return (
     <motion.article
@@ -468,10 +472,10 @@ function MedecinCard({ medecin, onClick }) {
             <span className="line-clamp-1">{workplace}</span>
           </div>
 
-          {ville && (
+          {wilaya && (
             <div className="flex items-center gap-3">
               <MapPin size={16} className="text-slate-400" />
-              <span>{ville}, Mauritanie</span>
+              <span>{wilaya}</span>
             </div>
           )}
         </div>

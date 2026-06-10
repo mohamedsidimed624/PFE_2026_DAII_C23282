@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/public/annuaire")
-@CrossOrigin(origins = "http://localhost:5173")
 public class PublicAnnuaireController {
 
     private final PublicAnnuaireService publicAnnuaireService;
@@ -23,20 +22,18 @@ public class PublicAnnuaireController {
             @RequestParam(required = false) String prenom,
             @RequestParam(required = false) String numeroInscription,
             @RequestParam(required = false) String specialite,
-            @RequestParam(required = false) String ville,
+            @RequestParam(required = false) String wilaya,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size,
             @RequestParam(defaultValue = "alpha") String sort
 
     ) {
-        System.out.println("specialite = " + specialite);
-        System.out.println("ville = " + ville);
         return publicAnnuaireService.searchMedecins(
                 nom,
                 prenom,
                 numeroInscription,
                 specialite,
-                ville,
+                wilaya,
                 page,
                 size,
                 sort

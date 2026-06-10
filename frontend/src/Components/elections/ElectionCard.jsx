@@ -94,7 +94,7 @@ export default function ElectionCard({ e, index = 0 }) {
           {canCandidater && (
             <button
               onClick={(ev) => { ev.stopPropagation(); navigate(`/medecin/elections/${e.id}/candidater`); }}
-              className="rounded-xl bg-blue-700 px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-800 transition whitespace-nowrap"
+              className="rounded-xl bg-blue-600 px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700 transition whitespace-nowrap"
             >
               Candidater
             </button>
@@ -102,7 +102,7 @@ export default function ElectionCard({ e, index = 0 }) {
           {canVote && (
             <button
               onClick={(ev) => { ev.stopPropagation(); navigate(`/medecin/elections/${e.id}/voter`); }}
-              className="rounded-xl bg-[#16A34A] px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-[#15803d] transition whitespace-nowrap"
+              className="rounded-xl bg-green-600 px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-green-700 transition whitespace-nowrap"
             >
               Voter
             </button>
@@ -110,7 +110,7 @@ export default function ElectionCard({ e, index = 0 }) {
           {hasResultats && (
             <button
               onClick={(ev) => { ev.stopPropagation(); navigate(`/medecin/elections/${e.id}/resultats`); }}
-              className="rounded-xl bg-amber-600 px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-amber-700 transition whitespace-nowrap"
+              className="rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition whitespace-nowrap"
             >
               Résultats
             </button>

@@ -6,13 +6,13 @@ import com.onmm.backend.dto.Admin.ApproveRequest;
 import com.onmm.backend.dto.Admin.RejectRequest;
 import com.onmm.backend.entity.enums.SectionOrdre;
 import com.onmm.backend.service.Admin.AdminDemandeService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/demandes")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AdminDemandeController {
 
     private final AdminDemandeService adminService;
@@ -40,7 +40,7 @@ public class AdminDemandeController {
     }
 
     @PutMapping("/{id}/reject")
-    public void rejectDemande(@PathVariable Long id, @RequestBody RejectRequest request) {
+    public void rejectDemande(@PathVariable Long id, @Valid @RequestBody RejectRequest request) {
         adminService.rejectDemande(id, request.getAdminComment());
     }
 }

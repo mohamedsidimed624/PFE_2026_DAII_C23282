@@ -242,12 +242,7 @@ export default function MultistepForm() {
             </div>
           </div>
 
-          <div className="mt-8 text-center text-sm text-slate-500">
-            Besoin d'aide ?{" "}
-            <span className="font-bold uppercase text-green-700">
-              Contacter l'administration
-            </span>
-          </div>
+          
         </div>
       </div>
     </div>

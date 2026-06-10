@@ -5,6 +5,7 @@ import com.onmm.backend.dto.Admin.ChangePasswordRequest;
 import com.onmm.backend.dto.Admin.UpdateAdminProfileRequest;
 import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.service.Admin.AdminProfileService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/profile")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AdminProfileController {
 
     private final AdminProfileService adminProfileService;
@@ -32,7 +32,7 @@ public class AdminProfileController {
     @PutMapping("/me")
     public ResponseEntity<AdminProfileResponse> updateMyProfile(
             Authentication authentication,
-            @RequestBody UpdateAdminProfileRequest request) {
+            @Valid @RequestBody UpdateAdminProfileRequest request) {
         String email = ((UserPrincipal) authentication.getPrincipal()).getUsername();
         return ResponseEntity.ok(adminProfileService.updateMyProfile(email, request));
     }
@@ -49,7 +49,7 @@ public class AdminProfileController {
     @PutMapping("/me/password")
     public ResponseEntity<Void> changePassword(
             Authentication authentication,
-            @RequestBody ChangePasswordRequest request) {
+            @Valid @RequestBody ChangePasswordRequest request) {
         String email = ((UserPrincipal) authentication.getPrincipal()).getUsername();
         adminProfileService.changePassword(email, request);
         return ResponseEntity.ok().build();

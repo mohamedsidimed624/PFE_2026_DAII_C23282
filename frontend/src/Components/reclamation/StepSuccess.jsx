@@ -42,7 +42,7 @@ export default function StepSuccess({ data, categoryMap, receipt }) {
           <p className="mt-2 font-mono text-2xl font-bold text-slate-900">
             {receipt.numeroReclamation}
           </p>
-          <p className="mt-1 text-xs text-slate-400">Conservez ce numéro pour suivre votre dossier.</p>
+          {/* <p className="mt-1 text-xs text-slate-400">Conservez ce numéro pour suivre votre dossier.</p> */}
         </div>
       )}
 
@@ -52,7 +52,7 @@ export default function StepSuccess({ data, categoryMap, receipt }) {
           <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Récapitulatif</p>
         </div>
         <div className="px-4 py-1">
-          <Row label="Nom complet"  value={`${data.prenom} ${data.nom}`.trim()} />
+          <Row label="Nom complet"  value={`${data.nom} ${data.prenom}`.trim()} />
           <Row label="Email"        value={data.email} />
           <Row label="Catégorie"    value={categoryMap.get(data.categorie)} />
           <Row label="Objet"        value={data.objet} />

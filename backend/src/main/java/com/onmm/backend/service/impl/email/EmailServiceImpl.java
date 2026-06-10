@@ -1,6 +1,7 @@
 package com.onmm.backend.service.impl.email;
 
 import com.onmm.backend.service.email.EmailService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
+
+    @Value("${app.contact-email:contact@ordre-medecins.mr}")
+    private String contactEmail;
 
     public EmailServiceImpl(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -149,6 +153,24 @@ public class EmailServiceImpl implements EmailService {
                 "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.\n\n" +
                 "Cordialement,\n" +
                 "ONMM"
+        );
+        mailSender.send(message);
+    }
+
+    @Override
+    @Async
+    public void sendContactMessage(String fromName, String fromEmail, String fromPhone, String sujet, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(contactEmail);
+        message.setReplyTo(fromEmail);
+        message.setSubject(sujet);
+        message.setText(
+                "Nouveau message de contact reçu via le site de l'ONMM.\n\n" +
+                "De : " + fromName + "\n" +
+                "Email : " + fromEmail + "\n" +
+                (fromPhone != null && !fromPhone.isBlank() ? "Téléphone : " + fromPhone + "\n" : "") +
+                "\nMessage :\n" + body + "\n\n" +
+                "---\nCe message a été envoyé depuis le formulaire de contact du site ONMM."
         );
         mailSender.send(message);
     }

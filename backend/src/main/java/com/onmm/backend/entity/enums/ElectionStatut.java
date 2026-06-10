@@ -6,7 +6,6 @@ public enum ElectionStatut {
     VALIDATION_CANDIDATURES,
     VOTE_EN_COURS,
     DEPOUILLEMENT,
-    TERMINEE,
     RESULTATS_PUBLIES,
     ARCHIVEE,
     ANNULEE

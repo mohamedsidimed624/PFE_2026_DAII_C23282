@@ -9,5 +9,5 @@ public class PublicMedecinSearchRequest {
     private String prenom;
     private String numeroInscription;
     private String specialite;
-    private String ville;
+    private String wilaya;
 }

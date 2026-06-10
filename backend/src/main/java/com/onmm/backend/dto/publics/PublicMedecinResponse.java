@@ -12,7 +12,7 @@ public class PublicMedecinResponse {
     private String nom;
     private String prenom;
     private String numeroInscription;
-    private String villeExercice;
+    private String wilayaExercice;
     private String structureExercice;
     private String photoProfilPath;
 

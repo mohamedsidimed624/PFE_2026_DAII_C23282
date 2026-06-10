@@ -1,8 +1,10 @@
 package com.onmm.backend.controller.Admin;
 
 import com.onmm.backend.dto.election.*;
+import com.onmm.backend.dto.election.VoteIntegrityReportDto;
 import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.service.Admin.ElectionService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +16,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/elections")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AdminElectionController {
 
     private final ElectionService electionService;
@@ -48,7 +49,7 @@ public class AdminElectionController {
 
     @PostMapping
     public ResponseEntity<ElectionDetailDto> createElection(
-            @RequestBody ElectionCreateRequest req,
+            @Valid @RequestBody ElectionCreateRequest req,
             Authentication auth
     ) {
         ElectionDetailDto dto = electionService.createElection(req, currentEmail(auth));
@@ -58,7 +59,7 @@ public class AdminElectionController {
     @PutMapping("/{id}")
     public ElectionDetailDto updateElection(
             @PathVariable Long id,
-            @RequestBody ElectionCreateRequest req
+            @Valid @RequestBody ElectionCreateRequest req
     ) {
         return electionService.updateElection(id, req);
     }
@@ -100,15 +101,6 @@ public class AdminElectionController {
             Authentication auth
     ) {
         electionService.cloturerVotes(id, currentEmail(auth));
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/{id}/terminer-depouillement")
-    public ResponseEntity<Void> terminerDepouillement(
-            @PathVariable Long id,
-            Authentication auth
-    ) {
-        electionService.terminerDepouillement(id, currentEmail(auth));
         return ResponseEntity.noContent().build();
     }
 
@@ -173,7 +165,7 @@ public class AdminElectionController {
     public ResponseEntity<Void> rejeterCandidature(
             @PathVariable Long id,
             @PathVariable Long cid,
-            @RequestBody CandidatureRejectionRequest req,
+            @Valid @RequestBody CandidatureRejectionRequest req,
             Authentication auth
     ) {
         electionService.rejeterCandidature(
@@ -197,7 +189,7 @@ public class AdminElectionController {
     @PostMapping("/{id}/positions")
     public ResponseEntity<PositionElectoraleDto> addPosition(
             @PathVariable Long id,
-            @RequestBody PositionElectoraleRequest req
+            @Valid @RequestBody PositionElectoraleRequest req
     ) {
         PositionElectoraleDto dto = electionService.addPosition(id, req);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
@@ -224,5 +216,10 @@ public class AdminElectionController {
     @GetMapping("/{id}/audit")
     public List<ElectionAuditLogDto> getAuditLog(@PathVariable Long id) {
         return electionService.getAuditLog(id);
+    }
+
+    @GetMapping("/{id}/verify-integrity")
+    public VoteIntegrityReportDto verifyIntegrity(@PathVariable Long id) {
+        return electionService.verifyVoteIntegrity(id);
     }
 }

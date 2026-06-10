@@ -1,45 +1,35 @@
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import PublicHero from "../components/public/PublicHero";
 import {
-  Info, Target, Scale, BookOpen, Users, Award,
+  Target, Scale, BookOpen, Users, Award,
   ShieldCheck, Stethoscope, Globe, ChevronRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import Breadcrumb from "../components/public/Breadcrumb";
 
 const VALUES = [
-  { icon: ShieldCheck, title: "Déontologie",    desc: "Garantir l'application stricte du code de déontologie médicale en Mauritanie.",             color: "bg-green-50 text-green-600" },
-  { icon: Scale,       title: "Indépendance",   desc: "Exercer notre mission sans ingérence politique ou commerciale.",                              color: "bg-blue-50 text-blue-600" },
-  { icon: Users,       title: "Solidarité",     desc: "Soutenir les médecins membres, défendre leurs droits et promouvoir leur bien-être.",         color: "bg-purple-50 text-purple-600" },
-  { icon: Globe,       title: "Excellence",     desc: "Promouvoir une médecine de qualité en encourageant la formation continue et l'innovation.",  color: "bg-amber-50 text-amber-600" },
+  { icon: ShieldCheck, title: "Déontologie",  desc: "Garantir l'application stricte du code de déontologie médicale en Mauritanie.",            color: "bg-green-50 text-green-600" },
+  { icon: Scale,       title: "Indépendance", desc: "Exercer notre mission sans ingérence politique ou commerciale.",                             color: "bg-blue-50 text-blue-600" },
+  { icon: Users,       title: "Solidarité",   desc: "Soutenir les médecins membres, défendre leurs droits et promouvoir leur bien-être.",        color: "bg-purple-50 text-purple-600" },
+  { icon: Globe,       title: "Excellence",   desc: "Promouvoir une médecine de qualité en encourageant la formation continue et l'innovation.", color: "bg-amber-50 text-amber-600" },
 ];
 
 const MISSIONS = [
-  "Veiller au respect des règles déontologiques par les médecins membres",
-  "Instruire les plaintes et réclamations concernant des actes médicaux",
-  "Tenir et mettre à jour l'annuaire des médecins autorisés à exercer",
-  "Représenter la profession médicale auprès des institutions nationales",
-  "Organiser des formations continues pour le développement des compétences",
-  "Délivrer et gérer les autorisations d'exercice de la médecine",
+  "Veiller au respect des règles déontologiques et éthiques de la profession médicale",
+  "Instruire les plaintes et réclamations déontologiques via le Conseil de Discipline",
+  "Tenir à jour le tableau de l'Ordre et délivrer les autorisations d'exercice",
+  "Représenter la profession auprès des pouvoirs publics et institutions nationales",
+  "Défendre l'indépendance et l'honneur de la profession médicale",
+  "Œuvrer au développement de la médecine et à la formation continue des praticiens",
 ];
 
 const COUNCIL = [
-  { name: "Pr. Mohamed Ould Salem",    role: "Président",             initials: "MS" },
-  { name: "Dr. Fatima Mint Ahmed",     role: "Vice-Présidente",       initials: "FA" },
-  { name: "Dr. Hamoud Ould Bilal",     role: "Secrétaire Général",    initials: "HB" },
-  { name: "Dr. Mariam Bint Cheikh",    role: "Trésorière",            initials: "MC" },
-  { name: "Dr. Sidi Ould Moussa",      role: "Membre du Conseil",     initials: "SM" },
-  { name: "Dr. Aminetou Mint Yahya",   role: "Membre du Conseil",     initials: "AY" },
-];
-
-const HISTORY = [
-  { year: "1999", event: "Création de l'Ordre National des Médecins de Mauritanie par décret" },
-  { year: "2003", event: "Adoption du premier code de déontologie médicale national" },
-  { year: "2010", event: "Lancement du registre électronique des médecins" },
-  { year: "2018", event: "Réforme des statuts et modernisation de la gouvernance" },
-  { year: "2023", event: "Lancement de la plateforme numérique de services aux médecins" },
+  { initials: "AG", role: "Assemblée Générale",     desc: "Organe suprême de l'Ordre — réunit l'ensemble des médecins inscrits",                               color: "bg-green-600" },
+  { initials: "CN", role: "Conseil National",        desc: "25 membres élus : 10 (Section A) · 6 (Section B) · 6 (Section C) · 3 (wilayas intérieures)",       color: "bg-blue-600" },
+  { initials: "BE", role: "Bureau Exécutif",         desc: "Élu par le Conseil National — mandat de 4 ans renouvelable, 8 fonctions dont le Président et le VP", color: "bg-purple-600" },
+  { initials: "CS", role: "Conseils de Section",     desc: "Trois sections : A (généralistes), B (spécialistes), C (enseignants-chercheurs)",                    color: "bg-slate-500" },
+  { initials: "CD", role: "Conseil de Discipline",   desc: "Instruit les plaintes déontologiques et prononce les sanctions disciplinaires",                       color: "bg-slate-600" },
 ];
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.45 } } };
@@ -52,12 +42,23 @@ export default function AProposPage() {
 
       <Breadcrumb items={[{ label: "Accueil", to: "/" }, { label: "À propos" }]} />
 
-      <PublicHero
-        badgeIcon={Info}
-        badgeText="À propos · ONMM"
-        title="L'Ordre National des Médecins de Mauritanie"
-        subtitle="Institution régulatrice de la profession médicale en Mauritanie, garante de l'éthique et de la qualité des soins depuis 1999."
-      />
+      {/* ── Page header ── */}
+      <section className="bg-white border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-6 py-10">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="h-px w-10 bg-green-600" />
+            <span className="text-xs font-bold uppercase tracking-widest text-green-600">À propos · ONMM</span>
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+            L'Ordre National des Médecins de Mauritanie
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+            Organisme d'utilité publique institué par Décret N° 2019-077 du 25 Avril 2019,
+            garant de l'éthique médicale et de la qualité des soins en Mauritanie.
+          </p>
+        </div>
+        <div className="h-px bg-linear-to-r from-green-500 via-emerald-300 to-transparent" />
+      </section>
 
       {/* ── Mission ── */}
       <section className="mx-auto max-w-6xl px-6 py-16">
@@ -74,9 +75,11 @@ export default function AProposPage() {
               Réguler, protéger, former
             </h2>
             <p className="mt-4 text-base leading-7 text-slate-600">
-              L'ONMM est l'organe représentatif et régulateur de la profession médicale en Mauritanie.
-              Institué par la loi, il a pour vocation de garantir le respect de l'éthique médicale,
-              de protéger les patients et de défendre les droits légitimes des praticiens.
+              L'ONMM est l'organe représentatif et régulateur de la profession médicale en Mauritanie,
+              institué par Décret N° 2019-077 du 25 Avril 2019. Organisme d'utilité publique doté
+              de la personnalité morale et de l'autonomie financière, il a pour mission de garantir
+              le respect de l'éthique médicale, de protéger les patients et de défendre les droits
+              légitimes des praticiens.
             </p>
             <ul className="mt-6 space-y-3">
               {MISSIONS.map((m) => (
@@ -92,27 +95,27 @@ export default function AProposPage() {
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="bg-gradient-to-r from-green-600 to-green-500 px-6 py-5 text-white">
                 <Stethoscope size={28} className="mb-2 text-white/70" />
-                <p className="text-xl font-extrabold">+3 500</p>
-                <p className="text-sm text-white/80">Médecins inscrits à l'Ordre</p>
+                <p className="text-xl font-extrabold">25</p>
+                <p className="text-sm text-white/80">Membres élus au Conseil National de l'Ordre</p>
               </div>
               <div className="grid grid-cols-2 divide-x divide-slate-100">
                 <div className="px-6 py-4">
-                  <p className="text-2xl font-extrabold text-slate-900">25+</p>
-                  <p className="text-xs text-slate-500">Années d'existence</p>
+                  <p className="text-2xl font-extrabold text-slate-900">3</p>
+                  <p className="text-xs text-slate-500">Sections (A · B · C)</p>
                 </div>
                 <div className="px-6 py-4">
-                  <p className="text-2xl font-extrabold text-slate-900">13</p>
-                  <p className="text-xs text-slate-500">Wilayas couvertes</p>
+                  <p className="text-2xl font-extrabold text-slate-900">5</p>
+                  <p className="text-xs text-slate-500">Organes de gouvernance</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 divide-x divide-y divide-slate-100 border-t border-slate-100">
                 <div className="px-6 py-4">
-                  <p className="text-2xl font-extrabold text-slate-900">40+</p>
-                  <p className="text-xs text-slate-500">Spécialités médicales</p>
+                  <p className="text-2xl font-extrabold text-slate-900">8</p>
+                  <p className="text-xs text-slate-500">Fonctions du Bureau Exécutif</p>
                 </div>
                 <div className="px-6 py-4">
-                  <p className="text-2xl font-extrabold text-slate-900">200+</p>
-                  <p className="text-xs text-slate-500">Dossiers traités / an</p>
+                  <p className="text-2xl font-extrabold text-slate-900">4 ans</p>
+                  <p className="text-xs text-slate-500">Durée du mandat (renouvelable)</p>
                 </div>
               </div>
             </div>
@@ -157,7 +160,7 @@ export default function AProposPage() {
         </div>
       </section>
 
-      {/* ── History ── */}
+      {/* ── Founding act ── */}
       <section className="mx-auto max-w-6xl px-6 py-16">
         <motion.div
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}
@@ -165,30 +168,29 @@ export default function AProposPage() {
         >
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-sm font-semibold text-amber-700">
             <BookOpen size={14} />
-            Notre histoire
+            Acte fondateur
           </div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Moments clés</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Texte constitutif</h2>
         </motion.div>
 
         <motion.div
-          className="relative space-y-0 pl-8 before:absolute before:left-3 before:top-2 before:h-[calc(100%-1rem)] before:w-px before:bg-slate-200"
-          variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
+          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.1 }}
+          className="flex items-start gap-5 rounded-2xl border border-green-200 bg-green-50 p-6 shadow-sm"
         >
-          {HISTORY.map((h, i) => (
-            <motion.div key={h.year} variants={fadeUp} className="relative pb-8 last:pb-0">
-              <div className="absolute -left-5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-green-500 bg-white">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
-              </div>
-              <div className="ml-4 flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                <span className="shrink-0 rounded-lg bg-green-50 px-3 py-1 text-xs font-bold text-green-700">{h.year}</span>
-                <p className="text-sm text-slate-700">{h.event}</p>
-              </div>
-            </motion.div>
-          ))}
+          <span className="shrink-0 rounded-xl bg-green-600 px-4 py-2 text-sm font-extrabold text-white">2019</span>
+          <div>
+            <p className="text-sm font-bold text-slate-900">Décret N° 2019-077 du 25 Avril 2019</p>
+            <p className="mt-1.5 text-sm leading-6 text-slate-600">
+              Fixant les conditions d'organisation et de fonctionnement de l'Ordre National des Médecins
+              de Mauritanie — organisme d'utilité publique doté de la personnalité morale et de
+              l'autonomie financière, dont l'adhésion est obligatoire pour tout médecin exerçant
+              sur le territoire mauritanien.
+            </p>
+          </div>
         </motion.div>
       </section>
 
-      {/* ── Council ── */}
+      {/* ── Governance structure ── */}
       <section className="border-t border-slate-200 bg-white py-16">
         <div className="mx-auto max-w-6xl px-6">
           <motion.div
@@ -199,27 +201,25 @@ export default function AProposPage() {
               <Users size={14} />
               Gouvernance
             </div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Le Conseil de l'Ordre</h2>
-            <p className="mt-2 text-sm text-slate-500">Membres élus pour représenter et diriger l'institution</p>
+            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Structure de l'Ordre</h2>
+            <p className="mt-2 text-sm text-slate-500">Les cinq organes définis par le Décret N° 2019-077 (Art. 4)</p>
           </motion.div>
 
           <motion.div
             className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
             variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
           >
-            {COUNCIL.map((member, i) => (
+            {COUNCIL.map((organ) => (
               <motion.div
-                key={member.name} variants={fadeUp}
-                className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+                key={organ.role} variants={fadeUp}
+                className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
               >
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
-                  i === 0 ? "bg-green-600" : i === 1 ? "bg-blue-600" : "bg-slate-500"
-                }`}>
-                  {member.initials}
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${organ.color}`}>
+                  {organ.initials}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-slate-900">{member.name}</p>
-                  <p className="text-xs text-slate-500">{member.role}</p>
+                  <p className="text-sm font-bold text-slate-900">{organ.role}</p>
+                  <p className="mt-0.5 text-xs leading-5 text-slate-500">{organ.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -244,10 +244,9 @@ export default function AProposPage() {
           </div>
           <div className="divide-y divide-slate-100">
             {[
-              { ref: "Loi N° 93-08",     desc: "Relative à l'exercice de la médecine en Mauritanie" },
-              { ref: "Décret N° 99-152", desc: "Portant création de l'Ordre National des Médecins" },
-              { ref: "Code de déontologie médicale", desc: "Adopté en 2003, régissant les devoirs et droits des médecins" },
-              { ref: "Règlement intérieur", desc: "Fixant les modalités de fonctionnement du Conseil de l'Ordre" },
+              { ref: "Décret N° 2019-077",          desc: "Du 25 Avril 2019 — fixant les conditions d'organisation et de fonctionnement de l'ONMM" },
+              { ref: "Code de déontologie médicale", desc: "Régissant les devoirs et droits des médecins membres de l'Ordre" },
+              { ref: "Règlement intérieur",          desc: "Fixant les modalités de fonctionnement du Conseil de l'Ordre" },
             ].map((t) => (
               <div key={t.ref} className="flex items-start gap-4 px-6 py-4 transition hover:bg-slate-50">
                 <span className="mt-0.5 shrink-0 rounded-lg bg-green-50 px-2.5 py-1 text-[10px] font-bold text-green-700">{t.ref}</span>

@@ -1,8 +1,20 @@
 package com.onmm.backend.service.impl.Admin;
 
+import com.onmm.backend.exception.BusinessException;
+import com.onmm.backend.exception.ForbiddenException;
+import com.onmm.backend.exception.ResourceNotFoundException;
 import com.onmm.backend.dto.Admin.specialite.AdminSpecialiteDetailResponse;
+import com.onmm.backend.exception.BusinessException;
+import com.onmm.backend.exception.ForbiddenException;
+import com.onmm.backend.exception.ResourceNotFoundException;
 import com.onmm.backend.dto.Admin.specialite.AdminSpecialiteResponse;
+import com.onmm.backend.exception.BusinessException;
+import com.onmm.backend.exception.ForbiddenException;
+import com.onmm.backend.exception.ResourceNotFoundException;
 import com.onmm.backend.dto.Admin.specialite.AdminSousSpecialiteResponse;
+import com.onmm.backend.exception.BusinessException;
+import com.onmm.backend.exception.ForbiddenException;
+import com.onmm.backend.exception.ResourceNotFoundException;
 import com.onmm.backend.dto.Admin.specialite.SpecialiteRequest;
 import com.onmm.backend.entity.Specialite;
 import com.onmm.backend.mapper.SpecialiteAdminMapper;
@@ -92,7 +104,7 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
     @Transactional(readOnly = true)
     public AdminSpecialiteDetailResponse getSpecialiteById(Long id) {
         Specialite specialite = specialiteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Spécialité introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Spécialité introuvable"));
 
         long nombreSousSpecialites = sousSpecialiteRepository.countBySpecialiteId(id);
         long nombreMedecins = medecinEducationRepository.countBySpecialiteId(id);
@@ -147,7 +159,7 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
         validateSpecialiteRequest(request);
 
         Specialite specialite = specialiteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Spécialité introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Spécialité introuvable"));
 
         if (specialiteRepository.existsByCodeIgnoreCaseAndIdNot(request.getCode().trim(), id)) {
             throw new RuntimeException("Le code de spécialité existe déjà.");
@@ -172,7 +184,7 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
     @Override
     public void toggleSpecialiteStatus(Long id) {
         Specialite specialite = specialiteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Spécialité introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Spécialité introuvable"));
 
         specialite.setActive(!specialite.isActive());
         specialiteRepository.save(specialite);
@@ -181,7 +193,7 @@ public class AdminSpecialiteServiceImpl implements AdminSpecialiteService {
     @Override
     public void deleteSpecialite(Long id) {
         Specialite specialite = specialiteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Spécialité introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Spécialité introuvable"));
 
         if (!canDeleteSpecialite(id)) {
             throw new RuntimeException("Impossible de supprimer cette spécialité car elle est utilisée ou possède des sous-spécialités.");

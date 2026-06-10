@@ -4,6 +4,7 @@ import com.onmm.backend.dto.Admin.specialite.AdminSpecialiteDetailResponse;
 import com.onmm.backend.dto.Admin.specialite.AdminSpecialiteResponse;
 import com.onmm.backend.dto.Admin.specialite.SpecialiteRequest;
 import com.onmm.backend.service.Admin.AdminSpecialiteService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -63,14 +64,14 @@ public class AdminSpecialiteController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AdminSpecialiteResponse createSpecialite(@RequestBody SpecialiteRequest request) {
+    public AdminSpecialiteResponse createSpecialite(@Valid @RequestBody SpecialiteRequest request) {
         return adminSpecialiteService.createSpecialite(request);
     }
 
     @PutMapping("/{id}")
     public AdminSpecialiteResponse updateSpecialite(
             @PathVariable Long id,
-            @RequestBody SpecialiteRequest request
+            @Valid @RequestBody SpecialiteRequest request
     ) {
         return adminSpecialiteService.updateSpecialite(id, request);
     }

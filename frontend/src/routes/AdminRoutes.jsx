@@ -17,7 +17,6 @@ import AdminSondageDetailPage from "../pages/admin/AdminSondageDetailPage";
 import AdminElectionsPage from "../pages/admin/AdminElectionsPage";
 import AdminElectionCreationPage from "../pages/admin/AdminElectionCreationPage";
 import AdminElectionDetailPage from "../pages/admin/AdminElectionDetailPage";
-import AdminCandidaturesPage from "../pages/admin/AdminCandidaturesPage";
 import AdminElectionCandidatesPage from "../pages/admin/AdminElectionCandidatesPage";
 
 
@@ -54,7 +53,6 @@ function AdminRoutes() {
       <Route path="processus/elections/:id/modifier" element={<AdminElectionCreationPage />} />
       <Route path="processus/elections/:id" element={<AdminElectionDetailPage />} />
       <Route path="processus/elections/:id/candidats" element={<AdminElectionCandidatesPage />} />
-      <Route path="processus/candidats" element={<AdminCandidaturesPage />} />
     </Routes>
   );
 }

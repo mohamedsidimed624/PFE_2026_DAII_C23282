@@ -5,6 +5,8 @@ import com.onmm.backend.entity.enums.StatutCandidature;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,10 @@ public interface CandidatureRepository extends JpaRepository<Candidature, Long> 
     );
 
     List<Candidature> findByElectionId(Long electionId);
+
+    @Query("SELECT COUNT(c) FROM Candidature c WHERE c.election.id = :electionId AND c.statut IN :statuts")
+    long countByElectionIdAndStatutIn(@Param("electionId") Long electionId,
+                                      @Param("statuts") List<StatutCandidature> statuts);
     List<Candidature> findByElectionIdAndStatut(Long electionId, StatutCandidature statut);
     Optional<Candidature> findByElectionIdAndMedecinEmail(Long electionId, String email);
     long countByElectionIdAndStatut(Long electionId, StatutCandidature statut);

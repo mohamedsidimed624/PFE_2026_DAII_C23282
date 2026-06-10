@@ -3,6 +3,9 @@ package com.onmm.backend.service.impl;
 import com.lowagie.text.*;
 import com.lowagie.text.Font;
 import com.lowagie.text.pdf.*;
+import com.onmm.backend.exception.BusinessException;
+import com.onmm.backend.exception.ForbiddenException;
+import com.onmm.backend.exception.ResourceNotFoundException;
 import com.onmm.backend.dto.medecin.*;
 import com.onmm.backend.entity.*;
 import com.onmm.backend.repository.*;
@@ -65,7 +68,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public MedecinProfileResponse getMyProfile(String email) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Profil médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Profil médecin introuvable"));
         return mapToResponse(medecin);
     }
 
@@ -73,7 +76,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public MedecinProfileResponse updateMyProfile(String email, UpdateMedecinProfileRequest request) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         medecin.setNom(request.getNom());
         medecin.setPrenom(request.getPrenom());
@@ -107,7 +110,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public String updateMyPhoto(String email, MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new RuntimeException("Aucun fichier envoyé");
+            throw new BusinessException("Aucun fichier envoyé");
         }
 
         String contentType = file.getContentType();
@@ -115,11 +118,11 @@ public class MedecinServiceImpl implements MedecinService {
                 (!contentType.equals("image/jpeg")
                         && !contentType.equals("image/png")
                         && !contentType.equals("image/webp"))) {
-            throw new RuntimeException("Format d'image non supporté");
+            throw new BusinessException("Format d'image non supporté");
         }
 
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         try {
             Path uploadPath = Paths.get(uploadDir, "profiles");
@@ -150,7 +153,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public List<MedecinEducationDto> getEducations(String email) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
         return medecin.getEducations().stream().map(this::mapEducation).toList();
     }
 
@@ -158,7 +161,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public MedecinEducationDto addEducation(String email, AddMedecinEducationRequest request) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         MedecinEducation edu = new MedecinEducation();
         edu.setMedecin(medecin);
@@ -185,11 +188,11 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public void deleteEducation(String email, Long educationId) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
         MedecinEducation edu = educationRepository.findById(educationId)
-                .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Formation introuvable"));
         if (!edu.getMedecin().getId().equals(medecin.getId())) {
-            throw new RuntimeException("Accès refusé");
+            throw new ForbiddenException("Accès refusé.");
         }
         educationRepository.delete(edu);
     }
@@ -200,7 +203,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public List<MedecinExperienceDto> getExperiences(String email) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
         return medecin.getExperiences().stream().map(this::mapExperience).toList();
     }
 
@@ -208,7 +211,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public MedecinExperienceDto addExperience(String email, AddMedecinExperienceRequest request) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         MedecinExperience exp = new MedecinExperience();
         exp.setMedecin(medecin);
@@ -230,11 +233,11 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public void deleteExperience(String email, Long experienceId) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
         MedecinExperience exp = experienceRepository.findById(experienceId)
-                .orElseThrow(() -> new RuntimeException("Expérience introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expérience introuvable"));
         if (!exp.getMedecin().getId().equals(medecin.getId())) {
-            throw new RuntimeException("Accès refusé");
+            throw new ForbiddenException("Accès refusé.");
         }
         experienceRepository.delete(exp);
     }
@@ -245,17 +248,17 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public List<MedecinDocumentDto> getDocuments(String email) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
         return medecin.getDocuments().stream().map(this::mapDocument).toList();
     }
 
     @Override
     @Transactional
     public MedecinDocumentDto uploadDocument(String email, String typeDocument, String categorie, MultipartFile file) {
-        if (file == null || file.isEmpty()) throw new RuntimeException("Aucun fichier envoyé");
+        if (file == null || file.isEmpty()) throw new BusinessException("Aucun fichier envoyé");
 
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         try {
             Path uploadPath = Paths.get(uploadDir, "documents", "medecin_" + medecin.getId());
@@ -290,11 +293,11 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public void deleteDocument(String email, Long documentId) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
         MedecinDocument doc = documentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Document introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Document introuvable"));
         if (!doc.getMedecin().getId().equals(medecin.getId())) {
-            throw new RuntimeException("Accès refusé");
+            throw new ForbiddenException("Accès refusé.");
         }
         documentRepository.delete(doc);
     }
@@ -375,7 +378,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public byte[] generateCertificat(String email) {
         Medecin medecin = medecinRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         String specialite = medecin.getEducations().stream()
                 .filter(e -> e.getSpecialite() != null)

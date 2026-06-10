@@ -4,13 +4,13 @@ import com.onmm.backend.dto.Admin.AdminMedecinDetailResponse;
 import com.onmm.backend.dto.Admin.AdminMedecinListResponse;
 import com.onmm.backend.dto.Admin.SuspendMedecinRequest;
 import com.onmm.backend.service.Admin.AdminMedecinService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/medecins")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AdminMedecinController {
 
     private final AdminMedecinService adminMedecinService;
@@ -30,7 +30,7 @@ public class AdminMedecinController {
     }
 
     @PutMapping("/{id}/suspend")
-    public void suspendMedecin(@PathVariable Long id, @RequestBody SuspendMedecinRequest request) {
+    public void suspendMedecin(@PathVariable Long id, @Valid @RequestBody SuspendMedecinRequest request) {
         adminMedecinService.suspendMedecin(id, request.getAdminComment());
     }
 

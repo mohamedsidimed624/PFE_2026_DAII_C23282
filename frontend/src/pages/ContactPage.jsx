@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { createContactMessage } from "../services/contactApi";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Breadcrumb from "../components/public/Breadcrumb";
@@ -38,10 +39,30 @@ const BREADCRUMB = [{ label: "Accueil", to: "/" }, { label: "Contact" }];
 export default function ContactPage() {
   const [form, setForm]           = useState({ nom: "", email: "", telephone: "", sujet: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState("");
 
   const onChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
-  const onSubmit = (e) => { e.preventDefault(); setSubmitted(true); };
-  const onReset  = () => { setSubmitted(false); setForm({ nom: "", email: "", telephone: "", sujet: "", message: "" }); };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      await createContactMessage(form);
+      setSubmitted(true);
+    } catch {
+      setError("Une erreur est survenue. Veuillez réessayer ou nous contacter directement par email.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onReset = () => {
+    setSubmitted(false);
+    setError("");
+    setForm({ nom: "", email: "", telephone: "", sujet: "", message: "" });
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -216,10 +237,17 @@ export default function ContactPage() {
                       className={`${inp} resize-none`} />
                   </Field>
 
-                  <button type="submit"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-green-700 active:scale-[.99] transition-all">
+                  {error && (
+                    <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                      <AlertCircle size={15} className="mt-0.5 shrink-0 text-red-600" />
+                      <p className="text-sm text-red-700">{error}</p>
+                    </div>
+                  )}
+
+                  <button type="submit" disabled={loading}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-green-700 active:scale-[.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <Send size={14} />
-                    Envoyer le message
+                    {loading ? "Envoi en cours…" : "Envoyer le message"}
                   </button>
 
                   <p className="text-center text-xs text-slate-400">

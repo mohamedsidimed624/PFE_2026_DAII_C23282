@@ -1,6 +1,6 @@
 package com.onmm.backend.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,13 +13,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -32,52 +28,43 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtFilter jwtFilter;
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
 
+    private final JwtFilter jwtFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final UserDetailsService userDetailsService;
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtFilter jwtFilter) {
-
+    public SecurityConfig(UserDetailsService userDetailsService, JwtFilter jwtFilter,
+                          RateLimitFilter rateLimitFilter) {
         this.userDetailsService = userDetailsService;
         this.jwtFilter = jwtFilter;
+        this.rateLimitFilter = rateLimitFilter;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                //.csrf(csrf -> csrf.disable())
-                .csrf(customizer -> customizer.disable())
-                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/medecin/**").hasRole("MEDECIN")
-
-
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/set-password").permitAll()
-                        .requestMatchers("/api/auth/activate").permitAll()
-
                         .requestMatchers("/api/demandes/**").permitAll()
-                        .requestMatchers("/api/reference/specialites", "/api/reference/specialites/**").permitAll()
-                        .requestMatchers("/api/reference/sous_specialites", "/api/reference/sous_specialites/**").permitAll()
+                        .requestMatchers("/api/reference/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
-
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/medecin/**").hasRole("MEDECIN")
-
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -85,37 +72,29 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
+        // passwordEncoder() est intercepté par le proxy CGLIB — retourne le singleton
+        provider.setPasswordEncoder(passwordEncoder());
         return provider;
-
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
-
     }
-
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//
-//        UserDetails user1 = User
-//                .withDefaultPasswordEncoder()
-//                .username("med")
-//                .password("m@123")
-//                .roles("ADMIN")
-//                .build();
-//
-//        return new InMemoryUserDetailsManager(user1);
-//    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(frontendUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin",
+                "X-Requested-With"
+        ));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

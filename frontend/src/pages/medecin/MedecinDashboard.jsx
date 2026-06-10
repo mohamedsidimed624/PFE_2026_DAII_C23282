@@ -168,16 +168,12 @@ function MedecinDashboard() {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_0.9fr]">
-          <ServicesPanel navigate={navigate} />
-
-          <NotificationsPanel
-            notifications={notifications}
-            unreadCount={unreadCount}
-            onRead={markRead}
-            onOpenAll={() => navigate("/medecin/notifications")}
-          />
-        </div>
+        <NotificationsPanel
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onRead={markRead}
+          onOpenAll={() => navigate("/medecin/notifications")}
+        />
       </div>
     </MedecinLayout>
   );
@@ -193,18 +189,15 @@ function PageIntro() {
     >
       <div>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-          Espace médecin ONMM
+          Tableau de bord médecin
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+        {/* <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
           Gérez vos informations professionnelles, téléchargez vos documents
           officiels et suivez vos échanges avec l’Ordre.
-        </p>
+        </p> */}
       </div>
 
-      <span className="inline-flex w-fit items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700 dark:border-green-900/50 dark:bg-green-900/20 dark:text-green-400">
-        <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-        Espace sécurisé
-      </span>
+      
     </motion.div>
   );
 }
@@ -276,10 +269,10 @@ function CertificatePanel({ loading, error, onDownload }) {
             Document PDF attestant votre inscription auprès de l’Ordre.
           </p>
 
-          <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+          {/* <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
             <Meta label="Format" value="PDF" />
             <Meta label="Dernière génération" value="—" />
-          </div>
+          </div> */}
 
           {error && <p className="mt-3 text-xs text-red-600">{error}</p>}
 
@@ -302,83 +295,21 @@ function CertificatePanel({ loading, error, onDownload }) {
   );
 }
 
-function ServicesPanel({ navigate }) {
-  const services = [
-    {
-      title: "Mes informations professionnelles",
-      desc: "Consulter ou mettre à jour mes coordonnées",
-      icon: User,
-      to: "/medecin/profil",
-    },
-    {
-      title: "Mes demandes et réclamations",
-      desc: "Déposer une demande ou suivre mes échanges",
-      icon: MessageSquareWarning,
-      to: "/medecin/reclamations",
-    },
-    {
-      title: "Communications de l’Ordre",
-      desc: "Lire les informations importantes",
-      icon: Bell,
-      to: "/medecin/notifications",
-    },
-    {
-      title: "Paramètres du compte",
-      desc: "Gérer la sécurité et les préférences",
-      icon: Settings,
-      to: "/medecin/parametres",
-    },
-  ];
-
+function NotificationsPanel({
+  notifications,
+  unreadCount,
+  onRead,
+  onOpenAll,
+  loading = false,
+}) {
   return (
     <section className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-        <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-          Services essentiels
-        </h2>
-        <p className="mt-0.5 text-xs text-slate-400">
-          Accès rapide aux services les plus utiles.
-        </p>
-      </div>
-
-      <div className="divide-y divide-slate-100 dark:divide-slate-800">
-        {services.map(({ title, desc, icon: Icon, to }) => (
-          <button
-            key={title}
-            onClick={() => navigate(to)}
-            className="group flex w-full items-center gap-3 px-5 py-4 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/60"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-              <Icon size={18} />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                {title}
-              </p>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                {desc}
-              </p>
-            </div>
-
-            <ChevronRight
-              size={16}
-              className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-green-600"
-            />
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function NotificationsPanel({ notifications, unreadCount, onRead, onOpenAll }) {
-  return (
-    <section className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5 dark:border-slate-800">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-            Communications récentes de l’Ordre
+          <Bell size={15} className="text-green-600 dark:text-green-400" />
+
+          <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+            Dernières notifications
           </h2>
 
           {unreadCount > 0 && (
@@ -389,61 +320,96 @@ function NotificationsPanel({ notifications, unreadCount, onRead, onOpenAll }) {
         </div>
 
         <button
+          type="button"
           onClick={onOpenAll}
-          className="text-xs font-semibold text-green-700 hover:underline dark:text-green-400"
+          className="flex items-center gap-1 text-xs font-semibold text-green-600 transition hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
         >
           Voir tout
+          <ChevronRight size={13} />
         </button>
       </div>
 
-      {notifications.length === 0 ? (
+      {loading ? (
+        <div className="divide-y divide-slate-50 dark:divide-slate-800">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-5 py-3">
+              <div className="h-9 w-9 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+
+              <div className="flex-1 space-y-1">
+                <div className="h-3.5 w-40 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+                <div className="h-3 w-56 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+              </div>
+
+              <div className="h-3 w-16 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+            </div>
+          ))}
+        </div>
+      ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-5 py-10 text-center">
-          <BellOff size={22} className="mb-2 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            Aucune communication pour le moment
+          <BellOff
+            size={24}
+            className="mb-2 text-slate-300 dark:text-slate-600"
+          />
+
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+            Aucune notification pour le moment
           </p>
-          <p className="mt-1 text-xs text-slate-400">
-            Les messages importants de l’Ordre apparaîtront ici.
+
+          <p className="mt-1 max-w-xs text-xs leading-5 text-slate-400">
+            Les communications importantes envoyées par l’Ordre apparaîtront ici.
           </p>
         </div>
       ) : (
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+        <div className="divide-y divide-slate-50 dark:divide-slate-800">
           {notifications.slice(0, 5).map((notification) => (
             <button
               key={notification.id}
+              type="button"
               onClick={() => onRead(notification.id)}
-              className="flex w-full items-start gap-3 px-5 py-4 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/60"
+              className="flex w-full items-center gap-4 px-5 py-3 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/60"
             >
-              <span
-                className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
-                  !notification.lu ? "bg-green-500" : "bg-transparent"
+              <div
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-1 ${
+                  !notification.lu
+                    ? "bg-green-50 text-green-700 ring-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-800"
+                    : "bg-slate-50 text-slate-400 ring-slate-100 dark:bg-slate-800 dark:text-slate-500 dark:ring-slate-700"
                 }`}
-              />
+              >
+                <Bell size={15} />
+              </div>
 
               <div className="min-w-0 flex-1">
                 <p
-                  className={`text-sm ${
+                  className={`truncate text-sm ${
                     !notification.lu
-                      ? "font-semibold text-slate-900 dark:text-white"
-                      : "text-slate-600 dark:text-slate-300"
+                      ? "font-semibold text-slate-800 dark:text-slate-100"
+                      : "font-medium text-slate-600 dark:text-slate-300"
                   }`}
                 >
-                  {notification.titre || "Communication"}
+                  {notification.titre || "Notification"}
                 </p>
 
                 {notification.message && (
-                  <p className="mt-0.5 line-clamp-1 text-xs text-slate-400">
+                  <p className="mt-0.5 line-clamp-1 text-xs text-slate-400 dark:text-slate-500">
                     {notification.message}
                   </p>
                 )}
               </div>
 
-              {notification.date && (
-                <span className="flex shrink-0 items-center gap-1 text-[10px] text-slate-400">
-                  <Clock size={10} />
-                  {notification.date}
-                </span>
-              )}
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                {!notification.lu && (
+                  <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700 dark:bg-green-900/40 dark:text-green-400">
+                    Nouveau
+                  </span>
+                )}
+
+                {notification.date && (
+                  <span className="flex items-center gap-1 text-[10px] text-slate-400">
+                    <Clock size={10} />
+                    {formatNotificationDate(notification.date)}
+                  </span>
+                )}
+              </div>
             </button>
           ))}
         </div>

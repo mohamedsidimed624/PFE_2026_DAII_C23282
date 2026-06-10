@@ -4,13 +4,13 @@ import com.onmm.backend.dto.reclamation.CloseReclamationRequest;
 import com.onmm.backend.dto.reclamation.ReclamationDetailResponse;
 import com.onmm.backend.dto.reclamation.ReclamationListResponse;
 import com.onmm.backend.service.ReclamationService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/reclamations")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AdminReclamationController {
 
     private final ReclamationService reclamationService;
@@ -36,7 +36,7 @@ public class AdminReclamationController {
 
     @PutMapping("/{id}/close")
     public void closeReclamation(@PathVariable Long id,
-                                 @RequestBody CloseReclamationRequest request) {
+                                 @Valid @RequestBody CloseReclamationRequest request) {
         reclamationService.closeReclamation(id, request);
     }
 }

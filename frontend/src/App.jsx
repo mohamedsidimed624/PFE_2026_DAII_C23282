@@ -25,8 +25,6 @@ import MedecinReclamationCreatePage from "./pages/medecin/MedecinReclamationCrea
 import MedecinReclamationsPage from "./pages/medecin/MedecinReclamationsPage.jsx";
 import MedecinReclamationDetailPage from "./pages/medecin/MedecinReclamationDetailPage.jsx";
 import MedecinNotificationsPage from "./pages/medecin/MedecinNotificationsPage.jsx";
-import MedecinCotisationPage from "./pages/medecin/MedecinCotisationPage.jsx";
-import MedecinAnnoncesPage from "./pages/medecin/MedecinAnnoncesPage.jsx";
 import MedecinSondagesPage from "./pages/medecin/MedecinSondagesPage.jsx";
 import MedecinSondageParticipationPage from "./pages/medecin/MedecinSondageParticipationPage.jsx";
 import MedecinSondageResultatsPage from "./pages/medecin/MedecinSondageResultatsPage.jsx";
@@ -149,23 +147,7 @@ function App() {
           }
         />
 
-        <Route
-          path="/medecin/cotisation"
-          element={
-            <MedecinRoute>
-              <MedecinCotisationPage />
-            </MedecinRoute>
-          }
-        />
 
-        <Route
-          path="/medecin/annonces"
-          element={
-            <MedecinRoute>
-              <MedecinAnnoncesPage />
-            </MedecinRoute>
-          }
-        />
 
         <Route
           path="/medecin/reclamations"

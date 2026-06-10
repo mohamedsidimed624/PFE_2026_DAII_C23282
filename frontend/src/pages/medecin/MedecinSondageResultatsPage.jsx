@@ -1,215 +1,356 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+
 import {
-  ArrowLeft, BarChart3, Users, CheckCircle2, ShieldCheck,
-  Loader2, Lock,
+  ArrowLeft,
+  BarChart3,
+  Users,
+  Loader2,
+  Lock,
+  ClipboardList,
+  AlertCircle,
 } from "lucide-react";
+
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
+
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { getSondageResultats } from "../../services/medecinSondageApi";
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+const CHART_COLORS = [
+  "#03A84E",
+  "#2563EB",
+  "#F59E0B",
+  "#8B5CF6",
+  "#EF4444",
+  "#06B6D4",
+  "#EC4899",
+];
 
-const TYPE_LABELS = {
-  CONSULTATION_INSTITUTIONNELLE: "Consultation institutionnelle",
-  PULSE: "Pulse",
-  QUESTIONNAIRE_SCIENTIFIQUE: "Questionnaire scientifique",
-  SATISFACTION: "Satisfaction",
-  ETUDE_EFFECTIFS: "Étude des effectifs",
-};
+function formatDate(value) {
+  if (!value) return "—";
 
-const TYPE_COLORS = {
-  CONSULTATION_INSTITUTIONNELLE: "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300",
-  PULSE: "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300",
-  QUESTIONNAIRE_SCIENTIFIQUE: "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300",
-  SATISFACTION: "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300",
-  ETUDE_EFFECTIFS: "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300",
-};
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
 
-const CHART_COLORS = ["#16a34a", "#3b82f6", "#f59e0b", "#8b5cf6", "#ef4444", "#06b6d4", "#ec4899"];
-
-function formatDate(d) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+  return date.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 }
 
-// ── Stat card ─────────────────────────────────────────────────────────────────
+function CustomTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
 
-function StatCard({ icon, label, value, color = "text-slate-400" }) {
-  const Icon = icon;
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="px-5 py-4">
-        <div className="mb-2 flex items-center gap-2">
-          <Icon size={14} className={color} />
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-        </div>
-        <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{value}</p>
-      </div>
+    <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 text-xs shadow-lg dark:border-slate-700 dark:bg-slate-900">
+      <p className="font-semibold text-[#123F4A] dark:text-slate-100">
+        {label || payload[0]?.name}
+      </p>
+
+      <p className="mt-1 text-slate-500 dark:text-slate-400">
+        Réponses :{" "}
+        <span className="font-bold text-[#03A84E]">
+          {payload[0]?.value}
+        </span>
+      </p>
     </div>
   );
 }
 
-// ── Question result card ──────────────────────────────────────────────────────
+function StatCard({ Icon, label, value, tone = "green" }) {
+  const tones = {
+    green: {
+      box: "border-green-100 bg-green-50 dark:border-green-900/40 dark:bg-green-900/20",
+      icon: "text-[#03A84E]",
+    },
+    blue: {
+      box: "border-blue-100 bg-blue-50 dark:border-blue-900/40 dark:bg-blue-900/20",
+      icon: "text-blue-600",
+    },
+    purple: {
+      box: "border-purple-100 bg-purple-50 dark:border-purple-900/40 dark:bg-purple-900/20",
+      icon: "text-purple-600",
+    },
+  };
+
+  const current = tones[tone] || tones.green;
+
+  return (
+    <div className={`rounded-2xl border px-5 py-4 shadow-sm ${current.box}`}>
+      <div className="mb-2 flex items-center gap-2">
+        <Icon size={16} className={current.icon} />
+
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          {label}
+        </p>
+      </div>
+
+      <p className="text-2xl font-bold text-[#123F4A] dark:text-white">
+        {value}
+      </p>
+    </div>
+  );
+}
 
 function QuestionResultCard({ qs, index }) {
   const isTextual = qs.typeQuestion === "TEXTE" || qs.typeQuestion === "DATE";
-  const isGauge   = qs.typeQuestion === "ECHELLE" || qs.typeQuestion === "NUMERIQUE";
-  const isOuiNon  = qs.typeQuestion === "OUI_NON";
+  const isGauge =
+    qs.typeQuestion === "ECHELLE" || qs.typeQuestion === "NUMERIQUE";
+  const isOuiNon = qs.typeQuestion === "OUI_NON";
 
-  const chartData = Object.entries(qs.repartition || {}).map(([name, value]) => ({ name, value }));
-  const total = chartData.reduce((s, d) => s + d.value, 0);
+  const chartData = useMemo(() => {
+    return Object.entries(qs.repartition || {}).map(([name, value]) => ({
+      name,
+      value,
+    }));
+  }, [qs.repartition]);
+
+  const total = chartData.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      transition={{ delay: index * 0.04 }}
+      className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
     >
-      {/* Question header */}
-      <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+      <div className="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
         <div className="flex items-start gap-3">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green-50 text-[12px] font-bold text-green-600 dark:bg-green-900/20 dark:text-green-400">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#03A84E] text-xs font-bold text-white">
             {index + 1}
           </div>
-          <div>
-            <p className="text-[14px] font-semibold text-slate-700 dark:text-slate-200">{qs.titre}</p>
-            <p className="mt-0.5 text-[11px] text-slate-400">
-              {qs.totalReponses} réponse{qs.totalReponses !== 1 ? "s" : ""}
+
+          <div className="min-w-0">
+            <h3 className="text-[15px] font-bold text-[#123F4A] dark:text-white">
+              {qs.titre || `Question ${index + 1}`}
+            </h3>
+
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              {qs.totalReponses || 0} réponse
+              {qs.totalReponses !== 1 ? "s" : ""}
               {qs.moyenne != null && ` · Moyenne : ${qs.moyenne.toFixed(1)}`}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Chart area */}
-      <div className="p-5">
+      <div className="p-6">
         {isTextual ? (
-          <div className="space-y-2">
-            {chartData.length === 0 ? (
-              <p className="text-[13px] text-slate-400">Aucune réponse</p>
-            ) : (
-              chartData.map((item, i) => (
-                <div key={i} className="rounded-lg bg-slate-50 px-4 py-2.5 text-[13px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                  {item.name}
-                </div>
-              ))
-            )}
-          </div>
+          <TextualResults chartData={chartData} />
         ) : isOuiNon ? (
-          <div className="space-y-3">
-            {chartData.map((item, i) => {
-              const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
-              const isOui = item.name.toUpperCase() === "OUI";
-              return (
-                <div key={i}>
-                  <div className="mb-1.5 flex items-center justify-between">
-                    <span className="text-[13px] font-semibold text-slate-700 dark:text-slate-200">{item.name}</span>
-                    <span className="text-[13px] font-bold" style={{ color: isOui ? "#16a34a" : "#ef4444" }}>
-                      {pct}% <span className="text-[11px] font-normal text-slate-400">({item.value})</span>
-                    </span>
-                  </div>
-                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${pct}%` }}
-                      transition={{ duration: 0.6, delay: index * 0.05 + 0.2 }}
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: isOui ? "#16a34a" : "#ef4444" }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <OuiNonResults chartData={chartData} total={total} />
         ) : isGauge ? (
-          <ResponsiveContainer width="100%" height={130}>
-            <BarChart data={chartData} barCategoryGap="30%">
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis hide />
-              <Tooltip formatter={(v) => [v, "Réponses"]} />
-              <Bar dataKey="value" fill="#16a34a" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <BarResults chartData={chartData} />
         ) : chartData.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* Pie chart */}
-            <ResponsiveContainer width="100%" height={180}>
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={70}
-                  innerRadius={30}
-                >
-                  {chartData.map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v) => [v, "Réponses"]} />
-              </PieChart>
-            </ResponsiveContainer>
-
-            {/* Legend with bars */}
-            <div className="flex flex-col justify-center space-y-2.5">
-              {chartData.map((item, i) => {
-                const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
-                return (
-                  <div key={i}>
-                    <div className="mb-1 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
-                        <span className="text-[12px] text-slate-600 dark:text-slate-300">{item.name}</span>
-                      </div>
-                      <span className="text-[12px] font-semibold text-slate-700 dark:text-slate-200">
-                        {pct}%
-                      </span>
-                    </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${pct}%` }}
-                        transition={{ duration: 0.5, delay: index * 0.05 + i * 0.08 }}
-                        className="h-full rounded-full"
-                        style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <PieResults chartData={chartData} total={total} />
         ) : (
-          <p className="py-4 text-center text-[13px] text-slate-400">Aucune réponse enregistrée</p>
+          <EmptyQuestion />
         )}
       </div>
     </motion.div>
   );
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+function TextualResults({ chartData }) {
+  if (!chartData.length) return <EmptyQuestion />;
+
+  return (
+    <div className="space-y-2">
+      {chartData.slice(0, 8).map((item, index) => (
+        <div
+          key={index}
+          className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300"
+        >
+          {item.name}
+        </div>
+      ))}
+
+      {chartData.length > 8 && (
+        <p className="pt-1 text-xs text-slate-400">
+          + {chartData.length - 8} autre(s) réponse(s)
+        </p>
+      )}
+    </div>
+  );
+}
+
+function OuiNonResults({ chartData, total }) {
+  if (!chartData.length) return <EmptyQuestion />;
+
+  return (
+    <div className="space-y-4">
+      {chartData.map((item, index) => {
+        const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+        const isOui = item.name.toUpperCase() === "OUI";
+        const color = isOui ? "#03A84E" : "#EF4444";
+
+        return (
+          <div key={index}>
+            <div className="mb-1.5 flex items-center justify-between">
+              <span className="text-sm font-semibold text-[#123F4A] dark:text-slate-100">
+                {item.name}
+              </span>
+
+              <span className="text-sm font-bold" style={{ color }}>
+                {pct}%{" "}
+                <span className="text-xs font-normal text-slate-400">
+                  ({item.value})
+                </span>
+              </span>
+            </div>
+
+            <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.5 }}
+                className="h-full rounded-full"
+                style={{ backgroundColor: color }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BarResults({ chartData }) {
+  if (!chartData.length) return <EmptyQuestion />;
+
+  return (
+    <div className="h-[210px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={chartData} barCategoryGap="35%">
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 11, fill: "#94a3b8" }}
+            axisLine={false}
+            tickLine={false}
+          />
+
+          <YAxis hide />
+
+          <Tooltip content={<CustomTooltip />} />
+
+          <Bar dataKey="value" fill="#03A84E" radius={[8, 8, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function PieResults({ chartData, total }) {
+  return (
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-[0.9fr_1.1fr]">
+      <div className="h-[210px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={78}
+              innerRadius={44}
+              paddingAngle={2}
+            >
+              {chartData.map((_, index) => (
+                <Cell
+                  key={index}
+                  fill={CHART_COLORS[index % CHART_COLORS.length]}
+                />
+              ))}
+            </Pie>
+
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="flex flex-col justify-center space-y-3">
+        {chartData.map((item, index) => {
+          const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+          const color = CHART_COLORS[index % CHART_COLORS.length];
+
+          return (
+            <div key={index}>
+              <div className="mb-1 flex items-center justify-between gap-4">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+
+                  <span className="truncate text-xs font-medium text-slate-600 dark:text-slate-300">
+                    {item.name}
+                  </span>
+                </div>
+
+                <span className="shrink-0 text-xs font-bold text-[#123F4A] dark:text-slate-100">
+                  {pct}%{" "}
+                  <span className="font-normal text-slate-400">
+                    ({item.value})
+                  </span>
+                </span>
+              </div>
+
+              <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 0.45 }}
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: color }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function EmptyQuestion() {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 text-center">
+      <AlertCircle size={24} className="mb-2 text-slate-300" />
+
+      <p className="text-sm text-slate-400">Aucune réponse enregistrée</p>
+    </div>
+  );
+}
 
 export default function MedecinSondageResultatsPage() {
-  const { id }    = useParams();
-  const navigate  = useNavigate();
-  const [data,    setData]    = useState(null);
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getSondageResultats(id)
       .then((res) => setData(res.data))
       .catch((err) => {
         if (err?.response?.status === 403) {
-          setError("Les résultats de ce sondage ne sont pas encore disponibles ou vous n'y avez pas participé.");
+          setError(
+            "Les résultats de ce sondage ne sont pas encore disponibles ou vous n'y avez pas participé."
+          );
         } else {
           navigate("/medecin/sondages");
         }
@@ -217,11 +358,19 @@ export default function MedecinSondageResultatsPage() {
       .finally(() => setLoading(false));
   }, [id, navigate]);
 
+  const tauxPct = useMemo(() => {
+    if (!data?.nbParticipationsDemarrees) return 0;
+
+    return Math.round(
+      (data.nbCompletes / data.nbParticipationsDemarrees) * 100
+    );
+  }, [data]);
+
   if (loading) {
     return (
       <MedecinLayout title="Chargement…">
-        <div className="flex min-h-screen items-center justify-center">
-          <Loader2 size={24} className="animate-spin text-slate-300" />
+        <div className="flex h-64 items-center justify-center">
+          <Loader2 size={24} className="animate-spin text-[#03A84E]" />
         </div>
       </MedecinLayout>
     );
@@ -229,132 +378,105 @@ export default function MedecinSondageResultatsPage() {
 
   if (error) {
     return (
-      <MedecinLayout title="Résultats non disponibles">
-        <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-[#FAFBFC] dark:bg-slate-950 px-6">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
-            <Lock size={28} className="text-slate-400" />
+      <MedecinLayout title="Résultats indisponibles">
+        <div className="flex min-h-[60vh] items-center justify-center px-6">
+          <div className="max-w-md rounded-2xl border border-slate-100 bg-white px-8 py-10 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
+              <Lock size={24} className="text-slate-400 dark:text-slate-500" />
+            </div>
+
+            <h1 className="text-lg font-bold text-[#123F4A] dark:text-white">
+              Résultats indisponibles
+            </h1>
+
+            <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+              {error}
+            </p>
+
+            <button
+              onClick={() => navigate("/medecin/sondages")}
+              className="mt-6 inline-flex h-10 items-center justify-center rounded-xl bg-[#03A84E] px-5 text-sm font-semibold text-white transition hover:bg-[#029646]"
+            >
+              Retour aux sondages
+            </button>
           </div>
-          <div className="text-center">
-            <p className="text-[16px] font-semibold text-slate-700 dark:text-slate-200">Résultats indisponibles</p>
-            <p className="mt-1 max-w-sm text-[13px] text-slate-500 dark:text-slate-400">{error}</p>
-          </div>
-          <button
-            onClick={() => navigate("/medecin/sondages")}
-            className="rounded-xl bg-green-700 px-5 py-2.5 text-[13px] font-semibold text-white hover:bg-green-800"
-          >
-            Retour aux sondages
-          </button>
         </div>
       </MedecinLayout>
     );
   }
 
-  const tauxPct = Math.round(
-    data.nbParticipationsDemarrees > 0
-      ? (data.nbCompletes / data.nbParticipationsDemarrees) * 100
-      : 0
-  );
-
   return (
     <MedecinLayout title="Résultats du sondage">
-      <div className="min-h-screen bg-[#FAFBFC] px-4 py-6 dark:bg-slate-950 sm:px-6">
-        <div className="mx-auto max-w-4xl space-y-6">
+      <div className="space-y-5">
+        {/* Header simple */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-[#123F4A] dark:text-white">
+              Résultats du sondage
+            </h1>
 
-          {/* Back */}
+          
+          </div>
+
           <button
             onClick={() => navigate("/medecin/sondages")}
-            className="inline-flex items-center gap-1.5 text-[13px] text-slate-400 transition hover:text-slate-600 dark:hover:text-slate-200"
+            className="inline-flex h-10 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={15} />
             Retour aux sondages
           </button>
+        </div>
 
-          {/* Header card */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-          >
-            <div className="px-6 py-5">
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${TYPE_COLORS[data.type] ?? "bg-slate-100 text-slate-500"}`}>
-                  {TYPE_LABELS[data.type] ?? data.type}
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-                  <CheckCircle2 size={10} /> Résultats publiés
-                </span>
-              </div>
+        {/* Stats */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <StatCard
+            Icon={Users}
+            label="Participants"
+            value={data?.nbCompletes ?? 0}
+            tone="green"
+          />
 
-              <h1 className="text-[20px] font-bold text-slate-800 dark:text-slate-100 leading-snug">
-                {data.titre}
-              </h1>
+          <StatCard
+            Icon={BarChart3}
+            label="Taux de complétion"
+            value={`${tauxPct}%`}
+            tone="blue"
+          />
 
-              <p className="mt-1.5 text-[13px] text-slate-400">
-                Du {formatDate(data.dateDebut)} au {formatDate(data.dateFin)}
-              </p>
-            </div>
+          <StatCard
+            Icon={ClipboardList}
+            label="Questions"
+            value={data?.questionStats?.length ?? 0}
+            tone="purple"
+          />
+        </div>
 
-            {/* Anonymous notice */}
-            <div className="border-t border-slate-100 bg-slate-50 px-6 py-3 dark:border-slate-800 dark:bg-slate-800/40">
-              <div className="flex items-center gap-2">
-                <ShieldCheck size={13} className="text-slate-400" />
-                <p className="text-[12px] text-slate-500 dark:text-slate-400">
-                  Ces résultats sont agrégés et anonymisés — aucune réponse individuelle n'est identifiable.
-                </p>
-              </div>
-            </div>
-          </motion.div>
+        {/* Results */}
+        {data?.questionStats?.length > 0 ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="h-5 w-1 rounded-full bg-[#03A84E]" />
 
-          {/* Stats row */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <StatCard
-              icon={Users}
-              label="Participants"
-              value={data.nbCompletes ?? 0}
-              color="text-green-500"
-            />
-            <StatCard
-              icon={BarChart3}
-              label="Taux de complétion"
-              value={`${tauxPct}%`}
-              color="text-blue-500"
-            />
-            <StatCard
-              icon={CheckCircle2}
-              label="Questions"
-              value={data.questionStats?.length ?? 0}
-              color="text-purple-500"
-            />
-          </div>
-
-          {/* Question results */}
-          {data.questionStats?.length > 0 ? (
-            <div className="space-y-4">
-              <h2 className="text-[16px] font-semibold text-slate-700 dark:text-slate-200">
+              <h2 className="text-[16px] font-bold text-[#123F4A] dark:text-white">
                 Résultats par question
               </h2>
-              {data.questionStats.map((qs, i) => (
-                <QuestionResultCard key={qs.questionOrdre} qs={qs} index={i} />
-              ))}
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 dark:border-slate-800 dark:bg-slate-900">
-              <BarChart3 size={28} className="mb-3 text-slate-300 dark:text-slate-600" />
-              <p className="text-[13px] text-slate-400">Aucune donnée disponible</p>
-            </div>
-          )}
 
-          {/* Footer */}
-          <div className="pb-4 text-center">
-            <button
-              onClick={() => navigate("/medecin/sondages")}
-              className="rounded-xl bg-green-700 px-6 py-2.5 text-[13px] font-semibold text-white hover:bg-green-800"
-            >
-              Retour aux sondages
-            </button>
+            {data.questionStats.map((qs, index) => (
+              <QuestionResultCard
+                key={qs.questionOrdre || index}
+                qs={qs}
+                index={index}
+              />
+            ))}
           </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white py-16 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <AlertCircle size={28} className="mb-3 text-slate-300" />
 
-        </div>
+            <p className="text-sm text-slate-400">Aucune donnée disponible</p>
+          </div>
+        )}
       </div>
     </MedecinLayout>
   );

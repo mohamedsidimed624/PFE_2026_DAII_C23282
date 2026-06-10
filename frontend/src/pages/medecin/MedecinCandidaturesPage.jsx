@@ -90,7 +90,7 @@ function CandidatureCard({ c }) {
           {c.statut === "BROUILLON" && (
             <button
               onClick={() => navigate(actionPath)}
-              className="rounded-lg bg-[#16A34A] px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-[#15803d] transition"
+              className="rounded-lg bg-green-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-green-700 transition"
             >
               Continuer
             </button>
@@ -129,7 +129,7 @@ export default function MedecinCandidaturesPage() {
 
   return (
     <MedecinLayout title="Mes Candidatures">
-      <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 px-4 py-6 sm:px-6">
+      <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-3xl space-y-5">
 
           <div>
@@ -156,7 +156,7 @@ export default function MedecinCandidaturesPage() {
                 action={
                   <button
                     onClick={() => navigate("/medecin/elections")}
-                    className="rounded-xl bg-[#16A34A] px-4 py-2 text-[12px] font-semibold text-white hover:bg-[#15803d] transition"
+                    className="rounded-xl bg-green-600 px-4 py-2 text-[12px] font-semibold text-white hover:bg-green-700 transition"
                   >
                     Voir les élections
                   </button>

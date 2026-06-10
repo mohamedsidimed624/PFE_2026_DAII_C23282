@@ -20,10 +20,18 @@ import {
   X,
   Send,
   Save,
+  ClipboardList,
+  Users,
+  Eye,
 } from "lucide-react";
 
 import AdminLayout from "../../components/admin/AdminLayout";
-import { createSondage, updateSondage, getSondageById, publishSondage } from "../../services/adminSondageApi";
+import {
+  createSondage,
+  updateSondage,
+  getSondageById,
+  publishSondage,
+} from "../../services/adminSondageApi";
 import { getSpecialites } from "../../services/api";
 
 const toIso = (v) => (v ? (v.length === 16 ? v + ":00" : v) : null);
@@ -88,14 +96,14 @@ const EMPTY_QUESTION = {
 };
 
 const inputCls =
-  "h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200";
+  "h-[48px] w-full rounded-lg border bg-white px-4 text-[15px] text-[#123F4A] outline-none transition placeholder:text-slate-300 focus:border-[#35C878] focus:ring-2 focus:ring-[#35C878]/10";
 
-const textAreaCls =
-  "w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200";
+const textareaCls =
+  "w-full rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-3 text-[13px] leading-6 text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400 resize-none";
 
 function Label({ children, required }) {
   return (
-    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <label className="mb-1.5 block text-[12px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
       {children}
       {required && <span className="ml-1 text-red-500">*</span>}
     </label>
@@ -107,48 +115,60 @@ function Field({ label, required, error, children }) {
     <div>
       {label && <Label required={required}>{label}</Label>}
       {children}
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-[11px] text-red-500">{error}</p>}
     </div>
   );
 }
 
 function Stepper({ current }) {
   return (
-    <div className="mb-8 border-b border-slate-100 pb-7 dark:border-slate-800">
-      <div className="flex items-center justify-between gap-4">
-        {STEPS.map((label, i) => {
-          const active = i === current;
-          const done = i < current;
+    <div className="border-b border-slate-100 dark:border-slate-800 px-7 py-5">
+      <div className="flex items-center">
+        {STEPS.map((label, index) => {
+          const active = index === current;
+          const done = index < current;
 
           return (
-            <div key={i} className="flex flex-1 items-center">
+            <div key={label} className="flex flex-1 items-center">
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${
-                    active || done
-                      ? "bg-green-500 text-white"
-                      : "bg-slate-300 text-white dark:bg-slate-700"
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[12px] font-bold transition ${
+                    done
+                      ? "bg-green-700 text-white"
+                      : active
+                      ? "bg-green-700 text-white ring-4 dark:ring-green-900/30"
+                      : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
                   }`}
                 >
-                  {done ? <CheckCircle2 size={16} /> : i + 1}
+                  {done ? <CheckCircle2 size={14} /> : index + 1}
                 </div>
 
-                <span
-                  className={`hidden text-sm font-semibold md:block ${
-                    active
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-slate-400 dark:text-slate-500"
-                  }`}
-                >
-                  {label}
-                </span>
+                <div className="hidden md:block">
+                  <p
+                    className={`text-[13px] font-semibold ${
+                      active
+                        ? "text-green-600 dark:text-green-400"
+                        : done
+                        ? "text-slate-600 dark:text-slate-300"
+                        : "text-slate-400 dark:text-slate-500"
+                    }`}
+                  >
+                    {label}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
+                    Étape {index + 1}
+                  </p>
+                </div>
               </div>
 
-              {i < STEPS.length - 1 && (
-                <ChevronRight
-                  size={18}
-                  className="mx-6 shrink-0 text-slate-300 dark:text-slate-600"
-                />
+              {index < STEPS.length - 1 && (
+                <div className="mx-4 h-px flex-1 bg-slate-100 dark:bg-slate-800">
+                  <div
+                    className={`h-full transition-all duration-300 ${
+                      done ? "w-full bg-green-500" : "w-0 bg-green-500"
+                    }`}
+                  />
+                </div>
               )}
             </div>
           );
@@ -160,10 +180,15 @@ function Stepper({ current }) {
 
 function StepInfo({ form, setForm, errors }) {
   return (
-    <section>
-      <h2 className="mb-6 text-lg font-bold text-slate-800 dark:text-slate-100">
-        Informations générales
-      </h2>
+    <section className="space-y-5">
+      <div>
+        <h2 className="text-[16px] font-semibold text-slate-700 dark:text-slate-100">
+          Informations de base
+        </h2>
+        <p className="mt-1 text-[13px] text-slate-400 dark:text-slate-500">
+          Définissez le titre, le type et le contexte du sondage.
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <Field label="Titre du sondage" required error={errors.titre}>
@@ -194,7 +219,9 @@ function StepInfo({ form, setForm, errors }) {
           <select
             className={inputCls}
             value={form.anonyme ? "true" : "false"}
-            onChange={(e) => setForm({ ...form, anonyme: e.target.value === "true" })}
+            onChange={(e) =>
+              setForm({ ...form, anonyme: e.target.value === "true" })
+            }
           >
             <option value="true">Anonyme</option>
             <option value="false">Nominatif</option>
@@ -204,11 +231,11 @@ function StepInfo({ form, setForm, errors }) {
         <div className="md:col-span-2">
           <Field label="Description">
             <textarea
-              rows={5}
-              className={textAreaCls}
+              rows={7}
+              className={textareaCls}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Expliquez l’objectif du sondage et le contexte de consultation."
+              placeholder="Expliquez clairement l'objectif du sondage, son contexte et les informations utiles pour les médecins ciblés."
             />
           </Field>
         </div>
@@ -218,11 +245,51 @@ function StepInfo({ form, setForm, errors }) {
 }
 
 function StepAudience({ form, setForm, specialites }) {
+  const hasFilter =
+    form.filtreStatut ||
+    form.filtreGenre ||
+    form.filtreWilaya ||
+    form.filtreSpecialite;
+
+  const resetAudience = () => {
+    setForm({
+      ...form,
+      filtreStatut: "",
+      filtreGenre: "",
+      filtreWilaya: "",
+      filtreSpecialite: "",
+    });
+  };
+
   return (
-    <section>
-      <h2 className="mb-6 text-lg font-bold text-slate-800 dark:text-slate-100">
-        Audience ciblée
-      </h2>
+    <section className="space-y-5">
+      <div>
+        <h2 className="text-[16px] font-semibold text-slate-700 dark:text-slate-100">
+          Audience ciblée
+        </h2>
+        <p className="mt-1 text-[13px] text-slate-400 dark:text-slate-500">
+          Laissez les filtres vides pour cibler tous les médecins concernés.
+        </p>
+      </div>
+
+      <div className="rounded-md border border-slate-100 bg-slate-50 px-5 py-4 dark:border-slate-800 dark:bg-slate-800/40">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={!hasFilter}
+            onChange={(e) => e.target.checked && resetAudience()}
+            className="mt-1 h-4 w-4 rounded accent-green-500"
+          />
+          <div>
+            <p className="text-[13px] font-semibold text-slate-700 dark:text-slate-200">
+              Tous les médecins inscrits
+            </p>
+            <p className="mt-0.5 text-[12px] text-slate-400 dark:text-slate-500">
+              Aucun filtre appliqué : le sondage sera visible pour toute l’audience.
+            </p>
+          </div>
+        </label>
+      </div>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <Field label="Statut du médecin">
@@ -268,7 +335,9 @@ function StepAudience({ form, setForm, specialites }) {
           <select
             className={inputCls}
             value={form.filtreSpecialite}
-            onChange={(e) => setForm({ ...form, filtreSpecialite: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, filtreSpecialite: e.target.value })
+            }
           >
             <option value="">Toutes les spécialités</option>
             {specialites.map((s) => (
@@ -279,17 +348,15 @@ function StepAudience({ form, setForm, specialites }) {
           </select>
         </Field>
       </div>
-
-      <p className="mt-5 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-800/50">
-        Les champs laissés vides signifient que le sondage sera visible pour tous
-        les médecins concernés.
-      </p>
     </section>
   );
 }
 
+
 function QuestionForm({ value, onChange, onCancel, onSave, editing }) {
-  const needsChoices = ["CHOIX_UNIQUE", "CHOIX_MULTIPLE"].includes(value.typeQuestion);
+  const needsChoices = ["CHOIX_UNIQUE", "CHOIX_MULTIPLE"].includes(
+    value.typeQuestion
+  );
   const needsScale = value.typeQuestion === "ECHELLE";
 
   const updateChoice = (index, text) => {
@@ -299,73 +366,86 @@ function QuestionForm({ value, onChange, onCancel, onSave, editing }) {
   };
 
   return (
-    <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-5 dark:border-emerald-900/40 dark:bg-emerald-900/10">
-      <div className="mb-5 flex items-center justify-between">
-        <h3 className="font-bold text-slate-800 dark:text-slate-100">
-          {editing ? "Modifier la question" : "Nouvelle question"}
-        </h3>
+    <div className="rounded-md border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-start justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+        <div>
+          <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-100">
+            {editing ? "Modifier la question" : "Nouvelle question"}
+          </h3>
+          <p className="mt-1 text-[12px] text-slate-400 dark:text-slate-500">
+            Choisissez le type puis rédigez la question.
+          </p>
+        </div>
 
-        <button onClick={onCancel} className="text-slate-400 hover:text-red-500">
-          <X size={18} />
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-red-500 dark:hover:bg-slate-800"
+        >
+          <X size={16} />
         </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5 p-5">
+        <Field label="Type de question">
+  <select
+    className={inputCls}
+    value={value.typeQuestion}
+    onChange={(e) => {
+      const nextType = e.target.value;
+
+      onChange({
+        ...value,
+        typeQuestion: nextType,
+        choix: ["CHOIX_UNIQUE", "CHOIX_MULTIPLE"].includes(nextType)
+          ? value.choix?.length
+            ? value.choix
+            : ["", ""]
+          : [],
+      });
+    }}
+  >
+    {QUESTION_TYPES.map((type) => (
+      <option key={type.value} value={type.value}>
+        {type.label}
+      </option>
+    ))}
+  </select>
+</Field>
+
+
         <Field label="Titre de la question" required>
           <input
             className={inputCls}
             value={value.titre}
             onChange={(e) => onChange({ ...value, titre: e.target.value })}
-            placeholder="Saisir la question"
+            placeholder="Ex : Êtes-vous favorable à cette proposition ?"
           />
         </Field>
 
         <Field label="Description / aide">
-          <input
-            className={inputCls}
+          <textarea
+            rows={3}
+            className={textareaCls}
             value={value.description}
             onChange={(e) => onChange({ ...value, description: e.target.value })}
-            placeholder="Texte d’aide optionnel"
+            placeholder="Texte d’aide optionnel visible par les médecins."
           />
         </Field>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Field label="Type de réponse">
-            <select
-              className={inputCls}
-              value={value.typeQuestion}
-              onChange={(e) =>
-                onChange({
-                  ...value,
-                  typeQuestion: e.target.value,
-                  choix: ["CHOIX_UNIQUE", "CHOIX_MULTIPLE"].includes(e.target.value)
-                    ? value.choix?.length >= 2
-                      ? value.choix
-                      : ["", ""]
-                    : [],
-                })
-              }
-            >
-              {QUESTION_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="Obligation">
-            <label className="flex h-10 items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-              <input
-                type="checkbox"
-                checked={value.obligatoire}
-                onChange={(e) => onChange({ ...value, obligatoire: e.target.checked })}
-                className="h-4 w-4 accent-emerald-600"
-              />
-              Réponse obligatoire
-            </label>
-          </Field>
-        </div>
+        <label className="flex cursor-pointer items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-800/40">
+          <input
+            type="checkbox"
+            checked={value.obligatoire}
+            onChange={(e) =>
+              onChange({ ...value, obligatoire: e.target.checked })
+            }
+            className="h-4 w-4 rounded accent-green-500"
+          />
+          <span className="text-[13px] font-medium text-slate-600 dark:text-slate-300">
+            Réponse obligatoire
+          </span>
+        </label>
 
         {needsScale && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -374,7 +454,9 @@ function QuestionForm({ value, onChange, onCancel, onSave, editing }) {
                 type="number"
                 className={inputCls}
                 value={value.echelleMin}
-                onChange={(e) => onChange({ ...value, echelleMin: Number(e.target.value) })}
+                onChange={(e) =>
+                  onChange({ ...value, echelleMin: Number(e.target.value) })
+                }
               />
             </Field>
 
@@ -383,7 +465,9 @@ function QuestionForm({ value, onChange, onCancel, onSave, editing }) {
                 type="number"
                 className={inputCls}
                 value={value.echelleMax}
-                onChange={(e) => onChange({ ...value, echelleMax: Number(e.target.value) })}
+                onChange={(e) =>
+                  onChange({ ...value, echelleMax: Number(e.target.value) })
+                }
               />
             </Field>
           </div>
@@ -393,7 +477,7 @@ function QuestionForm({ value, onChange, onCancel, onSave, editing }) {
           <Field label="Options de réponse" required>
             <div className="space-y-2">
               {value.choix.map((choice, index) => (
-                <div key={index} className="flex gap-2">
+                <div key={index} className="flex items-center gap-2">
                   <input
                     className={inputCls}
                     value={choice}
@@ -410,9 +494,9 @@ function QuestionForm({ value, onChange, onCancel, onSave, editing }) {
                           choix: value.choix.filter((_, i) => i !== index),
                         })
                       }
-                      className="rounded-lg border border-red-100 px-3 text-red-500 hover:bg-red-50"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </div>
@@ -421,28 +505,30 @@ function QuestionForm({ value, onChange, onCancel, onSave, editing }) {
               <button
                 type="button"
                 onClick={() => onChange({ ...value, choix: [...value.choix, ""] })}
-                className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700"
+                className="inline-flex items-center gap-2 text-[13px] font-semibold text-green-600 hover:text-green-700 dark:text-green-400"
               >
-                <Plus size={15} />
+                <Plus size={14} />
                 Ajouter une option
               </button>
             </div>
           </Field>
         )}
 
-        <div className="flex justify-end gap-3 pt-3">
+        <div className="flex justify-end gap-3 border-t border-slate-100 pt-5 dark:border-slate-800">
           <button
+            type="button"
             onClick={onCancel}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50"
+            className="rounded-md border border-slate-100 bg-white px-5 py-2 text-[13px] font-semibold text-slate-500 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
           >
             Annuler
           </button>
 
           <button
+            type="button"
             onClick={onSave}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="rounded-md bg-green-500 px-5 py-2 text-[13px] font-semibold text-white shadow-sm transition hover:bg-green-600"
           >
-            {editing ? "Enregistrer la modification" : "Ajouter la question"}
+            {editing ? "Enregistrer" : "Ajouter la question"}
           </button>
         </div>
       </div>
@@ -470,7 +556,6 @@ function StepQuestions({
 
     if (["CHOIX_UNIQUE", "CHOIX_MULTIPLE"].includes(questionDraft.typeQuestion)) {
       const choices = questionDraft.choix.map((c) => c.trim()).filter(Boolean);
-
       if (choices.length < 2) {
         setQuestionError("Une question à choix doit contenir au moins deux options.");
         return false;
@@ -525,198 +610,248 @@ function StepQuestions({
   };
 
   return (
-    <section>
-      <div className="mb-6 flex items-center justify-between gap-4">
+    <section className="space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          <h2 className="text-[16px] font-semibold text-slate-700 dark:text-slate-100">
             Questions du sondage
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Ajoutez les questions une par une après validation.
+          <p className="mt-1 text-[13px] text-slate-400 dark:text-slate-500">
+            Construisez le questionnaire envoyé aux médecins.
           </p>
         </div>
 
         {!showForm && (
           <button
+            type="button"
             onClick={() => {
               setQuestionDraft({ ...EMPTY_QUESTION });
               setEditingIndex(null);
+              setQuestionError("");
             }}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-green-500 px-4 text-[13px] font-semibold text-white shadow-sm transition hover:bg-green-600"
           >
-            <Plus size={16} />
+            <Plus size={15} />
             Ajouter une question
           </button>
         )}
       </div>
 
-      {showForm && (
-        <>
-          <QuestionForm
-            value={questionDraft}
-            onChange={setQuestionDraft}
-            onCancel={() => {
-              setQuestionDraft(null);
-              setEditingIndex(null);
-              setQuestionError("");
-            }}
-            onSave={saveQuestion}
-            editing={editingIndex !== null}
-          />
-
-          {questionError && <p className="mt-2 text-sm text-red-500">{questionError}</p>}
-        </>
+      {questionError && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+          {questionError}
+        </div>
       )}
 
-      <div className="mt-5 space-y-3">
-        {questions.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center text-sm text-slate-400 dark:border-slate-800 dark:bg-slate-900">
+      {showForm && (
+        <QuestionForm
+          value={questionDraft}
+          onChange={setQuestionDraft}
+          onCancel={() => {
+            setQuestionDraft(null);
+            setEditingIndex(null);
+            setQuestionError("");
+          }}
+          onSave={saveQuestion}
+          editing={editingIndex !== null}
+        />
+      )}
+
+      {!showForm && questions.length === 0 && (
+        <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-slate-200 bg-white py-16 text-center dark:border-slate-800 dark:bg-slate-900">
+          <ClipboardList size={28} className="mb-3 text-slate-300 dark:text-slate-600" />
+          <p className="text-[13px] font-semibold text-slate-500 dark:text-slate-400">
             Aucune question ajoutée
+          </p>
+          <p className="mt-1 text-[12px] text-slate-400 dark:text-slate-500">
+            Ajoutez au moins une question pour continuer.
+          </p>
+        </div>
+      )}
+
+      {questions.length > 0 && (
+        <div className="overflow-hidden rounded-md border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+            <p className="text-[13px] font-semibold text-slate-700 dark:text-slate-200">
+              {questions.length} question{questions.length > 1 ? "s" : ""} ajoutée
+              {questions.length > 1 ? "s" : ""}
+            </p>
           </div>
-        ) : (
-          questions.map((q, index) => {
-            const Icon =
-              QUESTION_TYPES.find((t) => t.value === q.typeQuestion)?.icon || Circle;
 
-            return (
-              <div
-                key={index}
-                className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-              >
-                <div className="flex gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-500 dark:bg-slate-800">
-                    <Icon size={16} />
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {questions.map((q, index) => {
+              const meta = QUESTION_TYPES.find((t) => t.value === q.typeQuestion);
+              const Icon = meta?.icon || Circle;
+
+              return (
+                <div
+                  key={index}
+                  className="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-slate-50/70 dark:hover:bg-slate-800/40"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400">
+                      <Icon size={16} />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-semibold text-slate-700 dark:text-slate-200">
+                        {index + 1}. {q.titre}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
+                        {meta?.label}
+                        {q.obligatoire ? " · Obligatoire" : " · Facultative"}
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                      {index + 1}. {q.titre}
-                    </p>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => editQuestion(index)}
+                      className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-900/20"
+                    >
+                      <Pencil size={14} />
+                    </button>
 
-                    <p className="mt-1 text-xs text-slate-400">
-                      {QUESTION_TYPES.find((t) => t.value === q.typeQuestion)?.label}
-                      {q.obligatoire ? " · Obligatoire" : " · Facultative"}
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => removeQuestion(index)}
+                      className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => editQuestion(index)}
-                    className="rounded-lg border border-slate-200 p-2 text-slate-400 hover:text-emerald-600"
-                  >
-                    <Pencil size={15} />
-                  </button>
-
-                  <button
-                    onClick={() => removeQuestion(index)}
-                    className="rounded-lg border border-slate-200 p-2 text-slate-400 hover:text-red-500"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
 
-function StepFinalisation({ form, questions, dateFin, setDateFin, dateDebut, setDateDebut, publishError }) {
-  return (
-    <section>
-      <h2 className="mb-2 text-lg font-bold text-slate-800 dark:text-slate-100">
-        Aperçu & publication
-      </h2>
-      <p className="mb-6 text-sm text-slate-500">
-        Vérifiez le résumé puis enregistrez comme brouillon ou publiez directement.
-      </p>
+function StepPreview({
+  form,
+  questions,
+  dateDebut,
+  setDateDebut,
+  dateFin,
+  setDateFin,
+  publishError,
+}) {
+  const typeLabel =
+    TYPE_OPTIONS.find((t) => t.value === form.type)?.label || "—";
 
-      {/* Summary */}
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-800/40">
-        <p className="mb-4 text-sm font-bold text-slate-700 dark:text-slate-200">Résumé</p>
-        <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
-          <p>
-            <span className="text-slate-400">Titre : </span>
-            <span className="font-semibold text-slate-700 dark:text-slate-200">{form.titre || "—"}</span>
-          </p>
-          <p>
-            <span className="text-slate-400">Type : </span>
-            <span className="font-semibold text-slate-700 dark:text-slate-200">
-              {TYPE_OPTIONS.find((t) => t.value === form.type)?.label || "—"}
+  return (
+    <section className="space-y-5">
+      <div>
+        <h2 className="text-[16px] font-semibold text-slate-700 dark:text-slate-100">
+          Aperçu avant enregistrement
+        </h2>
+        <p className="mt-1 text-[13px] text-slate-400 dark:text-slate-500">
+          Vérifiez les informations avant d’enregistrer ou de publier.
+        </p>
+      </div>
+
+      <div className="rounded-md border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <span className="rounded-md bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700 dark:bg-green-900/20 dark:text-green-400">
+              {typeLabel}
             </span>
-          </p>
-          <p>
-            <span className="text-slate-400">Mode : </span>
-            <span className="font-semibold text-slate-700 dark:text-slate-200">
+            <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
               {form.anonyme ? "Anonyme" : "Nominatif"}
             </span>
+          </div>
+
+          <h3 className="text-[17px] font-bold text-slate-800 dark:text-slate-100">
+            {form.titre || "—"}
+          </h3>
+
+          <p className="mt-2 text-[13px] leading-6 text-slate-500 dark:text-slate-400">
+            {form.description || "Aucune description"}
           </p>
-          <p>
-            <span className="text-slate-400">Questions : </span>
-            <span className="font-semibold text-slate-700 dark:text-slate-200">{questions.length}</span>
-          </p>
-          {form.filtreWilaya && (
-            <p>
-              <span className="text-slate-400">Wilaya : </span>
-              <span className="font-semibold text-slate-700 dark:text-slate-200">{form.filtreWilaya}</span>
-            </p>
-          )}
-          {form.filtreGenre && (
-            <p>
-              <span className="text-slate-400">Genre : </span>
-              <span className="font-semibold text-slate-700 dark:text-slate-200">
-                {form.filtreGenre === "M" ? "Hommes" : "Femmes"}
-              </span>
-            </p>
-          )}
+        </div>
+
+        <div className="grid grid-cols-1 gap-0 md:grid-cols-3">
+          <PreviewCell icon={<ClipboardList size={15} />} label="Questions" value={questions.length} />
+          <PreviewCell icon={<Users size={15} />} label="Audience" value={form.filtreWilaya || form.filtreSpecialite ? "Filtrée" : "Tous"} />
+          <PreviewCell icon={<Eye size={15} />} label="Visibilité" value="Après publication" />
         </div>
       </div>
 
-      {/* Publication dates */}
-      <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-800/40">
-        <p className="mb-1 text-sm font-bold text-slate-700 dark:text-slate-200">Publier maintenant</p>
-        <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-          Précisez la date de clôture pour activer le bouton « Publier maintenant ».
-          Sans date d'ouverture, le sondage sera actif immédiatement.
+      <div className="rounded-md border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p className="mb-1 text-[14px] font-semibold text-slate-700 dark:text-slate-200">
+          Publication
         </p>
+        <p className="mb-4 text-[13px] text-slate-400 dark:text-slate-500">
+          La date de clôture est obligatoire uniquement si vous publiez maintenant.
+        </p>
+
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-              Date d'ouverture{" "}
-              <span className="font-normal normal-case text-slate-300">(optionnelle)</span>
-            </label>
+          <Field label="Date d’ouverture">
             <input
               type="datetime-local"
               value={dateDebut}
               onChange={(e) => setDateDebut(e.target.value)}
               className={inputCls}
             />
-            {dateDebut && new Date(dateDebut) > new Date() && (
-              <p className="mt-1 text-[11px] text-blue-500">
-                Le sondage sera planifié et activé à cette date.
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-              Date de clôture <span className="text-red-400">*</span>
-            </label>
+          </Field>
+
+          <Field label="Date de clôture">
             <input
               type="datetime-local"
               value={dateFin}
               onChange={(e) => setDateFin(e.target.value)}
               className={inputCls}
             />
-          </div>
+          </Field>
         </div>
+
         {publishError && (
-          <p className="mt-3 text-sm text-red-500">{publishError}</p>
+          <p className="mt-3 text-[12px] text-red-500">{publishError}</p>
         )}
       </div>
+
+      {/* {questions.length > 0 && (
+        <div className="rounded-md border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+            <p className="text-[13px] font-semibold text-slate-700 dark:text-slate-200">
+              Questions
+            </p>
+          </div>
+
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {questions.map((q, i) => (
+              <div key={i} className="px-5 py-3">
+                <p className="text-[13px] font-semibold text-slate-700 dark:text-slate-200">
+                  {i + 1}. {q.titre}
+                  {q.obligatoire && <span className="ml-1 text-red-400">*</span>}
+                </p>
+                <p className="mt-0.5 text-[11px] text-slate-400">
+                  {QUESTION_TYPES.find((t) => t.value === q.typeQuestion)?.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )} */}
     </section>
+  );
+}
+
+function PreviewCell({ icon, label, value }) {
+  return (
+    <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800 md:border-b-0 md:border-r last:md:border-r-0">
+      <div className="mb-2 flex items-center gap-2 text-green-500">{icon}</div>
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+        {label}
+      </p>
+      <p className="mt-1 text-[14px] font-semibold text-slate-700 dark:text-slate-200">
+        {value}
+      </p>
+    </div>
   );
 }
 
@@ -730,19 +865,19 @@ export default function AdminSondageCreationPage() {
   const [questions, setQuestions] = useState([]);
   const [specialites, setSpecialites] = useState([]);
 
-  const [loading, setLoading] = useState(isEdit);
-  const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [saveError, setSaveError] = useState("");
-
   const [questionDraft, setQuestionDraft] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
   const [questionError, setQuestionError] = useState("");
 
-  const [dateFin,      setDateFin]      = useState("");
-  const [dateDebut,    setDateDebut]    = useState("");
-  const [publishing,   setPublishing]   = useState(false);
+  const [dateDebut, setDateDebut] = useState("");
+  const [dateFin, setDateFin] = useState("");
+
+  const [errors, setErrors] = useState({});
+  const [saveError, setSaveError] = useState("");
   const [publishError, setPublishError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [loading, setLoading] = useState(isEdit);
 
   useEffect(() => {
     getSpecialites()
@@ -757,11 +892,6 @@ export default function AdminSondageCreationPage() {
       .then((res) => {
         const s = res.data;
 
-        if (s.statut !== "BROUILLON") {
-          navigate("/admin/sondages");
-          return;
-        }
-
         setForm({
           titre: s.titre || "",
           description: s.description || "",
@@ -773,7 +903,16 @@ export default function AdminSondageCreationPage() {
           filtreSpecialite: s.filtreSpecialite || "",
         });
 
-        setQuestions(s.questions || []);
+        setQuestions(
+          (s.questions || []).map((q) => ({
+            ...EMPTY_QUESTION,
+            ...q,
+            choix: q.choix || [],
+          }))
+        );
+
+        setDateDebut(s.dateDebut ? s.dateDebut.slice(0, 16) : "");
+        setDateFin(s.dateFin ? s.dateFin.slice(0, 16) : "");
       })
       .catch(() => navigate("/admin/sondages"))
       .finally(() => setLoading(false));
@@ -781,13 +920,17 @@ export default function AdminSondageCreationPage() {
 
   const validateStep = () => {
     const e = {};
+
     if (step === 0) {
       if (!form.titre.trim()) e.titre = "Le titre est obligatoire.";
       if (!form.type) e.type = "Le type est obligatoire.";
     }
-    if (step === 2) {
-      if (questions.length === 0) e.questions = "Ajoutez au moins une question.";
+
+    if (step === 2 && questions.length === 0) {
+      setQuestionError("Ajoutez au moins une question.");
+      return false;
     }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -799,6 +942,7 @@ export default function AdminSondageCreationPage() {
 
   const prev = () => {
     setErrors({});
+    setQuestionError("");
     setStep((s) => Math.max(s - 1, 0));
   };
 
@@ -818,8 +962,10 @@ export default function AdminSondageCreationPage() {
         titre: q.titre.trim(),
         description: q.description?.trim() || null,
         obligatoire: q.obligatoire,
-        echelleMin: q.typeQuestion === "ECHELLE" ? Number(q.echelleMin) : null,
-        echelleMax: q.typeQuestion === "ECHELLE" ? Number(q.echelleMax) : null,
+        echelleMin:
+          q.typeQuestion === "ECHELLE" ? Number(q.echelleMin) : null,
+        echelleMax:
+          q.typeQuestion === "ECHELLE" ? Number(q.echelleMax) : null,
         choix: ["CHOIX_UNIQUE", "CHOIX_MULTIPLE"].includes(q.typeQuestion)
           ? q.choix.map((c) => c.trim()).filter(Boolean)
           : null,
@@ -831,8 +977,11 @@ export default function AdminSondageCreationPage() {
   const save = async () => {
     setSaving(true);
     setSaveError("");
+
     try {
-      isEdit ? await updateSondage(id, payload) : await createSondage(payload);
+      if (isEdit) await updateSondage(id, payload);
+      else await createSondage(payload);
+
       navigate("/admin/sondages");
     } catch (err) {
       setSaveError(
@@ -850,21 +999,26 @@ export default function AdminSondageCreationPage() {
       setPublishError("La date de clôture est obligatoire pour publier.");
       return;
     }
+
     setPublishing(true);
     setSaveError("");
     setPublishError("");
+
     try {
       let sondageId = id;
+
       if (!isEdit) {
         const res = await createSondage(payload);
         sondageId = res.data.id;
       } else {
         await updateSondage(id, payload);
       }
+
       await publishSondage(sondageId, {
         dateDebut: toIso(dateDebut) || null,
-        dateFin:   toIso(dateFin),
+        dateFin: toIso(dateFin),
       });
+
       navigate("/admin/sondages");
     } catch (err) {
       setPublishError(
@@ -880,7 +1034,7 @@ export default function AdminSondageCreationPage() {
   if (loading) {
     return (
       <AdminLayout title="Chargement">
-        <div className="flex min-h-screen items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center bg-[#FAFBFC] dark:bg-slate-950">
           <Loader2 className="animate-spin text-slate-400" />
         </div>
       </AdminLayout>
@@ -889,28 +1043,28 @@ export default function AdminSondageCreationPage() {
 
   return (
     <AdminLayout title={isEdit ? "Modifier le sondage" : "Nouveau sondage"}>
-      <div className="min-h-screen bg-[#F7F8FC] px-7 py-6 dark:bg-slate-950">
+      <div className="min-h-screen bg-[#FAFBFC] px-7 py-6 dark:bg-slate-950">
         <button
           onClick={() => navigate("/admin/sondages")}
-          className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-slate-700"
+          className="mb-5 inline-flex items-center gap-2 text-[13px] font-medium text-slate-400 transition hover:text-slate-600 dark:hover:text-slate-200"
         >
           <ArrowLeft size={15} />
           Retour aux sondages
         </button>
 
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+        <div className="mb-5">
+          <h1 className="text-[17px] font-semibold text-slate-700 dark:text-slate-100">
             {isEdit ? "Modifier le sondage" : "Nouveau sondage"}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Préparez un sondage interne destiné aux médecins de l’Ordre.
+          <p className="mt-1 text-[13px] text-slate-400 dark:text-slate-500">
+            Étape {step + 1} sur {STEPS.length} — {STEPS[step]}
           </p>
         </div>
 
-        <div className="rounded-2xl bg-white p-8 shadow-sm dark:bg-slate-900">
-          <Stepper step={step} />
+        <div className="overflow-hidden rounded-md bg-white shadow-sm dark:bg-slate-900">
+          <Stepper current={step} />
 
-          <div className="min-h-[420px]">
+          <div className="min-h-[460px] px-7 py-6">
             <AnimatePresence mode="wait">
               <motion.div
                 key={step}
@@ -932,77 +1086,77 @@ export default function AdminSondageCreationPage() {
                 )}
 
                 {step === 2 && (
-                  <>
-                    <StepQuestions
-                      questions={questions}
-                      setQuestions={setQuestions}
-                      questionDraft={questionDraft}
-                      setQuestionDraft={setQuestionDraft}
-                      editingIndex={editingIndex}
-                      setEditingIndex={setEditingIndex}
-                      questionError={questionError}
-                      setQuestionError={setQuestionError}
-                    />
-                    {errors.questions && (
-                      <p className="mt-3 text-sm text-red-500">{errors.questions}</p>
-                    )}
-                  </>
+                  <StepQuestions
+                    questions={questions}
+                    setQuestions={setQuestions}
+                    questionDraft={questionDraft}
+                    setQuestionDraft={setQuestionDraft}
+                    editingIndex={editingIndex}
+                    setEditingIndex={setEditingIndex}
+                    questionError={questionError}
+                    setQuestionError={setQuestionError}
+                  />
                 )}
 
                 {step === 3 && (
-                  <StepFinalisation
+                  <StepPreview
                     form={form}
                     questions={questions}
-                    dateFin={dateFin}
-                    setDateFin={setDateFin}
                     dateDebut={dateDebut}
                     setDateDebut={setDateDebut}
+                    dateFin={dateFin}
+                    setDateFin={setDateFin}
                     publishError={publishError}
                   />
                 )}
               </motion.div>
             </AnimatePresence>
+
+            {saveError && (
+              <div className="mt-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+                {saveError}
+              </div>
+            )}
           </div>
 
-          {saveError && (
-            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-              {saveError}
-            </div>
-          )}
-
-          <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6 dark:border-slate-800">
+          <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/70 px-7 py-5 dark:border-slate-800 dark:bg-slate-800/40">
             <button
               onClick={step === 0 ? () => navigate("/admin/sondages") : prev}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[13px] font-semibold text-slate-500 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             >
-              <ChevronLeft size={15} />
-              {step === 0 ? "Quitter" : "Précédent"}
+              <ChevronLeft size={14} />
+              {step === 0 ? "Annuler" : "Précédent"}
             </button>
 
             {step < STEPS.length - 1 ? (
               <button
                 onClick={next}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                className="inline-flex h-10 items-center gap-2 rounded-md bg-green-500 px-5 text-[13px] font-semibold text-white shadow-sm transition hover:bg-green-600"
               >
                 Suivant
-                <ChevronRight size={15} />
+                <ChevronRight size={14} />
               </button>
             ) : (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={save}
                   disabled={saving || publishing}
-                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                  className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[13px] font-semibold text-slate-500 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 >
-                  {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-                  Enregistrer brouillon
+                  {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  Enregistrer
                 </button>
+
                 <button
                   onClick={saveAndPublish}
-                  disabled={saving || publishing || !dateFin}
-                  className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                  disabled={saving || publishing}
+                  className="inline-flex h-10 items-center gap-2 rounded-md bg-green-500 px-5 text-[13px] font-semibold text-white shadow-sm transition hover:bg-green-600 disabled:opacity-50"
                 >
-                  {publishing ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
+                  {publishing ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Send size={14} />
+                  )}
                   Publier maintenant
                 </button>
               </div>

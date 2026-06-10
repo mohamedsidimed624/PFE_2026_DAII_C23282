@@ -474,7 +474,7 @@ export default function AdminSondageDetailPage() {
         </div>
       )}
 
-      {sondage.commentaireValidation && (
+      {/* {sondage.commentaireValidation && (
         <div className="mb-6 rounded-2xl bg-white px-6 py-4 shadow-sm dark:bg-slate-900">
           <p className="mb-1 text-[12px] font-semibold uppercase text-red-400">
             Commentaire de rejet
@@ -483,7 +483,7 @@ export default function AdminSondageDetailPage() {
             {sondage.commentaireValidation}
           </p>
         </div>
-      )}
+      )} */}
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <MiniStat icon={Users} label="Participants" value={sondage.nbParticipants} />

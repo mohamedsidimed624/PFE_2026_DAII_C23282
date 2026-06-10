@@ -6,7 +6,6 @@ const CONFIG = {
   VALIDATION_CANDIDATURES: { label: "Validation",            cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",         Icon: Clock },
   VOTE_EN_COURS:           { label: "Vote en cours",         cls: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",         Icon: Vote },
   DEPOUILLEMENT:           { label: "Dépouillement",         cls: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",     Icon: BarChart2 },
-  TERMINEE:                { label: "Terminée",              cls: "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400",            Icon: null },
   RESULTATS_PUBLIES:       { label: "Résultats publiés",     cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400", Icon: Trophy },
   ARCHIVEE:                { label: "Archivée",              cls: "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500",            Icon: null },
   ANNULEE:                 { label: "Annulée",               cls: "bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400",                Icon: XCircle },

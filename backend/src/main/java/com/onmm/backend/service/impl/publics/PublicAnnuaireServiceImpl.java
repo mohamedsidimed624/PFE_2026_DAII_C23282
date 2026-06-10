@@ -35,7 +35,7 @@ public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
             String prenom,
             String numeroInscription,
             String specialite,
-            String ville,
+            String wilaya,
             int page,
             int size,
             String sort
@@ -48,7 +48,7 @@ public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
                 prenom,
                 numeroInscription,
                 specialite,
-                ville
+                wilaya
         );
 
         Page<Medecin> medecinPage = medecinRepository.findAll(specification, pageable);
@@ -78,7 +78,7 @@ public class PublicAnnuaireServiceImpl implements PublicAnnuaireService {
         dto.setNom(medecin.getNom());
         dto.setPrenom(medecin.getPrenom());
         dto.setNumeroInscription(medecin.getNumeroInscription());
-        dto.setVilleExercice(medecin.getVilleExercice());
+        dto.setWilayaExercice(medecin.getWilayaExercice());
         dto.setPhotoProfilPath(medecin.getPhotoProfilPath());
 
         dto.setEducations(

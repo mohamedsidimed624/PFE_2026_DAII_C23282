@@ -1,15 +1,25 @@
 package com.onmm.backend.dto.sondage;
 
 import com.onmm.backend.entity.enums.SondageType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class SondageCreateRequest {
 
+    @NotBlank(message = "Le titre est obligatoire")
+    @Size(max = 255, message = "Le titre ne peut pas dépasser 255 caractères")
     private String titre;
+
     private String description;
+
+    @NotNull(message = "Le type de sondage est obligatoire")
     private SondageType type;
+
     private boolean anonyme = true;
     private LocalDateTime dateDebut;
     private LocalDateTime dateFin;
@@ -17,6 +27,8 @@ public class SondageCreateRequest {
     private String filtreWilaya;
     private String filtreStatut;
     private String filtreGenre;
+
+    @NotEmpty(message = "Le sondage doit contenir au moins une question")
     private List<QuestionDto> questions;
 
     public String getTitre() { return titre; }

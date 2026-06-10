@@ -13,7 +13,7 @@ public interface PublicAnnuaireService {
             String prenom,
             String numeroInscription,
             String specialite,
-            String ville,
+            String wilaya,
             int page,
             int size,
             String sort

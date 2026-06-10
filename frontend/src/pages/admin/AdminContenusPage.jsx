@@ -61,7 +61,7 @@ function ConfirmModal({ open, onClose, onConfirm, loading, config }) {
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/40" 
+            className="absolute inset-0" 
             onClick={onClose}
           />
           {/* Dialog */}
@@ -176,37 +176,51 @@ function StatCard({ label, value, icon, color, active, onClick }) {
 }
 
 /* ── Inline Actions ─────────────────────────────────── */
+/* ── Inline Actions avec icônes ─────────────────────────────────── */
 function InlineActions({ contenu, onEdit, onConfirmAction }) {
+  const isPublished = contenu.statut === "PUBLISHED";
+
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-1.5">
+      {/* Modifier */}
       <button
+        type="button"
         onClick={() => onEdit(contenu)}
-        className="text-[13px] font-semibold text-blue-500 hover:text-blue-600"
+        title="Modifier"
+        className="flex h-8 w-8 items-center justify-center rounded-md text-blue-500 transition hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20"
       >
-        Modifier
+        <Pencil size={15} />
       </button>
 
-      {contenu.statut === "PUBLISHED" ? (
+      {/* Publier / Dépublier */}
+      {isPublished ? (
         <button
+          type="button"
           onClick={() => onConfirmAction("unpublish", contenu)}
-          className="text-[13px] font-semibold text-yellow-500 hover:text-yellow-600"
+          title="Dépublier"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-amber-500 transition hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/20"
         >
-          Dépublier
+          <EyeOff size={15} />
         </button>
       ) : (
         <button
+          type="button"
           onClick={() => onConfirmAction("publish", contenu)}
-          className="text-[13px] font-semibold text-green-600 hover:text-green-700"
+          title="Publier"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-green-600 transition hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-900/20"
         >
-          Publier
+          <Send size={15} />
         </button>
       )}
 
+      {/* Supprimer */}
       <button
+        type="button"
         onClick={() => onConfirmAction("delete", contenu)}
-        className="text-[13px] font-semibold text-red-500 hover:text-red-600"
+        title="Supprimer"
+        className="flex h-8 w-8 items-center justify-center rounded-md text-red-500 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
       >
-        Supprimer
+        <Trash2 size={15} />
       </button>
     </div>
   );
@@ -503,8 +517,9 @@ function AdminContenusPage() {
 
         <button
           onClick={handleCreate}
-          className="h-10 rounded-md bg-green-500 px-4 text-[13px] font-semibold text-white shadow-sm hover:bg-green-600"
+          className="inline-flex h-10 items-center gap-2 rounded-md bg-green-500 px-4 text-[13px] font-semibold text-white shadow-sm transition hover:bg-green-600"
         >
+          <Plus size={15} />
           Nouveau contenu
         </button>
       </div>
@@ -627,7 +642,7 @@ function AdminContenusPage() {
                   <th className="w-[11%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
                     EXPIRE LE
                   </th>
-                  <th className="w-[10%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
+                  <th className="w-[16%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
                     ACTIONS
                   </th>
                 </tr>

@@ -43,8 +43,9 @@ public interface ElectionService {
     void rejeterCandidature(Long electionId, Long candidatureId, String commentaire, String adminEmail);
     void ouvrirVotes(Long id, String adminEmail);
     void cloturerVotes(Long id, String adminEmail);
-    void terminerDepouillement(Long id, String adminEmail);
     void publierResultats(Long id, String adminEmail);
     void archiver(Long id, String adminEmail);
     void annuler(Long id, String raison, String adminEmail);
+
+    VoteIntegrityReportDto verifyVoteIntegrity(Long electionId);
 }

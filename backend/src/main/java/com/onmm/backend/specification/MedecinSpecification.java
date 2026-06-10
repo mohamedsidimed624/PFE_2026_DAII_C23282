@@ -11,7 +11,7 @@ public class MedecinSpecification {
             String prenom,
             String numeroInscription,
             String specialite,
-            String ville
+            String wilaya
     ) {
         return (root, query, cb) -> {
             query.distinct(true);
@@ -47,12 +47,12 @@ public class MedecinSpecification {
                 );
             }
 
-            if (ville != null && !ville.isBlank()) {
+            if (wilaya != null && !wilaya.isBlank()) {
                 predicate = cb.and(
                         predicate,
                         cb.like(
-                                cb.lower(root.get("villeExercice")),
-                                "%" + ville.trim().toLowerCase() + "%"
+                                cb.lower(root.get("wilayaExercice")),
+                                "%" + wilaya.trim().toLowerCase() + "%"
                         )
                 );
             }

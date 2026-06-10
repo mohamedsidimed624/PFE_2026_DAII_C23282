@@ -4,11 +4,11 @@ import com.onmm.backend.dto.DemandeEducationRequest;
 import com.onmm.backend.dto.DemandeEducationResponse;
 import com.onmm.backend.entity.DemandeEducation;
 import com.onmm.backend.service.DemandeEducationService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/demandes")
-@CrossOrigin(origins = "http://localhost:5173")
 public class DemandeEducationController {
 
     private final DemandeEducationService educationService;
@@ -20,7 +20,7 @@ public class DemandeEducationController {
     @PostMapping("/{id}/educations")
     public DemandeEducationResponse addEducation(
             @PathVariable Long id,
-            @RequestBody DemandeEducationRequest request
+            @Valid @RequestBody DemandeEducationRequest request
     ) {
 
         return educationService.addEducation(id, request);

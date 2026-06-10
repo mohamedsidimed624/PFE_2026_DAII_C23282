@@ -192,7 +192,7 @@ export default function MedecinElectionDetailPage() {
                 {/* Corps + region */}
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {election.corpsElectoral && (
-                    <span className="inline-flex rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                    <span className="inline-flex rounded-full bg-green-50 dark:bg-green-900/20 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:text-green-400">
                       {CORPS_LABELS[election.corpsElectoral] ?? election.corpsElectoral}
                       {election.corpsElectoral === "MEDECINS_REGION" && election.region ? ` · ${election.region}` : ""}
                     </span>
@@ -225,7 +225,7 @@ export default function MedecinElectionDetailPage() {
                 {canCandidater && (
                   <button
                     onClick={() => navigate(`/medecin/elections/${id}/candidater`)}
-                    className="rounded-xl bg-[#16A34A] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[#15803d] transition"
+                    className="rounded-xl bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-blue-700 transition"
                   >
                     Candidater
                   </button>
@@ -233,7 +233,7 @@ export default function MedecinElectionDetailPage() {
                 {canVote && (
                   <button
                     onClick={() => navigate(`/medecin/elections/${id}/voter`)}
-                    className="rounded-xl bg-[#16A34A] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[#15803d] transition"
+                    className="rounded-xl bg-green-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-green-700 transition"
                   >
                     Voter maintenant
                   </button>
@@ -241,7 +241,7 @@ export default function MedecinElectionDetailPage() {
                 {s === "RESULTATS_PUBLIES" && (
                   <button
                     onClick={() => navigate(`/medecin/elections/${id}/resultats`)}
-                    className="rounded-xl bg-amber-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-amber-700 transition"
+                    className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition"
                   >
                     Voir les résultats
                   </button>
@@ -320,7 +320,7 @@ export default function MedecinElectionDetailPage() {
                   </p>
                   <button
                     onClick={() => navigate(`/medecin/elections/${id}/candidater`)}
-                    className="shrink-0 rounded-lg bg-[#16A34A] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[#15803d]"
+                    className="shrink-0 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-blue-700"
                   >
                     Candidater
                   </button>

@@ -3,6 +3,7 @@ package com.onmm.backend.controller.Admin;
 import com.onmm.backend.dto.sondage.*;
 import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.service.Admin.SondageService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/sondages")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AdminSondageController {
 
     private final SondageService sondageService;
@@ -45,7 +45,7 @@ public class AdminSondageController {
 
     @PostMapping
     public ResponseEntity<SondageDetailDto> create(
-            @RequestBody SondageCreateRequest req,
+            @Valid @RequestBody SondageCreateRequest req,
             Authentication auth
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -53,7 +53,7 @@ public class AdminSondageController {
     }
 
     @PutMapping("/{id}")
-    public SondageDetailDto update(@PathVariable Long id, @RequestBody SondageCreateRequest req) {
+    public SondageDetailDto update(@PathVariable Long id, @Valid @RequestBody SondageCreateRequest req) {
         return sondageService.updateSondage(id, req);
     }
 

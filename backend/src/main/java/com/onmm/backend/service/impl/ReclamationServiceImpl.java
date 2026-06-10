@@ -1,9 +1,13 @@
 package com.onmm.backend.service.impl;
 
+import com.onmm.backend.exception.BusinessException;
+import com.onmm.backend.exception.ForbiddenException;
+import com.onmm.backend.exception.ResourceNotFoundException;
 import com.onmm.backend.dto.reclamation.*;
 import com.onmm.backend.entity.Medecin;
 import com.onmm.backend.entity.Reclamation;
 import com.onmm.backend.entity.User;
+import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.entity.enums.ReclamationAuteurType;
 import com.onmm.backend.entity.enums.ReclamationCategory;
 import com.onmm.backend.entity.enums.ReclamationModule;
@@ -95,7 +99,7 @@ public class ReclamationServiceImpl implements ReclamationService {
     public ReclamationCreatedResponse createMedecinReclamation(String userEmail, CreateMedecinReclamationRequest request, String pieceJointePath) {
 
         Medecin medecin = medecinRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         ReclamationCategory categorie = parseCategory(request.getCategorie());
         LocalDateTime now = LocalDateTime.now();
@@ -132,7 +136,7 @@ public class ReclamationServiceImpl implements ReclamationService {
     public List<ReclamationListResponse> getMedecinReclamations(String userEmail) {
 
         Medecin medecin = medecinRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         return reclamationRepository.findByMedecinOrderByDateCreationDesc(medecin)
                 .stream()
@@ -153,7 +157,7 @@ public class ReclamationServiceImpl implements ReclamationService {
     @Transactional
     public ReclamationDetailResponse getReclamationDetail(Long id) {
         Reclamation reclamation = reclamationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Réclamation introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Réclamation introuvable"));
 
         return toDetailResponse(reclamation);
     }
@@ -163,10 +167,10 @@ public class ReclamationServiceImpl implements ReclamationService {
     public ReclamationDetailResponse getMedecinReclamationDetail(Long id, String userEmail) {
 
         Medecin medecin = medecinRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         Reclamation reclamation = reclamationRepository.findByIdAndMedecin(id, medecin)
-                .orElseThrow(() -> new RuntimeException("Réclamation introuvable ou accès refusé"));
+                .orElseThrow(() -> new ForbiddenException("Réclamation introuvable ou accès refusé"));
 
         return toDetailResponse(reclamation);
     }
@@ -175,10 +179,10 @@ public class ReclamationServiceImpl implements ReclamationService {
     @Transactional
     public void startReclamation(Long id) {
         Reclamation reclamation = reclamationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Réclamation introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Réclamation introuvable"));
 
         if (reclamation.getStatut() != ReclamationStatus.SUBMITTED) {
-            throw new RuntimeException("Seule une réclamation soumise peut être prise en charge");
+            throw new BusinessException("Seule une réclamation soumise peut être prise en charge");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -202,14 +206,14 @@ public class ReclamationServiceImpl implements ReclamationService {
     @Transactional
     public void closeReclamation(Long id, CloseReclamationRequest request) {
         Reclamation reclamation = reclamationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Réclamation introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Réclamation introuvable"));
 
         if (reclamation.getStatut() == ReclamationStatus.CLOSED) {
-            throw new RuntimeException("Cette réclamation est déjà clôturée");
+            throw new BusinessException("Cette réclamation est déjà clôturée");
         }
 
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User currentAdmin = (User) principal;
+        UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentAdmin = principal.getUser();
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -259,13 +263,13 @@ public class ReclamationServiceImpl implements ReclamationService {
 
     private ReclamationCategory parseCategory(String rawCategory) {
         if (rawCategory == null || rawCategory.isBlank()) {
-            throw new RuntimeException("La catégorie de réclamation est obligatoire");
+            throw new BusinessException("La catégorie de réclamation est obligatoire");
         }
 
         try {
             return ReclamationCategory.valueOf(rawCategory.toUpperCase().trim());
         } catch (IllegalArgumentException ex) {
-            throw new RuntimeException("Catégorie de réclamation invalide");
+            throw new BusinessException("Catégorie de réclamation invalide");
         }
     }
 

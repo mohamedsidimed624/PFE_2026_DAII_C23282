@@ -91,7 +91,7 @@ export default function MedecinElectionResultsPage() {
 
   return (
     <MedecinLayout title="Résultats de l'élection">
-      <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 px-4 py-6 sm:px-6">
+      <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-3xl space-y-5">
           <button
             onClick={() => navigate(`/medecin/elections/${id}`)}

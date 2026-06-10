@@ -3,6 +3,7 @@ package com.onmm.backend.controller;
 import com.onmm.backend.dto.sondage.*;
 import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.service.Admin.SondageService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/medecin/sondages")
-@CrossOrigin(origins = "http://localhost:5173")
 public class MedecinSondageController {
 
     private final SondageService sondageService;
@@ -46,7 +46,7 @@ public class MedecinSondageController {
 
     @PostMapping("/participations/repondre")
     public ResponseEntity<Void> submitReponses(
-            @RequestBody ReponseSubmitRequest req,
+            @Valid @RequestBody ReponseSubmitRequest req,
             Authentication auth
     ) {
         sondageService.submitReponses(req, currentEmail(auth));

@@ -25,7 +25,8 @@ const navItems = [
   { label: "Gestion des Réclamations", Icon: MessageSquareWarning, to: "/admin/reclamations" },
   { label: "Notifications",            Icon: Bell,                 to: "/admin/notifications", badge: true },
   { label: "Gestion des Sondages",     Icon: BarChart2,            to: "/admin/sondages" },
-  { label: "Diffusion d'information",  Icon: Megaphone,            to: "/admin/diffusion" },
+  { label: "Diffusion d'information",  Icon: Megaphone,          to: "/admin/diffusion" },
+  { label: "Processus Électoral",  Icon: Vote,          to: "/admin/processus/elections" },
 ];
 
 function AdminSidebar({ collapsed, onToggle }) {
@@ -103,7 +104,7 @@ function AdminSidebar({ collapsed, onToggle }) {
         ))}
 
         {/* Processus Électoral avec sous-menu */}
-        <div>
+        {/* <div>
           <button
             title={collapsed ? "Processus Électoral" : undefined}
             onClick={() => !collapsed && setElectionOpen((o) => !o)}
@@ -146,21 +147,9 @@ function AdminSidebar({ collapsed, onToggle }) {
               >
                 Gestion des Élections
               </NavLink>
-              <NavLink
-                to="/admin/processus/candidats"
-                className={({ isActive }) =>
-                  `flex items-center px-3 py-2 rounded-lg text-xs transition-colors ${
-                    isActive
-                      ? "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/10"
-                      : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
-                  }`
-                }
-              >
-                Gestion des Candidats
-              </NavLink>
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Paramètres avec sous-menu */}
         <div>

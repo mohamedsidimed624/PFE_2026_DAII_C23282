@@ -6,6 +6,7 @@ import com.onmm.backend.entity.enums.*;
 import com.onmm.backend.repository.*;
 import com.onmm.backend.service.Admin.ElectionService;
 import com.onmm.backend.service.NotificationService;
+import com.onmm.backend.service.VoteEncryptionService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -29,46 +32,56 @@ public class ElectionServiceImpl implements ElectionService {
 
     private final ElectionRepository electionRepo;
     private final CandidatureRepository candidatureRepo;
-//    private final VoteRepository voteRepo;
+    private final VoteRepository voteRepo;
     private final AdminRepository adminRepo;
     private final MedecinRepository medecinRepo;
     private final NotificationService notificationService;
     private final PositionElectoraleRepository positionRepo;
     private final ElectionAuditLogRepository auditRepo;
-    private final ParticipationElectoraleRepository participationRepo;
-    private final BulletinVoteRepository bulletinRepo;
     private final CandidatureDocumentRepository documentRepo;
     private final com.onmm.backend.service.FileStorageService fileStorageService;
+    private final VoteEncryptionService encryptionService;
+    private final ElectionIntegrityStateRepository integrityStateRepo;
 
     @Value("${app.election.hash-secret:dev-election-secret}")
     private String hashSecret;
 
+    @jakarta.annotation.PostConstruct
+    private void validateHashSecret() {
+        if (hashSecret == null || hashSecret.isBlank() || hashSecret.equals("dev-election-secret")) {
+            throw new IllegalStateException(
+                "[SECURITY] app.election.hash-secret n'est pas configuré. " +
+                "Définissez la propriété dans application.properties."
+            );
+        }
+    }
+
     public ElectionServiceImpl(
             ElectionRepository electionRepo,
             CandidatureRepository candidatureRepo,
-//            VoteRepository voteRepo,
+            VoteRepository voteRepo,
             AdminRepository adminRepo,
             MedecinRepository medecinRepo,
             NotificationService notificationService,
             PositionElectoraleRepository positionRepo,
             ElectionAuditLogRepository auditRepo,
-            ParticipationElectoraleRepository participationRepo,
-            BulletinVoteRepository bulletinRepo,
             CandidatureDocumentRepository documentRepo,
-            com.onmm.backend.service.FileStorageService fileStorageService
+            com.onmm.backend.service.FileStorageService fileStorageService,
+            VoteEncryptionService encryptionService,
+            ElectionIntegrityStateRepository integrityStateRepo
     ) {
         this.electionRepo = electionRepo;
         this.candidatureRepo = candidatureRepo;
-//        this.voteRepo = voteRepo;
+        this.voteRepo = voteRepo;
         this.adminRepo = adminRepo;
         this.medecinRepo = medecinRepo;
         this.notificationService = notificationService;
         this.positionRepo = positionRepo;
         this.auditRepo = auditRepo;
-        this.participationRepo = participationRepo;
-        this.bulletinRepo = bulletinRepo;
         this.documentRepo = documentRepo;
         this.fileStorageService = fileStorageService;
+        this.encryptionService = encryptionService;
+        this.integrityStateRepo = integrityStateRepo;
     }
 
     private static final List<ElectionStatut> STATUTS_INACTIFS =
@@ -453,6 +466,13 @@ public class ElectionServiceImpl implements ElectionService {
         e.setStatut(ElectionStatut.VOTE_EN_COURS);
         electionRepo.save(e);
 
+        ElectionIntegrityState integrityState = new ElectionIntegrityState();
+        integrityState.setElectionId(id);
+        integrityState.setLastHash(sha256("genesis:" + id));
+        integrityState.setVoteCount(0L);
+        integrityState.setUpdatedAt(LocalDateTime.now());
+        integrityStateRepo.save(integrityState);
+
         auditAdmin(
                 e,
                 "VOTE_OUVERT",
@@ -490,27 +510,10 @@ public class ElectionServiceImpl implements ElectionService {
     }
 
     @Override
-    public void terminerDepouillement(Long id, String adminEmail) {
-        Election e = findElection(id);
-        requireStatut(e, ElectionStatut.DEPOUILLEMENT);
-        e.setStatut(ElectionStatut.TERMINEE);
-        electionRepo.save(e);
-        auditAdmin(
-                e,
-                "DEPOUILLEMENT_TERMINE",
-                adminEmail,
-                "Dépouillement terminé",
-                "CRITICAL",
-                "Election",
-                id
-        );
-    }
-
-    @Override
     public void publierResultats(Long id, String adminEmail) {
         Election e = findElection(id);
 
-        requireStatut(e, ElectionStatut.TERMINEE);
+        requireStatut(e, ElectionStatut.DEPOUILLEMENT);
 
         ResultatElectionDto resultats = getResultats(id);
 
@@ -551,10 +554,7 @@ public class ElectionServiceImpl implements ElectionService {
     @Override
     public void archiver(Long id, String adminEmail) {
         Election e = findElection(id);
-        if (e.getStatut() != ElectionStatut.TERMINEE && e.getStatut() != ElectionStatut.RESULTATS_PUBLIES) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Statut requis: TERMINEE ou RESULTATS_PUBLIES");
-        }
+        requireStatut(e, ElectionStatut.RESULTATS_PUBLIES);
         e.setStatut(ElectionStatut.ARCHIVEE);
         electionRepo.save(e);
         auditAdmin(
@@ -595,7 +595,7 @@ public class ElectionServiceImpl implements ElectionService {
     public ResultatElectionDto getResultats(Long id) {
         Election e = findElection(id);
 
-        long nbVotants = participationRepo.countByElectionId(id);
+        long nbVotants = voteRepo.countDistinctVotersByElectionId(id);
         long nbElecteursEligibles = countElecteursEligibles(e);
 
         double tauxParticipation = nbElecteursEligibles > 0
@@ -997,13 +997,6 @@ public class ElectionServiceImpl implements ElectionService {
 
         String votantHash = buildVotantHash(electionId, medecin);
 
-        if (participationRepo.existsByElectionIdAndVotantHash(electionId, votantHash)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Vous avez déjà voté pour cette élection."
-            );
-        }
-
         // Auto-vote check
         List<Long> allSelectedIds = new ArrayList<>();
         if (req.getCandidatureIds() != null) allSelectedIds.addAll(req.getCandidatureIds());
@@ -1024,59 +1017,54 @@ public class ElectionServiceImpl implements ElectionService {
                     });
         }
 
-        // Section/région eligibility check per voted candidature
-        for (Long cid : allSelectedIds) {
-            candidatureRepo.findById(cid).ifPresent(cand -> {
-                if (cand.getPosition() != null && !isPositionEligiblePourMedecin(e, cand.getPosition(), medecin)) {
-                    throw new ResponseStatusException(
-                            HttpStatus.FORBIDDEN,
-                            "Vous ne pouvez pas voter pour une candidature hors de votre section ou région."
-                    );
-                }
-            });
-        }
-
-        List<BulletinVote> bulletins = buildAndValidateBulletins(e, req);
-
-        if (bulletins.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Aucun vote valide fourni"
-            );
-        }
-
-        ParticipationElectorale participation = new ParticipationElectorale();
-        participation.setElection(e);
-        participation.setVotantHash(votantHash);
-
-        try {
-            participation = participationRepo.saveAndFlush(participation);
-
-            for (BulletinVote bulletin : bulletins) {
-                bulletin.setParticipation(participation);
-
-                // À garder seulement si ton entity BulletinVote contient ces champs.
-                // Normalement buildAndValidateBulletins les remplit déjà.
-                if (bulletin.getElection() == null) {
-                    bulletin.setElection(e);
+        // Section/région eligibility check — batch load instead of N findById() calls
+        if (!allSelectedIds.isEmpty()) {
+            Map<Long, Candidature> candidaturesParId = candidatureRepo.findAllById(allSelectedIds)
+                    .stream().collect(Collectors.toMap(Candidature::getId, c -> c));
+            for (Long cid : allSelectedIds) {
+                Candidature cand = candidaturesParId.get(cid);
+                if (cand != null && cand.getPosition() != null
+                        && !isPositionEligiblePourMedecin(e, cand.getPosition(), medecin)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "Vous ne pouvez pas voter pour une candidature hors de votre section ou région.");
                 }
             }
-
-            bulletinRepo.saveAllAndFlush(bulletins);
-
-        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Vous avez déjà voté pour cette élection."
-            );
         }
+
+        ElectionIntegrityState state = integrityStateRepo.findByIdForUpdate(e.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "État d'intégrité manquant pour cette élection"));
+
+        String batchPrevHash = state.getLastHash();
+        long batchStartSeq = state.getVoteCount();
+
+        List<Vote> votes = buildAndValidateVotes(e, req, votantHash, batchPrevHash, batchStartSeq);
+
+        if (votes.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aucun vote valide fourni");
+        }
+
+        try {
+            voteRepo.saveAllAndFlush(votes);
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Vous avez déjà voté pour l'un de ces postes.");
+        }
+
+        String newLastHash = state.getLastHash();
+        for (Vote v : votes) {
+            newLastHash = sha256(newLastHash + ":" + v.getVoteHash());
+        }
+        state.setLastHash(newLastHash);
+        state.setVoteCount(batchStartSeq + votes.size());
+        state.setUpdatedAt(LocalDateTime.now());
+        integrityStateRepo.save(state);
 
         audit(
                 e,
                 "VOTE_ENREGISTRE",
                 null,
                 "SYSTEME",
-                "Vote enregistré avec " + bulletins.size() + " bulletin(s)",
+                "Vote enregistré avec " + votes.size() + " bulletin(s)",
                 "CRITICAL",
                 "Election",
                 electionId
@@ -1191,10 +1179,15 @@ public class ElectionServiceImpl implements ElectionService {
             boolean quorumAtteint,
             long nbVotants
     ) {
+        Map<Long, Long> countMap = showVotes ? buildVoteCountMap(e.getId()) : Collections.emptyMap();
         List<CandidatureDto> candidats = candidatureRepo
                 .findByElectionIdAndStatut(e.getId(), StatutCandidature.VALIDEE)
                 .stream()
-                .map(c -> toCandidatureDto(c, showVotes))
+                .map(c -> {
+                    CandidatureDto cDto = toCandidatureDto(c, false);
+                    cDto.setNbVotes(showVotes ? countMap.getOrDefault(c.getId(), 0L) : 0L);
+                    return cDto;
+                })
                 .sorted(this::compareCandidatsByVotesDesc)
                 .collect(Collectors.toList());
 
@@ -1220,6 +1213,7 @@ public class ElectionServiceImpl implements ElectionService {
     ) {
         List<Candidature> candidaturesValidees = candidatureRepo
                 .findByElectionIdAndStatut(e.getId(), StatutCandidature.VALIDEE);
+        Map<Long, Long> countMap = showVotes ? buildVoteCountMap(e.getId()) : Collections.emptyMap();
 
         List<ResultatParPositionDto> resultatsParPosition = new ArrayList<>();
         List<CandidatureDto> tousLesGagnants = new ArrayList<>();
@@ -1229,7 +1223,11 @@ public class ElectionServiceImpl implements ElectionService {
                     .stream()
                     .filter(c -> c.getPosition() != null)
                     .filter(c -> c.getPosition().getId().equals(position.getId()))
-                    .map(c -> toCandidatureDto(c, showVotes))
+                    .map(c -> {
+                        CandidatureDto cDto = toCandidatureDto(c, false);
+                        cDto.setNbVotes(showVotes ? countMap.getOrDefault(c.getId(), 0L) : 0L);
+                        return cDto;
+                    })
                     .sorted(this::compareCandidatsByVotesDesc)
                     .collect(Collectors.toList());
 
@@ -1309,13 +1307,8 @@ public class ElectionServiceImpl implements ElectionService {
 //        }
 
         long candidaturesEnAttente = candidatureRepo
-                .findByElectionId(e.getId())
-                .stream()
-                .filter(c ->
-                        c.getStatut() == StatutCandidature.SOUMISE
-                                || c.getStatut() == StatutCandidature.EN_REVUE
-                )
-                .count();
+                .countByElectionIdAndStatutIn(e.getId(),
+                        List.of(StatutCandidature.SOUMISE, StatutCandidature.EN_REVUE));
 
         if (candidaturesEnAttente > 0) {
             throw new ResponseStatusException(
@@ -1683,303 +1676,186 @@ public class ElectionServiceImpl implements ElectionService {
                 ));
     }
 
-    private List<BulletinVote> buildAndValidateBulletins(Election election, VoteRequest req) {
+    private List<Vote> buildAndValidateVotes(Election election, VoteRequest req, String voterKeyHash,
+                                              String prevHash, long startSeq) {
         List<PositionElectorale> positions = positionRepo
                 .findByElectionIdOrderByOrdreAsc(election.getId())
                 .stream()
                 .filter(PositionElectorale::isActif)
                 .collect(Collectors.toList());
 
-        boolean electionAvecPostes = !positions.isEmpty();
-
-        if (electionAvecPostes) {
-            return buildBulletinsForElectionWithPositions(election, req, positions);
-        }
-
-        return buildBulletinsForElectionWithoutPositions(election, req);
+        return positions.isEmpty()
+                ? buildVotesSansPostes(election, req, voterKeyHash, prevHash, startSeq)
+                : buildVotesAvecPostes(election, req, positions, voterKeyHash, prevHash, startSeq);
     }
 
-    private List<BulletinVote> buildBulletinsForElectionWithoutPositions(
-            Election election,
-            VoteRequest req
-    ) {
-        if (req.getVotes() != null && !req.getVotes().isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Cette élection ne contient pas de postes électoraux"
-            );
+    private List<Vote> buildVotesSansPostes(Election election, VoteRequest req, String voterKeyHash,
+                                             String prevHash, long startSeq) {
+        if (voteRepo.existsByElectionIdAndVoterKeyHash(election.getId(), voterKeyHash)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Vous avez déjà voté pour cette élection.");
         }
 
-        List<Long> candidatureIds = req.getCandidatureIds();
-
-        if (candidatureIds == null || candidatureIds.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Sélectionnez au moins un candidat"
-            );
-        }
-
-        int max = election.getMaxVotesParElecteur() > 0
-                ? election.getMaxVotesParElecteur()
-                : election.getSeatsCount();
-
-        if (candidatureIds.size() > max) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Vous ne pouvez choisir que " + max + " candidat(s)"
-            );
-        }
-
-        if (candidatureIds.stream().distinct().count() != candidatureIds.size()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Vous avez sélectionné le même candidat plusieurs fois"
-            );
-        }
-
-        List<BulletinVote> bulletins = new ArrayList<>();
-
-        for (Long candidatureId : candidatureIds) {
-            Candidature candidature = candidatureRepo.findById(candidatureId)
-                    .filter(c -> c.getElection().getId().equals(election.getId()))
-                    .filter(c -> c.getStatut() == StatutCandidature.VALIDEE)
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST,
-                            "Candidature invalide : " + candidatureId
-                    ));
-
-            BulletinVote bulletin = new BulletinVote();
-            bulletin.setElection(election);
-            bulletin.setCandidature(candidature);
-            bulletin.setPositionElectorale(null);
-
-            bulletins.add(bulletin);
-        }
-
-        return bulletins;
-    }
-
-    private List<BulletinVote> buildBulletinsForElectionWithPositions(
-            Election election,
-            VoteRequest req,
-            List<PositionElectorale> positions
-    ) {
-        if (req.getVotes() == null || req.getVotes().isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Le vote doit être organisé par poste"
-            );
-        }
-
-        if (req.getCandidatureIds() != null && !req.getCandidatureIds().isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Cette élection utilise un vote par poste"
-            );
-        }
-
-        Set<Long> positionsDejaVotees = new HashSet<>();
-        List<BulletinVote> bulletins = new ArrayList<>();
-
-        for (PositionVoteRequest positionVote : req.getVotes()) {
-            if (positionVote.getPositionId() == null) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Une position de vote est manquante"
-                );
-            }
-
-            if (!positionsDejaVotees.add(positionVote.getPositionId())) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Vous avez envoyé deux votes pour le même poste"
-                );
-            }
-
-            PositionElectorale position = positions.stream()
-                    .filter(p -> p.getId().equals(positionVote.getPositionId()))
-                    .findFirst()
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST,
-                            "Poste électoral invalide : " + positionVote.getPositionId()
-                    ));
-
-            List<Long> candidatureIds = positionVote.getCandidatureIds();
-
-            if (candidatureIds == null || candidatureIds.isEmpty()) {
-                continue;
-            }
-
-            if (candidatureIds.size() > position.getMaxVotesParElecteur()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Vous ne pouvez choisir que "
-                                + position.getMaxVotesParElecteur()
-                                + " candidat(s) pour le poste "
-                                + position.getLibelle()
-                );
-            }
-
-            if (candidatureIds.stream().distinct().count() != candidatureIds.size()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Le même candidat est sélectionné plusieurs fois pour le poste "
-                                + position.getLibelle()
-                );
-            }
-
-            for (Long candidatureId : candidatureIds) {
-                Candidature candidature = candidatureRepo.findById(candidatureId)
-                        .filter(c -> c.getElection().getId().equals(election.getId()))
-                        .filter(c -> c.getStatut() == StatutCandidature.VALIDEE)
-                        .filter(c -> c.getPosition() != null)
-                        .filter(c -> c.getPosition().getId().equals(position.getId()))
-                        .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST,
-                                "Candidature invalide pour le poste " + position.getLibelle()
-                        ));
-
-                BulletinVote bulletin = new BulletinVote();
-                bulletin.setElection(election);
-                bulletin.setPositionElectorale(position);
-                bulletin.setCandidature(candidature);
-
-                bulletins.add(bulletin);
-            }
-        }
-
-        return bulletins;
-    }
-
-    private List<BulletinVote> buildAndValidateSimpleBulletins(Election e, List<Long> candidatureIds) {
-        if (candidatureIds == null || candidatureIds.isEmpty()) {
+        List<Long> cids = req.getCandidatureIds();
+        if (cids == null || cids.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sélectionnez au moins un candidat");
         }
 
-        if (candidatureIds.stream().distinct().count() != candidatureIds.size()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Vous avez sélectionné le même candidat plusieurs fois"
-            );
+        int max = election.getMaxVotesParElecteur() > 0 ? election.getMaxVotesParElecteur() : election.getSeatsCount();
+        if (cids.size() > max) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous ne pouvez choisir que " + max + " candidat(s)");
+        }
+        if (cids.stream().distinct().count() != cids.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous avez sélectionné le même candidat plusieurs fois");
         }
 
-        int max = e.getMaxVotesParElecteur() > 0 ? e.getMaxVotesParElecteur() : e.getSeatsCount();
-
-        if (candidatureIds.size() > max) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Vous ne pouvez voter que pour " + max + " candidat(s)"
-            );
+        Map<Long, Candidature> candidaturesParId = candidatureRepo.findAllById(cids)
+                .stream().collect(Collectors.toMap(Candidature::getId, c -> c));
+        List<Vote> votes = new ArrayList<>();
+        for (Long cid : cids) {
+            Candidature cand = Optional.ofNullable(candidaturesParId.get(cid))
+                    .filter(c -> c.getElection().getId().equals(election.getId()))
+                    .filter(c -> c.getStatut() == StatutCandidature.VALIDEE)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Candidature invalide : " + cid));
+            votes.add(buildVote(election, null, cand, voterKeyHash, prevHash, startSeq + votes.size() + 1));
         }
-
-        List<BulletinVote> bulletins = new ArrayList<>();
-
-        for (Long candidatureId : candidatureIds) {
-            Candidature c = candidatureRepo.findById(candidatureId)
-                    .filter(x -> x.getElection().getId().equals(e.getId()))
-                    .filter(x -> x.getStatut() == StatutCandidature.VALIDEE)
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST,
-                            "Candidature invalide : " + candidatureId
-                    ));
-
-            BulletinVote b = new BulletinVote();
-            b.setElection(e);
-            b.setCandidature(c);
-            b.setPositionElectorale(null);
-
-            bulletins.add(b);
-        }
-
-        return bulletins;
+        return votes;
     }
 
-    private List<BulletinVote> buildAndValidatePositionBulletins(
-            Election e,
-            List<PositionElectorale> positions,
-            List<PositionVoteRequest> votes
-    ) {
-        if (votes == null || votes.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Le bulletin doit contenir les votes par poste"
-            );
+    private List<Vote> buildVotesAvecPostes(Election election, VoteRequest req,
+                                             List<PositionElectorale> positions, String voterKeyHash,
+                                             String prevHash, long startSeq) {
+        if (req.getVotes() == null || req.getVotes().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le vote doit être organisé par poste");
         }
 
-        Map<Long, PositionElectorale> positionMap = positions.stream()
-                .collect(Collectors.toMap(PositionElectorale::getId, p -> p));
+        // Batch load all candidatures before the loops to avoid N+1
+        List<Long> allCidsToBatch = new ArrayList<>();
+        req.getVotes().forEach(pv -> {
+            if (pv.getCandidatureIds() != null) allCidsToBatch.addAll(pv.getCandidatureIds());
+        });
+        Map<Long, Candidature> candidatureCache = candidatureRepo.findAllById(allCidsToBatch)
+                .stream().collect(Collectors.toMap(Candidature::getId, c -> c));
 
+        List<Vote> votes = new ArrayList<>();
         Set<Long> positionsDejaVotees = new HashSet<>();
-        List<BulletinVote> bulletins = new ArrayList<>();
 
-        for (PositionVoteRequest voteParPoste : votes) {
-            if (voteParPoste.getPositionId() == null) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Un vote ne référence aucun poste"
-                );
+        for (PositionVoteRequest pv : req.getVotes()) {
+            if (pv.getPositionId() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Une position de vote est manquante");
+            }
+            if (!positionsDejaVotees.add(pv.getPositionId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous avez envoyé deux votes pour le même poste");
             }
 
-            PositionElectorale position = positionMap.get(voteParPoste.getPositionId());
+            PositionElectorale pos = positions.stream()
+                    .filter(p -> p.getId().equals(pv.getPositionId()))
+                    .findFirst()
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Poste électoral invalide : " + pv.getPositionId()));
 
-            if (position == null) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Poste électoral invalide : " + voteParPoste.getPositionId()
-                );
+            if (voteRepo.existsByElectionIdAndPositionElectoraleIdAndVoterKeyHash(
+                    election.getId(), pos.getId(), voterKeyHash)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Vous avez déjà voté pour le poste : " + pos.getLibelle());
             }
 
-            if (!positionsDejaVotees.add(position.getId())) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Le poste \"" + position.getLibelle() + "\" est présent plusieurs fois dans le bulletin"
-                );
+            List<Long> cids = pv.getCandidatureIds();
+            if (cids == null || cids.isEmpty()) continue;
+
+            if (cids.size() > pos.getMaxVotesParElecteur()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Vous ne pouvez choisir que " + pos.getMaxVotesParElecteur()
+                                + " candidat(s) pour le poste " + pos.getLibelle());
+            }
+            if (cids.stream().distinct().count() != cids.size()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Le même candidat est sélectionné plusieurs fois pour " + pos.getLibelle());
             }
 
-            List<Long> candidatureIds = voteParPoste.getCandidatureIds();
-
-            if (candidatureIds == null || candidatureIds.isEmpty()) {
-                continue;
-            }
-
-            if (candidatureIds.stream().distinct().count() != candidatureIds.size()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Vous avez sélectionné le même candidat plusieurs fois pour " + position.getLibelle()
-                );
-            }
-
-            if (candidatureIds.size() > position.getMaxVotesParElecteur()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Maximum " + position.getMaxVotesParElecteur()
-                                + " candidat(s) pour " + position.getLibelle()
-                );
-            }
-
-            for (Long candidatureId : candidatureIds) {
-                Candidature c = candidatureRepo.findById(candidatureId)
-                        .filter(x -> x.getElection().getId().equals(e.getId()))
-                        .filter(x -> x.getStatut() == StatutCandidature.VALIDEE)
-                        .filter(x -> x.getPosition() != null)
-                        .filter(x -> x.getPosition().getId().equals(position.getId()))
-                        .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST,
-                                "Candidature invalide pour le poste "
-                                        + position.getLibelle()
-                                        + " : " + candidatureId
-                        ));
-
-                BulletinVote b = new BulletinVote();
-                b.setElection(e);
-                b.setPositionElectorale(position);
-                b.setCandidature(c);
-
-                bulletins.add(b);
+            for (Long cid : cids) {
+                final Long posId = pos.getId();
+                Candidature cand = Optional.ofNullable(candidatureCache.get(cid))
+                        .filter(c -> c.getElection().getId().equals(election.getId()))
+                        .filter(c -> c.getStatut() == StatutCandidature.VALIDEE)
+                        .filter(c -> c.getPosition() != null && c.getPosition().getId().equals(posId))
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "Candidature invalide pour le poste " + pos.getLibelle()));
+                votes.add(buildVote(election, pos, cand, voterKeyHash, prevHash, startSeq + votes.size() + 1));
             }
         }
+        return votes;
+    }
 
-        return bulletins;
+    private Vote buildVote(Election election, PositionElectorale pos, Candidature cand,
+                            String voterKeyHash, String prevHash, long sequenceNum) {
+        String voteHash = buildVoteHash(election.getId(),
+                pos != null ? pos.getId() : 0L, cand.getId(), voterKeyHash);
+        Vote v = new Vote();
+        v.setElection(election);
+        v.setPositionElectorale(pos);
+        v.setCandidature(null);
+        v.setEncryptedChoice(encryptionService.encrypt(cand.getId()));
+        v.setVoterKeyHash(voterKeyHash);
+        v.setVoteHash(voteHash);
+        v.setPrevHash(prevHash);
+        v.setSequenceNum(sequenceNum);
+        return v;
+    }
+
+    private String buildVoteHash(Long electionId, Long positionId, Long candidatureId, String voterKeyHash) {
+        return sha256(electionId + ":" + positionId + ":" + candidatureId + ":" + voterKeyHash);
+    }
+
+    private String sha256(String input) {
+        try {
+            MessageDigest d = MessageDigest.getInstance("SHA-256");
+            byte[] bytes = d.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException("SHA-256 unavailable", ex);
+        }
+    }
+
+    private Map<Long, Long> buildVoteCountMap(Long electionId) {
+        return voteRepo.findByElectionId(electionId).stream()
+                .filter(v -> v.getEncryptedChoice() != null)
+                .collect(Collectors.groupingBy(
+                        v -> encryptionService.decrypt(v.getEncryptedChoice()),
+                        Collectors.counting()
+                ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.onmm.backend.dto.election.VoteIntegrityReportDto verifyVoteIntegrity(Long electionId) {
+        findElection(electionId);
+        ElectionIntegrityState state = integrityStateRepo.findById(electionId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "État d'intégrité manquant — le vote n'a peut-être pas encore été ouvert"));
+
+        List<Vote> votes = voteRepo.findByElectionIdOrderBySequenceNumAsc(electionId);
+        long totalVotes = votes.size();
+        long expectedVotes = state.getVoteCount();
+        boolean deletionDetected = totalVotes != expectedVotes;
+
+        long tampered = 0;
+        for (Vote v : votes) {
+            Long posId = v.getPositionElectorale() != null ? v.getPositionElectorale().getId() : 0L;
+            Long candId = v.getEncryptedChoice() != null
+                    ? encryptionService.decrypt(v.getEncryptedChoice())
+                    : (v.getCandidature() != null ? v.getCandidature().getId() : null);
+            if (candId == null) { tampered++; continue; }
+            String expected = buildVoteHash(electionId, posId, candId, v.getVoterKeyHash());
+            if (!expected.equals(v.getVoteHash())) tampered++;
+        }
+
+        return new com.onmm.backend.dto.election.VoteIntegrityReportDto(
+                electionId, expectedVotes, totalVotes,
+                totalVotes - tampered, tampered,
+                deletionDetected, tampered == 0 && !deletionDetected
+        );
     }
 
     private boolean hasCriticalExAequo(List<CandidatureDto> ranked, int seats) {
@@ -2105,143 +1981,6 @@ public class ElectionServiceImpl implements ElectionService {
         return cleaned.isBlank() ? null : cleaned;
     }
 
-    private void enregistrerVotesParPosition(
-            Election election,
-            ParticipationElectorale participation,
-            List<PositionVoteRequest> votesParPosition
-    ) {
-        List<PositionElectorale> positions =
-                positionRepo.findByElectionIdOrderByOrdreAsc(election.getId())
-                        .stream()
-                        .filter(PositionElectorale::isActif)
-                        .collect(Collectors.toList());
-
-        if (positions.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Cette élection ne contient aucun poste électoral actif"
-            );
-        }
-
-        Set<Long> positionIdsSoumises = new HashSet<>();
-
-        for (PositionVoteRequest pv : votesParPosition) {
-            if (pv.getPositionId() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Une position de vote est manquante");
-            }
-
-            if (!positionIdsSoumises.add(pv.getPositionId())) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "La même position est présente plusieurs fois dans le bulletin"
-                );
-            }
-
-            PositionElectorale position = positions.stream()
-                    .filter(p -> p.getId().equals(pv.getPositionId()))
-                    .findFirst()
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST,
-                            "Position invalide : " + pv.getPositionId()
-                    ));
-
-            List<Long> candidatureIds = pv.getCandidatureIds();
-
-            if (candidatureIds == null || candidatureIds.isEmpty()) {
-                continue;
-            }
-
-            if (candidatureIds.size() > position.getMaxVotesParElecteur()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Maximum " + position.getMaxVotesParElecteur()
-                                + " candidat(s) pour le poste : " + position.getLibelle()
-                );
-            }
-
-            if (candidatureIds.stream().distinct().count() != candidatureIds.size()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Vous avez sélectionné le même candidat plusieurs fois pour : " + position.getLibelle()
-                );
-            }
-
-            for (Long candidatureId : candidatureIds) {
-                Candidature candidature = candidatureRepo.findById(candidatureId)
-                        .filter(c -> c.getElection().getId().equals(election.getId()))
-                        .filter(c -> c.getStatut() == StatutCandidature.VALIDEE)
-                        .filter(c -> c.getPosition() != null)
-                        .filter(c -> c.getPosition().getId().equals(position.getId()))
-                        .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST,
-                                "Candidature invalide : " + candidatureId
-                        ));
-
-                BulletinVote bulletin = new BulletinVote();
-                bulletin.setParticipation(participation);
-                bulletin.setElection(election);
-                bulletin.setPositionElectorale(position);
-                bulletin.setCandidature(candidature);
-
-                bulletinRepo.save(bulletin);
-            }
-        }
-
-        long totalVotes = bulletinRepo.countByParticipationId(participation.getId());
-
-        if (totalVotes == 0) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Le bulletin ne contient aucun choix"
-            );
-        }
-    }
-
-    private void enregistrerVotesSimples(
-            Election election,
-            ParticipationElectorale participation,
-            List<Long> candidatureIds
-    ) {
-        if (candidatureIds == null || candidatureIds.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aucun candidat sélectionné");
-        }
-
-        int max = election.getMaxVotesParElecteur() > 0
-                ? election.getMaxVotesParElecteur()
-                : election.getSeatsCount();
-
-        if (candidatureIds.size() > max) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Vous ne pouvez sélectionner que " + max + " candidat(s)"
-            );
-        }
-
-        if (candidatureIds.stream().distinct().count() != candidatureIds.size()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Vous avez sélectionné le même candidat plusieurs fois"
-            );
-        }
-
-        for (Long candidatureId : candidatureIds) {
-            Candidature candidature = candidatureRepo.findById(candidatureId)
-                    .filter(c -> c.getElection().getId().equals(election.getId()))
-                    .filter(c -> c.getStatut() == StatutCandidature.VALIDEE)
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST,
-                            "Candidature invalide : " + candidatureId
-                    ));
-
-            BulletinVote bulletin = new BulletinVote();
-            bulletin.setParticipation(participation);
-            bulletin.setElection(election);
-            bulletin.setCandidature(candidature);
-            bulletin.setPositionElectorale(candidature.getPosition());
-
-            bulletinRepo.save(bulletin);
-        }
-    }
 
     private Election findElection(Long id) {
         return electionRepo.findById(id)
@@ -2496,7 +2235,7 @@ public class ElectionServiceImpl implements ElectionService {
     }
 
     private boolean isResultsVisibleAdmin(Election e) {
-        return e.getStatut() == ElectionStatut.TERMINEE
+        return e.getStatut() == ElectionStatut.DEPOUILLEMENT
                 || e.getStatut() == ElectionStatut.RESULTATS_PUBLIES
                 || e.getStatut() == ElectionStatut.ARCHIVEE;
     }
@@ -2586,15 +2325,16 @@ public class ElectionServiceImpl implements ElectionService {
     }
 
     private String buildVotantHash(Long electionId, Medecin m) {
-        String raw = electionId + ":" + m.getId() + ":" + m.getEmail() + ":" + hashSecret;
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] bytes = digest.digest(raw.getBytes(StandardCharsets.UTF_8));
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(hashSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            String message = electionId + ":" + m.getId() + ":" + m.getEmail();
+            byte[] bytes = mac.doFinal(message.getBytes(StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
             for (byte b : bytes) sb.append(String.format("%02x", b));
             return sb.toString();
-        } catch (NoSuchAlgorithmException ex) {
-            throw new RuntimeException("SHA-256 unavailable", ex);
+        } catch (Exception ex) {
+            throw new RuntimeException("HMAC-SHA256 unavailable", ex);
         }
     }
 
@@ -2659,7 +2399,7 @@ public class ElectionServiceImpl implements ElectionService {
                 candidatureRepo.countByElectionIdAndStatut(e.getId(), StatutCandidature.VALIDEE)
         );
 
-        long nbVotants = participationRepo.countByElectionId(e.getId());
+        long nbVotants = voteRepo.countDistinctVotersByElectionId(e.getId());
         long nbElecteursEligibles = countElecteursEligibles(e);
 
         dto.setNbVotants(nbVotants);
@@ -2688,7 +2428,7 @@ public class ElectionServiceImpl implements ElectionService {
         dto.setPositionsEligibles(positionsEligibles);
 
         String votantHash = buildVotantHash(e.getId(), medecin);
-        dto.setAVote(participationRepo.existsByElectionIdAndVotantHash(e.getId(), votantHash));
+        dto.setAVote(voteRepo.existsByElectionIdAndVoterKeyHash(e.getId(), votantHash));
 
         Optional<Candidature> maCand = candidatureRepo.findByElectionIdAndMedecinEmail(e.getId(), medecin.getEmail());
         maCand.ifPresent(c -> dto.setMaCandidature(toCandidatureDto(c, isResultsVisible(e))));
@@ -2696,12 +2436,27 @@ public class ElectionServiceImpl implements ElectionService {
         List<Candidature> allValidee = candidatureRepo.findByElectionIdAndStatut(e.getId(), StatutCandidature.VALIDEE);
         boolean showVotes = isResultsVisible(e);
         String viewerEmail = medecin.getEmail();
-        dto.setCandidatures(allValidee.stream()
-                .map(c -> toCandidatureDto(c, showVotes, viewerEmail))
-                .collect(Collectors.toList()));
-        dto.setCandidaturesEligibles(allValidee.stream()
+
+        // Pré-charger les votes en déchiffrant encrypted_choice (candidature_id n'est plus stocké en clair)
+        Map<Long, Long> voteCounts = showVotes ? buildVoteCountMap(e.getId()) : Collections.emptyMap();
+
+        // Calculer les DTOs une seule fois avec les comptages pré-chargés
+        List<CandidatureDto> allDtos = allValidee.stream()
+                .map(c -> {
+                    CandidatureDto cDto = toCandidatureDto(c, false, viewerEmail);
+                    cDto.setNbVotes(voteCounts.getOrDefault(c.getId(), 0L));
+                    return cDto;
+                })
+                .collect(Collectors.toList());
+        dto.setCandidatures(allDtos);
+
+        // Filtrer les éligibles depuis les IDs sans recalculer les DTOs
+        Set<Long> eligibleIds = allValidee.stream()
                 .filter(c -> c.getPosition() == null || isPositionEligiblePourMedecin(e, c.getPosition(), medecin))
-                .map(c -> toCandidatureDto(c, showVotes, viewerEmail))
+                .map(Candidature::getId)
+                .collect(Collectors.toSet());
+        dto.setCandidaturesEligibles(allDtos.stream()
+                .filter(d -> eligibleIds.contains(d.getId()))
                 .collect(Collectors.toList()));
 
         // peutCandidater + raisonIneligibilite
@@ -2776,10 +2531,12 @@ public class ElectionServiceImpl implements ElectionService {
         dto.setCommentaireValidation(c.getCommentaireValidation());
         dto.setDateDepot(c.getDateDepot());
         dto.setDateValidation(c.getDateValidation());
-        dto.setNbVotes(showVotes ? bulletinRepo.countByElectionIdAndCandidatureId(c.getElection().getId(), c.getId()) : 0);
-        dto.setDocuments(documentRepo.findByCandidatureId(c.getId()).stream()
-                .map(this::toDocumentDto).collect(Collectors.toList()));
-        documentRepo.findByCandidatureIdAndTypeDocument(c.getId(), TypeDocumentCandidature.PHOTO)
+        dto.setNbVotes(0); // vote count is set externally via buildVoteCountMap
+        List<CandidatureDocument> docs = documentRepo.findByCandidatureId(c.getId());
+        dto.setDocuments(docs.stream().map(this::toDocumentDto).collect(Collectors.toList()));
+        docs.stream()
+                .filter(d -> d.getTypeDocument() == TypeDocumentCandidature.PHOTO)
+                .findFirst()
                 .ifPresent(photoDoc -> {
                     String path = photoDoc.getFilePath();
                     dto.setPhotoCandidatureUrl(path.startsWith("/") ? path : "/" + path);

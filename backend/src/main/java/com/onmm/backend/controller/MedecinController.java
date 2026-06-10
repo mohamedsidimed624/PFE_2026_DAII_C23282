@@ -3,6 +3,7 @@ package com.onmm.backend.controller;
 import com.onmm.backend.dto.medecin.*;
 import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.service.MedecinService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/medecin")
-@CrossOrigin(origins = "http://localhost:5173")
 public class MedecinController {
 
     private final MedecinService medecinService;
@@ -42,7 +42,7 @@ public class MedecinController {
     @PutMapping("/me")
     public ResponseEntity<MedecinProfileResponse> updateProfile(
             Authentication authentication,
-            @RequestBody UpdateMedecinProfileRequest request
+            @Valid @RequestBody UpdateMedecinProfileRequest request
     ) {
         return ResponseEntity.ok(medecinService.updateMyProfile(currentEmail(authentication), request));
     }

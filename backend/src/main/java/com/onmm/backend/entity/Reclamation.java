@@ -6,11 +6,15 @@ import com.onmm.backend.entity.enums.ReclamationModule;
 import com.onmm.backend.entity.enums.ReclamationPriorite;
 import com.onmm.backend.entity.enums.ReclamationStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reclamations")
+@Getter
+@Setter
 public class Reclamation {
 
     @Id
@@ -96,187 +100,5 @@ public class Reclamation {
     public Reclamation() {
     }
 
-    public Long getId() {
-        return id;
-    }
 
-    public String getNumeroReclamation() {
-        return numeroReclamation;
-    }
-
-    public void setNumeroReclamation(String numeroReclamation) {
-        this.numeroReclamation = numeroReclamation;
-    }
-
-    public ReclamationAuteurType getTypeAuteur() {
-        return typeAuteur;
-    }
-
-    public void setTypeAuteur(ReclamationAuteurType typeAuteur) {
-        this.typeAuteur = typeAuteur;
-    }
-
-    public ReclamationCategory getCategorie() {
-        return categorie;
-    }
-
-    public void setCategorie(ReclamationCategory categorie) {
-        this.categorie = categorie;
-    }
-
-    public ReclamationPriorite getPriorite() {
-        return priorite;
-    }
-
-    public void setPriorite(ReclamationPriorite priorite) {
-        this.priorite = priorite;
-    }
-
-    public ReclamationModule getModuleConcerne() {
-        return moduleConcerne;
-    }
-
-    public void setModuleConcerne(ReclamationModule moduleConcerne) {
-        this.moduleConcerne = moduleConcerne;
-    }
-
-    public String getObjet() {
-        return objet;
-    }
-
-    public void setObjet(String objet) {
-        this.objet = objet;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getPieceJointePath() {
-        return pieceJointePath;
-    }
-
-    public void setPieceJointePath(String pieceJointePath) {
-        this.pieceJointePath = pieceJointePath;
-    }
-
-    public ReclamationStatus getStatut() {
-        return statut;
-    }
-
-    public void setStatut(ReclamationStatus statut) {
-        this.statut = statut;
-    }
-
-    public LocalDateTime getDateCreation() {
-        return dateCreation;
-    }
-
-    public void setDateCreation(LocalDateTime dateCreation) {
-        this.dateCreation = dateCreation;
-    }
-
-    public LocalDateTime getDatePriseEnCharge() {
-        return datePriseEnCharge;
-    }
-
-    public void setDatePriseEnCharge(LocalDateTime datePriseEnCharge) {
-        this.datePriseEnCharge = datePriseEnCharge;
-    }
-
-    public LocalDateTime getDateCloture() {
-        return dateCloture;
-    }
-
-    public void setDateCloture(LocalDateTime dateCloture) {
-        this.dateCloture = dateCloture;
-    }
-
-    public LocalDateTime getDateDerniereMiseAJour() {
-        return dateDerniereMiseAJour;
-    }
-
-    public void setDateDerniereMiseAJour(LocalDateTime dateDerniereMiseAJour) {
-        this.dateDerniereMiseAJour = dateDerniereMiseAJour;
-    }
-
-    public Medecin getMedecin() {
-        return medecin;
-    }
-
-    public void setMedecin(Medecin medecin) {
-        this.medecin = medecin;
-    }
-
-    public String getNomCitoyen() {
-        return nomCitoyen;
-    }
-
-    public void setNomCitoyen(String nomCitoyen) {
-        this.nomCitoyen = nomCitoyen;
-    }
-
-    public String getPrenomCitoyen() {
-        return prenomCitoyen;
-    }
-
-    public void setPrenomCitoyen(String prenomCitoyen) {
-        this.prenomCitoyen = prenomCitoyen;
-    }
-
-    public String getVilleCitoyen() {
-        return villeCitoyen;
-    }
-
-    public void setVilleCitoyen(String villeCitoyen) {
-        this.villeCitoyen = villeCitoyen;
-    }
-
-    public String getAdresseCitoyen() {
-        return adresseCitoyen;
-    }
-
-    public void setAdresseCitoyen(String adresseCitoyen) {
-        this.adresseCitoyen = adresseCitoyen;
-    }
-
-    public String getTelephoneCitoyen() {
-        return telephoneCitoyen;
-    }
-
-    public void setTelephoneCitoyen(String telephoneCitoyen) {
-        this.telephoneCitoyen = telephoneCitoyen;
-    }
-
-    public String getEmailCitoyen() {
-        return emailCitoyen;
-    }
-
-    public void setEmailCitoyen(String emailCitoyen) {
-        this.emailCitoyen = emailCitoyen;
-    }
-
-    public String getAdminResponse() {
-        return adminResponse;
-    }
-
-    public void setAdminResponse(String adminResponse) {
-        this.adminResponse = adminResponse;
-    }
-
-    public User getAdminTraiteur() {
-        return adminTraiteur;
-    }
-
-    public void setAdminTraiteur(User adminTraiteur) {
-        this.adminTraiteur = adminTraiteur;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

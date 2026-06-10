@@ -4,6 +4,7 @@ import com.onmm.backend.dto.election.*;
 import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.entity.enums.TypeDocumentCandidature;
 import com.onmm.backend.service.Admin.ElectionService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/medecin/elections")
-@CrossOrigin(origins = "http://localhost:5173")
 public class MedecinElectionController {
 
     private final ElectionService electionService;
@@ -45,7 +45,7 @@ public class MedecinElectionController {
     @PostMapping("/{id}/candidater")
     public ResponseEntity<CandidatureDto> candidater(
             @PathVariable Long id,
-            @RequestBody CandidatureCreateRequest req,
+            @Valid @RequestBody CandidatureCreateRequest req,
             Authentication auth
     ) {
         CandidatureDto dto = electionService.soumettreCandidature(id, req, currentEmail(auth));
@@ -61,7 +61,7 @@ public class MedecinElectionController {
     @PostMapping("/{id}/voter")
     public ResponseEntity<Void> voter(
             @PathVariable Long id,
-            @RequestBody VoteRequest req,
+            @Valid @RequestBody VoteRequest req,
             Authentication auth
     ) {
         electionService.voter(id, req, currentEmail(auth));

@@ -2,12 +2,12 @@
   "version": 1,
   "entries": [],
   "last_report": {
-    "generated_at": "2026-05-28T13:34:25.474881300+00:00",
-    "completed_at": "2026-05-28T13:34:25.485522300+00:00",
+    "generated_at": "2026-06-09T13:39:16.430648+00:00",
+    "completed_at": "2026-06-09T13:39:17.968398700+00:00",
     "reported_scopes": [
       {
         "scope_kind": "project",
-        "scope_id": "8a2b93cf0bb3ccb9",
+        "scope_id": "cd5bc3e5ec576c29",
         "label": "project workspace"
       }
     ],
@@ -15,31 +15,31 @@
       {
         "competitor": "claude_code",
         "scope_kind": "project",
-        "scope_id": "8a2b93cf0bb3ccb9",
+        "scope_id": "cd5bc3e5ec576c29",
         "source_label": ".claude"
       },
       {
         "competitor": "open_code",
         "scope_kind": "project",
-        "scope_id": "8a2b93cf0bb3ccb9",
+        "scope_id": "cd5bc3e5ec576c29",
         "source_label": ".opencode"
       },
       {
         "competitor": "kilo_code",
         "scope_kind": "project",
-        "scope_id": "8a2b93cf0bb3ccb9",
+        "scope_id": "cd5bc3e5ec576c29",
         "source_label": ".kilo"
       },
       {
         "competitor": "kilo_code",
         "scope_kind": "project",
-        "scope_id": "8a2b93cf0bb3ccb9",
+        "scope_id": "cd5bc3e5ec576c29",
         "source_label": ".kilocode"
       },
       {
         "competitor": "continue_dev",
         "scope_kind": "project",
-        "scope_id": "8a2b93cf0bb3ccb9",
+        "scope_id": "cd5bc3e5ec576c29",
         "source_label": ".continue"
       }
     ],

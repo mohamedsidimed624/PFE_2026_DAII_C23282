@@ -4,12 +4,12 @@ import com.onmm.backend.dto.reclamation.CreatePublicReclamationRequest;
 import com.onmm.backend.dto.reclamation.ReclamationCreatedResponse;
 import com.onmm.backend.service.FileStorageService;
 import com.onmm.backend.service.ReclamationService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/public/reclamations")
-@CrossOrigin(origins = "http://localhost:5173")
 public class PublicReclamationController {
 
     private final ReclamationService reclamationService;
@@ -23,7 +23,7 @@ public class PublicReclamationController {
 
     @PostMapping
     public ReclamationCreatedResponse createPublicReclamation(
-            @RequestPart("data") CreatePublicReclamationRequest request,
+            @Valid @RequestPart("data") CreatePublicReclamationRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
         String pieceJointePath = fileStorageService.storeReclamationFile(file);

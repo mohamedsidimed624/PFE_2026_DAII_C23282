@@ -40,9 +40,6 @@ export const ouvrirVotes = (id) =>
 export const cloturerVotes = (id) =>
   api.put(`/admin/elections/${id}/cloturer-votes`);
 
-export const terminerDepouillement = (id) =>
-  api.put(`/admin/elections/${id}/terminer-depouillement`);
-
 export const publierResultats = (id) =>
   api.put(`/admin/elections/${id}/publier-resultats`);
 
