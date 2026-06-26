@@ -16,6 +16,7 @@ import {
   CalendarDays,
   Loader2,
 } from "lucide-react";
+import { resolveFileUrl } from "../../../config/api";
 
 const TYPE_OPTIONS = [
   {
@@ -271,11 +272,7 @@ function ContenuWizardModal({
           : "",
       });
 
-      setImagePreview(
-        initialData.imageUrl
-          ? `http://localhost:8080${initialData.imageUrl}`
-          : ""
-      );
+      setImagePreview(resolveFileUrl(initialData.imageUrl) || "");
     } else {
       setForm({
         type: "ANNONCE",

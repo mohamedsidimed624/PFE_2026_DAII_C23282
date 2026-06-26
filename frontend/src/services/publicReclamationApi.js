@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
-const API_URL = "http://localhost:8080/api/public/reclamations";
+const API_URL = `${API_BASE_URL}/api/public/reclamations`;
 
 export const createPublicReclamation = async (data, file) => {
   const formData = new FormData();

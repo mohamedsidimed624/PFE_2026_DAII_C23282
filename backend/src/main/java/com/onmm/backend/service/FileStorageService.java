@@ -1,20 +1,22 @@
 package com.onmm.backend.service;
 
 import com.onmm.backend.exception.BusinessException;
-import org.springframework.beans.factory.annotation.Value;
+import com.onmm.backend.service.storage.ObjectStorageService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.*;
 import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class FileStorageService {
 
-    @Value("${upload.dir}")
-    private String uploadDir;
+    private final ObjectStorageService objectStorageService;
+
+    public FileStorageService(ObjectStorageService objectStorageService) {
+        this.objectStorageService = objectStorageService;
+    }
 
     // ── Images (contenu/annonces, photos profil) ──────────────────────────────
     private static final long MAX_IMAGE_SIZE = 3 * 1024 * 1024;  // 3 MB
@@ -107,14 +109,9 @@ public class FileStorageService {
             }
 
             String safeFileName = UUID.randomUUID() + extension;
+            String key = folder + "/" + safeFileName;
 
-            Path targetDir = Paths.get(uploadDir, folder);
-            Files.createDirectories(targetDir);
-
-            Path targetPath = targetDir.resolve(safeFileName);
-            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-
-            return "/uploads/" + folder + "/" + safeFileName;
+            return objectStorageService.upload(key, file.getBytes(), file.getContentType());
 
         } catch (IOException e) {
             throw new RuntimeException("Impossible d'enregistrer le fichier", e);

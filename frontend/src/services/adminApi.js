@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
-const API_URL = "http://localhost:8080/api/admin/demandes";
+const API_URL = `${API_BASE_URL}/api/admin/demandes`;
 
 const getAuthConfig = () => {
   const token = localStorage.getItem("token");
@@ -41,7 +42,7 @@ export const rejectDemande = async (id, comment) => {
 
 export const getAllMedecins = async () => {
   const res = await axios.get(
-    "http://localhost:8080/api/admin/medecins",
+    `${API_BASE_URL}/api/admin/medecins`,
     getAuthConfig(),
   );
   return res.data;
@@ -49,7 +50,7 @@ export const getAllMedecins = async () => {
 
 export const getMedecinById = async (id) => {
   const res = await axios.get(
-    `http://localhost:8080/api/admin/medecins/${id}`,
+    `${API_BASE_URL}/api/admin/medecins/${id}`,
     getAuthConfig(),
   );
   return res.data;
@@ -57,7 +58,7 @@ export const getMedecinById = async (id) => {
 
 export const reactivateMedecin = async (id) => {
   const res = await axios.put(
-    `http://localhost:8080/api/admin/medecins/${id}/reactivate`,
+    `${API_BASE_URL}/api/admin/medecins/${id}/reactivate`,
     {},
     getAuthConfig(),
   );
@@ -66,7 +67,7 @@ export const reactivateMedecin = async (id) => {
 
 export const suspendMedecin = async (id, adminComment) => {
   const res = await axios.put(
-    `http://localhost:8080/api/admin/medecins/${id}/suspend`,
+    `${API_BASE_URL}/api/admin/medecins/${id}/suspend`,
     { adminComment },
     getAuthConfig(),
   );
@@ -75,7 +76,7 @@ export const suspendMedecin = async (id, adminComment) => {
 
 export const deleteMedecin = async (id) => {
   const res = await axios.delete(
-    `http://localhost:8080/api/admin/medecins/${id}`,
+    `${API_BASE_URL}/api/admin/medecins/${id}`,
     getAuthConfig(),
   );
   return res.data;

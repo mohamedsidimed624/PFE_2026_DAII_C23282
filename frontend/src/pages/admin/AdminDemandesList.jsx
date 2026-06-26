@@ -97,7 +97,7 @@ function AdminDemandesList() {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search by order id"
+              placeholder="Rechercher par nom, NNI..."
               value={search}
               onChange={handleSearch}
               className="h-10 w-[240px] rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 pr-10 text-[13px] text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400"
@@ -115,14 +115,14 @@ function AdminDemandesList() {
           >
             {STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>
-                {s === "Tous" ? "Status : All" : s}
+                {s === "Tous" ? "Tous les statuts" : s}
               </option>
             ))}
           </select>
         </div>
 
         <button className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200">
-          Filter by date range
+          Filtrer par période
         </button>
       </div>
 

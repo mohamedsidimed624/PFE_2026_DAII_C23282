@@ -11,18 +11,15 @@ import com.onmm.backend.entity.*;
 import com.onmm.backend.repository.*;
 import com.onmm.backend.service.MedecinService;
 import com.onmm.backend.service.NotificationService;
+import com.onmm.backend.service.storage.ObjectStorageService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,9 +37,8 @@ public class MedecinServiceImpl implements MedecinService {
     private final SpecialiteRepository specialiteRepository;
     private final SousSpecialiteRepository sousSpecialiteRepository;
     private final NotificationService notificationService;
-
-    @Value("${upload.dir}")
-    private String uploadDir;
+    private final PasswordEncoder passwordEncoder;
+    private final ObjectStorageService objectStorageService;
 
     public MedecinServiceImpl(
             MedecinRepository medecinRepository,
@@ -51,7 +47,9 @@ public class MedecinServiceImpl implements MedecinService {
             MedecinDocumentRepository documentRepository,
             SpecialiteRepository specialiteRepository,
             SousSpecialiteRepository sousSpecialiteRepository,
-            NotificationService notificationService
+            NotificationService notificationService,
+            PasswordEncoder passwordEncoder,
+            ObjectStorageService objectStorageService
     ) {
         this.medecinRepository = medecinRepository;
         this.educationRepository = educationRepository;
@@ -60,6 +58,8 @@ public class MedecinServiceImpl implements MedecinService {
         this.specialiteRepository = specialiteRepository;
         this.sousSpecialiteRepository = sousSpecialiteRepository;
         this.notificationService = notificationService;
+        this.passwordEncoder = passwordEncoder;
+        this.objectStorageService = objectStorageService;
     }
 
     // ── Profile ──────────────────────────────────────────────────────────────
@@ -83,6 +83,7 @@ public class MedecinServiceImpl implements MedecinService {
         medecin.setTelephone(request.getTelephone());
         medecin.setNationalite(request.getNationalite());
         medecin.setAdresse(request.getAdresse());
+        medecin.setWilayaExercice(request.getWilayaExercice());
 
         medecinRepository.save(medecin);
 
@@ -125,23 +126,19 @@ public class MedecinServiceImpl implements MedecinService {
                 .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         try {
-            Path uploadPath = Paths.get(uploadDir, "profiles");
-            Files.createDirectories(uploadPath);
-
             String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "photo";
             String extension = "";
             int dotIndex = originalName.lastIndexOf('.');
             if (dotIndex >= 0) extension = originalName.substring(dotIndex);
 
             String fileName = "medecin_" + medecin.getId() + "_" + UUID.randomUUID() + extension;
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            String key = "profiles/" + fileName;
+            String url = objectStorageService.upload(key, file.getBytes(), contentType);
 
-            String relativePath = "/uploads/profiles/" + fileName;
-            medecin.setPhotoProfilPath(relativePath);
+            medecin.setPhotoProfilPath(url);
             medecinRepository.save(medecin);
 
-            return relativePath;
+            return url;
         } catch (IOException e) {
             throw new RuntimeException("Erreur lors de l'enregistrement de la photo");
         }
@@ -261,22 +258,19 @@ public class MedecinServiceImpl implements MedecinService {
                 .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
 
         try {
-            Path uploadPath = Paths.get(uploadDir, "documents", "medecin_" + medecin.getId());
-            Files.createDirectories(uploadPath);
-
             String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "document";
             String extension = "";
             int dotIndex = originalName.lastIndexOf('.');
             if (dotIndex >= 0) extension = originalName.substring(dotIndex);
 
             String fileName = UUID.randomUUID() + extension;
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            String key = "documents/medecin_" + medecin.getId() + "/" + fileName;
+            String url = objectStorageService.upload(key, file.getBytes(), file.getContentType());
 
             MedecinDocument doc = new MedecinDocument();
             doc.setMedecin(medecin);
             doc.setFileName(originalName);
-            doc.setFilePath("/uploads/documents/medecin_" + medecin.getId() + "/" + fileName);
+            doc.setFilePath(url);
             doc.setTypeDocument(typeDocument != null ? typeDocument : "AUTRE");
             doc.setCategorie(categorie != null ? categorie : "AUTRE");
             doc.setSize(file.getSize());
@@ -320,6 +314,7 @@ public class MedecinServiceImpl implements MedecinService {
         response.setPhotoProfilPath(medecin.getPhotoProfilPath());
         response.setSectionOrdre(medecin.getSectionOrdre() != null ? medecin.getSectionOrdre().name() : null);
         response.setVilleExercice(medecin.getVilleExercice());
+        response.setWilayaExercice(medecin.getWilayaExercice());
         response.setEducations(
                 medecin.getEducations() == null
                         ? List.of()
@@ -387,81 +382,140 @@ public class MedecinServiceImpl implements MedecinService {
                 .orElse("Médecine générale");
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Document doc = new Document(PageSize.A4, 60, 60, 70, 60);
+            Document doc = new Document(PageSize.A4, 50, 50, 50, 50);
             PdfWriter writer = PdfWriter.getInstance(doc, out);
             doc.open();
 
-            // ── Header bar ───────────────────────────────────────────────────
-            Color teal = new Color(15, 118, 110);
-            Color lightTeal = new Color(204, 234, 232);
+            Color green      = new Color(22, 163, 74);   // vert ONMM (#16A34A)
+            Color lightGreen = new Color(220, 245, 230);
+            Color borderGray = new Color(120, 120, 120);
 
+            // ── Cadre du document ───────────────────────────────────────────
             PdfContentByte cb = writer.getDirectContent();
-            cb.setColorFill(teal);
-            cb.rectangle(60, PageSize.A4.getHeight() - 110, PageSize.A4.getWidth() - 120, 50);
-            cb.fill();
+            float pageW = PageSize.A4.getWidth();
+            float pageH = PageSize.A4.getHeight();
+            cb.setColorStroke(green);
+            cb.setLineWidth(2.2f);
+            cb.rectangle(28, 28, pageW - 56, pageH - 56);
+            cb.stroke();
+            cb.setColorStroke(borderGray);
+            cb.setLineWidth(0.6f);
+            cb.rectangle(34, 34, pageW - 68, pageH - 68);
+            cb.stroke();
 
-            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16, Color.WHITE);
-            Paragraph headerPara = new Paragraph("ORDRE NATIONAL DES MÉDECINS DE MAURITANIE", headerFont);
-            headerPara.setAlignment(Element.ALIGN_CENTER);
-            headerPara.setSpacingBefore(18f);
-            doc.add(headerPara);
+            Font institutionFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 15, Color.BLACK);
+            Font subHeaderFont   = FontFactory.getFont(FontFactory.HELVETICA, 11, green);
+            Font bodyFont        = FontFactory.getFont(FontFactory.HELVETICA, 12, Color.DARK_GRAY);
+            Font labelFont       = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, green);
+            Font valueFont       = FontFactory.getFont(FontFactory.HELVETICA, 12, Color.BLACK);
+            Font titleFont       = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 17, Color.BLACK);
+            Font refFont         = FontFactory.getFont(FontFactory.HELVETICA, 9, Color.GRAY);
+            Font footerFont      = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 9, Color.GRAY);
+            Font signatureFont   = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.BLACK);
 
-            Font subHeaderFont = FontFactory.getFont(FontFactory.HELVETICA, 11, teal);
-            Paragraph subHeader = new Paragraph("Certificat d'adhésion", subHeaderFont);
+            doc.add(new Paragraph(" "));
+
+            // ── Numéro de référence (coin) ──────────────────────────────────
+            String reference = "N° CERT-" + (medecin.getNumeroInscription() != null ? medecin.getNumeroInscription() : medecin.getId())
+                    + "-" + LocalDate.now().getYear();
+            Paragraph refPara = new Paragraph(reference, refFont);
+            refPara.setAlignment(Element.ALIGN_RIGHT);
+            doc.add(refPara);
+
+            // ── Emblème ONMM ─────────────────────────────────────────────────
+            try {
+                Image logo = Image.getInstance(getClass().getClassLoader().getResource("static/images/logo-onmm.png"));
+                logo.scaleToFit(85, 85);
+                logo.setAlignment(Element.ALIGN_CENTER);
+                logo.setSpacingBefore(4f);
+                logo.setSpacingAfter(10f);
+                doc.add(logo);
+            } catch (Exception ignored) {
+                // Logo introuvable : le certificat reste valide sans image
+            }
+
+            Paragraph institution = new Paragraph("ORDRE NATIONAL DES MÉDECINS DE MAURITANIE", institutionFont);
+            institution.setAlignment(Element.ALIGN_CENTER);
+            doc.add(institution);
+
+            Paragraph subHeader = new Paragraph("Conseil National de l'Ordre", subHeaderFont);
             subHeader.setAlignment(Element.ALIGN_CENTER);
-            subHeader.setSpacingAfter(20f);
+            subHeader.setSpacingAfter(14f);
             doc.add(subHeader);
 
             // ── Divider ───────────────────────────────────────────────────────
-            cb.setColorFill(lightTeal);
-            cb.rectangle(60, PageSize.A4.getHeight() - 165, PageSize.A4.getWidth() - 120, 2);
+            cb.setColorFill(green);
+            cb.rectangle(120, pageH - 175, pageW - 240, 1.5f);
             cb.fill();
-
-            // ── Certificate body ──────────────────────────────────────────────
-            Font bodyFont   = FontFactory.getFont(FontFactory.HELVETICA, 12, Color.DARK_GRAY);
-            Font labelFont  = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, teal);
-            Font valueFont  = FontFactory.getFont(FontFactory.HELVETICA, 12, Color.BLACK);
-            Font titleFont  = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Color.BLACK);
 
             doc.add(new Paragraph(" "));
 
             Paragraph certTitle = new Paragraph("CERTIFICAT D'ADHÉSION", titleFont);
             certTitle.setAlignment(Element.ALIGN_CENTER);
-            certTitle.setSpacingAfter(25f);
+            certTitle.setSpacingBefore(16f);
+            certTitle.setSpacingAfter(22f);
             doc.add(certTitle);
 
             Paragraph intro = new Paragraph(
                 "L'Ordre National des Médecins de Mauritanie certifie que :", bodyFont);
             intro.setAlignment(Element.ALIGN_CENTER);
-            intro.setSpacingAfter(20f);
+            intro.setSpacingAfter(18f);
             doc.add(intro);
 
-            // Info table
+            // ── Grille d'informations (cellules bordées) ─────────────────────
             PdfPTable table = new PdfPTable(2);
-            table.setWidthPercentage(80);
+            table.setWidthPercentage(85);
             table.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table.setSpacingBefore(10f);
-            table.setSpacingAfter(30f);
+            table.setSpacingBefore(6f);
+            table.setSpacingAfter(34f);
             table.setWidths(new float[]{40, 60});
 
-            addTableRow(table, "Nom complet", "Dr. " + medecin.getPrenom() + " " + medecin.getNom(), labelFont, valueFont, lightTeal);
+            addTableRow(table, "Nom complet", "Dr. " + medecin.getPrenom() + " " + medecin.getNom(), labelFont, valueFont, lightGreen);
             addTableRow(table, "N° Inscription", medecin.getNumeroInscription() != null ? medecin.getNumeroInscription() : "—", labelFont, valueFont, Color.WHITE);
-            addTableRow(table, "Spécialité", specialite, labelFont, valueFont, lightTeal);
+            addTableRow(table, "Spécialité", specialite, labelFont, valueFont, lightGreen);
             addTableRow(table, "Statut", "ACTIF", labelFont, valueFont, Color.WHITE);
             addTableRow(table, "Date de délivrance",
                 LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH)),
-                labelFont, valueFont, lightTeal);
+                labelFont, valueFont, lightGreen);
             doc.add(table);
 
+            // ── Zone signature / cachet ──────────────────────────────────────
+            PdfPTable signatureBlock = new PdfPTable(2);
+            signatureBlock.setWidthPercentage(85);
+            signatureBlock.setHorizontalAlignment(Element.ALIGN_CENTER);
+            signatureBlock.setWidths(new float[]{50, 50});
+
+            PdfPCell placeCell = new PdfPCell();
+            placeCell.setBorder(Rectangle.NO_BORDER);
+            Paragraph place = new Paragraph(
+                "Fait à Nouakchott, le " + LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH)),
+                bodyFont);
+            placeCell.addElement(place);
+            signatureBlock.addCell(placeCell);
+
+            PdfPCell signCell = new PdfPCell();
+            signCell.setBorder(Rectangle.NO_BORDER);
+            signCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            Paragraph signLabel = new Paragraph("Le Président de l'Ordre", signatureFont);
+            signLabel.setAlignment(Element.ALIGN_CENTER);
+            signCell.addElement(signLabel);
+            signCell.addElement(new Paragraph(" "));
+            signCell.addElement(new Paragraph(" "));
+            Paragraph signLine = new Paragraph("_________________________", bodyFont);
+            signLine.setAlignment(Element.ALIGN_CENTER);
+            signCell.addElement(signLine);
+            signatureBlock.addCell(signCell);
+
+            doc.add(signatureBlock);
+
             // ── Footer ─────────────────────────────────────────────────────────
-            Font footerFont = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 9, Color.GRAY);
             Paragraph footer = new Paragraph(
                 "Ce certificat est valable pour l'exercice en cours.\n" +
                 "Tout exercice illégal de la médecine est passible de sanctions pénales.\n" +
                 "ONMM — Ordre National des Médecins de Mauritanie",
                 footerFont);
             footer.setAlignment(Element.ALIGN_CENTER);
-            footer.setSpacingBefore(30f);
+            footer.setSpacingBefore(26f);
             doc.add(footer);
 
             doc.close();
@@ -485,5 +539,30 @@ public class MedecinServiceImpl implements MedecinService {
 
         table.addCell(labelCell);
         table.addCell(valueCell);
+    }
+
+    // ── Sécurité ───────────────────────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public void changePassword(String email, ChangePasswordRequest request) {
+        Medecin medecin = medecinRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin introuvable"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), medecin.getPassword())) {
+            throw new BusinessException("Mot de passe actuel incorrect");
+        }
+
+        medecin.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        medecinRepository.save(medecin);
+
+        notificationService.createMedecinNotification(
+                email,
+                "SECURITE",
+                "Mot de passe modifié",
+                "Votre mot de passe a été modifié avec succès.",
+                "/medecin/parametres",
+                false
+        );
     }
 }

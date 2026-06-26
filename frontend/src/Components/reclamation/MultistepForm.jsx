@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, RotateCcw, Loader2 } from "lucide-react";
 
@@ -130,7 +129,6 @@ export default function MultistepForm() {
       };
       const res = await createPublicReclamation(payload, data.fichier);
       setReceipt({ numeroReclamation: res?.numeroReclamation || res?.reference || res?.id || "—" });
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       setStep(3);
       localStorage.removeItem("publicReclamationFormData");
     } catch (err) {

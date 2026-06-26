@@ -70,6 +70,9 @@ public class AuthServiceImpl implements AuthService {
         user.setEnabled(true);
         userRepository.save(user);
 
+        token.setUsed(true);
+        tokenRepository.save(token);
+
         return "Compte activé avec succès";
     }
 
@@ -144,7 +147,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("Type de token invalide.");
         }
         if (!token.getUser().getEmail().equalsIgnoreCase(email)) {
-            throw new RuntimeException("Email incorrect. Vérifiez l'adresse email associée à votre compte.");
+            throw new BusinessException("Email incorrect. Vérifiez l'adresse email associée à votre compte.");
         }
     }
 

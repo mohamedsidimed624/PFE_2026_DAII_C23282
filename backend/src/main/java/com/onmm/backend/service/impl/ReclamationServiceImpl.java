@@ -128,6 +128,15 @@ public class ReclamationServiceImpl implements ReclamationService {
                 true
         );
 
+        notificationService.createMedecinNotification(
+                medecin.getEmail(),
+                "RECLAMATION_CONFIRMEE",
+                "Réclamation enregistrée",
+                "Votre réclamation " + reclamation.getNumeroReclamation() + " a bien été enregistrée.",
+                "/medecin/reclamations/" + reclamation.getId(),
+                false
+        );
+
         return toCreatedResponse(reclamation);
     }
 
@@ -200,6 +209,17 @@ public class ReclamationServiceImpl implements ReclamationService {
                 "/admin/reclamations/" + id,
                 false
         );
+
+        if (reclamation.getTypeAuteur() == ReclamationAuteurType.MEDECIN && reclamation.getMedecin() != null) {
+            notificationService.createMedecinNotification(
+                    reclamation.getMedecin().getEmail(),
+                    "RECLAMATION_PRISE_EN_CHARGE",
+                    "Votre réclamation est en cours de traitement",
+                    "Votre réclamation " + reclamation.getNumeroReclamation() + " est en cours de traitement par l'administration.",
+                    "/medecin/reclamations/" + id,
+                    false
+            );
+        }
     }
 
     @Override
@@ -236,6 +256,17 @@ public class ReclamationServiceImpl implements ReclamationService {
                 "/admin/reclamations/" + id,
                 false
         );
+
+        if (reclamation.getTypeAuteur() == ReclamationAuteurType.MEDECIN && reclamation.getMedecin() != null) {
+            notificationService.createMedecinNotification(
+                    reclamation.getMedecin().getEmail(),
+                    "RECLAMATION_CLOTUREE",
+                    "Réponse à votre réclamation",
+                    "L'administration a répondu à votre réclamation " + reclamation.getNumeroReclamation() + ".",
+                    "/medecin/reclamations/" + id,
+                    true
+            );
+        }
 
         String destinataireEmail;
         String destinataireNom;

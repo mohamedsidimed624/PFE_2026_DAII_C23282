@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
-const API_URL = "http://localhost:8080/api/medecin";
+const API_URL = `${API_BASE_URL}/api/medecin`;
 
 const authHeaders = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -46,3 +47,7 @@ export const deleteMyDocument   = (id)        => axios.delete(`${API_URL}/me/doc
 // ── Certificate ────────────────────────────────────────────────────────────
 export const downloadCertificat = () =>
   axios.get(`${API_URL}/me/certificat`, { ...authHeaders(), responseType: "blob" });
+
+// ── Sécurité ───────────────────────────────────────────────────────────────
+export const changePassword = (data) =>
+  axios.put(`${API_URL}/me/password`, data, authHeaders());

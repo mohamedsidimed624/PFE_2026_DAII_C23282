@@ -33,9 +33,13 @@ import {
 } from "../../services/medecinApi";
 
 import { getSpecialites, getSousSpecialites } from "../../services/api";
+import { API_BASE_URL as BASE_URL } from "../../config/api";
 
-const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const WILAYAS = [
+  "Adrar", "Assaba", "Brakna", "Dakhlet Nouadhibou", "Gorgol", "Guidimakha",
+  "Hodh Ech Chargui", "Hodh El Gharbi", "Inchiri", "Nouakchott Nord",
+  "Nouakchott Ouest", "Nouakchott Sud", "Tagant", "Tiris Zemmour", "Trarza",
+];
 
 const TABS = [
   { id: "profil", label: "Profil personnel", icon: User },
@@ -49,14 +53,6 @@ const DOC_TYPES = [
   "CERTIFICAT",
   "ATTESTATION",
   "AUTORISATION",
-  "AUTRE",
-];
-
-const DOC_CATS = [
-  "DIPLOME",
-  "CERTIFICAT",
-  "AUTORISATION",
-  "EXPERIENCE",
   "AUTRE",
 ];
 
@@ -166,7 +162,7 @@ function EmptyState({ icon, text }) {
 
 function ModalBase({ title, onClose, children, footer }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -651,7 +647,6 @@ function ExperienceModal({ onClose, onSaved }) {
 function DocumentModal({ onClose, onSaved }) {
   const [file, setFile] = useState(null);
   const [type, setType] = useState("AUTRE");
-  const [cat, setCat] = useState("AUTRE");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
@@ -667,7 +662,7 @@ function DocumentModal({ onClose, onSaved }) {
     setErr("");
 
     try {
-      const res = await uploadMyDocument(file, type, cat);
+      const res = await uploadMyDocument(file, type, type);
       onSaved(res.data);
     } catch {
       setErr("Erreur lors du téléversement.");
@@ -741,40 +736,21 @@ function DocumentModal({ onClose, onSaved }) {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
-            Type
-          </label>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className={sel}
-          >
-            {DOC_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
-            Catégorie
-          </label>
-          <select
-            value={cat}
-            onChange={(e) => setCat(e.target.value)}
-            className={sel}
-          >
-            {DOC_CATS.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div>
+        <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+          Type
+        </label>
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          className={sel}
+        >
+          {DOC_TYPES.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
       </div>
     </ModalBase>
   );
@@ -914,6 +890,7 @@ export default function MedecinProfilPage() {
             telephone: data.telephone || "",
             nationalite: data.nationalite || "",
             adresse: data.adresse || "",
+            wilayaExercice: data.wilayaExercice || "",
           });
         } else {
           setLoadError("Impossible de charger votre profil.");
@@ -1189,6 +1166,29 @@ export default function MedecinProfilPage() {
                     />
                   </div>
 
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-500">
+                      Wilaya d'exercice
+                    </label>
+                    <select
+                      className={inp}
+                      value={form.wilayaExercice || ""}
+                      onChange={(e) =>
+                        setForm((p) => ({
+                          ...p,
+                          wilayaExercice: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="">— Sélectionner une wilaya —</option>
+                      {WILAYAS.map((w) => (
+                        <option key={w} value={w}>
+                          {w}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   {saveErr && (
                     <p className="text-xs font-medium text-red-600">
                       {saveErr}
@@ -1260,6 +1260,11 @@ export default function MedecinProfilPage() {
                 <Field
                   label="Section"
                   value={profile.sectionOrdre?.replace(/_/g, " ")}
+                />
+
+                <Field
+                  label="Wilaya d'exercice"
+                  value={profile.wilayaExercice}
                 />
 
                 <Field

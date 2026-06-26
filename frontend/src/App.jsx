@@ -14,7 +14,7 @@ import AdminRoute from "./routes/AdminRoute";
 import MedecinRoute from "./routes/MedecinRoute";
 
 import MedecinDashboard from "./pages/medecin/MedecinDashboard";
-import PlaceholderPage from "./pages/medecin/PlaceholderPage";
+import MedecinParametresPage from "./pages/medecin/MedecinParametresPage.jsx";
 import MedecinProfilPage from "./pages/medecin/MedecinProfilPage.jsx";
 
 import AnnuaireMedecinDetailPage from "./pages/AnnuaireMedecinDetailPage.jsx";
@@ -30,6 +30,7 @@ import MedecinSondageParticipationPage from "./pages/medecin/MedecinSondageParti
 import MedecinSondageResultatsPage from "./pages/medecin/MedecinSondageResultatsPage.jsx";
 import MedecinElectionsPage from "./pages/medecin/MedecinElectionsPage.jsx";
 import MedecinElectionDetailPage from "./pages/medecin/MedecinElectionDetailPage.jsx";
+import MedecinElectionCandidatesPage from "./pages/medecin/MedecinElectionCandidatesPage.jsx";
 import MedecinVotingPage from "./pages/medecin/MedecinVotingPage.jsx";
 import MedecinCandidaturesPage from "./pages/medecin/MedecinCandidaturesPage.jsx";
 import CandidatureFormPage from "./pages/medecin/CandidatureFormPage.jsx";
@@ -130,15 +131,6 @@ function App() {
         />
 
         <Route
-          path="/medecin/documents"
-          element={
-            <MedecinRoute>
-              <PlaceholderPage title="Mes documents" />
-            </MedecinRoute>
-          }
-        />
-
-        <Route
           path="/medecin/notifications"
           element={
             <MedecinRoute>
@@ -148,15 +140,6 @@ function App() {
         />
 
 
-
-        <Route
-          path="/medecin/reclamations"
-          element={
-            <MedecinRoute>
-              <PlaceholderPage title="Réclamation" />
-            </MedecinRoute>
-          }
-        />
 
         <Route
           path="/medecin/sondages"
@@ -204,6 +187,15 @@ function App() {
         />
 
         <Route
+          path="/medecin/elections/:id/candidats"
+          element={
+            <MedecinRoute>
+              <MedecinElectionCandidatesPage />
+            </MedecinRoute>
+          }
+        />
+
+        <Route
           path="/medecin/elections/:id/voter"
           element={
             <MedecinRoute>
@@ -243,7 +235,7 @@ function App() {
           path="/medecin/parametres"
           element={
             <MedecinRoute>
-              <PlaceholderPage title="Paramètres" />
+              <MedecinParametresPage />
             </MedecinRoute>
           }
         />

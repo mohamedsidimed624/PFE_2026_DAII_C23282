@@ -6,6 +6,7 @@ import {
   rejectDemande,
 } from "../../services/adminApi";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { resolveFileUrl } from "../../config/api";
 import {
   ArrowLeft,
   GraduationCap,
@@ -289,7 +290,7 @@ function AdminDemandeDetail() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <a
-                      href={`http://localhost:8080/${doc.filePath}`}
+                      href={resolveFileUrl(doc.filePath)}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
@@ -298,7 +299,7 @@ function AdminDemandeDetail() {
                       Voir
                     </a>
                     <button
-                      onClick={() => downloadFile(`http://localhost:8080/${doc.filePath}`, doc.fileName)}
+                      onClick={() => downloadFile(resolveFileUrl(doc.filePath), doc.fileName)}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-xs font-medium text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
                     >
                       <Download size={13} />
@@ -417,7 +418,7 @@ function AdminDemandeDetail() {
 
 {/* ── Modal Rejet ── */}
 {showRejectModal && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
     <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
       
       <div className="flex items-start justify-between border-b border-slate-100 bg-red-50/70 px-5 py-4 dark:border-slate-800 dark:bg-red-900/10">

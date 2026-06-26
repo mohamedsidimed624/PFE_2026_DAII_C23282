@@ -6,7 +6,6 @@ import com.onmm.backend.entity.enums.*;
 import com.onmm.backend.repository.*;
 import com.onmm.backend.service.Admin.ElectionService;
 import com.onmm.backend.service.NotificationService;
-import com.onmm.backend.service.VoteEncryptionService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,8 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -40,21 +37,15 @@ public class ElectionServiceImpl implements ElectionService {
     private final ElectionAuditLogRepository auditRepo;
     private final CandidatureDocumentRepository documentRepo;
     private final com.onmm.backend.service.FileStorageService fileStorageService;
-    private final VoteEncryptionService encryptionService;
-    private final ElectionIntegrityStateRepository integrityStateRepo;
+    private final com.onmm.backend.service.election.crypto.BallotCryptoService ballotCryptoService;
+    private final com.onmm.backend.service.election.key.KeyManagementService keyManagementService;
+    private final com.onmm.backend.service.election.crypto.HashingService hashingService;
+    private final com.onmm.backend.service.election.crypto.SignatureService signatureService;
+    private final com.onmm.backend.service.election.ElectionAuditService electionAuditService;
 
-    @Value("${app.election.hash-secret:dev-election-secret}")
-    private String hashSecret;
-
-    @jakarta.annotation.PostConstruct
-    private void validateHashSecret() {
-        if (hashSecret == null || hashSecret.isBlank() || hashSecret.equals("dev-election-secret")) {
-            throw new IllegalStateException(
-                "[SECURITY] app.election.hash-secret n'est pas configuré. " +
-                "Définissez la propriété dans application.properties."
-            );
-        }
-    }
+    // Secret racine du module élections — validé au démarrage par KeyManagementService.
+    @Value("${app.election.master-secret}")
+    private String masterSecret;
 
     public ElectionServiceImpl(
             ElectionRepository electionRepo,
@@ -67,8 +58,11 @@ public class ElectionServiceImpl implements ElectionService {
             ElectionAuditLogRepository auditRepo,
             CandidatureDocumentRepository documentRepo,
             com.onmm.backend.service.FileStorageService fileStorageService,
-            VoteEncryptionService encryptionService,
-            ElectionIntegrityStateRepository integrityStateRepo
+            com.onmm.backend.service.election.crypto.BallotCryptoService ballotCryptoService,
+            com.onmm.backend.service.election.key.KeyManagementService keyManagementService,
+            com.onmm.backend.service.election.crypto.HashingService hashingService,
+            com.onmm.backend.service.election.crypto.SignatureService signatureService,
+            com.onmm.backend.service.election.ElectionAuditService electionAuditService
     ) {
         this.electionRepo = electionRepo;
         this.candidatureRepo = candidatureRepo;
@@ -80,8 +74,11 @@ public class ElectionServiceImpl implements ElectionService {
         this.auditRepo = auditRepo;
         this.documentRepo = documentRepo;
         this.fileStorageService = fileStorageService;
-        this.encryptionService = encryptionService;
-        this.integrityStateRepo = integrityStateRepo;
+        this.ballotCryptoService = ballotCryptoService;
+        this.keyManagementService = keyManagementService;
+        this.hashingService = hashingService;
+        this.signatureService = signatureService;
+        this.electionAuditService = electionAuditService;
     }
 
     private static final List<ElectionStatut> STATUTS_INACTIFS =
@@ -193,6 +190,10 @@ public class ElectionServiceImpl implements ElectionService {
         if (req.getCandidatureStartDate() == null || req.getCandidatureEndDate() == null
                 || req.getVoteStartDate() == null || req.getVoteEndDate() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Toutes les dates sont requises");
+        }
+        if (!req.getCandidatureStartDate().isAfter(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La date de début des candidatures doit être dans le futur, pour laisser le temps de configurer les postes électoraux avant l'ouverture automatique.");
         }
         if (!req.getCandidatureEndDate().isAfter(req.getCandidatureStartDate())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -453,6 +454,15 @@ public class ElectionServiceImpl implements ElectionService {
                 "Candidature",
                 c.getId()
         );
+
+        notificationService.createMedecinNotification(
+                c.getMedecin().getEmail(),
+                "CANDIDATURE_VALIDEE",
+                "Candidature validée",
+                "Votre candidature pour l'élection \"" + c.getElection().getTitre() + "\" a été validée.",
+                "/medecin/candidatures",
+                false
+        );
     }
 
     @Override
@@ -466,12 +476,8 @@ public class ElectionServiceImpl implements ElectionService {
         e.setStatut(ElectionStatut.VOTE_EN_COURS);
         electionRepo.save(e);
 
-        ElectionIntegrityState integrityState = new ElectionIntegrityState();
-        integrityState.setElectionId(id);
-        integrityState.setLastHash(sha256("genesis:" + id));
-        integrityState.setVoteCount(0L);
-        integrityState.setUpdatedAt(LocalDateTime.now());
-        integrityStateRepo.save(integrityState);
+        // Génère la paire RSA-2048 de cette élection (clé privée inaccessible avant clôture)
+        keyManagementService.generateElectionKeyPair(id);
 
         auditAdmin(
                 e,
@@ -498,11 +504,14 @@ public class ElectionServiceImpl implements ElectionService {
         requireStatut(e, ElectionStatut.VOTE_EN_COURS);
         e.setStatut(ElectionStatut.DEPOUILLEMENT);
         electionRepo.save(e);
+
+        // Chaque bulletin est déjà signé (Ed25519) depuis sa soumission — rien à faire ici.
+        // La clé privée RSA de l'élection devient accessible (statut != VOTE_EN_COURS).
         auditAdmin(
                 e,
                 "VOTE_CLOTURE",
                 adminEmail,
-                "Clôture officielle du vote",
+                "Clôture officielle du vote.",
                 "CRITICAL",
                 "Election",
                 id
@@ -869,6 +878,15 @@ public class ElectionServiceImpl implements ElectionService {
                 "Candidature",
                 c.getId()
         );
+
+        notificationService.createMedecinNotification(
+                c.getMedecin().getEmail(),
+                "CANDIDATURE_REJETEE",
+                "Candidature rejetée",
+                "Votre candidature pour l'élection \"" + c.getElection().getTitre() + "\" a été rejetée. Motif : " + commentaire.trim(),
+                "/medecin/candidatures",
+                true
+        );
     }
 
     @Override
@@ -963,7 +981,7 @@ public class ElectionServiceImpl implements ElectionService {
 
     @Override
     @Transactional
-    public void voter(Long electionId, VoteRequest req, String email) {
+    public VoteReceiptDto voter(Long electionId, VoteRequest req, String email) {
         Election e = findElection(electionId);
         Medecin medecin = findMedecin(email);
 
@@ -995,7 +1013,7 @@ public class ElectionServiceImpl implements ElectionService {
             );
         }
 
-        String votantHash = buildVotantHash(electionId, medecin);
+        String voterToken = buildVoterToken(electionId, medecin);
 
         // Auto-vote check
         List<Long> allSelectedIds = new ArrayList<>();
@@ -1031,14 +1049,11 @@ public class ElectionServiceImpl implements ElectionService {
             }
         }
 
-        ElectionIntegrityState state = integrityStateRepo.findByIdForUpdate(e.getId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.INTERNAL_SERVER_ERROR, "État d'intégrité manquant pour cette élection"));
+        // Horodatage calculé une seule fois pour tout le lot, réutilisé sans recalcul pour le
+        // hash ET la signature de chaque bulletin (un second appel à now() désynchroniserait les deux).
+        LocalDateTime timestamp = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
 
-        String batchPrevHash = state.getLastHash();
-        long batchStartSeq = state.getVoteCount();
-
-        List<Vote> votes = buildAndValidateVotes(e, req, votantHash, batchPrevHash, batchStartSeq);
+        List<Vote> votes = buildAndValidateVotes(e, req, voterToken, timestamp);
 
         if (votes.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aucun vote valide fourni");
@@ -1050,15 +1065,6 @@ public class ElectionServiceImpl implements ElectionService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Vous avez déjà voté pour l'un de ces postes.");
         }
 
-        String newLastHash = state.getLastHash();
-        for (Vote v : votes) {
-            newLastHash = sha256(newLastHash + ":" + v.getVoteHash());
-        }
-        state.setLastHash(newLastHash);
-        state.setVoteCount(batchStartSeq + votes.size());
-        state.setUpdatedAt(LocalDateTime.now());
-        integrityStateRepo.save(state);
-
         audit(
                 e,
                 "VOTE_ENREGISTRE",
@@ -1069,6 +1075,8 @@ public class ElectionServiceImpl implements ElectionService {
                 "Election",
                 electionId
         );
+
+        return new VoteReceiptDto(timestamp, "Vote enregistré avec " + votes.size() + " bulletin(s).");
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -1676,8 +1684,8 @@ public class ElectionServiceImpl implements ElectionService {
                 ));
     }
 
-    private List<Vote> buildAndValidateVotes(Election election, VoteRequest req, String voterKeyHash,
-                                              String prevHash, long startSeq) {
+    private List<Vote> buildAndValidateVotes(Election election, VoteRequest req, String voterToken,
+                                              LocalDateTime timestamp) {
         List<PositionElectorale> positions = positionRepo
                 .findByElectionIdOrderByOrdreAsc(election.getId())
                 .stream()
@@ -1685,13 +1693,13 @@ public class ElectionServiceImpl implements ElectionService {
                 .collect(Collectors.toList());
 
         return positions.isEmpty()
-                ? buildVotesSansPostes(election, req, voterKeyHash, prevHash, startSeq)
-                : buildVotesAvecPostes(election, req, positions, voterKeyHash, prevHash, startSeq);
+                ? buildVotesSansPostes(election, req, voterToken, timestamp)
+                : buildVotesAvecPostes(election, req, positions, voterToken, timestamp);
     }
 
-    private List<Vote> buildVotesSansPostes(Election election, VoteRequest req, String voterKeyHash,
-                                             String prevHash, long startSeq) {
-        if (voteRepo.existsByElectionIdAndVoterKeyHash(election.getId(), voterKeyHash)) {
+    private List<Vote> buildVotesSansPostes(Election election, VoteRequest req, String voterToken,
+                                             LocalDateTime timestamp) {
+        if (voteRepo.existsByElectionIdAndVoterToken(election.getId(), voterToken)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Vous avez déjà voté pour cette élection.");
         }
 
@@ -1716,14 +1724,14 @@ public class ElectionServiceImpl implements ElectionService {
                     .filter(c -> c.getElection().getId().equals(election.getId()))
                     .filter(c -> c.getStatut() == StatutCandidature.VALIDEE)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Candidature invalide : " + cid));
-            votes.add(buildVote(election, null, cand, voterKeyHash, prevHash, startSeq + votes.size() + 1));
+            votes.add(buildVote(election, null, cand, voterToken, timestamp));
         }
         return votes;
     }
 
     private List<Vote> buildVotesAvecPostes(Election election, VoteRequest req,
-                                             List<PositionElectorale> positions, String voterKeyHash,
-                                             String prevHash, long startSeq) {
+                                             List<PositionElectorale> positions, String voterToken,
+                                             LocalDateTime timestamp) {
         if (req.getVotes() == null || req.getVotes().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le vote doit être organisé par poste");
         }
@@ -1753,8 +1761,8 @@ public class ElectionServiceImpl implements ElectionService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                             "Poste électoral invalide : " + pv.getPositionId()));
 
-            if (voteRepo.existsByElectionIdAndPositionElectoraleIdAndVoterKeyHash(
-                    election.getId(), pos.getId(), voterKeyHash)) {
+            if (voteRepo.existsByElectionIdAndPositionElectoraleIdAndVoterToken(
+                    election.getId(), pos.getId(), voterToken)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
                         "Vous avez déjà voté pour le poste : " + pos.getLibelle());
             }
@@ -1780,81 +1788,57 @@ public class ElectionServiceImpl implements ElectionService {
                         .filter(c -> c.getPosition() != null && c.getPosition().getId().equals(posId))
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                 "Candidature invalide pour le poste " + pos.getLibelle()));
-                votes.add(buildVote(election, pos, cand, voterKeyHash, prevHash, startSeq + votes.size() + 1));
+                votes.add(buildVote(election, pos, cand, voterToken, timestamp));
             }
         }
         return votes;
     }
 
     private Vote buildVote(Election election, PositionElectorale pos, Candidature cand,
-                            String voterKeyHash, String prevHash, long sequenceNum) {
-        String voteHash = buildVoteHash(election.getId(),
-                pos != null ? pos.getId() : 0L, cand.getId(), voterKeyHash);
+                            String voterToken, LocalDateTime timestamp) {
+        // Chiffrement hybride AES-256-GCM + RSA-2048-OAEP
+        String encryptedChoice = ballotCryptoService.encryptChoice(cand.getId(), election.getId());
+        // Empreinte d'intégrité — jamais le candidatureId en clair
+        String voteHash = hashingService.buildVoteHash(election.getId(), voterToken, encryptedChoice, timestamp);
+        // Preuve d'authenticité de l'origine — calculée à la soumission, pas en batch à la clôture
+        String ballotSignature = signatureService.signBallot(encryptedChoice, voterToken, timestamp);
+
         Vote v = new Vote();
         v.setElection(election);
         v.setPositionElectorale(pos);
-        v.setCandidature(null);
-        v.setEncryptedChoice(encryptionService.encrypt(cand.getId()));
-        v.setVoterKeyHash(voterKeyHash);
+        v.setEncryptedChoice(encryptedChoice);
+        v.setVoterToken(voterToken);
         v.setVoteHash(voteHash);
-        v.setPrevHash(prevHash);
-        v.setSequenceNum(sequenceNum);
+        v.setBallotSignature(ballotSignature);
+        v.setDateVote(timestamp);
         return v;
     }
 
-    private String buildVoteHash(Long electionId, Long positionId, Long candidatureId, String voterKeyHash) {
-        return sha256(electionId + ":" + positionId + ":" + candidatureId + ":" + voterKeyHash);
-    }
-
-    private String sha256(String input) {
-        try {
-            MessageDigest d = MessageDigest.getInstance("SHA-256");
-            byte[] bytes = d.digest(input.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : bytes) sb.append(String.format("%02x", b));
-            return sb.toString();
-        } catch (NoSuchAlgorithmException ex) {
-            throw new RuntimeException("SHA-256 unavailable", ex);
-        }
-    }
-
     private Map<Long, Long> buildVoteCountMap(Long electionId) {
+        Election election = findElection(electionId);
         return voteRepo.findByElectionId(electionId).stream()
-                .filter(v -> v.getEncryptedChoice() != null)
-                .collect(Collectors.groupingBy(
-                        v -> encryptionService.decrypt(v.getEncryptedChoice()),
-                        Collectors.counting()
-                ));
+                .map(v -> {
+                    try {
+                        return ballotCryptoService.decryptChoice(v.getEncryptedChoice(), electionId, election.getStatut());
+                    } catch (Exception ex) {
+                        return null; // bulletin altéré, ou clé non encore accessible — ignoré du décompte
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(id -> id, Collectors.counting()));
     }
 
     @Override
     @Transactional(readOnly = true)
     public com.onmm.backend.dto.election.VoteIntegrityReportDto verifyVoteIntegrity(Long electionId) {
         findElection(electionId);
-        ElectionIntegrityState state = integrityStateRepo.findById(electionId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "État d'intégrité manquant — le vote n'a peut-être pas encore été ouvert"));
-
-        List<Vote> votes = voteRepo.findByElectionIdOrderBySequenceNumAsc(electionId);
+        List<Vote> votes = voteRepo.findByElectionId(electionId);
+        long tampered = votes.stream()
+                .filter(v -> !hashingService.verifyVoteHash(v, electionId))
+                .count();
         long totalVotes = votes.size();
-        long expectedVotes = state.getVoteCount();
-        boolean deletionDetected = totalVotes != expectedVotes;
-
-        long tampered = 0;
-        for (Vote v : votes) {
-            Long posId = v.getPositionElectorale() != null ? v.getPositionElectorale().getId() : 0L;
-            Long candId = v.getEncryptedChoice() != null
-                    ? encryptionService.decrypt(v.getEncryptedChoice())
-                    : (v.getCandidature() != null ? v.getCandidature().getId() : null);
-            if (candId == null) { tampered++; continue; }
-            String expected = buildVoteHash(electionId, posId, candId, v.getVoterKeyHash());
-            if (!expected.equals(v.getVoteHash())) tampered++;
-        }
-
         return new com.onmm.backend.dto.election.VoteIntegrityReportDto(
-                electionId, expectedVotes, totalVotes,
-                totalVotes - tampered, tampered,
-                deletionDetected, tampered == 0 && !deletionDetected
+                electionId, totalVotes, totalVotes - tampered, tampered, tampered == 0
         );
     }
 
@@ -2020,6 +2004,23 @@ public class ElectionServiceImpl implements ElectionService {
             return false;
         }
 
+        ElectionType type = e.getType();
+        if (type == ElectionType.BUREAU_SECTION_A && medecin.getSectionOrdre() != SectionOrdre.GENERALISTE) {
+            return false;
+        }
+        if (type == ElectionType.BUREAU_SECTION_B && medecin.getSectionOrdre() != SectionOrdre.SPECIALISTE) {
+            return false;
+        }
+        if (type == ElectionType.BUREAU_SECTION_C && medecin.getSectionOrdre() != SectionOrdre.ENSEIGNANT_CHERCHEUR) {
+            return false;
+        }
+        if (type == ElectionType.REPRESENTANTS_REGIONAUX) {
+            String wilaya = medecin.getWilayaExercice();
+            if (wilaya == null || wilaya.isBlank() || !wilaya.equalsIgnoreCase(e.getRegion())) {
+                return false;
+            }
+        }
+
         if (e.getCorpsElectoral() == null
                 || e.getCorpsElectoral() == CorpsElectoral.TOUS_MEDECINS_ACTIFS) {
             return true;
@@ -2125,16 +2126,6 @@ public class ElectionServiceImpl implements ElectionService {
         if (election.getStatut() != ElectionStatut.CANDIDATURE_OUVERTE) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Les candidatures ne sont pas ouvertes pour cette élection.");
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        if (election.getCandidatureStartDate() != null && now.isBefore(election.getCandidatureStartDate())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "La période de candidature n'est pas encore ouverte.");
-        }
-        if (election.getCandidatureEndDate() != null && now.isAfter(election.getCandidatureEndDate())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "La période de candidature est clôturée.");
         }
 
         ElectionType type = election.getType();
@@ -2308,31 +2299,22 @@ public class ElectionServiceImpl implements ElectionService {
             String entityType,
             Long entityId
     ) {
-        ElectionAuditLog log = new ElectionAuditLog();
-        log.setElection(e);
-        log.setAction(action);
-        log.setActeurEmail(acteurEmail != null ? acteurEmail : "SYSTEME");
-        log.setActeurRole(acteurRole != null ? acteurRole : "SYSTEME");
-        log.setDetails(details);
-        log.setSeverity(severity != null ? severity : "INFO");
-        log.setEntityType(entityType != null ? entityType : "Election");
-        log.setEntityId(entityId != null ? entityId : e.getId());
-        auditRepo.save(log);
+        electionAuditService.save(e, action, acteurEmail, acteurRole, details, severity, entityType, entityId);
     }
 
     private String buildHashBase(Medecin m) {
         return m.getId() + ":" + m.getEmail();
     }
 
-    private String buildVotantHash(Long electionId, Medecin m) {
+    // Pseudonyme de l'électeur : HMAC-SHA256(masterSecret, electionId:medecinId) — remplace
+    // l'identité du médecin par un jeton non réversible sans connaître le secret applicatif.
+    private String buildVoterToken(Long electionId, Medecin m) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(hashSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-            String message = electionId + ":" + m.getId() + ":" + m.getEmail();
+            mac.init(new SecretKeySpec(masterSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            String message = electionId + ":" + m.getId();
             byte[] bytes = mac.doFinal(message.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : bytes) sb.append(String.format("%02x", b));
-            return sb.toString();
+            return HexFormat.of().formatHex(bytes);
         } catch (Exception ex) {
             throw new RuntimeException("HMAC-SHA256 unavailable", ex);
         }
@@ -2427,8 +2409,8 @@ public class ElectionServiceImpl implements ElectionService {
                 .collect(Collectors.toList());
         dto.setPositionsEligibles(positionsEligibles);
 
-        String votantHash = buildVotantHash(e.getId(), medecin);
-        dto.setAVote(voteRepo.existsByElectionIdAndVoterKeyHash(e.getId(), votantHash));
+        String voterToken = buildVoterToken(e.getId(), medecin);
+        dto.setAVote(voteRepo.existsByElectionIdAndVoterToken(e.getId(), voterToken));
 
         Optional<Candidature> maCand = candidatureRepo.findByElectionIdAndMedecinEmail(e.getId(), medecin.getEmail());
         maCand.ifPresent(c -> dto.setMaCandidature(toCandidatureDto(c, isResultsVisible(e))));

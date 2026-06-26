@@ -59,13 +59,13 @@ public class MedecinElectionController {
     }
 
     @PostMapping("/{id}/voter")
-    public ResponseEntity<Void> voter(
+    public ResponseEntity<VoteReceiptDto> voter(
             @PathVariable Long id,
             @Valid @RequestBody VoteRequest req,
             Authentication auth
     ) {
-        electionService.voter(id, req, currentEmail(auth));
-        return ResponseEntity.noContent().build();
+        VoteReceiptDto receipt = electionService.voter(id, req, currentEmail(auth));
+        return ResponseEntity.ok(receipt);
     }
 
     @PostMapping("/candidatures/{candidatureId}/documents")

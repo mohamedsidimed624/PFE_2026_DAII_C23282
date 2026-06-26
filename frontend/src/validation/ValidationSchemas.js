@@ -36,7 +36,11 @@ export const personalSchema = z.object({
 
   email: z.string().email("Email invalide"),
 
-  dateNaissance: z.string().min(1, "Date de naissance requise"),
+  dateNaissance: z
+    .string()
+    .min(1, "Date de naissance requise")
+    .refine((value) => !isNaN(new Date(value).getTime()), "Date invalide")
+    .refine((value) => new Date(value) <= new Date(), "La date de naissance ne peut pas être dans le futur"),
 });
 
 /* =========================

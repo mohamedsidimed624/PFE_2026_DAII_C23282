@@ -7,6 +7,7 @@ import {
   deleteMedecin,
 } from "../../services/adminApi";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { resolveFileUrl } from "../../config/api";
 import {
   ArrowLeft,
   Trash2,
@@ -227,7 +228,7 @@ function AdminMedecinDetail() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 flex flex-col sm:flex-row items-center sm:items-start gap-5">
           {medecin.photoProfilPath ? (
             <img
-              src={`http://localhost:8080${medecin.photoProfilPath}`}
+              src={resolveFileUrl(medecin.photoProfilPath)}
               alt={`${medecin.prenom} ${medecin.nom}`}
               className="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-slate-800 shadow-md shrink-0"
             />
@@ -367,7 +368,7 @@ function AdminMedecinDetail() {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <a
-                      href={`http://localhost:8080/${doc.filePath}`}
+                      href={resolveFileUrl(doc.filePath)}
                       target="_blank"
                       rel="noreferrer"
                       className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
@@ -376,7 +377,7 @@ function AdminMedecinDetail() {
                       <Eye size={14} />
                     </a>
                     <button
-                      onClick={() => downloadFile(`http://localhost:8080/${doc.filePath}`, doc.fileName)}
+                      onClick={() => downloadFile(resolveFileUrl(doc.filePath), doc.fileName)}
                       className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                       title="Télécharger"
                     >

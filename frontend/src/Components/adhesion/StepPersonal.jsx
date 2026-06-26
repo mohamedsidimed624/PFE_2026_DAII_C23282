@@ -102,7 +102,7 @@ function StepPersonal({ nextStep }) {
       {/* Ligne 1 */}
       <Field label="Sexe" required error={errors.sexe?.message}>
         <select {...register("sexe")} className={inputCls(Boolean(errors.sexe))}>
-          <option value="">Sexe</option>
+          <option value="" disabled>Sexe</option>
           <option value="Homme">Homme</option>
           <option value="Femme">Femme</option>
         </select>
@@ -113,7 +113,7 @@ function StepPersonal({ nextStep }) {
           {...register("nationalite")}
           className={inputCls(Boolean(errors.nationalite))}
         >
-          <option value="">Mauritanie</option>
+          <option value="" disabled>Mauritanie</option>
           <option value="Mauritanienne">Mauritanienne</option>
           <option value="Sénégalaise">Sénégalaise</option>
           <option value="Marocaine">Marocaine</option>
@@ -195,7 +195,7 @@ function StepPersonal({ nextStep }) {
       <Field label="Adresse" required error={errors.adresse?.message}>
         <input
           {...register("adresse")}
-          placeholder="Lorem"
+          placeholder=""
           className={inputCls(Boolean(errors.adresse))}
         />
       </Field>

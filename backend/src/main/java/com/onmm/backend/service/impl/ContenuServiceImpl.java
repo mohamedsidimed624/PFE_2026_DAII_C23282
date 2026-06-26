@@ -7,6 +7,7 @@ import com.onmm.backend.mapper.ContenuMapper;
 import com.onmm.backend.repository.*;
 import com.onmm.backend.service.Admin.ContenuService;
 import com.onmm.backend.service.FileStorageService;
+import com.onmm.backend.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -27,6 +29,7 @@ public class ContenuServiceImpl implements ContenuService {
     private final FileStorageService fileStorageService;
     private final SpecialiteRepository specialiteRepository;
     private final MedecinRepository medecinRepository;
+    private final NotificationService notificationService;
 
     @Override
     public ContenuResponseDTO create(ContenuRequestDTO dto, MultipartFile image, Long userId) {
@@ -110,7 +113,40 @@ public class ContenuServiceImpl implements ContenuService {
         contenu.setStatut(ContenuStatut.PUBLISHED);
         contenu.setDatePublication(LocalDateTime.now());
 
-        return ContenuMapper.toDTO(contenuRepository.save(contenu));
+        Contenu saved = contenuRepository.save(contenu);
+
+        if (saved.getVisibilite() == ContenuVisibilite.PRIVEE) {
+            notifyMedecinsOfContenu(saved);
+        }
+
+        return ContenuMapper.toDTO(saved);
+    }
+
+    private void notifyMedecinsOfContenu(Contenu contenu) {
+        Specialite cible = contenu.getSpecialiteCible();
+
+        medecinRepository.findAll().stream()
+                .filter(m -> m.getStatut() == StatutMedecin.ACTIF)
+                .filter(m -> cible == null || medecinMatchesSpecialite(m, cible))
+                .forEach(m -> notificationService.createMedecinNotification(
+                        m.getEmail(),
+                        "NOUVEAU_CONTENU",
+                        "Nouveau contenu publié",
+                        "L'ONMM a publié : " + contenu.getTitre(),
+                        "/medecin/contenus/" + contenu.getId(),
+                        false
+                ));
+    }
+
+    private boolean medecinMatchesSpecialite(Medecin medecin, Specialite cible) {
+        if (medecin.getEducations() == null || medecin.getEducations().isEmpty()) {
+            return false;
+        }
+        MedecinEducation reference = medecin.getEducations().stream()
+                .max(Comparator.comparing(MedecinEducation::getAnneeObtention))
+                .orElse(null);
+        return reference != null && reference.getSpecialite() != null
+                && reference.getSpecialite().getId().equals(cible.getId());
     }
 
     @Override

@@ -40,7 +40,7 @@ function Footer() {
                         <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Services en ligne</h4>
                         <ul className="space-y-4 text-sm font-medium">
                             <li><Link to="/adhesion" className="hover:text-green-400 transition-colors">Demande d'adhésion</Link></li>
-                            <li><Link to="/suivi" className="hover:text-green-400 transition-colors">Suivi de dossier</Link></li>
+                            <li><Link to="/suivi-dossier" className="hover:text-green-400 transition-colors">Suivi de dossier</Link></li>
                             <li><Link to="/reclamations" className="hover:text-green-400 transition-colors">Déposer une réclamation</Link></li>
                             <li><Link to="/login" className="hover:text-green-400 transition-colors">Espace Médecin</Link></li>
                         </ul>

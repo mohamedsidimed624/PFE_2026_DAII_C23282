@@ -22,9 +22,7 @@ import {
   Stethoscope,
   User,
 } from "lucide-react";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+import { resolveFileUrl } from "../../config/api";
 
 const isActiveStatus = (statut) =>
   ["ACTIF", "ACTIVE", "APPROVED", "VALIDE"].includes(
@@ -203,9 +201,7 @@ function PageIntro() {
 }
 
 function DoctorOverview({ profile, specialite, isActive }) {
-  const photoUrl = profile.photoProfilPath
-    ? `${API_BASE_URL}${profile.photoProfilPath}`
-    : null;
+  const photoUrl = resolveFileUrl(profile.photoProfilPath);
 
   const initials =
     `${profile.prenom?.[0] || ""}${profile.nom?.[0] || ""}`.toUpperCase() ||

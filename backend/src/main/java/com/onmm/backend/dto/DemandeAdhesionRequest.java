@@ -24,7 +24,10 @@ public class DemandeAdhesionRequest {
     @Size(max = 100, message = "Le prénom ne peut pas dépasser 100 caractères")
     private String prenom;
 
+    @NotBlank(message = "Le sexe est obligatoire")
     private String sexe;
+
+    @NotBlank(message = "La nationalité est obligatoire")
     private String nationalite;
 
     @NotNull(message = "La date de naissance est obligatoire")
@@ -39,6 +42,9 @@ public class DemandeAdhesionRequest {
     @Pattern(regexp = "^[234]\\d{7}$", message = "Format de téléphone mauritanien invalide (8 chiffres commençant par 2, 3 ou 4)")
     private String telephone;
 
+    @NotBlank(message = "L'adresse est obligatoire")
     private String adresse;
+
+    @NotBlank(message = "La wilaya d'exercice est obligatoire")
     private String wilayaExercice;
 }

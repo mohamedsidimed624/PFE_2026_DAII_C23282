@@ -207,7 +207,7 @@ export default function MedecinElectionResultsPage() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-semibold text-slate-800 dark:text-slate-100">
-                              Dr. {c.medecinPrenom} {c.medecinNom}
+                              Dr. {c.medecinNom} {c.medecinPrenom}
                             </p>
                             {isWinner && (
                               <span className="flex items-center gap-1 rounded bg-green-100 dark:bg-green-900/20 px-1.5 py-0.5 text-[10px] font-bold text-green-700 dark:text-green-400">

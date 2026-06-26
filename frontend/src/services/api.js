@@ -1,12 +1,13 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
 const API = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: `${API_BASE_URL}/api`,
 });
 
 export const createDemande = async (personalData) => {
   const response = await axios.post(
-    "http://localhost:8080/api/demandes",
+    `${API_BASE_URL}/api/demandes`,
     personalData,
   );
 
@@ -23,7 +24,7 @@ export const checkUnique = async ({ nni, email, telephone }) => {
   });
 };
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: `${API_BASE_URL}/api`,
 });
 
 export const getSpecialites = () => api.get("/reference/specialites");

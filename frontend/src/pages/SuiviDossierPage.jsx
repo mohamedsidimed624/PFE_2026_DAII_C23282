@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import {
   CheckCircle, Clock3, XCircle, User, Mail, CalendarDays,
   ArrowLeft, AlertTriangle, LogIn, RefreshCw, ShieldCheck,
-  FileSearch, MessageSquare,
+  FileSearch, MessageSquare, Search,
 } from "lucide-react";
 import { getSuiviDossier, getDemandePourReprise } from "../services/demandeSuiviApi";
 import Breadcrumb from "../components/public/Breadcrumb";
@@ -154,14 +154,17 @@ function SuiviDossierPage() {
   const { setFormData, setStep, setSubmitted } = useFormData();
 
   const [numeroDossier, setNumeroDossier] = useState("");
+  const [searchInput, setSearchInput]     = useState("");
   const [result, setResult]               = useState(null);
   const [error, setError]                 = useState("");
   const [loading, setLoading]             = useState(true);
   const [resumeLoading, setResumeLoading] = useState(false);
+  const [noNumero, setNoNumero]           = useState(false);
 
   useEffect(() => {
     const numero = searchParams.get("numero");
-    if (!numero?.trim()) { setError("Aucun numéro de dossier fourni."); setLoading(false); return; }
+    if (!numero?.trim()) { setNoNumero(true); setLoading(false); return; }
+    setNoNumero(false);
     setNumeroDossier(numero);
     (async () => {
       try {
@@ -172,6 +175,13 @@ function SuiviDossierPage() {
       finally { setLoading(false); }
     })();
   }, [searchParams]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const valeur = searchInput.trim();
+    if (!valeur) { setError("Veuillez saisir un numéro de dossier."); return; }
+    navigate(`/suivi-dossier?numero=${encodeURIComponent(valeur)}`);
+  };
 
   const handleResume = async () => {
     try {
@@ -208,6 +218,60 @@ function SuiviDossierPage() {
     </>
   );
 
+  /* ── Aucun numéro fourni : champ de saisie ── */
+  if (noNumero) return (
+    <>
+      <Navbar />
+      <Breadcrumb items={[{ label: "Accueil", to: "/" }, { label: "Suivi de dossier" }]} />
+      <div className="min-h-screen bg-slate-50">
+        <main className="mx-auto max-w-2xl px-6 py-10">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="border-b border-slate-100 bg-green-50/70 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-600">
+                  <FileSearch size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Suivre mon dossier</p>
+                  <p className="text-xs text-slate-500">Saisissez votre numéro de dossier pour consulter son état</p>
+                </div>
+              </div>
+            </div>
+            <form onSubmit={handleSearchSubmit} className="px-6 py-5">
+              <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                Numéro de dossier
+              </label>
+              <div className="flex h-12 items-center rounded-xl border border-slate-200 bg-white px-4 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-500/10">
+                <input
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Entrez votre numéro de dossier"
+                  className="min-w-0 flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+                />
+              </div>
+              {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+                >
+                  <Search size={15} /> Rechercher
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/")}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                >
+                  <ArrowLeft size={15} /> Retour à l'accueil
+                </button>
+              </div>
+            </form>
+          </div>
+        </main>
+      </div>
+    </>
+  );
+
   /* ── Error (no result) ── */
   if (error && !result) return (
     <>
@@ -235,12 +299,34 @@ function SuiviDossierPage() {
                   <p className="mt-1 font-mono text-sm font-semibold text-slate-700">{numeroDossier}</p>
                 </div>
               )}
-              <button
-                onClick={() => navigate("/")}
-                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
-              >
-                <ArrowLeft size={15} /> Retour à l'accueil
-              </button>
+              <form onSubmit={handleSearchSubmit} className="mt-4">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                  Réessayer avec un autre numéro
+                </label>
+                <div className="flex h-12 items-center rounded-xl border border-slate-200 bg-white px-4 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-500/10">
+                  <input
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    placeholder="Entrez votre numéro de dossier"
+                    className="min-w-0 flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+                  />
+                </div>
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+                  >
+                    <Search size={15} /> Rechercher
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/")}
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                  >
+                    <ArrowLeft size={15} /> Retour à l'accueil
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </main>

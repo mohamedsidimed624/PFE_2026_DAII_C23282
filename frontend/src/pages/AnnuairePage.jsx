@@ -22,9 +22,9 @@ import {
   Building2,
 } from "lucide-react";
 
-const BREADCRUMB = [{ label: "Accueil", to: "/" }, { label: "Annuaire médical" }];
+import { resolveFileUrl } from "../config/api";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const BREADCRUMB = [{ label: "Accueil", to: "/" }, { label: "Annuaire médical" }];
 
 const PAGE_SIZE = 6;
 
@@ -432,7 +432,7 @@ function MedecinCard({ medecin, onClick }) {
       <div className="relative h-40 bg-green-50">
         {medecin.photoProfilPath ? (
           <img
-            src={`${API_BASE_URL}${medecin.photoProfilPath}`}
+            src={resolveFileUrl(medecin.photoProfilPath)}
             alt={`Dr. ${medecin.prenom} ${medecin.nom}`}
             className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105"
           />

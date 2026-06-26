@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { getPublicMedecinById } from "../services/publicAnnuaireApi";
+import { resolveFileUrl } from "../config/api";
 import {
   ArrowLeft,
   MapPin,
@@ -139,7 +140,7 @@ function AnnuaireMedecinDetailPage() {
                 <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-[#E2E8F0] bg-slate-100">
                   {medecin.photoProfilPath ? (
                     <img
-                      src={`http://localhost:8080${medecin.photoProfilPath}`}
+                      src={resolveFileUrl(medecin.photoProfilPath)}
                       alt=""
                       className="h-full w-full object-cover"
                     />

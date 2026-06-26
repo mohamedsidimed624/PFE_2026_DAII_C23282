@@ -7,6 +7,7 @@ import {
   startReclamation,
   closeReclamation,
 } from "../../services/adminReclamationApi";
+import { resolveFileUrl } from "../../config/api";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -411,7 +412,7 @@ export default function AdminReclamationDetail() {
             </div>
             {reclamation.pieceJointePath && (
               <a
-                href={`http://localhost:8080${reclamation.pieceJointePath}`}
+                href={resolveFileUrl(reclamation.pieceJointePath)}
                 target="_blank"
                 rel="noreferrer"
                 className="mt-4 inline-flex min-w-0 items-center gap-2 text-sm font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 transition hover:text-green-700 hover:decoration-green-400 dark:text-slate-400 dark:hover:text-green-400"
@@ -484,7 +485,7 @@ export default function AdminReclamationDetail() {
 
       {/* Modal de prise en charge */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}

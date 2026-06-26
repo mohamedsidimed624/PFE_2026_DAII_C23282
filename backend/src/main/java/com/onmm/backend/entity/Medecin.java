@@ -55,6 +55,9 @@ public class Medecin extends User {
     @Column(nullable = false, length = 30)
     private StatutMedecin statut;
 
+    @Column(name = "commentaire_suspension", length = 1000)
+    private String commentaireSuspension;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "section_ordre", nullable = false, length = 50)
     private SectionOrdre sectionOrdre;

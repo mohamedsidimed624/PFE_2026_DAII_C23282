@@ -2,289 +2,406 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft, CheckCircle2, Loader2, Vote, Shield, AlertTriangle,
-  Lock, EyeOff, X, FileText,
+  ArrowLeft, Check, CheckCircle2, Loader2, Shield, X,
+  AlertCircle, Vote, Info, Circle, ChevronLeft, ChevronRight,
+  Award, Building2, Hash, Users,
 } from "lucide-react";
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { getElectionDetail, voter } from "../../services/medecinElectionApi";
 import { extractApiError } from "../../utils/apiUtils";
 import CandidateAvatar from "../../components/elections/CandidateAvatar";
-import ElectionStatusBadge from "../../components/elections/ElectionStatusBadge";
-import ElectionTypeBadge from "../../components/elections/ElectionTypeBadge";
+import { cn } from "../../lib/utils";
+import { Badge } from "../../components/ui/badge";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  DialogDescription, DialogClose,
+} from "../../components/ui/dialog";
 
-const VIEWS = ["intro", "selection", "confirmation", "success"];
+/* ── helpers ──────────────────────────────────────────────── */
+const voteRuleText = (max) =>
+  max <= 1
+    ? "Vous disposez d'un vote pour ce poste"
+    : `Vous pouvez sélectionner jusqu'à ${max} candidats`;
 
-/* ---- Barre de progression raffinée ---- */
-function ProgressBar({ step, total }) {
-  const pct = total > 0 ? ((step + 1) / total) * 100 : 0;
+/* ── CandidateRow ─────────────────────────────────────────── */
+function CandidateRow({ c, name, isRadio, isSelected, isDisabled, onToggle, onShowInfo }) {
+  const isOwn = !!c.estMaCandidature;
+  const effectiveDisabled = isDisabled || isOwn;
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-100 dark:bg-slate-800">
-      <motion.div
-        className="h-1 rounded-r-full bg-green-600"
-        initial={{ width: 0 }}
-        animate={{ width: `${pct}%` }}
-        transition={{ ease: "easeOut", duration: 0.5 }}
-      />
-    </div>
-  );
-}
-
-/* ---- Badges de sécurité améliorés ---- */
-function SecurityBadgesRow() {
-  const items = [
-    { icon: Lock, label: "Vote unique" },
-    { icon: EyeOff, label: "Vote secret" },
-    { icon: Shield, label: "Vote irréversible" },
-  ];
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {items.map((item) => (
-        <span
-          key={item.label}
-          className="inline-flex items-center gap-1.5 rounded-full border border-green-100 bg-green-50 px-3 py-1 text-xs font-medium text-green-700 dark:border-green-900 dark:bg-green-950 dark:text-green-300"
-        >
-          <item.icon size={12} /> {item.label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-/* ---- En-tête du scrutin ---- */
-function BallotHeader({ election, candidatesCount, positionsCount }) {
-  return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">{election.titre}</h1>
-        <ElectionStatusBadge statut={election.statut} />
-        <ElectionTypeBadge type={election.type} />
-      </div>
-      <p className="text-sm text-slate-500">
-        {positionsCount > 0 ? `${positionsCount} poste(s) · ` : ""}{candidatesCount} candidat(s)
-      </p>
-      <SecurityBadgesRow />
-    </div>
-  );
-}
-
-/* ---- Ligne candidat retravaillée ---- */
-function CandidateRow({ c, isSelected, isDisabled, isRadio, onToggle, isOwnCandidature, onShowProgramme }) {
-  const effectiveDisabled = isDisabled || isOwnCandidature;
-  const hasProgramme = !!(c.programmeElectoral || c.declarationCandidature);
-
-  return (
-    <div
-      role="button"
-      tabIndex={effectiveDisabled ? -1 : 0}
-      onClick={() => !effectiveDisabled && onToggle(c.id)}
-      onKeyDown={(e) => {
-        if ((e.key === "Enter" || e.key === " ") && !effectiveDisabled) {
-          e.preventDefault();
-          onToggle(c.id);
-        }
-      }}
-      className={`flex items-center gap-4 px-4 py-3 transition-all duration-200 rounded-lg ${
-        isOwnCandidature
-          ? "bg-amber-50/80 dark:bg-amber-950/30 cursor-not-allowed"
+    <label
+      className={cn(
+        "flex min-h-[48px] items-center gap-3 rounded-xl border bg-white px-4 py-3 transition dark:bg-slate-900",
+        isOwn
+          ? "cursor-not-allowed border-amber-300 bg-amber-50 dark:border-amber-800/50 dark:bg-amber-950/10"
           : isSelected
-          ? "bg-green-50/70 dark:bg-green-950/40 border-l-4 border-green-600"
-          : isDisabled
-          ? "opacity-60 cursor-not-allowed"
-          : "hover:bg-slate-50 dark:hover:bg-slate-800/40 border-l-4 border-transparent"
-      }`}
+            ? "border-2 border-green-600 bg-green-50/60 shadow-sm dark:border-green-500 dark:bg-green-950/20"
+            : effectiveDisabled
+              ? "cursor-not-allowed border-slate-200 opacity-60 dark:border-slate-800"
+              : "cursor-pointer border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
+      )}
     >
+      <input
+        type={isRadio ? "radio" : "checkbox"}
+        name={name}
+        checked={isSelected}
+        disabled={effectiveDisabled}
+        onChange={() => !effectiveDisabled && onToggle()}
+        className="sr-only"
+        aria-label={`Dr. ${c.medecinPrenom} ${c.medecinNom}`}
+      />
+      <span
+        aria-hidden="true"
+        className={cn(
+          "flex h-5 w-5 shrink-0 items-center justify-center border-2 transition-colors",
+          isRadio ? "rounded-full" : "rounded-md",
+          isOwn
+            ? "border-amber-400 bg-amber-100 dark:border-amber-700 dark:bg-amber-950/30"
+            : isSelected
+              ? "border-green-600 bg-green-600"
+              : "border-slate-500 bg-white dark:bg-slate-900"
+        )}
+      >
+        {isSelected && !isOwn && <Check size={16} strokeWidth={3} className="text-white" />}
+      </span>
+
       <CandidateAvatar
         candidate={c}
-        size={36}
-        bgClass={isOwnCandidature ? "bg-amber-400" : isSelected ? "bg-green-600" : "bg-slate-700"}
-        imgClassName={isOwnCandidature ? "opacity-60" : ""}
+        size={44}
+        bgClass={isOwn ? "bg-amber-400" : isSelected ? "bg-green-600" : "bg-slate-300 dark:bg-slate-700"}
+        imgClassName={isOwn ? "opacity-60" : ""}
       />
+
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <p className={`text-sm font-semibold truncate ${isOwnCandidature ? "text-amber-700 dark:text-amber-300" : "text-slate-800 dark:text-slate-100"}`}>
-            Dr. {c.medecinPrenom} {c.medecinNom}
-          </p>
-          {isOwnCandidature && (
-            <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/50 dark:text-amber-400">
-              Votre candidature
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-slate-500 truncate">
+        <p className={cn("text-[15px] font-semibold", isOwn ? "text-amber-700 dark:text-amber-300" : "text-slate-800 dark:text-slate-100")}>
+          Dr. {c.medecinPrenom} {c.medecinNom}
+        </p>
+        <p className="truncate text-[12px] text-slate-500 dark:text-slate-400">
           {[c.specialite, c.region].filter(Boolean).join(" · ") || "—"}
         </p>
-        {isOwnCandidature ? (
-          <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-            Vous ne pouvez pas voter pour vous-même.
-          </p>
-        ) : (
-          hasProgramme && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onShowProgramme(c);
-              }}
-              className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-green-600 hover:underline dark:text-green-400"
-            >
-              <FileText size={12} /> Voir le programme
-            </button>
-          )
-        )}
       </div>
-      <div
-        className={`flex h-6 w-6 shrink-0 items-center justify-center ${
-          isRadio ? "rounded-full" : "rounded-md"
-        } border-2 transition-all ${
-          isOwnCandidature
-            ? "border-amber-200 dark:border-amber-700"
-            : isSelected
-            ? "border-green-600 bg-green-600"
-            : "border-slate-300 dark:border-slate-600"
-        }`}
+
+      {isOwn && (
+        <span className="shrink-0 rounded-full border border-amber-300 bg-amber-100 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-300">
+          Votre candidature
+        </span>
+      )}
+
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          onShowInfo();
+        }}
+        aria-label={`Profil de Dr. ${c.medecinPrenom} ${c.medecinNom}`}
+        className="shrink-0 rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-green-700 dark:hover:bg-slate-800"
       >
-        {isSelected && !isOwnCandidature && <CheckCircle2 size={14} className="text-white" />}
-      </div>
-    </div>
+        <Info size={18} />
+      </button>
+    </label>
   );
 }
 
-/* ---- Section de poste ---- */
-function BallotPositionSection({ pos, posCandidates, maxVotes, isRadio, selected, toggleVote, onShowProgramme }) {
-  const instruction = isRadio ? "Choisir 1 candidat" : `Choisir jusqu'à ${maxVotes} candidats`;
+/* ── PositionStep : affiche un seul poste avec sa liste ── */
+function PositionStep({ pos, candidates, maxVotes, selected, onToggle, onShowInfo }) {
+  const isRadio = maxVotes === 1;
+  const key = pos?.id ?? "flat";
+  const isCompleted = selected.length > 0;
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex items-center justify-between gap-3 border-b bg-slate-50 px-5 py-3 dark:border-slate-800 dark:bg-slate-800/50">
-        <div className="min-w-0">
-          <p className="truncate text-base font-semibold text-slate-800 dark:text-slate-100">{pos?.libelle ?? instruction}</p>
-          {pos && <p className="text-xs text-slate-500">{instruction}</p>}
+    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 p-5">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-[15px] font-bold text-slate-800 dark:text-slate-100">
+              {pos?.libelle ?? "Sélection des candidats"}
+            </h2>
+            {isCompleted ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-[10px] font-bold text-green-700 dark:bg-green-900/40 dark:text-green-400">
+                <CheckCircle2 size={11} /> Complété
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                <Circle size={11} /> À remplir
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">
+            {pos && (
+              <>
+                {pos.nombreSieges} siège{pos.nombreSieges > 1 ? "s" : ""} à pourvoir ·{" "}
+              </>
+            )}
+            {voteRuleText(maxVotes)}
+          </p>
         </div>
-        <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${
-          selected.length > 0
-            ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300"
-            : "bg-slate-100 text-slate-500 dark:bg-slate-800"
-        }`}>
-          {selected.length} / {maxVotes}
+        <span
+          className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-bold tabular-nums ${
+            isCompleted
+              ? "bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+              : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+          }`}
+        >
+          {selected.length}/{maxVotes}
         </span>
       </div>
-      <div className="divide-y dark:divide-slate-800">
-        {posCandidates.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-slate-400 text-center">Aucun candidat pour ce poste</p>
-        ) : posCandidates.map((c) => (
-          <CandidateRow
-            key={c.id}
-            c={c}
-            isSelected={selected.includes(c.id)}
-            isDisabled={!selected.includes(c.id) && selected.length >= maxVotes && !isRadio}
-            isRadio={isRadio}
-            onToggle={(cid) => toggleVote(pos?.id ?? null, cid, maxVotes)}
-            isOwnCandidature={!!c.estMaCandidature}
-            onShowProgramme={onShowProgramme}
-          />
-        ))}
+
+      <div className="border-t border-slate-100 dark:border-slate-800 mb-4" />
+
+      {candidates.length === 0 ? (
+        <p className="py-6 text-center text-[13px] italic text-slate-400">
+          Aucun candidat validé pour ce poste.
+        </p>
+      ) : (
+        <fieldset className="space-y-2">
+          <legend className="sr-only">{pos?.libelle ?? "Candidats"}</legend>
+          {candidates.map((c, i) => (
+            <motion.div
+              key={c.id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+            >
+              <CandidateRow
+                c={c}
+                name={`poste-${key}`}
+                isRadio={isRadio}
+                isSelected={selected.includes(c.id)}
+                isDisabled={!selected.includes(c.id) && selected.length >= maxVotes && !isRadio}
+                onToggle={() => onToggle(pos?.id ?? null, c.id, maxVotes)}
+                onShowInfo={() => onShowInfo(c)}
+              />
+            </motion.div>
+          ))}
+        </fieldset>
+      )}
+    </div>
+  );
+}
+
+/* ── Indicateur de progression globale ──────────────────── */
+function ProgressIndicator({ completed, total }) {
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="mb-3 flex items-center justify-between text-xs font-semibold text-slate-400">
+        <span>
+          {completed}/{total} poste{completed > 1 ? "s" : ""} complété{completed > 1 ? "s" : ""}
+        </span>
+        <span>{pct}%</span>
+      </div>
+      <div
+        role="progressbar"
+        aria-valuenow={completed}
+        aria-valuemin={0}
+        aria-valuemax={total}
+        aria-label="Progression du vote"
+        className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
+      >
+        <motion.div
+          className="h-full rounded-full bg-green-500"
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.25 }}
+        />
       </div>
     </div>
   );
 }
 
-/* ---- Récapitulatif latéral ---- */
-function SelectionSummarySidebar({ byPosition, positionVotes, getMaxVotes, totalSelected }) {
+/* ── Carte d'un candidat sélectionné (récapitulatif) ────── */
+function SelectedCandidateCard({ candidate }) {
   return (
-    <aside className="hidden lg:block">
-      <div className="sticky top-8 rounded-xl border bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Récapitulatif</p>
-        <div className="space-y-2">
-          {byPosition.map(({ pos }) => {
-            const key = pos?.id ?? "flat";
-            const max = getMaxVotes(pos);
-            const selected = (positionVotes[key] ?? []).length;
+    <div className="flex items-center gap-3 rounded-xl border border-green-100 bg-green-50/50 px-4 py-3 dark:border-green-900/30 dark:bg-green-900/10">
+      <CandidateAvatar candidate={candidate} size={32} bgClass="bg-green-600" />
+      <span className="flex-1 text-[13px] font-semibold text-green-900 dark:text-green-300">
+        Dr. {candidate.medecinPrenom} {candidate.medecinNom}
+      </span>
+      <CheckCircle2 size={16} className="shrink-0 text-green-600 dark:text-green-400" />
+    </div>
+  );
+}
+
+/* ── Review Step (récapitulatif avant envoi) ────────────── */
+function ReviewStep({
+  filledPositions,
+  positionVotes,
+  totalSelected,
+  completedPositionsCount,
+  skippedPositionsCount,
+  error,
+  submitting,
+  onConfirm,
+  onBack,
+}) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 p-5">
+      <h2 className="text-[14px] font-bold text-slate-800 dark:text-slate-100 mb-1">Récapitulatif de votre bulletin</h2>
+      <p className="mb-5 text-[12px] text-slate-500 dark:text-slate-400">
+        Vérifiez vos choix avant de confirmer. Ce vote est définitif.
+      </p>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 mb-6">
+        <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-slate-800 dark:bg-slate-800/40">
+          <p className="text-[22px] font-bold tabular-nums text-green-600 dark:text-green-400">{totalSelected}</p>
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Sélectionné{totalSelected > 1 ? "s" : ""}</p>
+        </div>
+        <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-slate-800 dark:bg-slate-800/40">
+          <p className="text-[22px] font-bold tabular-nums text-slate-800 dark:text-slate-100">{completedPositionsCount}</p>
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Poste{completedPositionsCount > 1 ? "s" : ""} complété{completedPositionsCount > 1 ? "s" : ""}</p>
+        </div>
+        <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-slate-800 dark:bg-slate-800/40">
+          <p className="text-[22px] font-bold tabular-nums text-slate-400">{skippedPositionsCount}</p>
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Non renseigné{skippedPositionsCount > 1 ? "s" : ""}</p>
+        </div>
+      </div>
+
+      <div className="space-y-5">
+        {filledPositions.map(({ pos, candidates: posCandidates }) => {
+          const key = pos?.id ?? "flat";
+          const selected = positionVotes[key] ?? [];
+          return (
+            <div key={key}>
+              <div className="mb-2 flex items-center justify-between gap-2 border-b border-slate-100 pb-2 dark:border-slate-800">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                  {pos?.libelle ?? "Sélection"}
+                </p>
+                {selected.length > 0 ? (
+                  <Badge className="border-green-200 bg-green-50 text-[10px] font-bold text-green-700 dark:border-green-900/40 dark:bg-green-950/30 dark:text-green-400">
+                    Complété
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                    Vote blanc
+                  </Badge>
+                )}
+              </div>
+              {selected.length === 0 ? (
+                <p className="py-2 text-[12px] italic text-slate-400">Aucun vote (Vote Blanc)</p>
+              ) : (
+                <div className="space-y-2 pt-2">
+                  {selected.map((cid) => {
+                    const c = posCandidates.find((x) => x.id === cid);
+                    if (!c) return null;
+                    return <SelectedCandidateCard key={cid} candidate={c} />;
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {skippedPositionsCount > 0 && (
+        <div className="mt-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-[12px] text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/10 dark:text-amber-400">
+          <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-500" />
+          <p>
+            Vous n'avez fait aucune sélection pour {skippedPositionsCount} poste{skippedPositionsCount > 1 ? "s" : ""}. Vote blanc possible.
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <div className="mt-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-[12px] text-red-800 dark:border-red-900/50 dark:bg-red-900/10 dark:text-red-400">
+          <AlertCircle size={16} className="mt-0.5 shrink-0 text-red-600 dark:text-red-500" />
+          <p>{error}</p>
+        </div>
+      )}
+
+      <div className="mt-6 flex justify-between">
+        <button
+          onClick={onBack}
+          disabled={submitting}
+          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          <ChevronLeft size={14} /> Revenir aux postes
+        </button>
+        <button
+          onClick={onConfirm}
+          disabled={submitting}
+          className="inline-flex items-center gap-2 rounded-full bg-green-600 px-6 py-2.5 text-[13px] font-bold text-white transition hover:bg-green-700 disabled:opacity-50 dark:bg-green-500 dark:hover:bg-green-600"
+        >
+          {submitting ? <Loader2 size={16} className="animate-spin" /> : <Vote size={16} />}
+          Confirmer mon vote
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Dialogue d'informations sur un candidat ────────────── */
+function CandidateInfoDialog({ candidate, open, onClose }) {
+  if (!candidate) return null;
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="w-full max-w-lg gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+        <DialogHeader className="flex-row items-center gap-3 border-b border-slate-100 px-6 py-5 text-left dark:border-slate-800">
+          <CandidateAvatar candidate={candidate} size={48} bgClass="bg-green-600" />
+          <div className="min-w-0">
+            <DialogTitle className="text-[15px] font-bold text-slate-900 dark:text-white">
+              Dr. {candidate.medecinPrenom} {candidate.medecinNom}
+            </DialogTitle>
+            <DialogDescription className="mt-0.5 text-[13px] text-slate-500 dark:text-slate-400">Informations du candidat</DialogDescription>
+          </div>
+        </DialogHeader>
+
+        <div className="grid grid-cols-2 gap-0 divide-x divide-slate-100 border-b border-slate-100 dark:divide-slate-800 dark:border-slate-800">
+          {[
+            { icon: Award, label: "Poste", value: candidate.position?.libelle ?? "—" },
+            { icon: Users, label: "Spécialité", value: candidate.specialite ?? "—" },
+            { icon: Building2, label: "Région / Ville d'exercice", value: candidate.region ?? "—" },
+            { icon: Hash, label: "N° d'inscription", value: candidate.medecinNumeroInscription ?? "—" },
+          ].map(({ icon, label, value }) => {
+            const Icon = icon;
             return (
-              <div key={key} className="flex items-center justify-between text-sm">
-                <span className="truncate text-slate-600 dark:text-slate-300">{pos?.libelle ?? "Liste des candidats"}</span>
-                <span className={`ml-2 font-bold tabular-nums ${selected > 0 ? "text-green-600" : "text-slate-400"}`}>
-                  {selected}/{max}
-                </span>
+              <div key={label} className="flex items-start gap-3 px-5 py-3">
+                <Icon size={13} className="mt-0.5 shrink-0 text-slate-400 dark:text-slate-500" />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</p>
+                  <p className="mt-0.5 text-[13px] font-medium text-slate-700 dark:text-slate-200">{value}</p>
+                </div>
               </div>
             );
           })}
         </div>
-        <div className="mt-3 flex items-center justify-between border-t pt-3 text-sm font-bold dark:border-slate-800">
-          <span className="text-slate-700 dark:text-slate-200">Total sélectionné</span>
-          <span className="tabular-nums text-green-600">{totalSelected}</span>
+
+        <div className="max-h-[50vh] space-y-5 overflow-y-auto px-6 py-5">
+          <div>
+            <h3 className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+              Déclaration de candidature
+            </h3>
+            <p className="text-[13px] leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">
+              {candidate.declarationCandidature || "Aucune déclaration fournie."}
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+              Programme électoral
+            </h3>
+            <p className="text-[13px] leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">
+              {candidate.programmeElectoral || "Aucun programme fourni."}
+            </p>
+          </div>
         </div>
-      </div>
-    </aside>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-/* ---- Modale programme ---- */
-function ProgrammeModal({ candidate, onClose }) {
-  if (!candidate) return null;
-  const content = candidate.programmeElectoral || candidate.declarationCandidature;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4" onClick={onClose}>
-      <div
-        className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b px-5 py-4 dark:border-slate-800">
-          <p className="text-lg font-bold text-slate-800 dark:text-slate-100">
-            Dr. {candidate.medecinPrenom} {candidate.medecinNom}
-          </p>
-          <button onClick={onClose} aria-label="Fermer" className="rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-            <X size={18} />
-          </button>
-        </div>
-        <div className="px-5 py-5">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">Programme électoral</p>
-          <p className="whitespace-pre-line text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{content}</p>
-        </div>
-        <div className="flex justify-end border-t px-5 py-4 dark:border-slate-800">
-          <button onClick={onClose} className="rounded-lg border px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
-            Fermer
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---- Pied collant (actions principales) ---- */
-function StickyFooter({ view, submitting, onBack, onPrimary, primaryLabel, primaryDisabled }) {
-  return (
-    <div className="sticky bottom-0 z-40 -mx-4 mt-8 flex items-center justify-between gap-4 border-t bg-white/95 px-6 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:-mx-6 sm:px-8">
-      <button
-        onClick={onBack}
-        className="rounded-lg border px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-      >
-        {view === "confirmation" ? "Modifier" : "Retour"}
-      </button>
-      <button
-        onClick={onPrimary}
-        disabled={primaryDisabled || submitting}
-        className="flex items-center gap-2 rounded-lg bg-green-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:opacity-50"
-      >
-        {submitting && <Loader2 size={16} className="animate-spin" />}
-        {primaryLabel}
-      </button>
-    </div>
-  );
-}
-
-/* ============================= */
-/* Composant principal amélioré  */
-/* ============================= */
+/* ═══════════════════════════════════════════════════════════ */
+/*  Composant principal : wizard étape par étape              */
+/* ═══════════════════════════════════════════════════════════ */
 export default function MedecinVotingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [election, setElection] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("intro");
   const [positionVotes, setPositionVotes] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [programmeCandidate, setProgrammeCandidate] = useState(null);
+  const [toastMsg, setToastMsg] = useState("");
+  const [infoCandidate, setInfoCandidate] = useState(null);
+
+  // Wizard state
+  const [currentStep, setCurrentStep] = useState(0); // 0 = premier poste, N = review (dernier step)
 
   useEffect(() => {
     getElectionDetail(id)
@@ -293,6 +410,7 @@ export default function MedecinVotingPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  /* ── données dérivées ── */
   const peutVoter = election?.peutVoter ?? (election?.statut === "VOTE_EN_COURS" && !election?.aVote);
   const candidates = election?.candidaturesEligibles ?? election?.candidatures ?? [];
   const positions = election?.positionsEligibles ?? election?.positions ?? [];
@@ -302,9 +420,22 @@ export default function MedecinVotingPage() {
     pos?.maxVotesParElecteur ?? pos?.nombreSieges ?? election?.maxVotesParElecteur ?? election?.seatsCount ?? 1;
 
   const byPosition = hasPositions
-    ? positions.map((pos) => ({ pos, candidates: candidates.filter((c) => c.position?.id === pos.id) }))
+    ? positions.map((pos) => ({
+        pos,
+        candidates: candidates.filter((c) => c.position?.id === pos.id),
+      }))
     : [{ pos: null, candidates }];
 
+  const filledPositions = byPosition.filter(({ candidates: pc }) =>
+    pc.some((c) => !c.estMaCandidature)
+  );
+
+  const totalSteps = filledPositions.length + 1; // +1 pour la review
+  const isReviewStep = currentStep === filledPositions.length;
+  const isFirstStep = currentStep === 0;
+  const isLastPostStep = currentStep === filledPositions.length - 1;
+
+  /* ── gestion du vote ── */
   const toggleVote = (posId, cid, maxVotes) => {
     const key = posId ?? "flat";
     setPositionVotes((prev) => {
@@ -319,6 +450,10 @@ export default function MedecinVotingPage() {
   };
 
   const totalSelected = Object.values(positionVotes).flat().length;
+  const completedPositionsCount = filledPositions.filter(
+    ({ pos }) => (positionVotes[pos?.id ?? "flat"] ?? []).length > 0
+  ).length;
+  const skippedPositionsCount = filledPositions.length - completedPositionsCount;
 
   const buildPayload = () => {
     if (hasPositions) {
@@ -330,13 +465,19 @@ export default function MedecinVotingPage() {
     return { candidatureIds: positionVotes["flat"] ?? [] };
   };
 
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(""), 3500);
+  };
+
   const handleVote = async () => {
-    if (submitting || totalSelected === 0) return;
+    if (submitting || (totalSelected === 0 && !window.confirm("Vous n'avez sélectionné aucun candidat. Confirmez-vous ce vote blanc ?"))) return;
     setSubmitting(true);
     setError("");
     try {
       await voter(id, buildPayload());
-      setView("success");
+      showToast("Vote enregistré avec succès.");
+      setTimeout(() => navigate("/medecin/elections"), 1800);
     } catch (err) {
       setError(extractApiError(err));
     } finally {
@@ -344,50 +485,22 @@ export default function MedecinVotingPage() {
     }
   };
 
+  /* ── navigation ── */
+  const goToNext = () => setCurrentStep((prev) => Math.min(prev + 1, totalSteps - 1));
+  const goToPrev = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
+  const goToReview = () => setCurrentStep(filledPositions.length);
+
+  /* ── chargement ── */
   if (loading) {
     return (
       <MedecinLayout title="Vote">
-        <div className="flex h-64 items-center justify-center">
-          <Loader2 size={24} className="animate-spin text-slate-400" />
-        </div>
-      </MedecinLayout>
-    );
-  }
-
-  if (!election || !peutVoter) {
-    const alreadyVoted = election?.aVote === true;
-    return (
-      <MedecinLayout title={alreadyVoted ? "Vote déjà enregistré" : "Vote"}>
-        <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-4 py-8 sm:px-6 flex items-start justify-center">
-          <div className="w-full max-w-md mt-10">
-            <button
-              onClick={() => navigate(`/medecin/elections/${id}`)}
-              className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700"
-            >
-              <ArrowLeft size={14} /> Retour à l'élection
-            </button>
-            <div className="rounded-2xl border bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex flex-col items-center text-center gap-4">
-              <div className={`flex h-16 w-16 items-center justify-center rounded-full ${
-                alreadyVoted ? "bg-green-50 dark:bg-green-950" : "bg-amber-50 dark:bg-amber-950"
-              }`}>
-                {alreadyVoted ? <CheckCircle2 size={32} className="text-green-600" /> : <Shield size={32} className="text-amber-500" />}
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">
-                  {alreadyVoted ? "Vote déjà enregistré" : "Accès au vote impossible"}
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {alreadyVoted
-                    ? "Vous avez déjà voté pour cette élection. Un seul vote est autorisé."
-                    : (election?.raisonIneligibilite ?? "Le vote n'est pas disponible pour cette élection.")}
-                </p>
-              </div>
-              <button
-                onClick={() => navigate(`/medecin/elections/${id}`)}
-                className="mt-2 rounded-xl bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition"
-              >
-                Retour à l'élection
-              </button>
+        <div className="min-h-screen bg-[#FAFBFC] px-4 py-6 dark:bg-slate-950 sm:px-6">
+          <div className="mx-auto max-w-3xl">
+            <div className="h-10 w-64 animate-pulse rounded bg-slate-200 dark:bg-slate-800 mb-8" />
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-40 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+              ))}
             </div>
           </div>
         </div>
@@ -395,262 +508,143 @@ export default function MedecinVotingPage() {
     );
   }
 
-  const viewIndex = VIEWS.indexOf(view);
+  /* ── non éligible / déjà voté ── */
+  if (!election || !peutVoter) {
+    const alreadyVoted = election?.aVote === true;
+    return (
+      <MedecinLayout title={alreadyVoted ? "A voté" : "Vote"}>
+        <div className="min-h-screen bg-[#FAFBFC] px-4 py-6 dark:bg-slate-950 sm:px-6">
+          <div className="mx-auto mt-12 max-w-md text-center">
+            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm dark:bg-slate-900">
+              {alreadyVoted ? (
+                <CheckCircle2 size={40} className="text-green-500" />
+              ) : (
+                <Shield size={40} className="text-slate-400" />
+              )}
+            </div>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              {alreadyVoted ? "Vote déjà enregistré" : "Accès restreint"}
+            </h2>
+            <p className="mt-3 text-[13px] text-slate-500 dark:text-slate-400">
+              {alreadyVoted
+                ? "Votre vote a bien été pris en compte pour cette élection. Un seul vote est autorisé."
+                : (election?.raisonIneligibilite ?? "Vous ne pouvez pas participer à ce vote.")}
+            </p>
+            <button
+              onClick={() => navigate(`/medecin/elections/${id}`)}
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-green-600 px-5 py-2.5 text-[13px] font-semibold text-white transition hover:bg-green-700"
+            >
+              Retour à l'élection
+            </button>
+          </div>
+        </div>
+      </MedecinLayout>
+    );
+  }
+
+  const currentPos = isReviewStep ? null : filledPositions[currentStep];
 
   return (
-    <MedecinLayout title="Vote électronique">
-      {view !== "success" && <ProgressBar step={viewIndex} total={VIEWS.length - 1} />}
-
-      <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-4 py-8 sm:px-6 lg:px-8">
-        <AnimatePresence mode="wait">
-
-          {/* Introduction professionnelle */}
-          {view === "intro" && (
-            <motion.div
-              key="intro"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              className="mx-auto max-w-lg space-y-5"
+    <MedecinLayout title="Bulletin de vote">
+      <div className="min-h-screen bg-[#FAFBFC] dark:bg-slate-950 px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-3xl space-y-5">
+            {/* Bouton retour */}
+            <button
+              onClick={() => navigate(`/medecin/elections/${id}`)}
+              className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             >
-              <button
-                onClick={() => navigate(`/medecin/elections/${id}`)}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700"
-              >
-                <ArrowLeft size={14} /> Retour
-              </button>
+              <ArrowLeft size={13} /> Quitter le vote
+            </button>
 
-              <div className="rounded-2xl border bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 dark:bg-green-950">
-                    <Vote size={24} className="text-green-600" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-800 dark:text-slate-100 text-lg">{election.titre}</p>
-                    <p className="text-sm text-slate-500">
-                      {candidates.length} candidat(s) · {hasPositions ? `${positions.length} poste(s)` : `${election.seatsCount ?? getMaxVotes(null)} siège(s)`}
-                    </p>
-                  </div>
-                </div>
+            {/* Barre de progression globale */}
+            <ProgressIndicator completed={completedPositionsCount} total={filledPositions.length} />
 
-                <SecurityBadgesRow />
-
-                <div className="text-sm text-slate-600 dark:text-slate-400 space-y-1.5">
-                  <p>
-                    Cette élection comporte <strong>{candidates.length} candidat(s)</strong>
-                    {hasPositions ? ` répartis sur ${positions.length} poste(s)` : ""}.
-                  </p>
-                  {hasPositions ? (
-                    positions.map((pos) => {
-                      const max = getMaxVotes(pos);
-                      return (
-                        <p key={pos.id}>
-                          <strong>{pos.libelle}</strong> — {max === 1 ? "1 candidat à sélectionner" : `jusqu'à ${max} candidats à sélectionner`}
-                        </p>
-                      );
-                    })
-                  ) : (
-                    <p>Sélectionnez jusqu'à <strong>{getMaxVotes(null)}</strong> candidat(s).</p>
-                  )}
-                  <p className="pt-1">Vous pouvez laisser un poste sans sélection (vote partiel autorisé).</p>
-                  <p>Ce vote est <strong>définitif et irréversible</strong>.</p>
-                </div>
-
-                <button
-                  onClick={() => setView("selection")}
-                  className="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 transition"
-                >
-                  Commencer le vote
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Sélection optimisée */}
-          {view === "selection" && (
-            <motion.div
-              key="selection"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="mx-auto max-w-7xl"
-            >
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
-                <div className="space-y-5">
-                  <BallotHeader election={election} candidatesCount={candidates.length} positionsCount={positions.length} />
-
-                  {byPosition.map(({ pos, candidates: posCandidates }) => {
-                    const key = pos?.id ?? "flat";
-                    const maxVotes = getMaxVotes(pos);
-                    const isRadio = maxVotes === 1;
-                    const selected = positionVotes[key] ?? [];
-
-                    return (
-                      <BallotPositionSection
-                        key={key}
-                        pos={pos}
-                        posCandidates={posCandidates}
-                        maxVotes={maxVotes}
-                        isRadio={isRadio}
-                        selected={selected}
-                        toggleVote={toggleVote}
-                        onShowProgramme={setProgrammeCandidate}
-                      />
-                    );
-                  })}
-                </div>
-
-                <SelectionSummarySidebar
-                  byPosition={byPosition}
-                  positionVotes={positionVotes}
-                  getMaxVotes={getMaxVotes}
-                  totalSelected={totalSelected}
-                />
-              </div>
-
-              <StickyFooter
-                view="selection"
-                submitting={submitting}
-                onBack={() => navigate(`/medecin/elections/${id}`)}
-                onPrimary={() => setView("confirmation")}
-                primaryLabel={`Vérifier mon bulletin (${totalSelected})`}
-                primaryDisabled={totalSelected === 0}
-              />
-            </motion.div>
-          )}
-
-          {/* Confirmation plus claire */}
-          {view === "confirmation" && (
-            <motion.div
-              key="confirmation"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="mx-auto max-w-3xl space-y-6"
-            >
-              <div>
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Vérification finale du bulletin</h2>
-                <p className="text-sm text-slate-500">Vérifiez vos sélections avant de confirmer. Ce vote est définitif.</p>
-              </div>
-
-              <div className="overflow-hidden rounded-xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                {byPosition.map(({ pos, candidates: posCandidates }) => {
-                  const key = pos?.id ?? "flat";
-                  const selected = positionVotes[key] ?? [];
-                  return (
-                    <div key={key} className="border-b last:border-b-0 dark:border-slate-800">
-                      <div className="flex items-center justify-between border-b bg-slate-50 px-5 py-3 dark:border-slate-800 dark:bg-slate-800/50">
-                        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{pos?.libelle ?? "Sélection"}</p>
-                        <span className="text-xs font-bold text-slate-400">{selected.length} sélection(s)</span>
-                      </div>
-                      {selected.length === 0 ? (
-                        <p className="px-5 py-4 text-sm italic text-slate-400">Aucune sélection</p>
-                      ) : (
-                        <div className="divide-y dark:divide-slate-800">
-                          {selected.map((cid) => {
-                            const c = posCandidates.find((x) => x.id === cid);
-                            if (!c) return null;
-                            return (
-                              <div key={cid} className="flex items-center gap-3 px-5 py-3">
-                                <CandidateAvatar candidate={c} size={32} bgClass="bg-green-600" />
-                                <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-100">
-                                    Dr. {c.medecinPrenom} {c.medecinNom}
-                                  </p>
-                                  {c.specialite && <p className="truncate text-xs text-slate-500">{c.specialite}</p>}
-                                </div>
-                                <CheckCircle2 size={16} className="shrink-0 text-green-600" />
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900 dark:bg-amber-950">
-                <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-600" />
-                <p className="text-sm text-amber-700 dark:text-amber-400">
-                  Ce vote est <strong>définitif et irréversible</strong>.
-                </p>
-              </div>
-
-              <div className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/40">
-                <EyeOff size={16} className="mt-0.5 shrink-0 text-slate-400" />
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Votre participation est enregistrée pour empêcher le double vote ; le contenu de votre vote reste confidentiel.
-                </p>
-              </div>
-
-              {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  {error}
-                </div>
-              )}
-
-              <div className="flex items-start gap-3 rounded-lg border-2 border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
-                <Lock size={16} className="mt-0.5 shrink-0 text-green-600" />
-                <div>
-                  <p className="text-sm font-bold text-green-800 dark:text-green-300">Validation finale du vote</p>
-                  <p className="text-xs text-green-700 dark:text-green-400 mt-1">
-                    En confirmant, votre bulletin sera transmis et enregistré de façon définitive et irréversible. Aucune modification ne sera possible après confirmation.
-                  </p>
-                </div>
-              </div>
-
-              <StickyFooter
-                view="confirmation"
-                submitting={submitting}
-                onBack={() => setView("selection")}
-                onPrimary={handleVote}
-                primaryLabel="Confirmer mon vote"
-                primaryDisabled={false}
-              />
-            </motion.div>
-          )}
-
-          {/* Succès avec animation soignée */}
-          {view === "success" && (
-            <motion.div
-              key="success"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mx-auto flex max-w-lg flex-col items-center py-16 text-center"
-            >
+            {/* Contenu de l'étape */}
+            <AnimatePresence mode="wait">
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
-                className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50 dark:bg-green-950 mb-6"
+                key={currentStep}
+                className="space-y-5"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.18 }}
               >
-                <CheckCircle2 size={40} className="text-green-600" />
+              {isReviewStep ? (
+              <ReviewStep
+                filledPositions={filledPositions}
+                positionVotes={positionVotes}
+                totalSelected={totalSelected}
+                completedPositionsCount={completedPositionsCount}
+                skippedPositionsCount={skippedPositionsCount}
+                error={error}
+                submitting={submitting}
+                onConfirm={handleVote}
+                onBack={goToPrev}
+              />
+            ) : (
+              <>
+                <PositionStep
+                  pos={currentPos.pos}
+                  candidates={currentPos.candidates}
+                  maxVotes={getMaxVotes(currentPos.pos)}
+                  selected={positionVotes[currentPos.pos?.id ?? "flat"] ?? []}
+                  onToggle={toggleVote}
+                  onShowInfo={(c) => setInfoCandidate(c)}
+                />
+
+                {/* Navigation entre postes */}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <button
+                    onClick={goToPrev}
+                    disabled={isFirstStep || submitting}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800"
+                  >
+                    <ChevronLeft size={14} /> Poste précédent
+                  </button>
+                  <span className="text-[13px] font-semibold text-slate-500 dark:text-slate-400">
+                    Poste {currentStep + 1} sur {filledPositions.length}
+                  </span>
+                  {isLastPostStep ? (
+                    <button
+                      onClick={goToReview}
+                      className="inline-flex items-center gap-2 rounded-full bg-green-600 px-5 py-2.5 text-[13px] font-semibold text-white hover:bg-green-700 transition disabled:opacity-50 dark:bg-green-500 dark:hover:bg-green-600"
+                    >
+                      Voir le récapitulatif <ChevronRight size={14} />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={goToNext}
+                      className="inline-flex items-center gap-2 rounded-full bg-green-600 px-5 py-2.5 text-[13px] font-semibold text-white hover:bg-green-700 transition disabled:opacity-50 dark:bg-green-500 dark:hover:bg-green-600"
+                    >
+                      Poste suivant <ChevronRight size={14} />
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
               </motion.div>
-
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-                Vote enregistré avec succès
-              </h2>
-              <p className="text-base text-slate-500 dark:text-slate-400 mb-1">
-                Votre vote pour <strong>{election?.titre}</strong> a bien été enregistré.
-              </p>
-              <p className="text-sm text-slate-400 mb-8">
-                Un seul vote est autorisé par élection. Votre participation est confirmée et ne peut pas être modifiée.
-              </p>
-
-              <button
-                onClick={() => navigate("/medecin/elections")}
-                className="rounded-xl bg-green-600 px-6 py-3 text-base font-semibold text-white hover:bg-green-700 transition shadow-md"
-              >
-                Retour aux élections
-              </button>
-            </motion.div>
-          )}
-
-        </AnimatePresence>
+            </AnimatePresence>
+        </div>
       </div>
 
-      <ProgrammeModal candidate={programmeCandidate} onClose={() => setProgrammeCandidate(null)} />
+      {/* Dialogue info candidat */}
+      <CandidateInfoDialog
+        candidate={infoCandidate}
+        open={!!infoCandidate}
+        onClose={() => setInfoCandidate(null)}
+      />
+
+      {/* Toast */}
+      {toastMsg && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-slate-900 px-5 py-4 text-[13px] font-medium text-white shadow-xl"
+        >
+          <CheckCircle2 size={20} className="text-green-400" />
+          {toastMsg}
+        </div>
+      )}
     </MedecinLayout>
   );
 }

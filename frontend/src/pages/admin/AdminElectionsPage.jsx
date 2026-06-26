@@ -232,7 +232,7 @@ function StatutBadge({ statut }) {
 
 function DashboardStatCard({ icon: Icon, title, value }) {
   return (
-    <div className="rounded-md bg-white px-5 py-4 shadow-sm dark:bg-slate-900">
+    <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-white px-5 py-4 shadow-sm dark:bg-slate-900">
       <div className="mb-3 flex items-center gap-2">
         <Icon size={15} className="text-slate-400 dark:text-slate-500" />
         <p className="text-[12px] font-semibold uppercase tracking-wide text-slate-400">
@@ -260,7 +260,7 @@ function ActionButton({
       onClick={onClick}
       title={label}
       className={cx(
-        "flex h-8 w-8 items-center justify-center rounded-md transition",
+        "flex h-8 w-8 items-center justify-center rounded-full transition",
         primary
           ? "bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30"
           : danger
@@ -405,7 +405,7 @@ function ConfirmModal({
                 onClick={onClose}
                 disabled={actionLoading}
                 aria-label="Fermer"
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 disabled:opacity-40 dark:hover:bg-slate-800"
+                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 disabled:opacity-40 dark:hover:bg-slate-800"
               >
                 <X size={16} />
               </button>
@@ -446,7 +446,7 @@ function ConfirmModal({
                 type="button"
                 onClick={onClose}
                 disabled={actionLoading}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-500 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-500 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
               >
                 Annuler
               </button>
@@ -459,7 +459,7 @@ function ConfirmModal({
                   (modal.action === "annuler" && !modal.raison.trim())
                 }
                 className={cx(
-                  "inline-flex items-center gap-2 rounded-lg px-5 py-2 text-[13px] font-semibold text-white disabled:opacity-50",
+                  "inline-flex items-center gap-2 rounded-full px-5 py-2 text-[13px] font-semibold text-white disabled:opacity-50",
                   isDanger
                     ? "bg-red-600 hover:bg-red-700"
                     : "bg-green-500 hover:bg-green-600"
@@ -636,7 +636,7 @@ export default function AdminElectionsPage() {
           <button
             type="button"
             onClick={() => navigate("/admin/processus/elections/nouveau")}
-            className="inline-flex h-10 items-center gap-2 rounded-md bg-green-500 px-4 text-[13px] font-semibold text-white shadow-sm transition hover:bg-green-600"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-green-500 px-4 text-[13px] font-semibold text-white shadow-sm transition hover:bg-green-600"
           >
             <Plus size={15} />
             Nouvelle élection
@@ -691,7 +691,7 @@ export default function AdminElectionsPage() {
               onChange={(e) => setFilterType(e.target.value)}
               className="h-10 rounded-md border border-slate-100 bg-white px-4 text-[13px] text-slate-500 shadow-sm outline-none focus:border-green-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              <option value="">Type : All</option>
+              <option value="">Tous les types</option>
               {Object.entries(TYPE_LABELS).map(([key, label]) => (
                 <option key={key} value={key}>
                   {label}
@@ -704,7 +704,7 @@ export default function AdminElectionsPage() {
               onChange={(e) => setFilterStatut(e.target.value)}
               className="h-10 rounded-md border border-slate-100 bg-white px-4 text-[13px] text-slate-500 shadow-sm outline-none focus:border-green-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              <option value="">Status : All</option>
+              <option value="">Tous les statuts</option>
               {Object.entries(STATUT_LABELS).map(([key, label]) => (
                 <option key={key} value={key}>
                   {label}
@@ -721,7 +721,7 @@ export default function AdminElectionsPage() {
                   setFilterStatut("");
                   setPage(1);
                 }}
-                className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[13px] text-slate-400 shadow-sm transition hover:text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-slate-100 bg-white px-4 text-[13px] text-slate-400 shadow-sm transition hover:text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
               >
                 <RotateCcw size={13} />
                 Réinitialiser
@@ -907,7 +907,7 @@ export default function AdminElectionsPage() {
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
                   aria-label="Page précédente"
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 disabled:opacity-40"
                 >
                   <ChevronLeft size={14} />
                 </button>
@@ -923,7 +923,7 @@ export default function AdminElectionsPage() {
                       aria-label={`Page ${pageNumber}`}
                       aria-current={page === pageNumber ? "page" : undefined}
                       className={cx(
-                        "flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold",
+                        "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold",
                         page === pageNumber
                           ? "bg-green-600 text-white"
                           : "bg-slate-50 text-slate-400 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
@@ -939,7 +939,7 @@ export default function AdminElectionsPage() {
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
                   aria-label="Page suivante"
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 disabled:opacity-40"
                 >
                   <ChevronRight size={14} />
                 </button>

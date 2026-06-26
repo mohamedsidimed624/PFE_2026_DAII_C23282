@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: onmm-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/auth/login
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ELECTION_MASTER_SECRET
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: APP_FRONTEND_URL
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_REGION
+        sync: false
+      - key: R2_ACCESS_KEY
+        sync: false
+      - key: R2_SECRET_KEY
+        sync: false
+      - key: R2_UPLOADS_BUCKET
+        sync: false

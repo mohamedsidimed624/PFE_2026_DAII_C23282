@@ -430,7 +430,7 @@ export default function AdminDashboard() {
                 to="/admin/demandes"
                 className="flex items-center gap-1 text-xs font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
               >
-                See all <ChevronRight size={13} />
+                Voir tout <ChevronRight size={13} />
               </Link>
             </div>
 

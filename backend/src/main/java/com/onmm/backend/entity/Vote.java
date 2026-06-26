@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
     name = "votes_election",
     uniqueConstraints = @UniqueConstraint(
         name = "uk_vote_election_position_voter",
-        columnNames = {"election_id", "position_id", "voter_key_hash"}
+        columnNames = {"election_id", "position_id", "voter_token"}
     )
 )
 public class Vote {
@@ -25,36 +25,25 @@ public class Vote {
     @JoinColumn(name = "position_id")
     private PositionElectorale positionElectorale;
 
-    // Nullable — le choix est désormais stocké dans encrypted_choice (AES-256-GCM)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "candidature_id", nullable = true)
-    private Candidature candidature;
-
-    // Choix chiffré (AES-256-GCM) — remplace candidature_id en clair
-    @Column(name = "encrypted_choice", columnDefinition = "TEXT")
+    // Choix chiffré : Base64(wrappedDEK) + "." + Base64(iv + ciphertext) — AES-256-GCM + RSA-2048-OAEP
+    @Column(name = "encrypted_choice", nullable = false, columnDefinition = "TEXT")
     private String encryptedChoice;
 
-    @Column(name = "voter_key_hash", nullable = false, length = 128)
-    private String voterKeyHash;
+    // Pseudonyme de l'électeur : HMAC-SHA256(masterSecret, electionId:medecinId)
+    @Column(name = "voter_token", nullable = false, length = 64)
+    private String voterToken;
 
-    @Column(name = "vote_hash", nullable = false, length = 128)
+    // Empreinte d'intégrité : SHA-256(electionId:voterToken:encryptedChoice:dateVote)
+    @Column(name = "vote_hash", nullable = false, length = 64)
     private String voteHash;
 
-    // Hash du bulletin précédent — permet de former une chaîne et détecter les suppressions
-    @Column(name = "prev_hash", length = 128)
-    private String prevHash;
+    // Signature Ed25519 du serveur sur (encryptedChoice||voterToken||dateVote), calculée à la soumission
+    @Column(name = "ballot_signature", nullable = false, columnDefinition = "TEXT")
+    private String ballotSignature;
 
-    // Numéro de séquence dans l'élection — ordonne la chaîne
-    @Column(name = "sequence_num")
-    private Long sequenceNum;
-
+    // Horodatage — calculé une seule fois et réutilisé pour voteHash ET ballotSignature
     @Column(nullable = false, updatable = false)
     private LocalDateTime dateVote;
-
-    @PrePersist
-    protected void onCreate() {
-        this.dateVote = LocalDateTime.now();
-    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -65,23 +54,17 @@ public class Vote {
     public PositionElectorale getPositionElectorale() { return positionElectorale; }
     public void setPositionElectorale(PositionElectorale positionElectorale) { this.positionElectorale = positionElectorale; }
 
-    public Candidature getCandidature() { return candidature; }
-    public void setCandidature(Candidature candidature) { this.candidature = candidature; }
-
     public String getEncryptedChoice() { return encryptedChoice; }
     public void setEncryptedChoice(String encryptedChoice) { this.encryptedChoice = encryptedChoice; }
 
-    public String getVoterKeyHash() { return voterKeyHash; }
-    public void setVoterKeyHash(String voterKeyHash) { this.voterKeyHash = voterKeyHash; }
+    public String getVoterToken() { return voterToken; }
+    public void setVoterToken(String voterToken) { this.voterToken = voterToken; }
 
     public String getVoteHash() { return voteHash; }
     public void setVoteHash(String voteHash) { this.voteHash = voteHash; }
 
-    public String getPrevHash() { return prevHash; }
-    public void setPrevHash(String prevHash) { this.prevHash = prevHash; }
-
-    public Long getSequenceNum() { return sequenceNum; }
-    public void setSequenceNum(Long sequenceNum) { this.sequenceNum = sequenceNum; }
+    public String getBallotSignature() { return ballotSignature; }
+    public void setBallotSignature(String ballotSignature) { this.ballotSignature = ballotSignature; }
 
     public LocalDateTime getDateVote() { return dateVote; }
     public void setDateVote(LocalDateTime dateVote) { this.dateVote = dateVote; }

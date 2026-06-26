@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { CalendarDays, ArrowRight, FileText, Pin } from "lucide-react";
 import { formatAnnonceDate, getTypeLabel, getActionLabel } from "../../utils/annonceUtils";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+import { resolveFileUrl } from "../../config/api";
 
 const TYPE_STYLES = {
   ANNONCE:    "border-emerald-200 bg-emerald-50 text-emerald-700",
@@ -15,7 +14,7 @@ const TYPE_STYLES = {
 function AnnonceFeatured({ annonce }) {
   if (!annonce) return null;
 
-  const imageSrc = annonce.imageUrl ? `${API_BASE_URL}${annonce.imageUrl}` : null;
+  const imageSrc = resolveFileUrl(annonce.imageUrl);
   const typeCls = TYPE_STYLES[annonce.type] || "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B]";
 
   /* ── Version avec image ── */

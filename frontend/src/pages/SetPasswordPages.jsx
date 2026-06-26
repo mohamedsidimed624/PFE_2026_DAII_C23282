@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 import {
   Lock,
   Eye,
@@ -53,7 +54,7 @@ function SetPasswordPage() {
 
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:8080/api/auth/set-password", {
+      const res = await axios.post(`${API_BASE_URL}/api/auth/set-password`, {
         token,
         password,
         confirmPassword,

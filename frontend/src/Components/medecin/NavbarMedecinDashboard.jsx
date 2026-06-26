@@ -18,6 +18,7 @@ import {
   markAllMedecinNotifsRead,
   markMedecinNotifAsRead,
 } from "../../services/medecinNotificationApi";
+import { resolveFileUrl } from "../../config/api";
 
 function formatNotifTime(dateStr) {
   if (!dateStr) return "";
@@ -126,9 +127,7 @@ function NavbarMedecinDashboard({ title = "Tableau de bord", onToggleSidebar }) 
 
   const userRole = "Médecin";
 
-  const photoUrl = profile?.photoProfilPath
-    ? `http://localhost:8080${profile.photoProfilPath}`
-    : null;
+  const photoUrl = resolveFileUrl(profile?.photoProfilPath);
 
   const initials = userName
     .split(" ")

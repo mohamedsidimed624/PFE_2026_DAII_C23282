@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { getMyReclamationById } from "../../services/medecinReclamationApi";
 import StatusBadge from "../../Components/shared/StatusBadge";
+import { resolveFileUrl } from "../../config/api";
 import {
   ArrowLeft,
   FileText,
@@ -53,6 +54,8 @@ const TIMELINE_STEPS = [
 ];
 
 const STATUS_ORDER = { SUBMITTED: 0, IN_PROGRESS: 1, CLOSED: 2 };
+
+const humanize = (v) => (v ? v.charAt(0) + v.slice(1).toLowerCase().replace(/_/g, " ") : "—");
 
 function formatDate(value) {
   if (!value) return "—";
@@ -315,7 +318,7 @@ function MedecinReclamationDetailPage() {
             {r.pieceJointePath && (
               <SectionCard title="Pièce jointe" icon={<Paperclip size={14} />}>
                 <a
-                  href={`http://localhost:8080${r.pieceJointePath}`}
+                  href={resolveFileUrl(r.pieceJointePath)}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 transition hover:border-green-200 hover:bg-green-50/30 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-green-800 dark:hover:bg-green-900/10"
@@ -355,6 +358,7 @@ function MedecinReclamationDetailPage() {
               <InfoRow label="Référence"    value={r.numeroReclamation} accent />
               <InfoRow label="Statut"       value={statusCfg.label} />
               <InfoRow label="Catégorie"    value={categoryLabel} />
+              <InfoRow label="Module concerné" value={humanize(r.moduleConcerne)} />
               <InfoRow label="Pièce jointe" value={r.pieceJointePath ? fileName : "Aucune"} />
               <InfoRow label="Réponse admin" value={hasResponse ? "Disponible" : "En attente"} accent={hasResponse} />
             </SectionCard>

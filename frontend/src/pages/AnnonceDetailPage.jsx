@@ -16,8 +16,7 @@ import Breadcrumb from "../components/public/Breadcrumb";
 
 import { getPublicContenuById } from "../services/publicContenuApi";
 import { formatAnnonceDate, getTypeLabel } from "../utils/annonceUtils";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+import { resolveFileUrl } from "../config/api";
 
 const TYPE_STYLES = {
   ANNONCE:    "border-green-200 bg-green-50 text-[#16A34A]",
@@ -75,7 +74,7 @@ function AnnonceDetailPage() {
     }
   };
 
-  const imageSrc = annonce?.imageUrl ? `${API_BASE_URL}${annonce.imageUrl}` : null;
+  const imageSrc = resolveFileUrl(annonce?.imageUrl);
   const typeCls = TYPE_STYLES[annonce?.type] || "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B]";
   const readingTime = estimateReadingTime(annonce?.contenu);
 

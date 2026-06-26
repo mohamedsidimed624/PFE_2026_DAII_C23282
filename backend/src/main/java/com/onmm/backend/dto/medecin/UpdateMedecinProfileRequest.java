@@ -18,4 +18,5 @@ public class UpdateMedecinProfileRequest {
     private String telephone;
     private String nationalite;
     private String adresse;
+    private String wilayaExercice;
 }

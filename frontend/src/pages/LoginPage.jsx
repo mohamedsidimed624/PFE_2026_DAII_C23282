@@ -3,32 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { loginUser } from "../services/authApi";
 import Navbar from "../components/Navbar";
-import { Stethoscope, Shield, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import Footer from "../components/Footer";
-import medecinLogo from "../assets/logo.png";
 import ordreLogo from "../assets/logo.png";
-
-const TABS = [
-    { key: "MEDECIN", label: "Médecin", Icon: Stethoscope },
-    { key: "ORDRE", label: "Ordre", Icon: Shield },
-];
 
 function LoginPage() {
     const navigate = useNavigate();
 
-    const [activeTab, setActiveTab] = useState("MEDECIN");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
-    const handleTabChange = (tab) => {
-        setActiveTab(tab);
-        setError("");
-        setEmail("");
-        setPassword("");
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -63,9 +49,6 @@ function LoginPage() {
         }
     };
 
-    const isMedecin = activeTab === "MEDECIN";
-    const logo = isMedecin ? medecinLogo : ordreLogo;
-
     return (
         <div className="min-h-screen flex flex-col bg-slate-50 relative overflow-hidden">
             <Navbar />
@@ -91,35 +74,6 @@ function LoginPage() {
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center px-4 py-24 relative z-10">
-                {/* Tabs */}
-                <motion.div 
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="bg-white/80 backdrop-blur-xl rounded-full border border-slate-200 shadow-sm p-1.5 flex gap-1 mb-12"
-                >
-                    {TABS.map(({ key, label, Icon }) => (
-                        <button
-                            key={key}
-                            type="button"
-                            onClick={() => handleTabChange(key)}
-                            className={`relative flex items-center gap-2 px-8 py-2.5 rounded-full text-sm font-semibold transition-colors z-10 ${
-                                activeTab === key ? "text-green-700" : "text-slate-500 hover:text-slate-700"
-                            }`}
-                        >
-                            {activeTab === key && (
-                                <motion.div
-                                    layoutId="activeTab"
-                                    className="absolute inset-0 bg-white shadow-md border border-slate-100 rounded-full -z-10"
-                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                />
-                            )}
-                            <Icon size={16} className={activeTab === key ? "text-green-600" : "text-slate-400"} />
-                            {label}
-                        </button>
-                    ))}
-                </motion.div>
-
                 {/* Login Card Wrapper */}
                 <motion.div 
                     initial={{ opacity: 0, y: 30 }}
@@ -135,19 +89,15 @@ function LoginPage() {
   className="relative z-20 -mb-12"
 >
   <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-slate-100">
-    {isMedecin ? (
-      <Stethoscope size={46} strokeWidth={1.8} className="text-green-600" />
-    ) : (
-      <img
-        src={ordreLogo}
-        alt="Logo ONMM"
-        className="h-24 w-24 scale-125 rounded-full object-cover"
-        style={{
-          clipPath: "circle(42% at 50% 50%)",
-          mixBlendMode: "multiply",
-        }}
-      />
-    )}
+    <img
+      src={ordreLogo}
+      alt="Logo ONMM"
+      className="h-24 w-24 scale-125 rounded-full object-cover"
+      style={{
+        clipPath: "circle(42% at 50% 50%)",
+        mixBlendMode: "multiply",
+      }}
+    />
   </div>
 </motion.div>
 
@@ -157,7 +107,7 @@ function LoginPage() {
                         
 
                         <h2 className="text-2xl font-bold text-slate-800 text-center mb-8">
-                            Espace {isMedecin ? "Médecin" : "Ordre"}
+                            Connexion
                         </h2>
 
                         <form onSubmit={handleSubmit} className="space-y-5">
@@ -168,7 +118,7 @@ function LoginPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder={isMedecin ? "dr.exemple@email.com" : "contact@ordre.mr"}
+                                    placeholder="votre@email.com"
                                     className="w-full border border-slate-200 rounded-xl px-5 py-3.5 text-sm text-slate-800 bg-white/50 outline-none focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 transition-all placeholder:text-slate-400"
                                 />
                             </div>
@@ -239,20 +189,18 @@ function LoginPage() {
                             </motion.button>
 
                             {/* Bottom CTA */}
-                            {isMedecin && (
-                                <div className="text-center pt-6 mt-4 border-t border-slate-100">
-                                    <p className="text-sm text-slate-600">
-                                        Nouveau médecin ?{" "}
-                                        <button
-                                            type="button"
-                                            onClick={() => navigate("/adhesion")}
-                                            className="font-bold text-green-600 hover:text-green-700 transition-colors"
-                                        >
-                                            Créer mon espace
-                                        </button>
-                                    </p>
-                                </div>
-                            )}
+                            <div className="text-center pt-6 mt-4 border-t border-slate-100">
+                                <p className="text-sm text-slate-600">
+                                    Nouveau médecin ?{" "}
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate("/adhesion")}
+                                        className="font-bold text-green-600 hover:text-green-700 transition-colors"
+                                    >
+                                        Créer mon espace
+                                    </button>
+                                </p>
+                            </div>
                         </form>
                     </div>
                 </motion.div>

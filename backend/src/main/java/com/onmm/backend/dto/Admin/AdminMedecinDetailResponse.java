@@ -21,6 +21,7 @@ public class AdminMedecinDetailResponse {
     private String wilayaExercice;
     private String numeroInscription;
     private StatutMedecin statut;
+    private String adminComment;
     private Long specialiteId;
     private String specialiteLibelle;
     private Long sousSpecialiteId;

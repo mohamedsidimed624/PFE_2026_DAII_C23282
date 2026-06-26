@@ -10,6 +10,7 @@ import com.onmm.backend.entity.enums.TokenType;
 import com.onmm.backend.repository.ActivationTokenRepository;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.service.Admin.AdminMedecinService;
+import com.onmm.backend.service.NotificationService;
 import com.onmm.backend.service.email.EmailService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -24,15 +25,18 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
     private final MedecinRepository medecinRepository;
     private final EmailService emailService;
     private final ActivationTokenRepository activationTokenRepository;
+    private final NotificationService notificationService;
 
     public AdminMedecinServiceImpl(
             MedecinRepository medecinRepository,
             EmailService emailService,
-            ActivationTokenRepository activationTokenRepository
+            ActivationTokenRepository activationTokenRepository,
+            NotificationService notificationService
     ) {
         this.medecinRepository = medecinRepository;
         this.emailService = emailService;
         this.activationTokenRepository = activationTokenRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -91,6 +95,7 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
         response.setWilayaExercice(medecin.getAdresse());
         response.setNumeroInscription(medecin.getNumeroInscription());
         response.setStatut(medecin.getStatut());
+        response.setAdminComment(medecin.getCommentaireSuspension());
         response.setPhotoProfilPath(medecin.getPhotoProfilPath());
         response.setDateNaissance(medecin.getDateNaissance());
 
@@ -135,12 +140,22 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
         medecin.setStatut(StatutMedecin.SUSPENDU);
+        medecin.setCommentaireSuspension(adminComment);
         medecinRepository.save(medecin);
 
         emailService.sendSuspensionEmail(
                 medecin.getEmail(),
                 medecin.getNom(),
                 adminComment
+        );
+
+        notificationService.createMedecinNotification(
+                medecin.getEmail(),
+                "COMPTE_SUSPENDU",
+                "Votre compte a été suspendu",
+                "Votre compte a été suspendu par l'administration. Contactez l'Ordre pour plus d'informations.",
+                "/medecin/profil",
+                true
         );
     }
 
@@ -152,10 +167,20 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
                 .orElseThrow(() -> new RuntimeException("Médecin introuvable"));
 
         medecin.setStatut(StatutMedecin.ACTIF);
+        medecin.setCommentaireSuspension(null);
         if (medecin.getDateApprouvement() == null) {
             medecin.setDateApprouvement(java.time.LocalDate.now());
         }
         medecinRepository.save(medecin);
+
+        notificationService.createMedecinNotification(
+                medecin.getEmail(),
+                "COMPTE_REACTIVE",
+                "Votre compte a été réactivé",
+                "Votre compte a été réactivé par l'administration. Vous pouvez à nouveau accéder à votre espace médecin.",
+                "/medecin/profil",
+                false
+        );
     }
 
     @Override

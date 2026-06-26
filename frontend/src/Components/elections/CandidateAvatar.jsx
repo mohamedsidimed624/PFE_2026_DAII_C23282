@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../../config/api";
 
-const BACKEND = "http://localhost:8080";
+const BACKEND = API_BASE_URL;
 
 function toAbsUrl(path) {
   if (!path) return null;

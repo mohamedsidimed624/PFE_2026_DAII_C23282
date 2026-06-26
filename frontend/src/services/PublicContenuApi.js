@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
-const API_URL = "http://localhost:8080/api/public/contenus";
+const API_URL = `${API_BASE_URL}/api/public/contenus`;
 
 export const getPublicContenus = async ({
   page = 0,

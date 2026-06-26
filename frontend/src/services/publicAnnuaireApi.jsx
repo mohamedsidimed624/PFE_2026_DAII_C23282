@@ -48,8 +48,9 @@
 // };
 
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
-const API_URL = "http://localhost:8080/api/public/annuaire";
+const API_URL = `${API_BASE_URL}/api/public/annuaire`;
 
 export const getPublicMedecins = async (params = {}) => {
   const res = await axios.get(`${API_URL}/medecins`, {
@@ -64,6 +65,6 @@ export const getPublicMedecinById = async (id) => {
 };
 
 export const getPublicSpecialites = async () => {
-  const res = await axios.get("http://localhost:8080/api/public/specialites");
+  const res = await axios.get(`${API_BASE_URL}/api/public/specialites`);
   return res.data;
 };

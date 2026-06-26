@@ -8,17 +8,13 @@ import com.onmm.backend.entity.User;
 import com.onmm.backend.repository.AdminRepository;
 import com.onmm.backend.repository.UserRepository;
 import com.onmm.backend.service.Admin.AdminProfileService;
-import org.springframework.beans.factory.annotation.Value;
+import com.onmm.backend.service.storage.ObjectStorageService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -29,16 +25,16 @@ public class AdminProfileServiceImpl implements AdminProfileService {
     private final AdminRepository adminRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${file.upload-dir:uploads}")
-    private String uploadDir;
+    private final ObjectStorageService objectStorageService;
 
     public AdminProfileServiceImpl(AdminRepository adminRepository,
                                    UserRepository userRepository,
-                                   PasswordEncoder passwordEncoder) {
+                                   PasswordEncoder passwordEncoder,
+                                   ObjectStorageService objectStorageService) {
         this.adminRepository = adminRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.objectStorageService = objectStorageService;
     }
 
     @Override
@@ -79,23 +75,19 @@ public class AdminProfileServiceImpl implements AdminProfileService {
         Admin admin = findByEmail(email);
 
         try {
-            Path uploadPath = Paths.get(uploadDir, "profiles");
-            Files.createDirectories(uploadPath);
-
             String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "photo";
             String extension = "";
             int dot = originalName.lastIndexOf('.');
             if (dot >= 0) extension = originalName.substring(dot);
 
             String fileName = "admin_" + admin.getId() + "_" + UUID.randomUUID() + extension;
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            String key = "profiles/" + fileName;
+            String url = objectStorageService.upload(key, file.getBytes(), contentType);
 
-            String relativePath = "/uploads/profiles/" + fileName;
-            admin.setPhotoProfilPath(relativePath);
+            admin.setPhotoProfilPath(url);
             adminRepository.save(admin);
 
-            return relativePath;
+            return url;
         } catch (IOException e) {
             throw new RuntimeException("Erreur lors de l'enregistrement de la photo");
         }

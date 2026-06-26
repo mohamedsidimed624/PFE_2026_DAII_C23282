@@ -145,4 +145,14 @@ public class MedecinController {
         headers.setContentLength(pdf.length);
         return ResponseEntity.ok().headers(headers).body(pdf);
     }
+
+    // ── Sécurité ──────────────────────────────────────────────────────────────
+
+    @PutMapping("/me/password")
+    public ResponseEntity<Void> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        medecinService.changePassword(currentEmail(authentication), request);
+        return ResponseEntity.ok().build();
+    }
 }

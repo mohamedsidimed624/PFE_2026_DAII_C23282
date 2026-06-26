@@ -251,8 +251,6 @@ function StepCandidature({
   setPositionId,
   declaration,
   setDeclaration,
-  programme,
-  setProgramme,
 }) {
   return (
     <section>
@@ -326,19 +324,6 @@ function StepCandidature({
             <span>{declaration.length}</span>
           </div>
         </Field>
-
-        {/* <Field
-          label="Programme électoral"
-          hint="Facultatif — présentez vos engagements ou axes de travail."
-        >
-          <textarea
-            rows={5}
-            value={programme}
-            onChange={(e) => setProgramme(e.target.value)}
-            placeholder="Présentez vos engagements..."
-            className={textAreaCls}
-          />
-        </Field> */}
       </div>
     </section>
   );
@@ -571,7 +556,6 @@ export default function CandidatureFormPage() {
   const [step, setStep] = useState(0);
   const [positionId, setPositionId] = useState("");
   const [declaration, setDeclaration] = useState("");
-  const [programme, setProgramme] = useState("");
 
   const [files, setFiles] = useState({});
   const [existingDocs, setExistingDocs] = useState({});
@@ -603,7 +587,6 @@ export default function CandidatureFormPage() {
           if (candidature.statut === "BROUILLON") {
             setPositionId(candidature.position?.id?.toString() || "");
             setDeclaration(candidature.declarationCandidature || "");
-            setProgramme(candidature.programmeElectoral || "");
 
             const docsMap = {};
             (candidature.documents || []).forEach((doc) => {
@@ -741,7 +724,6 @@ export default function CandidatureFormPage() {
         const res = await candidater(id, {
           positionId: positionId ? Number(positionId) : null,
           declarationCandidature: declaration.trim(),
-          programmeElectoral: programme.trim() || null,
           soumettre: false,
         });
 
@@ -952,8 +934,6 @@ export default function CandidatureFormPage() {
                     setPositionId={setPositionId}
                     declaration={declaration}
                     setDeclaration={setDeclaration}
-                    programme={programme}
-                    setProgramme={setProgramme}
                   />
                 )}
 

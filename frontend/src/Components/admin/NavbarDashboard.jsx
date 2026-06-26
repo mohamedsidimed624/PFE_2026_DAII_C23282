@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { getMyProfile } from "../../services/adminProfileApi";
 import { getNotifications, markAsRead, markAllAsRead } from "../../services/notificationApi";
+import { resolveFileUrl } from "../../config/api";
 
 function formatRelTime(dt) {
   if (!dt) return "";
@@ -106,9 +107,7 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
 
   const userName = profile?.nomComplet || localStorage.getItem("email") || "Admin";
   const userRole = "Administrateur";
-  const photoUrl = profile?.photoProfilPath
-    ? `http://localhost:8080${profile.photoProfilPath}`
-    : null;
+  const photoUrl = resolveFileUrl(profile?.photoProfilPath);
   const initials = userName
     .split(" ")
     .map((w) => w[0])

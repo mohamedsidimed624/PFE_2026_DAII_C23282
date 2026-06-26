@@ -494,7 +494,7 @@ function AdminSpecialitesPage() {
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.label} value={opt.value}>
-                {opt.label === "Tous" ? "Status : All" : opt.label}
+                {opt.label === "Tous" ? "Tous les statuts" : opt.label}
               </option>
             ))}
           </select>
@@ -986,7 +986,7 @@ function StatusBadge({ active }) {
         active ? "text-green-600" : "text-slate-400"
       }`}
     >
-      {active ? "Active" : "Inactive"}
+      {active ? "Actif" : "Inactif"}
     </span>
   );
 }

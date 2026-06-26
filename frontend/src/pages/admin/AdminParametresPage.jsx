@@ -7,6 +7,7 @@ import {
   uploadMyPhoto,
   changePassword,
 } from "../../services/adminProfileApi";
+import { API_BASE_URL } from "../../config/api";
 import {
   User,
   Pencil,
@@ -21,7 +22,7 @@ import {
   Shield,
 } from "lucide-react";
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = API_BASE_URL;
 
 /* ── helpers ── */
 const inputCls =

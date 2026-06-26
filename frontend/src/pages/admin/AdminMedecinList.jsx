@@ -137,7 +137,7 @@ function AdminMedecinsList() {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search by order id"
+              placeholder="Rechercher par nom, NNI..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -159,14 +159,14 @@ function AdminMedecinsList() {
             }}
             className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
           >
-            <option value="">Status : All</option>
+            <option value="">Tous les statuts</option>
             <option value="ACTIF">Actif</option>
             <option value="SUSPENDU">Suspendu</option>
           </select>
         </div>
 
         <button className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200">
-          Filter by date range
+          Filtrer par période
         </button>
       </div>
 

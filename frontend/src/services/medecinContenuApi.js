@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
-const BASE = "http://localhost:8080/api/medecin/contenus";
+const BASE = `${API_BASE_URL}/api/medecin/contenus`;
 const auth = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
 });

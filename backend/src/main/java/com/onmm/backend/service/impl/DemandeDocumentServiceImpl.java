@@ -6,29 +6,32 @@ import com.onmm.backend.entity.DemandeDocument;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
 import com.onmm.backend.repository.DemandeDocumentRepository;
 import com.onmm.backend.service.DemandeDocumentService;
+import com.onmm.backend.service.storage.ObjectStorageService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 @Service
 public class DemandeDocumentServiceImpl implements DemandeDocumentService {
 
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
+    private static final java.util.Set<String> ALLOWED_CONTENT_TYPES = java.util.Set.of(
+            "application/pdf", "image/jpeg", "image/png");
+
     private final DemandeDocumentRepository documentRepository;
     private final DemandeAdhesionRepository demandeRepository;
-
-    private final String uploadDir = "uploads/";
+    private final ObjectStorageService objectStorageService;
 
     public DemandeDocumentServiceImpl(
             DemandeDocumentRepository documentRepository,
-            DemandeAdhesionRepository demandeRepository) {
+            DemandeAdhesionRepository demandeRepository,
+            ObjectStorageService objectStorageService) {
 
         this.documentRepository = documentRepository;
         this.demandeRepository = demandeRepository;
+        this.objectStorageService = objectStorageService;
     }
 
     @Override
@@ -38,6 +41,14 @@ public class DemandeDocumentServiceImpl implements DemandeDocumentService {
             String categorie,
             MultipartFile file) {
 
+        if (!ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
+            throw new RuntimeException("Type de fichier non autorisé. Formats acceptés : PDF, JPEG, PNG");
+        }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new RuntimeException("Le fichier dépasse la taille maximale autorisée (5 Mo)");
+        }
+
         try {
 
             DemandeAdhesion demande = demandeRepository.findById(demandeId)
@@ -46,12 +57,8 @@ public class DemandeDocumentServiceImpl implements DemandeDocumentService {
             System.out.println("UPLOAD DOCUMENT APPELLE");
 
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-
-            Path path = Paths.get(uploadDir + fileName);
-
-            Files.createDirectories(path.getParent());
-
-            Files.write(path, file.getBytes());
+            String key = "demandes/" + fileName;
+            String url = objectStorageService.upload(key, file.getBytes(), file.getContentType());
 
             System.out.println("FILE NAME = " + file.getOriginalFilename());
 
@@ -60,7 +67,7 @@ public class DemandeDocumentServiceImpl implements DemandeDocumentService {
             document.setTypeDocument(typeDocument);
             document.setCategorie(categorie);
             document.setFileName(fileName);
-            document.setFilePath(path.toString());
+            document.setFilePath(url);
             document.setSize(file.getSize());
             document.setUploadDate(LocalDateTime.now());
             document.setDemandeAdhesion(demande);

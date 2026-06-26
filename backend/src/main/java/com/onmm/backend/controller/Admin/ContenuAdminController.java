@@ -2,6 +2,7 @@ package com.onmm.backend.controller.Admin;
 
 import com.onmm.backend.dto.contenu.*;
 import com.onmm.backend.service.Admin.ContenuService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class ContenuAdminController {
 
     @PostMapping(consumes = "multipart/form-data")
     public ContenuResponseDTO create(
-            @RequestPart("data") ContenuRequestDTO dto,
+            @Valid @RequestPart("data") ContenuRequestDTO dto,
             @RequestPart("image") MultipartFile image,
             @RequestParam Long userId
     ) {
@@ -34,7 +35,7 @@ public class ContenuAdminController {
     @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     public ContenuResponseDTO update(
             @PathVariable Long id,
-            @RequestPart("data") ContenuRequestDTO dto,
+            @Valid @RequestPart("data") ContenuRequestDTO dto,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) {
         return contenuService.update(id, dto, image);

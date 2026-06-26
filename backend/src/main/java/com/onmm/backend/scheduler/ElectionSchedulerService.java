@@ -2,17 +2,17 @@ package com.onmm.backend.scheduler;
 
 import com.onmm.backend.entity.Candidature;
 import com.onmm.backend.entity.Election;
-import com.onmm.backend.entity.ElectionAuditLog;
 import com.onmm.backend.entity.PositionElectorale;
 import com.onmm.backend.entity.enums.CorpsElectoral;
 import com.onmm.backend.entity.enums.ElectionStatut;
 import com.onmm.backend.entity.enums.StatutCandidature;
 import com.onmm.backend.entity.enums.StatutMedecin;
 import com.onmm.backend.repository.CandidatureRepository;
-import com.onmm.backend.repository.ElectionAuditLogRepository;
 import com.onmm.backend.repository.ElectionRepository;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.repository.PositionElectoraleRepository;
+import com.onmm.backend.service.election.ElectionAuditService;
+import com.onmm.backend.service.election.key.KeyManagementService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,20 +28,23 @@ public class ElectionSchedulerService {
     private final CandidatureRepository candidatureRepo;
     private final PositionElectoraleRepository positionRepo;
     private final MedecinRepository medecinRepo;
-    private final ElectionAuditLogRepository auditRepo;
+    private final ElectionAuditService electionAuditService;
+    private final KeyManagementService keyManagementService;
 
     public ElectionSchedulerService(
             ElectionRepository electionRepo,
             CandidatureRepository candidatureRepo,
             PositionElectoraleRepository positionRepo,
             MedecinRepository medecinRepo,
-            ElectionAuditLogRepository auditRepo
+            ElectionAuditService electionAuditService,
+            KeyManagementService keyManagementService
     ) {
         this.electionRepo = electionRepo;
         this.candidatureRepo = candidatureRepo;
         this.positionRepo = positionRepo;
         this.medecinRepo = medecinRepo;
-        this.auditRepo = auditRepo;
+        this.electionAuditService = electionAuditService;
+        this.keyManagementService = keyManagementService;
     }
 
     @Scheduled(fixedRate = 60000)
@@ -116,6 +119,11 @@ public class ElectionSchedulerService {
 
                 e.setStatut(ElectionStatut.VOTE_EN_COURS);
                 electionRepo.save(e);
+
+                // Génère la paire RSA-2048 de cette élection — sans cela, aucun bulletin ne
+                // pourrait être chiffré (bug pré-existant : ce point d'entrée automatique
+                // n'appelait jamais la génération de clé, contrairement à ouvrirVotes() côté admin).
+                keyManagementService.generateElectionKeyPair(e.getId());
 
                 audit(
                         e,
@@ -361,15 +369,6 @@ public class ElectionSchedulerService {
     }
 
     private void audit(Election e, String action, String details, String severity) {
-        ElectionAuditLog log = new ElectionAuditLog();
-        log.setElection(e);
-        log.setAction(action);
-        log.setActeurEmail("SYSTEME");
-        log.setActeurRole("SYSTEME");
-        log.setDetails(details);
-        log.setSeverity(severity);
-        log.setEntityType("Election");
-        log.setEntityId(e.getId());
-        auditRepo.save(log);
+        electionAuditService.save(e, action, "SYSTEME", "SYSTEME", details, severity, "Election", e.getId());
     }
 }

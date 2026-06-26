@@ -32,4 +32,6 @@ public interface MedecinService {
     List<MedecinDocumentDto> getDocuments(String email);
 
     byte[] generateCertificat(String email);
+
+    void changePassword(String email, ChangePasswordRequest request);
 }

@@ -182,7 +182,7 @@ function AdminReclamationsList() {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search by order id"
+              placeholder="Rechercher par nom, objet..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="h-10 w-[240px] rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 pr-10 text-[13px] text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400"
@@ -198,7 +198,7 @@ function AdminReclamationsList() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
           >
-            <option value="ALL">Status : All</option>
+            <option value="ALL">Tous les statuts</option>
             <option value="SUBMITTED">Soumises</option>
             <option value="IN_PROGRESS">En cours</option>
             <option value="CLOSED">Clôturées</option>
@@ -209,7 +209,7 @@ function AdminReclamationsList() {
             onChange={(e) => setAuteurFilter(e.target.value)}
             className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-500 dark:text-slate-300 shadow-sm outline-none focus:border-green-400"
           >
-            <option value="ALL">Auteur : All</option>
+            <option value="ALL">Tous les auteurs</option>
             <option value="MEDECIN">Médecins</option>
             <option value="CITOYEN">Citoyens</option>
           </select>

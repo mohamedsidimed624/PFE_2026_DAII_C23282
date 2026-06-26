@@ -1,14 +1,9 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Users, BadgeCheck, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { fadeInLeft, fadeInRight, staggerContainer } from "../motion/animation";
-
-const STATS = [
-    { value: "1981", label: "Année de fondation" },
-    { value: "+500", label: "Médecins membres" },
-    { value: "13",   label: "Wilayas couvertes" },
-    { value: "40+",  label: "Spécialités" },
-];
+import { getPublicMedecins, getPublicSpecialites } from "../services/publicAnnuaireApi";
 
 const PILLARS = [
     {
@@ -32,6 +27,26 @@ const PILLARS = [
 ];
 
 export default function About() {
+    const [medecinsCount, setMedecinsCount] = useState(null);
+    const [specialitesCount, setSpecialitesCount] = useState(null);
+
+    useEffect(() => {
+        getPublicMedecins({ page: 0, size: 1 })
+            .then((data) => setMedecinsCount(data.totalElements))
+            .catch(() => {});
+
+        getPublicSpecialites()
+            .then((data) => setSpecialitesCount(data.length))
+            .catch(() => {});
+    }, []);
+
+    const STATS = [
+        { value: "2019", label: "Année de fondation" },
+        { value: medecinsCount !== null ? `+${medecinsCount}` : "…", label: "Médecins membres" },
+        { value: "13",   label: "Wilayas couvertes" },
+        { value: specialitesCount !== null ? `${specialitesCount}+` : "…", label: "Spécialités" },
+    ];
+
     return (
         <section className="bg-slate-50 overflow-hidden">
 
@@ -41,7 +56,7 @@ export default function About() {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="bg-[#A0891B] py-10"
+                className="bg-green-600 py-10"
             >
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 divide-x divide-white/20">
@@ -67,15 +82,15 @@ export default function About() {
                         viewport={{ once: true, margin: "-80px" }}
                     >
                         <div className="flex items-center gap-3 mb-6">
-                            <span className="h-px w-12 bg-[#A0891B]" />
-                            <span className="text-[#A0891B] font-bold tracking-widest uppercase text-sm">
+                            <span className="h-px w-12 bg-green-600" />
+                            <span className="text-green-600 font-bold tracking-widest uppercase text-sm">
                                 L'Institution
                             </span>
                         </div>
 
                         <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-[1.15] tracking-tight mb-6">
                             Garant de l'éthique médicale en{" "}
-                            <span className="text-[#A0891B]">Mauritanie</span>
+                            <span className="text-green-600">Mauritanie</span>
                         </h2>
 
                         <p className="text-slate-600 text-lg leading-relaxed mb-8">
@@ -84,7 +99,7 @@ export default function About() {
 
                         <Link
                             to="/a-propos"
-                            className="inline-flex items-center gap-2 rounded-full bg-[#A0891B] hover:bg-[#8a760f] px-8 py-4 text-white font-bold transition-all shadow-lg shadow-[#A0891B]/25 active:scale-95 group"
+                            className="inline-flex items-center gap-2 rounded-full bg-green-600 hover:bg-green-700 px-8 py-4 text-white font-bold transition-all shadow-lg shadow-green-600/25 active:scale-95 group"
                         >
                             En savoir plus
                             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -108,12 +123,12 @@ export default function About() {
                                     className="py-7 flex gap-5 group"
                                 >
                                     {/* Number */}
-                                    <span className="text-5xl font-black text-[#A0891B]/15 leading-none flex-shrink-0 w-14 group-hover:text-[#A0891B]/30 transition-colors duration-300">
+                                    <span className="text-5xl font-black text-green-600/15 leading-none flex-shrink-0 w-14 group-hover:text-green-600/30 transition-colors duration-300">
                                         {p.num}
                                     </span>
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
-                                            <PillarIcon size={16} className="text-[#A0891B]" />
+                                            <PillarIcon size={16} className="text-green-600" />
                                             <h3 className="font-bold text-slate-900 text-base">{p.title}</h3>
                                         </div>
                                         <p className="text-slate-500 text-sm leading-relaxed">{p.desc}</p>
@@ -127,7 +142,7 @@ export default function About() {
             </div>
 
             {/* ── Bottom accent line ── */}
-            <div className="h-px bg-gradient-to-r from-transparent via-[#A0891B]/30 to-transparent" />
+            <div className="h-px bg-gradient-to-r from-transparent via-green-600/30 to-transparent" />
         </section>
     );
 }

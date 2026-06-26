@@ -66,7 +66,7 @@ function EducationList({ setIsAdding, setEditingIndex, nextStep, prevStep }) {
         </div>
       ))}
 
-      <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+      {/* <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
         <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
@@ -83,7 +83,7 @@ function EducationList({ setIsAdding, setEditingIndex, nextStep, prevStep }) {
             ? "Section C — Médecins enseignants-chercheurs"
             : "Section déterminée selon votre spécialité — vérifiée par l'administration."}
         </p>
-      </div>
+      </div> */}
 
       <div className="flex justify-between pt-4">
         <button

@@ -302,7 +302,7 @@ function PublishModal({ sondage, onClose, onDone }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, scale: 0.96, y: 8 }}
@@ -574,7 +574,7 @@ export default function AdminSondagesPage() {
               onChange={(e) => setFilterType(e.target.value)}
               className="h-10 rounded-md border border-slate-100 bg-white px-4 text-[13px] text-slate-500 shadow-sm outline-none focus:border-green-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              <option value="">Type : All</option>
+              <option value="">Tous les types</option>
               {Object.entries(TYPE_LABELS).map(([key, label]) => (
                 <option key={key} value={key}>
                   {label}
@@ -587,7 +587,7 @@ export default function AdminSondagesPage() {
               onChange={(e) => setFilterStatut(e.target.value)}
               className="h-10 rounded-md border border-slate-100 bg-white px-4 text-[13px] text-slate-500 shadow-sm outline-none focus:border-green-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              <option value="">Status : All</option>
+              <option value="">Tous les statuts</option>
               {Object.entries(STATUT_LABELS).map(([key, label]) => (
                 <option key={key} value={key}>
                   {label}

@@ -1,18 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
-  ArrowRight,
-  CheckCircle2,
-  Filter,
   Loader2,
   RotateCcw,
   Search,
-  UserCheck,
   Vote,
 } from "lucide-react";
 
 import MedecinLayout from "../../components/medecin/MedecinLayout";
+import ElectionCard from "../../components/elections/ElectionCard";
 import { getMesElections } from "../../services/medecinElectionApi";
 import { extractApiError } from "../../utils/apiUtils";
 
@@ -29,48 +25,6 @@ const TABS = [
   { key: "resultats", label: "Résultats" },
   { key: "toutes", label: "Toutes" },
 ];
-
-const STATUS_META = {
-  BROUILLON: {
-    label: "Brouillon",
-    className: "text-slate-500 dark:text-slate-400",
-  },
-  CANDIDATURE_OUVERTE: {
-    label: "Candidature ouverte",
-    className: "text-amber-500 dark:text-amber-400",
-  },
-  VALIDATION_CANDIDATURES: {
-    label: "Validation candidatures",
-    className: "text-purple-500 dark:text-purple-400",
-  },
-  VOTE_EN_COURS: {
-    label: "Vote en cours",
-    className: "text-green-600 dark:text-green-400",
-  },
-  DEPOUILLEMENT: {
-    label: "Dépouillement",
-    className: "text-cyan-600 dark:text-cyan-400",
-  },
-  RESULTATS_PUBLIES: {
-    label: "Résultats publiés",
-    className: "text-green-600 dark:text-green-400",
-  },
-  ARCHIVEE: {
-    label: "Archivée",
-    className: "text-slate-400 dark:text-slate-500",
-  },
-  ANNULEE: {
-    label: "Annulée",
-    className: "text-red-500 dark:text-red-400",
-  },
-};
-
-const TYPE_LABELS = {
-  CONSEIL_NATIONAL: "Conseil national",
-  CONSEIL_REGIONAL: "Conseil régional",
-  BUREAU_EXECUTIF: "Bureau exécutif",
-  COMMISSION_SPECIALISEE: "Commission spécialisée",
-};
 
 const EMPTY_MESSAGES = {
   participer: {
@@ -105,56 +59,12 @@ function isActiveElection(election) {
   return ACTIVE_STATUSES.includes(election.statut);
 }
 
-function formatDate(value) {
-  if (!value) return "—";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-
-  return date.toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-}
-
-function getStatusMeta(status) {
-  return (
-    STATUS_META[status] || {
-      label: status || "Statut inconnu",
-      className: "text-slate-500 dark:text-slate-400",
-    }
-  );
-}
-
-function getElectionTitle(election) {
-  return (
-    election.titre ||
-    election.nom ||
-    election.libelle ||
-    TYPE_LABELS[election.typeElection] ||
-    "Élection ordinale"
-  );
-}
-
-function getElectionType(election) {
-  return (
-    TYPE_LABELS[election.typeElection] ||
-    TYPE_LABELS[election.type] ||
-    election.typeElection ||
-    election.type ||
-    "Élection"
-  );
-}
-
-function getElectionRegion(election) {
-  return (
-    election.region ||
-    election.wilaya ||
-    election.porteeRegion ||
-    election.zone ||
-    "Nationale"
-  );
+function needsAction(election) {
+  if (!isActiveElection(election)) return false;
+  if (election.peutCandidater) return true;
+  if (election.peutVoter) return true;
+  const statutCandidature = election.maCandidature?.statut;
+  return statutCandidature === "BROUILLON" || statutCandidature === "SOUMISE" || statutCandidature === "EN_REVUE";
 }
 
 function getVoteStart(election) {
@@ -167,16 +77,6 @@ function getVoteStart(election) {
   );
 }
 
-function getVoteEnd(election) {
-  return (
-    election.voteEndDate ||
-    election.dateFinVote ||
-    election.voteFin ||
-    election.dateFin ||
-    election.endDate
-  );
-}
-
 function getCandidatureStart(election) {
   return (
     election.candidatureStartDate ||
@@ -185,57 +85,9 @@ function getCandidatureStart(election) {
   );
 }
 
-function getPrimaryAction(election) {
-  if (election.statut === "VOTE_EN_COURS") {
-    if (election.aVote || election.dejaVote) {
-      return {
-        label: "Vote enregistré",
-        tone: "muted",
-        disabled: true,
-      };
-    }
-
-    return {
-      label: "Voter",
-      tone: "green",
-      to: `/medecin/elections/${election.id}/voter`,
-    };
-  }
-
-  if (election.statut === "CANDIDATURE_OUVERTE") {
-    if (election.maCandidature) {
-      return {
-        label: "Candidature déposée",
-        tone: "muted",
-        to: `/medecin/elections/${election.id}`,
-      };
-    }
-
-    return {
-      label: "Candidater",
-      tone: "blue",
-      to: `/medecin/elections/${election.id}/candidater`,
-    };
-  }
-
-  if (isResultAvailable(election)) {
-    return {
-      label: "Résultats",
-      tone: "outline",
-      to: `/medecin/elections/${election.id}/resultats`,
-    };
-  }
-
-  return {
-    label: "Détail",
-    tone: "default",
-    to: `/medecin/elections/${election.id}`,
-  };
-}
-
 function filterByTab(list, tabKey) {
   if (tabKey === "participer") {
-    return list.filter(isActiveElection);
+    return list.filter(needsAction);
   }
 
   if (tabKey === "candidatures") {
@@ -271,30 +123,6 @@ function sortElections(list) {
 
     return db - da;
   });
-}
-
-function ActionButton({ action, onOpen }) {
-  return (
-    <button
-      type="button"
-      disabled={action.disabled}
-      onClick={() => action.to && onOpen(action.to)}
-      className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[12px] font-semibold transition ${
-        action.tone === "green"
-          ? "bg-green-600 text-white hover:bg-green-700"
-          : action.tone === "blue"
-            ? "bg-blue-600 text-white hover:bg-blue-700"
-            : action.tone === "outline"
-              ? "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-              : action.tone === "muted"
-                ? "cursor-default bg-slate-100 text-slate-400 dark:bg-slate-800"
-                : "text-blue-500 hover:text-blue-600"
-      }`}
-    >
-      {action.label}
-      {!action.disabled && <ArrowRight size={12} />}
-    </button>
-  );
 }
 
 function LoadingState() {
@@ -341,9 +169,64 @@ function EmptyStateLocal({ title, subtitle }) {
   );
 }
 
-export default function MedecinElectionsPage() {
-  const navigate = useNavigate();
+function FlatGrid({ elections }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+      {elections.map((e, i) => (
+        <ElectionCard key={e.id} e={e} index={i} />
+      ))}
+    </div>
+  );
+}
 
+const GROUPS = [
+  {
+    key: "actives",
+    title: "Élections en cours",
+    subtitle: "Candidatures ouvertes, vote en cours ou en dépouillement",
+    match: (e) => isActiveElection(e),
+  },
+  {
+    key: "resultats",
+    title: "Résultats",
+    subtitle: "Résultats publiés et disponibles à la consultation",
+    match: (e) => isResultAvailable(e),
+  },
+  {
+    key: "archives",
+    title: "Archives",
+    subtitle: "Élections terminées, annulées ou en préparation",
+    match: (e) => !isActiveElection(e) && !isResultAvailable(e),
+  },
+];
+
+function GroupedGrid({ elections }) {
+  return (
+    <div className="space-y-8">
+      {GROUPS.map((group) => {
+        const items = elections.filter(group.match);
+        if (items.length === 0) return null;
+
+        return (
+          <section key={group.key}>
+            <div className="mb-3">
+              <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-100">
+                {group.title}
+              </h2>
+              <p className="text-[12px] text-slate-400 dark:text-slate-500">
+                {group.subtitle}
+              </p>
+            </div>
+
+            <FlatGrid elections={items} />
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function MedecinElectionsPage() {
   const [elections, setElections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -387,9 +270,9 @@ export default function MedecinElectionsPage() {
 
     return filterByTab(sortedElections, activeTab).filter((election) => {
       const haystack = [
-        getElectionTitle(election),
-        getElectionType(election),
-        getElectionRegion(election),
+        election.titre,
+        election.type,
+        election.region,
         election.description,
         election.statut,
       ]
@@ -416,9 +299,14 @@ export default function MedecinElectionsPage() {
     <MedecinLayout title="Élections">
       <div className="min-h-screen bg-[#FAFBFC] px-7 py-6 dark:bg-slate-950">
         <div className="space-y-5">
-          <h1 className="text-[20px] font-semibold text-slate-700 dark:text-slate-100">
-            Centre électoral
-          </h1>
+          <div className="space-y-1">
+            <h1 className="text-[20px] font-semibold text-slate-700 dark:text-slate-100">
+              Centre électoral
+            </h1>
+            <p className="text-[13px] text-slate-400 dark:text-slate-500">
+              Suivez vos candidatures, votes et résultats électoraux
+            </p>
+          </div>
 
           {/* Filters */}
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -443,7 +331,7 @@ export default function MedecinElectionsPage() {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="h-10 w-full rounded-md border border-slate-100 bg-white px-4 text-[13px] text-slate-500 shadow-sm outline-none focus:border-green-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 sm:w-[190px]"
               >
-                <option value="ALL">Status : All</option>
+                <option value="ALL">Statut : Tous</option>
                 <option value="CANDIDATURE_OUVERTE">Candidature ouverte</option>
                 <option value="VOTE_EN_COURS">Vote en cours</option>
                 <option value="DEPOUILLEMENT">Dépouillement</option>
@@ -455,7 +343,7 @@ export default function MedecinElectionsPage() {
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[13px] text-slate-400 shadow-sm transition hover:text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-slate-100 bg-white px-4 text-[13px] text-slate-400 shadow-sm transition hover:text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
                 >
                   <RotateCcw size={14} />
                   Réinitialiser
@@ -464,10 +352,9 @@ export default function MedecinElectionsPage() {
             </div>
           </div>
 
-          {/* Main register */}
+          {/* Tabs */}
           <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
-            {/* Tabs */}
-            <div className="overflow-x-auto border-b border-slate-100 px-7 dark:border-slate-800">
+            <div className="overflow-x-auto px-7">
               <div className="flex min-w-max">
                 {TABS.map((tab) => {
                   const active = activeTab === tab.key;
@@ -501,106 +388,26 @@ export default function MedecinElectionsPage() {
                 })}
               </div>
             </div>
+          </div>
 
+          {/* Content */}
+          <div className="mt-5">
             {loading ? (
-              <LoadingState />
-            ) : error ? (
-              <ErrorState message={error} />
-            ) : filtered.length === 0 ? (
-              <EmptyStateLocal title={empty.title} subtitle={empty.subtitle} />
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1050px] table-fixed text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 dark:border-slate-800">
-                      <th className="w-[30%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
-                        Élection
-                      </th>
-                      <th className="w-[16%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
-                        Type
-                      </th>
-                      <th className="w-[14%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
-                        Région
-                      </th>
-                      <th className="w-[18%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
-                        Période
-                      </th>
-                      <th className="w-[12%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
-                        Statut
-                      </th>
-                      <th className="w-[10%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {filtered.map((election) => {
-                      const statusMeta = getStatusMeta(election.statut);
-                      const action = getPrimaryAction(election);
-
-                      return (
-                        <tr
-                          key={election.id}
-                          className="border-b border-slate-100 transition hover:bg-slate-50/60 dark:border-slate-800 dark:hover:bg-slate-800/40"
-                        >
-                          <td className="px-7 py-4">
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="truncate text-[14px] font-semibold text-slate-700 dark:text-slate-200">
-                                  {getElectionTitle(election)}
-                                </p>
-
-                                {election.maCandidature && (
-                                  <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-                                    <UserCheck size={10} />
-                                    Candidat
-                                  </span>
-                                )}
-
-                                {(election.aVote || election.dejaVote) && (
-                                  <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-600 dark:bg-green-900/20 dark:text-green-400">
-                                    <CheckCircle2 size={10} />
-                                    Voté
-                                  </span>
-                                )}
-                              </div>
-
-                              <p className="mt-1 truncate text-[12px] text-slate-400 dark:text-slate-500">
-                                {election.description ||
-                                  "Élection ordinale organisée par l’ONMM."}
-                              </p>
-                            </div>
-                          </td>
-
-                          <td className="px-7 py-4 text-[14px] font-medium text-slate-600 dark:text-slate-300">
-                            {getElectionType(election)}
-                          </td>
-
-                          <td className="px-7 py-4 text-[14px] font-medium text-slate-600 dark:text-slate-300">
-                            {getElectionRegion(election)}
-                          </td>
-
-                          <td className="px-7 py-4 text-[14px] font-medium text-slate-600 dark:text-slate-300">
-                            {formatDate(getVoteStart(election))} →{" "}
-                            {formatDate(getVoteEnd(election))}
-                          </td>
-
-                          <td className="px-7 py-4">
-                            <span className={`text-[14px] font-bold ${statusMeta.className}`}>
-                              {statusMeta.label}
-                            </span>
-                          </td>
-
-                          <td className="px-7 py-4">
-                            <ActionButton action={action} onOpen={navigate} />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
+                <LoadingState />
               </div>
+            ) : error ? (
+              <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
+                <ErrorState message={error} />
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
+                <EmptyStateLocal title={empty.title} subtitle={empty.subtitle} />
+              </div>
+            ) : activeTab === "toutes" ? (
+              <GroupedGrid elections={filtered} />
+            ) : (
+              <FlatGrid elections={filtered} />
             )}
           </div>
         </div>

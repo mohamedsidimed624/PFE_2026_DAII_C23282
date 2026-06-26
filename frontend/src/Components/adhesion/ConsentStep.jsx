@@ -3,6 +3,7 @@ import { useFormData } from "../../context/FormContext";
 import { createDemande } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../../config/api";
 import {
   User,
   GraduationCap,
@@ -49,7 +50,7 @@ function ConsentStep({ prevStep }) {
 
       // 2. Éducations
       for (const edu of formData.education) {
-        await axios.post(`http://localhost:8080/api/demandes/${demandeId}/educations`, {
+        await axios.post(`${API_BASE_URL}/api/demandes/${demandeId}/educations`, {
           specialiteId: edu.specialiteId ? Number(edu.specialiteId) : null,
           sousSpecialiteId: edu.sousSpecialiteId ? Number(edu.sousSpecialiteId) : null,
           diplome: edu.diplome,
@@ -62,7 +63,7 @@ function ConsentStep({ prevStep }) {
 
       // 3. Expériences
       for (const exp of formData.experience) {
-        await axios.post(`http://localhost:8080/api/demandes/${demandeId}/experiences`, {
+        await axios.post(`${API_BASE_URL}/api/demandes/${demandeId}/experiences`, {
           poste:            exp.poste,
           nomEtablissement: exp.etablissement,
           ville:            exp.ville,
@@ -79,7 +80,7 @@ function ConsentStep({ prevStep }) {
         data.append("typeDocument", type);
         data.append("categorie",    categorie);
         data.append("file",         file);
-        await axios.post(`http://localhost:8080/api/demandes/${demandeId}/documents`, data);
+        await axios.post(`${API_BASE_URL}/api/demandes/${demandeId}/documents`, data);
       };
 
       for (const doc of formData.documents.diplomes)    await uploadDocument("DIPLOME",    "diplome",    doc.file);

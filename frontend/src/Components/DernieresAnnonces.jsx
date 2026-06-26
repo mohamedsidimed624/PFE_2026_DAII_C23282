@@ -9,6 +9,7 @@ import {
   Newspaper,
 } from "lucide-react";
 import { getPublicContenus } from "../services/PublicContenuApi";
+import { resolveFileUrl } from "../config/api";
 
 /* Each slide is exactly 1/VISIBLE of the track width → translateX(-i * 100/VISIBLE %) is pixel-perfect. */
 const VISIBLE = 3;
@@ -21,8 +22,6 @@ const TYPE_STYLES = {
   DECISION:   { label: "Décision",   cls: "bg-amber-50 text-amber-700 border-amber-200" },
   EVENEMENT:  { label: "Événement",  cls: "bg-rose-50 text-rose-700 border-rose-200" },
 };
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 const formatDate = (v) =>
   v
@@ -39,7 +38,7 @@ function AnnonceSlide({ item }) {
     label: "Publication",
     cls: "bg-slate-50 text-slate-600 border-slate-200",
   };
-  const imageSrc = item.imageUrl ? `${API_BASE}${item.imageUrl}` : null;
+  const imageSrc = resolveFileUrl(item.imageUrl);
   const date = formatDate(item.datePublication || item.dateCreation);
 
   return (

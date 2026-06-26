@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft, Loader2, Trophy,
   PlayCircle, StopCircle, Archive, Ban, Clock,
-  Building2, CalendarDays, Users, AlertCircle, MapPin, Hash,
+  Building2, CalendarDays, Users, AlertCircle, MapPin, Hash, Vote,
 } from "lucide-react";
 
 import AdminLayout from "../../components/admin/AdminLayout";
@@ -16,6 +16,7 @@ import {
 import ElectionStatusBadge from "../../components/elections/ElectionStatusBadge";
 import ElectionTypeBadge from "../../components/elections/ElectionTypeBadge";
 import ElectionTimeline from "../../components/elections/ElectionTimeline";
+import StatCard from "../../components/elections/StatCard";
 
 /* ─────────────────────────────────────────────────────────────
    Constants & helpers — inchangés
@@ -115,7 +116,7 @@ function ActionBtn({ icon, label, onClick, color = "slate", disabled = false }) 
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex h-9 items-center gap-2 rounded-md px-4 text-[13px] font-semibold transition ${styles} disabled:cursor-not-allowed disabled:opacity-40`}
+      className={`inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-semibold transition ${styles} disabled:cursor-not-allowed disabled:opacity-40`}
     >
       <Icon size={14} />
       {label}
@@ -266,7 +267,7 @@ export default function AdminElectionDetailPage() {
 
         {/* Annuler modal */}
         {annulerModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div className="w-full max-w-md overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
               <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
                 <div>
@@ -302,14 +303,14 @@ export default function AdminElectionDetailPage() {
               <div className="flex justify-end gap-2 border-t border-slate-100 bg-slate-50/60 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/30">
                 <button
                   onClick={() => { setAnnulerModal(false); setActionErr(""); }}
-                  className="rounded-md border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                 >
                   Fermer
                 </button>
                 <button
                   onClick={confirmAnnuler}
                   disabled={!annulerRaison.trim()}
-                  className="rounded-md bg-red-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-red-700 disabled:opacity-40"
+                  className="rounded-full bg-red-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-red-700 disabled:opacity-40"
                 >
                   Confirmer l'annulation
                 </button>
@@ -328,7 +329,7 @@ export default function AdminElectionDetailPage() {
             <div className="mb-4 flex items-center justify-between">
               <button
                 onClick={() => navigate("/admin/processus/elections")}
-                className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[13px] font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >
                 <ArrowLeft size={14} />
                 Retour aux élections
@@ -366,6 +367,32 @@ export default function AdminElectionDetailPage() {
               <span className="text-[13px] text-slate-500 dark:text-slate-400">
                 {election.seatsCount} siège{election.seatsCount !== 1 ? "s" : ""}
               </span>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <StatCard
+                label="Période de vote"
+                value={election.voteStartDate ? formatDateShort(election.voteStartDate) : "—"}
+                sub={election.voteEndDate ? `→ ${formatDateShort(election.voteEndDate)}` : undefined}
+                icon={CalendarDays}
+                color="green"
+              />
+              <StatCard
+                label="Postes électoraux"
+                value={positions.length || election.seatsCount || "—"}
+                sub={`${election.seatsCount} siège(s)`}
+                icon={Hash}
+                color="blue"
+              />
+              <StatCard label="Candidatures" value={election.candidatures?.length ?? 0} icon={Users} color="slate" />
+              <StatCard
+                label={resultats ? "Votants" : "Bulletins attendus"}
+                value={resultats ? resultats.nbVotants : "—"}
+                sub={resultats ? `${resultats.tauxParticipation?.toFixed(1)}% participation` : undefined}
+                icon={Vote}
+                color="amber"
+              />
             </div>
 
             {/* Action bar */}
@@ -608,7 +635,7 @@ export default function AdminElectionDetailPage() {
                 <div className="flex justify-center pt-2">
                   <button
                     onClick={() => navigate(`/admin/processus/elections/${id}/candidats`)}
-                    className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-2.5 text-[14px] font-semibold text-white shadow-sm transition hover:bg-green-700"
+                    className="inline-flex items-center gap-2 rounded-full bg-green-600 px-6 py-2.5 text-[14px] font-semibold text-white shadow-sm transition hover:bg-green-700"
                   >
                     Gérer les candidatures →
                   </button>

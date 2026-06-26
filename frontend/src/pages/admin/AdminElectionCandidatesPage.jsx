@@ -56,7 +56,7 @@ function KpiCard({ label, value, icon: Icon, colorCls, bgCls, delay = 0 }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay }}
-      className="overflow-hidden rounded-md border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
     >
       <div className="flex items-start justify-between p-4">
         <div>
@@ -122,14 +122,14 @@ function RejectModal({ candidate, onClose, onConfirm, zIndex = 50 }) {
         <div className="flex justify-end gap-2 border-t border-slate-100 bg-slate-50/60 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/30">
           <button
             onClick={onClose}
-            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
           >
             Annuler
           </button>
           <button
             onClick={() => onConfirm(commentaire)}
             disabled={!commentaire.trim()}
-            className="rounded-md bg-red-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-full bg-red-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Confirmer le rejet
           </button>
@@ -176,14 +176,14 @@ function ValidateConfirmModal({ candidate, onClose, onConfirm, loading, zIndex =
           <button
             onClick={onClose}
             disabled={loading}
-            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
           >
             Annuler
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="inline-flex h-9 items-center gap-1.5 rounded-md bg-green-600 px-4 text-[13px] font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-green-600 px-4 text-[13px] font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={14} />}
             Confirmer la validation
@@ -285,7 +285,7 @@ function CandidateModal({ candidate, electionId, onClose, onRefresh }) {
             <button
               onClick={onClose}
               aria-label="Fermer"
-              className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
             >
               <X size={16} />
             </button>
@@ -353,7 +353,7 @@ function CandidateModal({ candidate, electionId, onClose, onRefresh }) {
                       href={doc.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-600 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-600 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                     >
                       <FileText size={13} className="shrink-0" />
                       {TYPE_DOC_LABELS[doc.typeDocument] ?? doc.typeDocument}
@@ -376,7 +376,7 @@ function CandidateModal({ candidate, electionId, onClose, onRefresh }) {
           <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/30">
             <button
               onClick={onClose}
-              className="rounded-md border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
               Fermer
             </button>
@@ -386,7 +386,7 @@ function CandidateModal({ candidate, electionId, onClose, onRefresh }) {
                 <button
                   onClick={() => setShowValidateConfirm(true)}
                   disabled={loading}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-md bg-green-600 px-4 text-[13px] font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full bg-green-600 px-4 text-[13px] font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-50"
                 >
                   {loading ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={14} />}
                   Valider
@@ -394,7 +394,7 @@ function CandidateModal({ candidate, electionId, onClose, onRefresh }) {
                 <button
                   onClick={() => setShowReject(true)}
                   disabled={loading}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-md border border-red-200 px-4 text-[13px] font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-800/50 dark:text-red-400"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-red-200 px-4 text-[13px] font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-800/50 dark:text-red-400"
                 >
                   <XCircle size={14} />
                   Rejeter
@@ -517,7 +517,7 @@ function CandidatureRow({ c, electionId, onRefresh, onViewDossier }) {
           <div className="flex items-center justify-end gap-1.5">
             <button
               onClick={() => onViewDossier(c)}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-700 dark:hover:text-blue-400"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-700 dark:hover:text-blue-400"
               title="Voir le dossier"
               aria-label="Voir le dossier"
             >
@@ -529,7 +529,7 @@ function CandidatureRow({ c, electionId, onRefresh, onViewDossier }) {
                 <button
                   onClick={() => setShowValidateConfirm(true)}
                   disabled={loading}
-                  className="flex h-8 w-8 items-center justify-center rounded-md bg-green-50 text-green-600 hover:bg-green-100 disabled:opacity-50 dark:bg-green-900/20"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600 hover:bg-green-100 disabled:opacity-50 dark:bg-green-900/20"
                   title="Valider"
                   aria-label="Valider"
                 >
@@ -538,7 +538,7 @@ function CandidatureRow({ c, electionId, onRefresh, onViewDossier }) {
                 <button
                   onClick={() => setShowReject(true)}
                   disabled={loading}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-red-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-900/20"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-red-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-900/20"
                   title="Rejeter"
                   aria-label="Rejeter"
                 >
@@ -705,7 +705,7 @@ export default function AdminElectionCandidatesPage() {
           {hasActiveFilters && (
             <button
               onClick={() => { setSearchQuery(""); setPosteFilter(""); setFilterStatut("ALL"); }}
-              className="h-10 rounded-md border border-slate-100 bg-white px-4 text-[13px] text-slate-400 shadow-sm transition hover:text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+              className="h-10 rounded-full border border-slate-100 bg-white px-4 text-[13px] text-slate-400 shadow-sm transition hover:text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
             >
               Réinitialiser
             </button>
@@ -782,7 +782,7 @@ export default function AdminElectionCandidatesPage() {
                     disabled={page === 1}
                     onClick={() => setPage((p) => p - 1)}
                     aria-label="Page précédente"
-                    className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40 dark:text-slate-600"
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 disabled:opacity-40 dark:text-slate-600"
                   >
                     <ChevronLeft size={14} />
                   </button>
@@ -793,7 +793,7 @@ export default function AdminElectionCandidatesPage() {
                       onClick={() => setPage(p)}
                       aria-label={`Page ${p}`}
                       aria-current={page === p ? "page" : undefined}
-                      className={`flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold ${
+                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
                         page === p
                           ? "bg-green-600 text-white"
                           : "bg-slate-50 text-slate-400 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
@@ -807,7 +807,7 @@ export default function AdminElectionCandidatesPage() {
                     disabled={page === totalPages}
                     onClick={() => setPage((p) => p + 1)}
                     aria-label="Page suivante"
-                    className="flex h-7 w-7 items-center justify-center rounded-md text-slate-300 disabled:opacity-40 dark:text-slate-600"
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 disabled:opacity-40 dark:text-slate-600"
                   >
                     <ChevronRight size={14} />
                   </button>

@@ -6,6 +6,7 @@ import {
   getAdminContenus, createContenu, updateContenu,
   publishContenu, unpublishContenu, deleteContenu,
 } from "../../services/adminContenuApi";
+import { resolveFileUrl } from "../../config/api";
 import {
   Search, RotateCcw, Plus, Pencil, Trash2, Send, EyeOff,
   FileText, ChevronLeft, ChevronRight, LayoutGrid, List,
@@ -245,7 +246,7 @@ function ContentGrid({ contenus, loading, error, onEdit, onConfirmAction }) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {contenus.map((c) => {
-        const imageSrc = c.imageUrl ? `http://localhost:8080${c.imageUrl}` : null;
+        const imageSrc = resolveFileUrl(c.imageUrl);
         return (
           <article
             key={c.id}
@@ -530,7 +531,7 @@ function AdminContenusPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by order id"
+              placeholder="Rechercher par titre..."
               className="h-10 w-[240px] rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 pr-10 text-[13px] text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400"
             />
             <Search
@@ -558,7 +559,7 @@ function AdminContenusPage() {
           >
             {STATUS_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.value === "" ? "Status : All" : o.label}
+                {o.value === "" ? "Tous les statuts" : o.label}
               </option>
             ))}
           </select>

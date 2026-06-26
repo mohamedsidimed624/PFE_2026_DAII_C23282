@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, CheckCircle2, Users, Calendar } from "lucide-react";
+import { ChevronRight, CheckCircle2, Calendar, Award } from "lucide-react";
 import ElectionStatusBadge from "./ElectionStatusBadge";
-import ElectionTypeBadge from "./ElectionTypeBadge";
+import { ORGANE_LABELS } from "./ElectionTypeBadge";
 import CandidatureStatusBadge from "./CandidatureStatusBadge";
 
 const formatDate = (d) =>
@@ -17,6 +17,7 @@ export default function ElectionCard({ e, index = 0 }) {
   const hasVoted       = !!e.aVote;
   const hasResultats   = s === "RESULTATS_PUBLIES" || (s === "ARCHIVEE" && e.resultatsPublies);
   const hasCandidature = !!e.maCandidature;
+  const nbPostes       = e.positions?.length ?? 0;
 
   return (
     <motion.div
@@ -24,14 +25,13 @@ export default function ElectionCard({ e, index = 0 }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04 }}
       onClick={() => navigate(`/medecin/elections/${e.id}`)}
-      className="group cursor-pointer rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-700 transition-all p-5"
+      className="group cursor-pointer rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-700 transition-all p-6"
     >
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
-          {/* Badges row */}
-          <div className="flex flex-wrap items-center gap-1.5 mb-2">
+          {/* Status */}
+          <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
             <ElectionStatusBadge statut={s} />
-            <ElectionTypeBadge type={e.type} />
             {e.region && (
               <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                 {e.region}
@@ -39,28 +39,30 @@ export default function ElectionCard({ e, index = 0 }) {
             )}
           </div>
 
-          {/* Title */}
+          {/* Organe + titre */}
+          {ORGANE_LABELS[e.type] && (
+            <p className="text-[11px] font-semibold text-green-600 dark:text-green-400 mb-0.5">
+              {ORGANE_LABELS[e.type]}
+            </p>
+          )}
           <h3 className="font-bold text-[15px] text-slate-800 dark:text-slate-100 leading-snug mb-2">
             {e.titre}
           </h3>
 
-          {/* Calendar */}
+          {/* Postes + date limite */}
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400 mb-2">
-            {e.candidatureStartDate && (
+            {nbPostes > 0 && (
               <span className="flex items-center gap-1">
-                <Calendar size={11} />
-                Candidatures : {formatDate(e.candidatureStartDate)} → {formatDate(e.candidatureEndDate)}
+                <Award size={11} /> {nbPostes} poste{nbPostes > 1 ? "s" : ""} à pourvoir
               </span>
             )}
-            {e.voteStartDate && (
+            {e.voteEndDate ? (
               <span className="flex items-center gap-1">
-                <Calendar size={11} />
-                Vote : {formatDate(e.voteStartDate)} → {formatDate(e.voteEndDate)}
+                <Calendar size={11} /> Vote jusqu'au {formatDate(e.voteEndDate)}
               </span>
-            )}
-            {e.seatsCount > 0 && (
+            ) : e.voteStartDate && (
               <span className="flex items-center gap-1">
-                <Users size={11} /> {e.seatsCount} siège(s)
+                <Calendar size={11} /> Vote à partir du {formatDate(e.voteStartDate)}
               </span>
             )}
           </div>
@@ -75,18 +77,18 @@ export default function ElectionCard({ e, index = 0 }) {
                 <CheckCircle2 size={10} /> Déjà voté
               </span>
             )}
-            {!canCandidater && !canVote && !hasVoted && e.raisonIneligibilite && (
+            {/* {!canCandidater && !canVote && !hasVoted && e.raisonIneligibilite && (
               <span className="inline-flex rounded-full bg-amber-50 dark:bg-amber-900/10 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
                 Non éligible
               </span>
-            )}
+            )} */}
           </div>
 
-          {e.raisonIneligibilite && !canCandidater && !canVote && (
+          {/* {e.raisonIneligibilite && !canCandidater && !canVote && (
             <p className="mt-1.5 text-[11px] text-amber-600 dark:text-amber-400 leading-snug">
               {e.raisonIneligibilite}
             </p>
-          )}
+          )} */}
         </div>
 
         {/* CTAs */}
@@ -94,7 +96,7 @@ export default function ElectionCard({ e, index = 0 }) {
           {canCandidater && (
             <button
               onClick={(ev) => { ev.stopPropagation(); navigate(`/medecin/elections/${e.id}/candidater`); }}
-              className="rounded-xl bg-blue-600 px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700 transition whitespace-nowrap"
+              className="rounded-full bg-blue-600 px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700 transition whitespace-nowrap"
             >
               Candidater
             </button>
@@ -102,15 +104,15 @@ export default function ElectionCard({ e, index = 0 }) {
           {canVote && (
             <button
               onClick={(ev) => { ev.stopPropagation(); navigate(`/medecin/elections/${e.id}/voter`); }}
-              className="rounded-xl bg-green-600 px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-green-700 transition whitespace-nowrap"
+              className="rounded-full bg-green-600 px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-green-700 transition whitespace-nowrap"
             >
-              Voter
+              Commencer le vote
             </button>
           )}
           {hasResultats && (
             <button
               onClick={(ev) => { ev.stopPropagation(); navigate(`/medecin/elections/${e.id}/resultats`); }}
-              className="rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition whitespace-nowrap"
+              className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition whitespace-nowrap"
             >
               Résultats
             </button>
