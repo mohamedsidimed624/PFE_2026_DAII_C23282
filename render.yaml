@@ -5,7 +5,7 @@ services:
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     plan: free
-    healthCheckPath: /api/auth/login
+    healthCheckPath: /api/public/health
     envVars:
       - key: DB_URL
         sync: false
