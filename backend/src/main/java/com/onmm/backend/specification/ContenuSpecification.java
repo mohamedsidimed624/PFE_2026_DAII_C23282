@@ -22,7 +22,7 @@ public class ContenuSpecification {
 
             List<Predicate> predicates = new ArrayList<>();
 
-            // 🔐 seulement public + publié
+            // \ud83d\udd10 seulement public + publié
             predicates.add(cb.equal(root.get("statut"), ContenuStatut.PUBLISHED));
             predicates.add(cb.equal(root.get("visibilite"), ContenuVisibilite.PUBLIC));
 
@@ -34,17 +34,17 @@ public class ContenuSpecification {
                     )
             );
 
-            // 📂 catégorie
+            // \ud83d\udcc2 catégorie
             if (categorieId != null) {
                 predicates.add(cb.equal(root.get("categorie").get("id"), categorieId));
             }
 
-            // 🏷️ type
+            // \ud83c\udff7️ type
             if (type != null) {
                 predicates.add(cb.equal(root.get("type"), type));
             }
 
-            // 🔎 recherche
+            // \ud83d\udd0e recherche
             if (search != null && !search.isBlank()) {
                 String like = "%" + search.toLowerCase() + "%";
 
