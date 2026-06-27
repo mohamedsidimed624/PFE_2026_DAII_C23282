@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import MedecinLayout from "../../components/medecin/MedecinLayout";
 import { getMyReclamationById } from "../../services/medecinReclamationApi";
-import StatusBadge from "../../Components/shared/StatusBadge";
+import StatusBadge from "../../components/shared/StatusBadge";
 import { resolveFileUrl } from "../../config/api";
 import {
   ArrowLeft,
