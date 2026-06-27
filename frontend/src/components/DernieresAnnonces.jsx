@@ -8,7 +8,7 @@ import {
   FileText,
   Newspaper,
 } from "lucide-react";
-import { getPublicContenus } from "../services/PublicContenuApi";
+import { getPublicContenus } from "../services/publicContenuApi";
 import { resolveFileUrl } from "../config/api";
 
 /* Each slide is exactly 1/VISIBLE of the track width → translateX(-i * 100/VISIBLE %) is pixel-perfect. */
