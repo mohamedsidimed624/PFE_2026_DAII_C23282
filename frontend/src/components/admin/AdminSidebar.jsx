@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getUnreadCount } from "../../services/notificationApi";
+import logo from "../../assets/logo.png";
 
 const navItems = [
   { label: "Dashboard",                Icon: LayoutDashboard,      to: "/admin/dashboard" },
@@ -54,7 +55,7 @@ function AdminSidebar({ collapsed, onToggle }) {
       <div className="flex items-center justify-center py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
         <div className="h-24 w-24 overflow-hidden rounded-full">
           <img
-            src="/src/assets/logo.png"
+            src={logo}
             alt="Ordre des Médecins"
             className="h-full w-full object-cover scale-[1.20]"
           />

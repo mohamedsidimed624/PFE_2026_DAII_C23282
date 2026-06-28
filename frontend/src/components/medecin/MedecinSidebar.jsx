@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { getMedecinUnreadCount } from "../../services/medecinNotificationApi";
+import logo from "../../assets/logo.png";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/medecin/dashboard" },
@@ -57,7 +58,7 @@ function MedecinSidebar({ collapsed, onToggle }) {
           }`}
         >
           <img
-            src="/src/assets/logo.png"
+            src={logo}
             alt="Ordre des Médecins"
             className="h-full w-full object-cover scale-[1.20]"
           />
