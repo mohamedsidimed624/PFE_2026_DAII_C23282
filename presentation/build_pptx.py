@@ -55,13 +55,18 @@ def box(s, l, t, w, h, fill=None, line=None, line_w=1.0, shape=MSO_SHAPE.ROUNDED
         sp.line.color.rgb = line; sp.line.width = Pt(line_w)
     sp.shadow.inherit = False
     if shadow:
-        el = sp._element.spPr
-        ef = el.makeelement(qn('a:effectLst'), {})
-        sh = el.makeelement(qn('a:outerShdw'),
-                            {'blurRad': '90000', 'dist': '40000', 'dir': '5400000', 'rotWithShape': '0'})
-        clr = el.makeelement(qn('a:srgbClr'), {'val': '0A3D62'})
-        alpha = el.makeelement(qn('a:alpha'), {'val': '22000'})
-        clr.append(alpha); sh.append(clr); ef.append(sh); el.append(ef)
+        # Réutilise l'unique <a:effectLst> créé par shadow.inherit=False
+        # (en créer un second corromprait le fichier — 2 effectLst = XML invalide).
+        spPr = sp._element.spPr
+        eff = spPr.find(qn('a:effectLst'))
+        if eff is None:
+            eff = spPr.makeelement(qn('a:effectLst'), {})
+            spPr.append(eff)
+        sh = eff.makeelement(qn('a:outerShdw'),
+                             {'blurRad': '90000', 'dist': '40000', 'dir': '5400000', 'rotWithShape': '0'})
+        clr = eff.makeelement(qn('a:srgbClr'), {'val': '0A3D62'})
+        alpha = eff.makeelement(qn('a:alpha'), {'val': '22000'})
+        clr.append(alpha); sh.append(clr); eff.append(sh)
     if radius is not None and shape == MSO_SHAPE.ROUNDED_RECTANGLE:
         try:
             sp.adjustments[0] = radius
