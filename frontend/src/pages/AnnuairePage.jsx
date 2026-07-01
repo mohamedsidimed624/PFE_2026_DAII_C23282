@@ -434,6 +434,7 @@ function MedecinCard({ medecin, onClick }) {
           <img
             src={resolveFileUrl(medecin.photoProfilPath)}
             alt={`Dr. ${medecin.prenom} ${medecin.nom}`}
+            loading="lazy"
             className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105"
           />
         ) : (

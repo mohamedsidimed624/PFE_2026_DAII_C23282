@@ -171,7 +171,8 @@ function AdminMedecinsList() {
       </div>
 
       <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
-        <table className="w-full table-fixed text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[1050px] table-fixed text-sm">
           <thead>
             <tr className="border-b border-slate-100 dark:border-slate-800">
               <th className="w-[16%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
@@ -247,6 +248,7 @@ function AdminMedecinsList() {
             )}
           </tbody>
         </table>
+        </div>
 
         <div className="flex items-center justify-between px-7 py-5">
           <div className="flex items-center gap-2 text-[13px] text-slate-400">

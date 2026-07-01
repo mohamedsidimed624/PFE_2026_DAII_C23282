@@ -25,9 +25,9 @@ export default function ElectionCard({ e, index = 0 }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04 }}
       onClick={() => navigate(`/medecin/elections/${e.id}`)}
-      className="group cursor-pointer rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-700 transition-all p-6"
+      className="group cursor-pointer rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-700 transition-all p-4 sm:p-6"
     >
-      <div className="flex items-start gap-4">
+      <div className="flex flex-col sm:flex-row items-start gap-4">
         <div className="min-w-0 flex-1">
           {/* Status */}
           <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
@@ -92,7 +92,7 @@ export default function ElectionCard({ e, index = 0 }) {
         </div>
 
         {/* CTAs */}
-        <div className="flex shrink-0 flex-col items-end gap-2 ml-2 mt-0.5">
+        <div className="flex w-full shrink-0 flex-row flex-wrap items-center gap-2 sm:ml-2 sm:mt-0.5 sm:w-auto sm:flex-col sm:items-end">
           {canCandidater && (
             <button
               onClick={(ev) => { ev.stopPropagation(); navigate(`/medecin/elections/${e.id}/candidater`); }}

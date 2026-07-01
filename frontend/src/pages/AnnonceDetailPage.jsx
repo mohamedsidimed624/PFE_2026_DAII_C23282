@@ -115,6 +115,7 @@ function AnnonceDetailPage() {
                   <img
                     src={imageSrc}
                     alt={annonce.titre || "Image de la publication"}
+                    loading="lazy"
                     className="h-full w-full object-cover"
                   />
                 </div>

@@ -33,6 +33,7 @@ function AnnonceFeatured({ annonce }) {
             <img
               src={imageSrc}
               alt={annonce.titre || ""}
+              loading="lazy"
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             {/* Dark gradient overlay */}

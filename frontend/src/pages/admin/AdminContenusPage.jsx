@@ -255,7 +255,7 @@ function ContentGrid({ contenus, loading, error, onEdit, onConfirmAction }) {
             {/* Image */}
             <div className="relative h-36 bg-slate-100 dark:bg-slate-800">
               {imageSrc ? (
-                <img src={imageSrc} alt={c.titre} className="h-full w-full object-cover" />
+                <img src={imageSrc} alt={c.titre} loading="lazy" className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full items-center justify-center text-slate-300 dark:text-slate-600">
                   <FileText size={32} />

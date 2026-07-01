@@ -10,7 +10,7 @@ const ICON_COLORS = {
 
 export default function StatCard({ label, value, icon: Icon, color = "blue", sub }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm">
+    <div className="flex items-center gap-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 sm:px-4 sm:py-3 shadow-sm">
       {Icon && (
         <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${ICON_COLORS[color] ?? ICON_COLORS.blue}`}>
           <Icon size={16} />
@@ -18,7 +18,7 @@ export default function StatCard({ label, value, icon: Icon, color = "blue", sub
       )}
       <div className="min-w-0">
         <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{label}</p>
-        <p className="text-[20px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{value}</p>
+        <p className="text-[18px] sm:text-[20px] font-bold text-slate-800 dark:text-slate-100 leading-tight">{value}</p>
         {sub && <p className="text-[10px] text-slate-400 mt-0.5">{sub}</p>}
       </div>
     </div>

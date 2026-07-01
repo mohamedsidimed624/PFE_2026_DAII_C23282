@@ -25,7 +25,7 @@ const navItems = [
   { label: "Paramètres", icon: Settings, to: "/medecin/parametres" },
 ];
 
-function MedecinSidebar({ collapsed, onToggle }) {
+function MedecinSidebar({ collapsed, onToggle, mobileOpen }) {
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -46,9 +46,11 @@ function MedecinSidebar({ collapsed, onToggle }) {
 
   return (
     <aside
-      className={`${
-        collapsed ? "w-14" : "w-56"
-      } shrink-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 min-h-screen flex flex-col transition-all duration-300 overflow-hidden`}
+      className={`fixed inset-y-0 left-0 z-50 w-56 transform transition-transform duration-300 md:static md:translate-x-0 md:transition-all ${
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      } ${
+        collapsed ? "md:w-14" : "md:w-56"
+      } shrink-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 min-h-screen flex flex-col overflow-hidden`}
     >
       {/* Logo */}
       <div className="flex items-center justify-center py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">

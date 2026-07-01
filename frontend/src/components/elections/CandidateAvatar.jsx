@@ -28,6 +28,7 @@ export default function CandidateAvatar({
       <img
         src={photo}
         alt=""
+        loading="lazy"
         onError={() => setImgError(true)}
         className={`shrink-0 rounded-full object-cover ${imgClassName}`}
         style={{ height: size, width: size }}

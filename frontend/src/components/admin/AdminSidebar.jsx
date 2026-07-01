@@ -30,7 +30,7 @@ const navItems = [
   { label: "Processus Électoral",  Icon: Vote,          to: "/admin/processus/elections" },
 ];
 
-function AdminSidebar({ collapsed, onToggle }) {
+function AdminSidebar({ collapsed, onToggle, mobileOpen }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [electionOpen, setElectionOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -47,20 +47,24 @@ function AdminSidebar({ collapsed, onToggle }) {
 
   return (
     <aside
-      className={`${
-        collapsed ? "w-14" : "w-56"
-      } shrink-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 min-h-screen flex flex-col transition-all duration-300 overflow-hidden`}
+      className={`fixed inset-y-0 left-0 z-50 w-56 transform transition-transform duration-300 md:static md:translate-x-0 md:transition-all ${
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      } ${
+        collapsed ? "md:w-14" : "md:w-56"
+      } shrink-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 min-h-screen flex flex-col overflow-hidden`}
     >
-      {/* Logo */}
-      <div className="flex items-center justify-center py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
-        <div className="h-24 w-24 overflow-hidden rounded-full">
-          <img
-            src={logo}
-            alt="Ordre des Médecins"
-            className="h-full w-full object-cover scale-[1.20]"
-          />
+      {/* Logo — masqué en mode réduit (w-14 trop étroit pour h-24 w-24) */}
+      {!collapsed && (
+        <div className="flex items-center justify-center py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+          <div className="h-24 w-24 overflow-hidden rounded-full">
+            <img
+              src={logo}
+              alt="Ordre des Médecins"
+              className="h-full w-full object-cover scale-[1.20]"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto overflow-x-hidden">

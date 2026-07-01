@@ -34,6 +34,7 @@ function AnnonceCard({ annonce }) {
               <img
                 src={imageSrc}
                 alt={annonce.titre || ""}
+                loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             ) : (
