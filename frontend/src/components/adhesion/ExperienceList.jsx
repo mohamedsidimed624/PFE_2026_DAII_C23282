@@ -34,18 +34,18 @@ function ExperienceList({ setIsAdding, setEditingIndex, nextStep, prevStep }) {
       )}
 
       {experience.map((item, index) => (
-        <div key={index} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-          <div className="flex items-center gap-4">
+        <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm gap-3">
+          <div className="flex items-center gap-4 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-600">
               <Briefcase size={18} />
             </div>
-            <div>
-              <div className="font-semibold text-slate-800">{item.poste}</div>
-              <div className="text-sm text-slate-500">{item.etablissement}</div>
-              <div className="text-xs text-slate-400">{item.ville}</div>
+            <div className="min-w-0">
+              <div className="font-semibold text-slate-800 truncate">{item.poste}</div>
+              <div className="text-sm text-slate-500 truncate">{item.etablissement}</div>
+              <div className="text-xs text-slate-400 truncate">{item.ville}</div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 self-end sm:self-auto shrink-0">
             {confirmDelete === index ? (
               <>
                 <span className="text-xs text-slate-500">Supprimer ?</span>

@@ -64,7 +64,7 @@ export default function StepSuccess({ data, categoryMap, receipt }) {
         <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-400">
           Processus de traitement
         </p>
-        <div className="flex gap-0">
+        <div className="flex flex-col sm:flex-row gap-0">
           {PROCESS_STEPS.map((s, idx) => {
             const Icon   = s.icon;
             const isLast = idx === PROCESS_STEPS.length - 1;
@@ -72,17 +72,17 @@ export default function StepSuccess({ data, categoryMap, receipt }) {
               <div key={idx} className="flex flex-1 flex-col items-center text-center">
                 <div className="flex w-full items-center">
                   {idx > 0 && (
-                    <div className="h-px flex-1 bg-green-200" />
+                    <div className="h-px flex-1 bg-green-200 hidden sm:block" />
                   )}
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600">
                     <Icon size={16} />
                   </div>
                   {!isLast && (
-                    <div className="h-px flex-1 bg-green-200" />
+                    <div className="h-px flex-1 bg-green-200 hidden sm:block" />
                   )}
                 </div>
-                <p className="mt-2 text-[11px] font-bold text-slate-700">{s.label}</p>
-                <p className="mt-0.5 text-[10px] text-slate-400 leading-4 px-1">{s.desc}</p>
+                <p className="mt-2 text-xs font-bold text-slate-700">{s.label}</p>
+                <p className="mt-0.5 text-[11px] text-slate-400 leading-4 px-1">{s.desc}</p>
               </div>
             );
           })}

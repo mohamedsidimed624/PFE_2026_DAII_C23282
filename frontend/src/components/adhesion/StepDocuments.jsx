@@ -118,11 +118,11 @@ function StepDocuments({ nextStep, prevStep }) {
         </p>
       )}
 
-      <div className="flex justify-end gap-6 pt-20">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-10 sm:pt-20">
         <button
           type="button"
           onClick={prevStep}
-          className="h-12 w-36 rounded-lg border border-slate-300 bg-white text-lg font-medium text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+          className="h-12 w-full sm:w-36 rounded-lg border border-slate-300 bg-white text-lg font-medium text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
         >
           Retour
         </button>
@@ -143,7 +143,7 @@ function StepDocuments({ nextStep, prevStep }) {
             setError("");
             nextStep();
           }}
-          className="h-12 w-80 rounded-lg bg-green-600 text-lg font-bold text-white transition hover:bg-green-700"
+          className="h-12 w-full sm:w-80 rounded-lg bg-green-600 text-lg font-bold text-white transition hover:bg-green-700"
         >
           Suivant
         </button>

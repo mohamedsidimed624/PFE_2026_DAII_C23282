@@ -61,7 +61,7 @@ function LoginPage() {
                         opacity: [0.3, 0.5, 0.3],
                     }}
                     transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-green-200/40 rounded-full blur-[100px]"
+                    className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-green-200/40 rounded-full blur-[100px] hidden sm:block"
                 />
                 <motion.div
                     animate={{
@@ -69,7 +69,7 @@ function LoginPage() {
                         opacity: [0.2, 0.4, 0.2],
                     }}
                     transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-emerald-300/30 rounded-full blur-[100px]"
+                    className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-emerald-300/30 rounded-full blur-[100px] hidden sm:block"
                 />
             </div>
 

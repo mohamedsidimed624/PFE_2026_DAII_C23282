@@ -98,7 +98,7 @@ function StepPersonal({ nextStep }) {
 
   return (
   <form onSubmit={handleSubmit(onSubmit)}>
-    <div className="grid grid-cols-1 gap-x-[70px] gap-y-5 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
       {/* Ligne 1 */}
       <Field label="Sexe" required error={errors.sexe?.message}>
         <select {...register("sexe")} className={inputCls(Boolean(errors.sexe))}>
@@ -141,7 +141,7 @@ function StepPersonal({ nextStep }) {
         error={errors.telephone?.message}
       >
         <div className="flex gap-3">
-          <div className="flex h-[48px] w-[105px] items-center justify-center rounded-lg border border-slate-200 bg-white text-[14px] font-medium text-[#123F4A]">
+          <div className="flex h-[48px] w-[80px] sm:w-[105px] items-center justify-center rounded-lg border border-slate-200 bg-white text-[14px] font-medium text-[#123F4A]">
             +222
           </div>
 
@@ -223,7 +223,7 @@ function StepPersonal({ nextStep }) {
     <div className="mt-11 flex justify-end">
       <button
         type="submit"
-        className="h-[48px] w-[310px] rounded-lg bg-[#03A84E] text-[17px] font-semibold text-white transition hover:bg-[#029646]"
+        className="h-[48px] w-full max-w-[310px] rounded-lg bg-[#03A84E] text-[17px] font-semibold text-white transition hover:bg-[#029646]"
       >
         Suivant
       </button>

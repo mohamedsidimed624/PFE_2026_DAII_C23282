@@ -28,8 +28,27 @@ export default function StepIndicator() {
   if (submitted) return null;
 
   return (
-    <div className="mb-9 w-full overflow-hidden">
-      <div className="grid grid-cols-5 gap-4">
+    <div className="mb-9 w-full">
+      {/* Mobile : barre de progression + étiquette de l'étape courante */}
+      <div className="md:hidden">
+        <div className="mb-2 flex items-center gap-1.5">
+          {STEPS.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                step > i ? "bg-green-500" : "bg-slate-200"
+              }`}
+            />
+          ))}
+        </div>
+        <p className="text-sm text-slate-500">
+          Étape <span className="font-semibold text-slate-800">{step}</span> sur {STEPS.length}{" "}
+          — <span className="font-medium text-slate-700">{STEPS[step - 1]}</span>
+        </p>
+      </div>
+      {/* Desktop : flèches chevrons */}
+      <div className="hidden overflow-hidden md:block">
+        <div className="grid grid-cols-5 gap-4">
         {STEPS.map((label, i) => {
           const num = i + 1;
           const active = step === num;
@@ -71,6 +90,7 @@ export default function StepIndicator() {
             </button>
           );
         })}
+        </div>
       </div>
     </div>
   );

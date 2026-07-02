@@ -192,14 +192,14 @@ export default function MultistepForm() {
             </AnimatePresence>
           </div>
 
-          {/* Navigation style photo */}
-          <div className="mt-8 flex items-center justify-between gap-4">
+          {/* Navigation */}
+          <div className="mt-8 flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               {step > 0 && step < totalSteps - 1 && (
                 <button
                   type="button"
                   onClick={back}
-                  className="rounded-md border border-green-600 bg-white px-6 py-2.5 text-sm font-bold uppercase text-green-700 transition hover:bg-green-50"
+                  className="w-full rounded-md border border-green-600 bg-white px-6 py-2.5 text-sm font-bold uppercase text-green-700 transition hover:bg-green-50 sm:w-auto"
                 >
                   Retour
                 </button>
@@ -211,7 +211,7 @@ export default function MultistepForm() {
                 <button
                   type="button"
                   onClick={next}
-                  className="rounded-md bg-green-700 px-7 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800"
+                  className="w-full rounded-md bg-green-700 px-7 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800 sm:w-auto"
                 >
                   Suivant
                 </button>
@@ -222,7 +222,7 @@ export default function MultistepForm() {
                   type="button"
                   onClick={submit}
                   disabled={submitting}
-                  className="rounded-md bg-green-700 px-7 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  className="w-full rounded-md bg-green-700 px-7 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
                 >
                   {submitting ? "Enregistrement..." : "Envoyer"}
                 </button>
@@ -232,7 +232,7 @@ export default function MultistepForm() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="rounded-md bg-green-700 px-7 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800"
+                  className="w-full rounded-md bg-green-700 px-7 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-green-800 sm:w-auto"
                 >
                   Nouvelle réclamation
                 </button>

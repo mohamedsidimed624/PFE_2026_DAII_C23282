@@ -92,15 +92,15 @@ function AdminDemandesList() {
       </h1> */}
 
       {/* Filtres */}
-      <div className="mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative">
             <input
               type="text"
               placeholder="Rechercher par nom, NNI..."
               value={search}
               onChange={handleSearch}
-              className="h-10 w-[240px] rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 pr-10 text-[13px] text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400"
+              className="h-10 w-full rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 pr-10 text-[13px] text-slate-600 dark:text-slate-200 shadow-sm outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-green-400 sm:w-[240px]"
             />
             <Search
               size={15}
@@ -128,7 +128,8 @@ function AdminDemandesList() {
 
       {/* Table wrapper */}
       <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">
-        <table className="w-full table-fixed text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[700px] table-fixed text-sm">
           <thead>
             <tr className="border-b border-slate-100 dark:border-slate-800">
               <th className="w-[20%] px-7 py-5 text-left text-[13px] font-semibold uppercase text-slate-400">
@@ -208,6 +209,7 @@ function AdminDemandesList() {
             )}
           </tbody>
         </table>
+        </div>
 
         {/* Pagination */}
         <div className="flex items-center justify-between px-7 py-5">

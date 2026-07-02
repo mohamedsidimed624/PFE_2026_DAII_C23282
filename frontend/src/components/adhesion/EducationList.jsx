@@ -38,18 +38,18 @@ function EducationList({ setIsAdding, setEditingIndex, nextStep, prevStep }) {
       )}
 
       {education.map((item, index) => (
-        <div key={index} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-          <div className="flex items-center gap-4">
+        <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm gap-3">
+          <div className="flex items-center gap-4 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-600">
               <GraduationCap size={18} />
             </div>
-            <div>
-              <div className="font-semibold text-slate-800">{item.specialiteLibelle || "Formation"}</div>
-              <div className="text-sm text-slate-500">{item.diplome} · {item.anneeObtention}</div>
-              <div className="text-xs text-slate-400">{item.pays} — {item.ville}</div>
+            <div className="min-w-0">
+              <div className="font-semibold text-slate-800 truncate">{item.specialiteLibelle || "Formation"}</div>
+              <div className="text-sm text-slate-500 truncate">{item.diplome} · {item.anneeObtention}</div>
+              <div className="text-xs text-slate-400 truncate">{item.pays} — {item.ville}</div>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 self-end sm:self-auto shrink-0">
             <button
               onClick={() => { setEditingIndex(index); setIsAdding(true); }}
               className="text-slate-400 transition-colors hover:text-green-600"

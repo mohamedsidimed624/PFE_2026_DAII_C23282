@@ -173,7 +173,7 @@ function SetPasswordPage() {
 
             {/* Règles */}
             {password.length > 0 && (
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 {rules.map((r) => (
                   <div key={r.label} className="flex items-center gap-1.5">
                     <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 transition-colors ${
