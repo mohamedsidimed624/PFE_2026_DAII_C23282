@@ -12,7 +12,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username:}")
+    @Value("${app.mail-from:}")
     private String mailFrom;
 
     @Value("${app.contact-email:contact@ordre-medecins.mr}")
