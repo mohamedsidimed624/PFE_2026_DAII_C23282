@@ -12,6 +12,9 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
 
+    @Value("${spring.mail.username:}")
+    private String mailFrom;
+
     @Value("${app.contact-email:contact@ordre-medecins.mr}")
     private String contactEmail;
 
@@ -19,12 +22,18 @@ public class EmailServiceImpl implements EmailService {
         this.mailSender = mailSender;
     }
 
+    private SimpleMailMessage base(String to, String subject) {
+        SimpleMailMessage m = new SimpleMailMessage();
+        if (mailFrom != null && !mailFrom.isBlank()) m.setFrom(mailFrom);
+        m.setTo(to);
+        m.setSubject(subject);
+        return m;
+    }
+
     @Override
     @Async
     public void sendSubmissionEmail(String to, String name, String numeroDossier) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Demande reçue");
+        SimpleMailMessage message = base(to, "Demande reçue");
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                         "Votre demande a été reçue avec succès.\n" +
@@ -40,9 +49,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendApprovalEmail(String to, String name, String link) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Demande approuvée");
+        SimpleMailMessage message = base(to, "Demande approuvée");
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                         "Votre demande a été approuvée.\n" +
@@ -57,9 +64,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendRejectionEmail(String to, String name, String comment) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Demande rejetée");
+        SimpleMailMessage message = base(to, "Demande rejetée");
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                         "Votre demande a été rejetée.\n" +
@@ -73,9 +78,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendSuspensionEmail(String to, String name, String comment) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Suspension de votre compte médecin");
+        SimpleMailMessage message = base(to, "Suspension de votre compte médecin");
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                         "Votre compte médecin a été suspendu par l’administration.\n\n" +
@@ -95,9 +98,7 @@ public class EmailServiceImpl implements EmailService {
             String numeroReclamation,
             String objet
     ) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Accusé de réception de votre réclamation");
+        SimpleMailMessage message = base(to, "Accusé de réception de votre réclamation");
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                         "Votre réclamation a bien été reçue par l’administration.\n\n" +
@@ -121,9 +122,7 @@ public class EmailServiceImpl implements EmailService {
             String objet,
             String adminResponse
     ) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Clôture de votre réclamation");
+        SimpleMailMessage message = base(to, "Clôture de votre réclamation");
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                         "Votre réclamation a été clôturée.\n\n" +
@@ -141,9 +140,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendPasswordResetEmail(String to, String name, String resetLink) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Réinitialisation de votre mot de passe - ONMM");
+        SimpleMailMessage message = base(to, "Réinitialisation de votre mot de passe - ONMM");
         message.setText(
                 "Bonjour " + name + ",\n\n" +
                 "Vous avez demandé la réinitialisation de votre mot de passe.\n" +
@@ -160,10 +157,8 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendContactMessage(String fromName, String fromEmail, String fromPhone, String sujet, String body) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(contactEmail);
+        SimpleMailMessage message = base(contactEmail, sujet);
         message.setReplyTo(fromEmail);
-        message.setSubject(sujet);
         message.setText(
                 "Nouveau message de contact reçu via le site de l'ONMM.\n\n" +
                 "De : " + fromName + "\n" +
