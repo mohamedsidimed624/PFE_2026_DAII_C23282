@@ -1,7 +1,6 @@
 package com.onmm.backend.config;
 
 import com.onmm.backend.service.JWTService;
-import com.onmm.backend.service.MyUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,13 +8,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -23,10 +23,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
 
     private final JWTService jwtService;
-    private final MyUserDetailsService userDetailsService;
 
-    public JwtFilter(MyUserDetailsService userDetailsService, JWTService jwtService) {
-        this.userDetailsService = userDetailsService;
+    public JwtFilter(JWTService jwtService) {
         this.jwtService = jwtService;
     }
 
@@ -44,18 +42,19 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 username = jwtService.extractUsername(token);
             } catch (Exception e) {
-                // Token malformé, expiré ou signature invalide — ignoré proprement.
-                // Spring Security refusera la requête avec 401 si l'endpoint est protégé.
                 log.warn("[JWT] Token invalide pour {} : {}", request.getRequestURI(), e.getClass().getSimpleName());
             }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (jwtService.validateToken(token, userDetails)) {
+                if (jwtService.isTokenValid(token)) {
+                    String role = jwtService.extractRole(token);
+                    List<SimpleGrantedAuthority> authorities = role != null
+                            ? List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                            : List.of();
                     UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                            new UsernamePasswordAuthenticationToken(username, null, authorities);
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }

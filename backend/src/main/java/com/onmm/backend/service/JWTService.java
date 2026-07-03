@@ -25,28 +25,32 @@ public class JWTService {
     @Value("${jwt.expiration-ms:86400000}")
     private long jwtExpirationMs;
 
+    private SecretKey cachedKey;
+
     @PostConstruct
-    private void validateJwtSecret() {
+    private void init() {
         if (jwtSecret == null || jwtSecret.isBlank()) {
             throw new IllegalStateException(
                 "[SECURITY] JWT secret is not configured. Set the JWT_SECRET environment variable."
             );
         }
+        byte[] keyBytes;
         try {
-            byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-            if (keyBytes.length < 32) {
-                throw new IllegalStateException(
-                    "[SECURITY] JWT secret is too short. Minimum 256 bits (32 bytes) required for HS256."
-                );
-            }
+            keyBytes = Decoders.BASE64.decode(jwtSecret);
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("[SECURITY] JWT secret is not valid Base64.", e);
+        }
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException(
+                "[SECURITY] JWT secret is too short. Minimum 256 bits (32 bytes) required for HS256."
+            );
         }
         if (jwtExpirationMs <= 0) {
             throw new IllegalStateException(
                 "[SECURITY] JWT expiration must be positive. Check jwt.expiration-ms property."
             );
         }
+        this.cachedKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(User user) {
@@ -101,8 +105,15 @@ public class JWTService {
                 .getPayload();
     }
 
+    public boolean isTokenValid(String token) {
+        try {
+            return !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private SecretKey getKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return cachedKey;
     }
 }

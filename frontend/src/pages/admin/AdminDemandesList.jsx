@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getAllDemandes } from "../../services/adminApi";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -52,18 +52,28 @@ function AdminDemandesList() {
     })();
   }, []);
 
-  const filtered = demandes.filter((d) => {
-    const matchSearch =
-      `${d.nom} ${d.prenom} ${d.email} ${d.id}`
-        .toLowerCase()
-        .includes(search.toLowerCase());
-    const matchStatus =
-      statusFilter === "Tous" || d.statut === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  const { filtered, totalPages, paginated, pending, accepted, rejected } = useMemo(() => {
+    const filtered = demandes.filter((d) => {
+      const matchSearch =
+        `${d.nom} ${d.prenom} ${d.email} ${d.id}`
+          .toLowerCase()
+          .includes(search.toLowerCase());
+      const matchStatus = statusFilter === "Tous" || d.statut === statusFilter;
+      return matchSearch && matchStatus;
+    });
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const paginated  = filtered.slice((page - 1) * pageSize, page * pageSize);
+    let pending = 0, accepted = 0, rejected = 0;
+    demandes.forEach((d) => {
+      if (d.statut === "PENDING")   pending++;
+      if (d.statut === "APPROUVED") accepted++;
+      if (d.statut === "REJECTED")  rejected++;
+    });
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    const paginated  = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+    return { filtered, totalPages, paginated, pending, accepted, rejected };
+  }, [demandes, search, statusFilter, page, pageSize]);
 
   const handleSearch = (e) => { setSearch(e.target.value); setPage(1); };
   const handleStatus = (s)  => { setStatusFilter(s); setPage(1); };
@@ -78,10 +88,6 @@ function AdminDemandesList() {
       </AdminLayout>
     );
   }
-
-  const pending   = demandes.filter(d => d.statut === "PENDING").length;
-  const accepted  = demandes.filter(d => d.statut === "APPROUVED").length;
-  const rejected  = demandes.filter(d => d.statut === "REJECTED").length;
 
   return (
   <AdminLayout title="Gestion des demandes">

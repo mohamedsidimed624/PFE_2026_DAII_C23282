@@ -136,11 +136,9 @@ export default function AdminDashboard() {
   const statsMenuRef = useRef(null);
 
   useEffect(() => {
-    const obs = new MutationObserver(() =>
-      setIsDark(document.documentElement.classList.contains("dark"))
-    );
-    obs.observe(document.documentElement, { attributeFilter: ["class"] });
-    return () => obs.disconnect();
+    const handler = () => setIsDark(document.documentElement.classList.contains("dark"));
+    window.addEventListener("theme-changed", handler);
+    return () => window.removeEventListener("theme-changed", handler);
   }, []);
 
   useEffect(() => {

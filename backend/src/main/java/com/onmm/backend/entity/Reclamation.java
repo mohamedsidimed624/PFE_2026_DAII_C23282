@@ -10,7 +10,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "reclamations")
+@Table(name = "reclamations",
+        indexes = {
+            @Index(name = "idx_reclamation_statut", columnList = "statut")
+        })
 public class Reclamation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

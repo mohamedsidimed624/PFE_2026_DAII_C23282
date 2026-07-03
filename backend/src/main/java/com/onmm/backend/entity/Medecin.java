@@ -9,7 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "medecins", uniqueConstraints = {@UniqueConstraint(name = "uk_medecin_telephone", columnNames = "telephone"), @UniqueConstraint(name = "uk_medecin_nni", columnNames = "nni"), @UniqueConstraint(name = "uk_medecin_numero_inscription", columnNames = "numero_inscription")})
+@Table(name = "medecins",
+        uniqueConstraints = {
+            @UniqueConstraint(name = "uk_medecin_telephone", columnNames = "telephone"),
+            @UniqueConstraint(name = "uk_medecin_nni", columnNames = "nni"),
+            @UniqueConstraint(name = "uk_medecin_numero_inscription", columnNames = "numero_inscription")
+        },
+        indexes = {
+            @Index(name = "idx_medecin_statut",      columnList = "statut"),
+            @Index(name = "idx_medecin_sexe",        columnList = "sexe"),
+            @Index(name = "idx_medecin_nationalite", columnList = "nationalite")
+        })
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Medecin extends User {
     @Column(nullable = false, length = 100)

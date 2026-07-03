@@ -132,6 +132,25 @@ public class NotificationServiceImpl implements NotificationService {
         });
     }
 
+    @Override
+    public void createMedecinNotificationBatch(List<Medecin> medecins, String type, String titre,
+                                               String message, String lien, boolean actionRequise) {
+        LocalDateTime now = LocalDateTime.now();
+        List<Notification> notifications = medecins.stream().map(medecin -> {
+            Notification n = new Notification();
+            n.setMedecin(medecin);
+            n.setType(type);
+            n.setTitre(titre);
+            n.setMessage(message);
+            n.setLien(lien);
+            n.setActionRequise(actionRequise);
+            n.setLu(false);
+            n.setCreatedAt(now);
+            return n;
+        }).toList();
+        notificationRepository.saveAll(notifications);
+    }
+
     private NotificationDTO toDTO(Notification n) {
         NotificationDTO dto = new NotificationDTO();
         dto.setId(n.getId());

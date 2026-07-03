@@ -105,14 +105,12 @@ export const FormProvider = ({ children }) => {
 
     if (savedData) {
       const parsed = JSON.parse(savedData);
-      console.log("Form data loaded from localStorage:", parsed);
       setFormData(parsed);
     }
   }, []);
 
   // Sauvegarde automatique
   useEffect(() => {
-    console.log("Form data updated, saving to localStorage:", formData);
     localStorage.setItem("adhesionForm", JSON.stringify(formData));
   }, [formData]);
 

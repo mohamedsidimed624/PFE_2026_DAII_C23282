@@ -17,4 +17,6 @@ public interface ReclamationRepository extends JpaRepository<Reclamation, Long> 
     Optional<Reclamation> findByIdAndMedecin(Long id, Medecin medecin);
 
     long countByStatut(ReclamationStatus statut);
+
+    long countByStatutIn(java.util.List<ReclamationStatus> statuts);
 }

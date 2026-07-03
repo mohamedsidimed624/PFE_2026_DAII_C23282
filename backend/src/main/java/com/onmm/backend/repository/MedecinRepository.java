@@ -76,4 +76,28 @@ public interface MedecinRepository extends JpaRepository<Medecin, Long>, JpaSpec
     long countBySectionOrdreAndStatut(SectionOrdre sectionOrdre, StatutMedecin statut);
 
     List<Medecin> findBySectionOrdreAndStatut(SectionOrdre sectionOrdre, StatutMedecin statut);
+
+    interface MedecinCounts {
+        Long getTotal();
+        Long getActifs();
+        Long getSuspendus();
+        Long getHommes();
+        Long getFemmes();
+        Long getMauritaniens();
+    }
+
+    @Query(value = """
+        SELECT COUNT(*) AS total,
+               SUM(CASE WHEN statut = 'ACTIF'    THEN 1 ELSE 0 END) AS actifs,
+               SUM(CASE WHEN statut = 'SUSPENDU' THEN 1 ELSE 0 END) AS suspendus,
+               SUM(CASE WHEN sexe = 'Homme'      THEN 1 ELSE 0 END) AS hommes,
+               SUM(CASE WHEN sexe = 'Femme'      THEN 1 ELSE 0 END) AS femmes,
+               SUM(CASE WHEN LOWER(nationalite) = 'mauritanienne' THEN 1 ELSE 0 END) AS mauritaniens
+        FROM medecins
+        """, nativeQuery = true)
+    MedecinCounts getDashboardCounts();
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"educations", "educations.specialite", "educations.sousSpecialite"})
+    @Query("SELECT m FROM Medecin m")
+    List<Medecin> findAllWithEducations();
 }

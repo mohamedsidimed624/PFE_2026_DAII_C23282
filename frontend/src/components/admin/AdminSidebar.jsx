@@ -14,8 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { getUnreadCount } from "../../services/notificationApi";
+import { useState } from "react";
+import { useAdminNotification } from "../../context/AdminNotificationContext";
 import logo from "../../assets/logo.png";
 
 const navItems = [
@@ -33,17 +33,8 @@ const navItems = [
 function AdminSidebar({ collapsed, onToggle, mobileOpen }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [electionOpen, setElectionOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
-
-  useEffect(() => {
-    const fetchCount = () => {
-      getUnreadCount().then((res) => setUnreadCount(res.data.count || 0)).catch(() => {});
-    };
-    fetchCount();
-    const id = setInterval(fetchCount, 30000);
-    return () => clearInterval(id);
-  }, []);
+  const { unreadCount } = useAdminNotification();
 
   return (
     <aside

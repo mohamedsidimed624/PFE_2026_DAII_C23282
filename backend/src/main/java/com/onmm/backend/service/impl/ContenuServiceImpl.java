@@ -82,7 +82,14 @@ public class ContenuServiceImpl implements ContenuService {
 
     private void notifyMedecinsOfContenu(Contenu contenu) {
         Specialite cible = contenu.getSpecialiteCible();
-        medecinRepository.findAll().stream().filter(m -> m.getStatut() == StatutMedecin.ACTIF).filter(m -> cible == null || medecinMatchesSpecialite(m, cible)).forEach(m -> notificationService.createMedecinNotification(m.getEmail(), "NOUVEAU_CONTENU", "Nouveau contenu publié", "L\'ONMM a publié : " + contenu.getTitre(), "/medecin/contenus/" + contenu.getId(), false));
+        List<Medecin> cibles = medecinRepository.findAllWithEducations().stream()
+                .filter(m -> m.getStatut() == StatutMedecin.ACTIF)
+                .filter(m -> cible == null || medecinMatchesSpecialite(m, cible))
+                .toList();
+        notificationService.createMedecinNotificationBatch(
+                cibles, "NOUVEAU_CONTENU", "Nouveau contenu publié",
+                "L'ONMM a publié : " + contenu.getTitre(),
+                "/medecin/contenus/" + contenu.getId(), false);
     }
 
     private boolean medecinMatchesSpecialite(Medecin medecin, Specialite cible) {
@@ -110,13 +117,9 @@ public class ContenuServiceImpl implements ContenuService {
 
     @Override
     @Scheduled(fixedRate = 3600000)
+    @org.springframework.transaction.annotation.Transactional
     public void expireContenus() {
-        contenuRepository.findAll().forEach(contenu -> {
-            if (contenu.getDateExpiration() != null && contenu.getDateExpiration().isBefore(LocalDateTime.now()) && contenu.getStatut() == ContenuStatut.PUBLISHED) {
-                contenu.setStatut(ContenuStatut.EXPIRED);
-                contenuRepository.save(contenu);
-            }
-        });
+        contenuRepository.expireContenusBefore(LocalDateTime.now());
     }
 
     @Override

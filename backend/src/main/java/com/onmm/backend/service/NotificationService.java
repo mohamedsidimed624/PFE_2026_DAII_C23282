@@ -1,6 +1,7 @@
 package com.onmm.backend.service;
 
 import com.onmm.backend.dto.NotificationDTO;
+import com.onmm.backend.entity.Medecin;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ public interface NotificationService {
 
     // ── Doctor-scoped notifications ───────────────────────────────────────────
     void createMedecinNotification(String medecinEmail, String type, String titre, String message, String lien, boolean actionRequise);
+
+    void createMedecinNotificationBatch(List<Medecin> medecins, String type, String titre, String message, String lien, boolean actionRequise);
     List<NotificationDTO> getMedecinNotifications(String medecinEmail);
     long getMedecinUnreadCount(String medecinEmail);
     void markMedecinNotifAsRead(String medecinEmail, Long id);

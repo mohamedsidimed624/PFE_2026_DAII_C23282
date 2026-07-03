@@ -42,7 +42,7 @@ public class AdminMedecinServiceImpl implements AdminMedecinService {
     @Override
     @Transactional
     public List<AdminMedecinListResponse> getAllMedecins() {
-        return medecinRepository.findAll().stream().map(medecin -> {
+        return medecinRepository.findAllWithEducations().stream().map(medecin -> {
 
             AdminMedecinListResponse response = new AdminMedecinListResponse();
 

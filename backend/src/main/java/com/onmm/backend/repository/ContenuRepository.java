@@ -6,9 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,4 +61,12 @@ public interface ContenuRepository extends JpaRepository<Contenu, Long>, JpaSpec
         ORDER BY c.datePublication DESC
     """)
     Page<Contenu> findMedecinContenus(@Param("specialiteIds") List<Long> specialiteIds, Pageable pageable);
+
+    @Modifying
+    @Query("""
+        UPDATE Contenu c SET c.statut = com.onmm.backend.entity.enums.ContenuStatut.EXPIRED
+        WHERE c.dateExpiration < :now
+          AND c.statut = com.onmm.backend.entity.enums.ContenuStatut.PUBLISHED
+    """)
+    int expireContenusBefore(@Param("now") LocalDateTime now);
 }

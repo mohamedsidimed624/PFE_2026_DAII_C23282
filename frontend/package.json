@@ -21,7 +21,6 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^0.576.0",
-    "motion": "^12.38.0",
     "path": "^0.12.7",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",

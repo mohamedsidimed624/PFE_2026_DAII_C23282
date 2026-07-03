@@ -11,9 +11,8 @@ import {
   Check,
   Menu,
 } from "lucide-react";
-import { getMyProfile } from "../../services/adminProfileApi";
-import { getNotifications, markAsRead, markAllAsRead } from "../../services/notificationApi";
 import { resolveFileUrl } from "../../config/api";
+import { useAdminNotification } from "../../context/AdminNotificationContext";
 
 function formatRelTime(dt) {
   if (!dt) return "";
@@ -29,19 +28,18 @@ function formatRelTime(dt) {
 }
 
 function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
-  const [userOpen,      setUserOpen]      = useState(false);
-  const [notifOpen,     setNotifOpen]     = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [darkMode,      setDarkMode]      = useState(
+  const [userOpen,  setUserOpen]  = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [darkMode,  setDarkMode]  = useState(
     () => localStorage.getItem("theme") === "dark"
   );
-  const [profile, setProfile] = useState(null);
+
+  const { notifications, unreadCount, profile, markAsRead, markAllAsRead } =
+    useAdminNotification();
 
   const userRef  = useRef(null);
   const notifRef = useRef(null);
   const navigate = useNavigate();
-
-  const unreadCount = notifications.filter((n) => !n.lu).length;
 
   /* ── Dark mode ── */
   useEffect(() => {
@@ -55,12 +53,8 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
       root.setAttribute("data-theme", "light");
       localStorage.setItem("theme", "light");
     }
+    window.dispatchEvent(new Event("theme-changed"));
   }, [darkMode]);
-
-  /* ── Profil admin ── */
-  useEffect(() => {
-    getMyProfile().then((res) => setProfile(res.data)).catch(() => {});
-  }, []);
 
   /* ── Fermer dropdowns au clic extérieur ── */
   useEffect(() => {
@@ -72,30 +66,8 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* ── Fetch notifications (poll 30s) ── */
-  const fetchNotifications = () => {
-    getNotifications()
-      .then((res) => setNotifications(res.data.slice(0, 6)))
-      .catch(() => {});
-  };
-  useEffect(() => {
-    fetchNotifications();
-    const id = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(id);
-  }, []);
-
-  const handleMarkAllRead = async () => {
-    await markAllAsRead();
-    setNotifications((prev) => prev.map((n) => ({ ...n, lu: true })));
-  };
-
   const handleNotifClick = async (n) => {
-    if (!n.lu) {
-      markAsRead(n.id).catch(() => {});
-      setNotifications((prev) =>
-        prev.map((x) => (x.id === n.id ? { ...x, lu: true } : x))
-      );
-    }
+    if (!n.lu) markAsRead(n.id);
     if (n.lien) navigate(n.lien);
     setNotifOpen(false);
   };
@@ -178,7 +150,7 @@ function NavbarDashboard({ title = "Gestion des demandes", onToggleSidebar }) {
                 </div>
                 {unreadCount > 0 && (
                   <button
-                    onClick={handleMarkAllRead}
+                    onClick={markAllAsRead}
                     className="flex items-center gap-1 text-[11px] font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors"
                   >
                     <Check size={11} />

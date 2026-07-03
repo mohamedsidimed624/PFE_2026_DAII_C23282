@@ -50,4 +50,20 @@ public interface DemandeAdhesionRepository extends JpaRepository<DemandeAdhesion
     long countByStatut(ApplicationStatus statut);
 
     List<DemandeAdhesion> findTop5ByOrderBySubmissionDateDesc();
+
+    interface DemandeCounts {
+        Long getTotal();
+        Long getPending();
+        Long getApprouved();
+        Long getRejected();
+    }
+
+    @Query(value = """
+        SELECT COUNT(*) AS total,
+               SUM(CASE WHEN statut = 'PENDING'   THEN 1 ELSE 0 END) AS pending,
+               SUM(CASE WHEN statut = 'APPROUVED' THEN 1 ELSE 0 END) AS approuved,
+               SUM(CASE WHEN statut = 'REJECTED'  THEN 1 ELSE 0 END) AS rejected
+        FROM demande_adhesion
+        """, nativeQuery = true)
+    DemandeCounts getDashboardCounts();
 }

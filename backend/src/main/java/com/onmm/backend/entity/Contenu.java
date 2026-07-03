@@ -26,10 +26,10 @@ public class Contenu {
     private String imageUrl;
     @Column(length = 500)
     private String resume;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categorie_id")
     private CategorieContenu categorie;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;
     @ManyToOne(fetch = FetchType.LAZY)

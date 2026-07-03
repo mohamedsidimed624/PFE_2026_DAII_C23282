@@ -10,7 +10,11 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "demande_adhesion")
+@Table(name = "demande_adhesion",
+        indexes = {
+            @Index(name = "idx_demande_statut",          columnList = "statut"),
+            @Index(name = "idx_demande_submission_date", columnList = "submission_date")
+        })
 public class DemandeAdhesion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

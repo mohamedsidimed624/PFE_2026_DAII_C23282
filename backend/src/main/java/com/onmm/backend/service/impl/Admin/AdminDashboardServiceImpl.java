@@ -3,9 +3,7 @@ package com.onmm.backend.service.impl.Admin;
 
 import com.onmm.backend.dto.Admin.DashboardStatsResponse;
 import com.onmm.backend.entity.DemandeAdhesion;
-import com.onmm.backend.entity.enums.ApplicationStatus;
 import com.onmm.backend.entity.enums.ReclamationStatus;
-import com.onmm.backend.entity.enums.StatutMedecin;
 import com.onmm.backend.repository.DemandeAdhesionRepository;
 import com.onmm.backend.repository.MedecinRepository;
 import com.onmm.backend.repository.ReclamationRepository;
@@ -25,23 +23,37 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
     @Override
     public DashboardStatsResponse getStats() {
-        long totalDemandes = demandeRepo.count();
-        long enAttente = demandeRepo.countByStatut(ApplicationStatus.PENDING);
-        long acceptees = demandeRepo.countByStatut(ApplicationStatus.APPROUVED);
-        long rejetees = demandeRepo.countByStatut(ApplicationStatus.REJECTED);
-        long totalMedecins = medecinRepo.count();
-        long actifs = medecinRepo.countByStatut(StatutMedecin.ACTIF);
-        long suspendus = medecinRepo.countByStatut(StatutMedecin.SUSPENDU);
-        long hommes = medecinRepo.countBySexe("Homme");
-        long femmes = medecinRepo.countBySexe("Femme");
-        long mauritaniens = medecinRepo.countByNationaliteIgnoreCase("mauritanienne");
-        long etrangers = totalMedecins - mauritaniens;
-        long totalSpecialites = specialiteRepo.count();
+        DemandeAdhesionRepository.DemandeCounts dc = demandeRepo.getDashboardCounts();
+        MedecinRepository.MedecinCounts mc = medecinRepo.getDashboardCounts();
+
+        long totalDemandes = dc.getTotal() != null ? dc.getTotal() : 0L;
+        long enAttente     = dc.getPending() != null ? dc.getPending() : 0L;
+        long acceptees     = dc.getApprouved() != null ? dc.getApprouved() : 0L;
+        long rejetees      = dc.getRejected() != null ? dc.getRejected() : 0L;
+
+        long totalMedecins = mc.getTotal() != null ? mc.getTotal() : 0L;
+        long actifs        = mc.getActifs() != null ? mc.getActifs() : 0L;
+        long suspendus     = mc.getSuspendus() != null ? mc.getSuspendus() : 0L;
+        long hommes        = mc.getHommes() != null ? mc.getHommes() : 0L;
+        long femmes        = mc.getFemmes() != null ? mc.getFemmes() : 0L;
+        long mauritaniens  = mc.getMauritaniens() != null ? mc.getMauritaniens() : 0L;
+        long etrangers     = totalMedecins - mauritaniens;
+
+        long totalSpecialites       = specialiteRepo.count();
         long specialitesAvecMedecins = specialiteRepo.countSpecialitesAvecMedecins();
-        long reclamationsEnAttente = reclamationRepo.countByStatut(ReclamationStatus.SUBMITTED) + reclamationRepo.countByStatut(ReclamationStatus.IN_PROGRESS);
+        long reclamationsEnAttente  = reclamationRepo.countByStatutIn(
+                List.of(ReclamationStatus.SUBMITTED, ReclamationStatus.IN_PROGRESS));
+
         List<DemandeAdhesion> recent = demandeRepo.findTop5ByOrderBySubmissionDateDesc();
-        List<DashboardStatsResponse.RecentDemandeDto> recentDtos = recent.stream().map(d -> new DashboardStatsResponse.RecentDemandeDto(d.getId(), d.getNom(), d.getPrenom(), d.getNumeroDossier(), d.getStatut() != null ? d.getStatut().name() : null, d.getSubmissionDate())).toList();
-        return new DashboardStatsResponse(totalDemandes, enAttente, acceptees, rejetees, totalMedecins, actifs, suspendus, hommes, femmes, mauritaniens, etrangers, totalSpecialites, specialitesAvecMedecins, reclamationsEnAttente, recentDtos);
+        List<DashboardStatsResponse.RecentDemandeDto> recentDtos = recent.stream()
+                .map(d -> new DashboardStatsResponse.RecentDemandeDto(
+                        d.getId(), d.getNom(), d.getPrenom(), d.getNumeroDossier(),
+                        d.getStatut() != null ? d.getStatut().name() : null, d.getSubmissionDate()))
+                .toList();
+
+        return new DashboardStatsResponse(totalDemandes, enAttente, acceptees, rejetees,
+                totalMedecins, actifs, suspendus, hommes, femmes, mauritaniens, etrangers,
+                totalSpecialites, specialitesAvecMedecins, reclamationsEnAttente, recentDtos);
     }
 
     @java.lang.SuppressWarnings("all")
