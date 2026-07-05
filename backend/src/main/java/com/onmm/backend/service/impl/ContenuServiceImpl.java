@@ -32,7 +32,7 @@ public class ContenuServiceImpl implements ContenuService {
     public ContenuResponseDTO create(ContenuRequestDTO dto, MultipartFile image, Long userId) {
         CategorieContenu categorie = categorieRepository.findById(dto.getCategorieId()).orElseThrow(() -> new RuntimeException("Catégorie introuvable"));
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-        String imageUrl = fileStorageService.storeContenuImage(image);
+        String imageUrl = (image != null && !image.isEmpty()) ? fileStorageService.storeContenuImage(image) : null;
         Specialite specialiteCible = resolveSpecialite(dto.getSpecialiteCibleId());
         Contenu contenu = Contenu.builder().titre(dto.getTitre()).resume(dto.getResume()).contenu(dto.getContenu()).type(dto.getType()).categorie(categorie).visibilite(dto.getVisibilite()).statut(ContenuStatut.DRAFT).createdBy(user).imageUrl(imageUrl).dateCreation(LocalDateTime.now()).dateExpiration(parseDate(dto.getDateExpiration())).specialiteCible(specialiteCible).build();
         return ContenuMapper.toDTO(contenuRepository.save(contenu));

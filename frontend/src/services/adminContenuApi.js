@@ -43,7 +43,7 @@ export const getAdminContenus = async (params = {}) => {
   return response.data;
 };
 
-export const createContenu = async (payload, imageFile, userId) => {
+export const createContenu = async (payload, imageFile) => {
   const formData = new FormData();
 
   formData.append(
@@ -51,11 +51,11 @@ export const createContenu = async (payload, imageFile, userId) => {
     new Blob([JSON.stringify(payload)], { type: "application/json" }),
   );
 
-  formData.append("image", imageFile);
+  if (imageFile) {
+    formData.append("image", imageFile);
+  }
 
-  const response = await adminContenuApi.post("/contenus", formData, {
-    params: { userId },
-  });
+  const response = await adminContenuApi.post("/contenus", formData);
 
   return response.data;
 };

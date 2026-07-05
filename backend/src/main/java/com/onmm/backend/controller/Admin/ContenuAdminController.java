@@ -2,9 +2,11 @@
 package com.onmm.backend.controller.Admin;
 
 import com.onmm.backend.dto.contenu.*;
+import com.onmm.backend.entity.UserPrincipal;
 import com.onmm.backend.service.Admin.ContenuService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,7 +21,8 @@ public class ContenuAdminController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public ContenuResponseDTO create(@Valid @RequestPart("data") ContenuRequestDTO dto, @RequestPart("image") MultipartFile image, @RequestParam Long userId) {
+    public ContenuResponseDTO create(@Valid @RequestPart("data") ContenuRequestDTO dto, @RequestPart(value = "image", required = false) MultipartFile image, Authentication authentication) {
+        Long userId = ((UserPrincipal) authentication.getPrincipal()).getUser().getId();
         return contenuService.create(dto, image, userId);
     }
 

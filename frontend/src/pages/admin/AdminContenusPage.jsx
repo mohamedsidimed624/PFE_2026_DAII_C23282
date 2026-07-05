@@ -494,7 +494,7 @@ function AdminContenusPage() {
   const handleSubmit = async (payload) => {
     try {
       setActionLoading(true);
-      if (modalMode === "create") await createContenu(payload.data, payload.image, 1);
+      if (modalMode === "create") await createContenu(payload.data, payload.image);
       else await updateContenu(selectedContenu.id, payload.data, payload.image);
       setModalOpen(false);
       await loadContenus();
