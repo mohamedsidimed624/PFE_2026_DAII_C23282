@@ -19,6 +19,7 @@ public class ContenuPublicServiceImpl implements ContenuPublicService {
     private final ContenuRepository contenuRepository;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Page<ContenuResponseDTO> getPublicContenus(int page, int size, ContenuType type, Long categorieId, String search) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("datePublication").descending());
         var spec = ContenuSpecification.filter(type, categorieId, search);

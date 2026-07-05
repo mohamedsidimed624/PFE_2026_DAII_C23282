@@ -63,6 +63,7 @@ public class ContenuServiceImpl implements ContenuService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Page<ContenuResponseDTO> getAdminContenus(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("dateCreation").descending());
         return contenuRepository.findAllByOrderByDateCreationDesc(pageable).map(ContenuMapper::toDTO);
@@ -109,6 +110,7 @@ public class ContenuServiceImpl implements ContenuService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Page<ContenuResponseDTO> getPublicContenus(Long categorieId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("datePublication").descending());
         Page<Contenu> contenus = categorieId != null ? contenuRepository.findByStatutAndVisibiliteAndCategorie_Id(ContenuStatut.PUBLISHED, ContenuVisibilite.PUBLIC, categorieId, pageable) : contenuRepository.findByStatutAndVisibilite(ContenuStatut.PUBLISHED, ContenuVisibilite.PUBLIC, pageable);
