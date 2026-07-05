@@ -165,9 +165,6 @@ function AdminMedecinsList() {
           </select>
         </div>
 
-        <button className="h-10 rounded-md border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-[13px] text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200">
-          Filtrer par période
-        </button>
       </div>
 
       <div className="overflow-hidden rounded-md bg-white dark:bg-slate-900">

@@ -5,188 +5,192 @@ export const educationData = {
       "Faculté de Médecine de Nouakchott",
       "Institut Supérieur des Sciences de la Santé",
     ],
-
     Nouadhibou: ["Université de Nouadhibou"],
-
     Rosso: ["Institut Supérieur d'Agronomie de Rosso"],
+    Kiffa: ["Centre de Santé de Kiffa"],
   },
 
-  Tunisie: {
-    Tunis: ["Université de Tunis El Manar", "Faculté de Médecine de Tunis"],
-
-    Sfax: ["Université de Sfax", "Faculté de Médecine de Sfax"],
-
-    Sousse: ["Université de Sousse", "Faculté de Médecine de Sousse"],
-  },
-
-  Maroc: {
-    Rabat: ["Université Mohammed V de Rabat"],
-
-    Casablanca: ["Université Hassan II de Casablanca"],
-
-    Marrakech: ["Université Cadi Ayyad"],
+  France: {
+    Paris: [
+      "Université Paris Cité",
+      "Université Sorbonne Paris Nord",
+      "Université Pierre et Marie Curie (Sorbonne)",
+      "Université Paris Descartes",
+      "Hôpital Lariboisière – Faculté de Médecine",
+      "Faculté de Médecine de Bicêtre",
+    ],
+    Lyon: [
+      "Université Claude Bernard Lyon 1",
+      "Faculté de Médecine Lyon Est",
+      "Faculté de Médecine Lyon Sud",
+    ],
+    Marseille: [
+      "Aix-Marseille Université – Faculté de Médecine",
+      "Faculté des Sciences Médicales et Paramédicales",
+    ],
+    Bordeaux: [
+      "Université de Bordeaux – Faculté de Médecine",
+    ],
+    Toulouse: [
+      "Université Paul Sabatier – Faculté de Médecine",
+    ],
+    Lille: [
+      "Université de Lille – Faculté de Médecine",
+      "CHU de Lille",
+    ],
+    Strasbourg: [
+      "Université de Strasbourg – Faculté de Médecine",
+    ],
+    Montpellier: [
+      "Université de Montpellier – Faculté de Médecine",
+    ],
   },
 
   Algérie: {
-    Alger: ["Université d'Alger 1", "Université d'Alger 3"],
+    Alger: [
+      "Université d'Alger 1 – Faculté de Médecine",
+      "Université d'Alger 3 (Benyoucef Benkhedda)",
+    ],
+    Oran: ["Université d'Oran – Faculté de Médecine"],
+    Constantine: ["Université Constantine 3 – Faculté de Médecine"],
+    Annaba: ["Université Badji Mokhtar – Faculté de Médecine"],
+    Sétif: ["Université Ferhat Abbas Sétif – Faculté de Médecine"],
+    Tlemcen: ["Université de Tlemcen – Faculté de Médecine"],
+  },
 
-    Oran: ["Université d'Oran"],
+  Tunisie: {
+    Tunis: [
+      "Université de Tunis El Manar – Faculté de Médecine",
+      "Faculté de Médecine de Tunis",
+    ],
+    Sfax: [
+      "Université de Sfax – Faculté de Médecine",
+      "Faculté de Médecine de Sfax",
+    ],
+    Sousse: [
+      "Université de Sousse – Faculté de Médecine",
+      "Faculté de Médecine de Sousse",
+    ],
+    Monastir: ["Université de Monastir – Faculté de Médecine"],
+  },
 
-    Constantine: ["Université Constantine 3"],
+  Maroc: {
+    Rabat: [
+      "Université Mohammed V de Rabat – Faculté de Médecine",
+      "Faculté de Médecine et de Pharmacie de Rabat",
+    ],
+    Casablanca: [
+      "Université Hassan II de Casablanca – Faculté de Médecine",
+      "Faculté de Médecine et de Pharmacie de Casablanca",
+    ],
+    Fès: [
+      "Université Sidi Mohammed Ben Abdellah – Faculté de Médecine",
+    ],
+    Marrakech: ["Université Cadi Ayyad – Faculté de Médecine"],
+    Oujda: ["Université Mohammed Premier – Faculté de Médecine"],
+  },
+
+  Égypte: {
+    Le_Caire: [
+      "Université du Caire – Faculté de Médecine",
+      "Université Ain Shams – Faculté de Médecine",
+      "Université Al-Azhar – Faculté de Médecine",
+    ],
+    Alexandrie: [
+      "Université d'Alexandrie – Faculté de Médecine",
+    ],
+    Assiout: ["Université d'Assiout – Faculté de Médecine"],
+  },
+
+  Libye: {
+    Tripoli: [
+      "Université de Tripoli – Faculté de Médecine",
+      "Université Al-Fateh – Faculté de Médecine",
+    ],
+    Benghazi: [
+      "Université de Benghazi – Faculté de Médecine",
+    ],
+    Misrata: ["Université de Misrata – Faculté de Médecine"],
   },
 
   Sénégal: {
-    Dakar: ["Université Cheikh Anta Diop"],
-
+    Dakar: [
+      "Université Cheikh Anta Diop – Faculté de Médecine",
+      "Faculté de Médecine, de Pharmacie et d'Odontologie de Dakar",
+    ],
     Saint_Louis: ["Université Gaston Berger"],
-
     Thiès: ["Université de Thiès"],
   },
+
+  Soudan: {
+    Khartoum: [
+      "Université de Khartoum – Faculté de Médecine",
+      "Université de Gezira – Faculté de Médecine",
+    ],
+    Omdurman: ["Université islamique d'Omdurman – Faculté de Médecine"],
+  },
+
+  Mali: {
+    Bamako: [
+      "Université des Sciences, des Techniques et des Technologies de Bamako",
+      "Faculté de Médecine et d'Odonto-Stomatologie (FMOS)",
+    ],
+  },
+
+  Guinée: {
+    Conakry: [
+      "Université Gamal Abdel Nasser de Conakry – Faculté de Médecine",
+      "Institut National de Santé Publique (INSP)",
+    ],
+  },
+
+  "Côte d'Ivoire": {
+    Abidjan: [
+      "Université Félix Houphouët-Boigny – UFR Sciences Médicales",
+      "Institut National de Santé Publique d'Abidjan",
+    ],
+    Bouaké: ["Université Alassane Ouattara – UFR Sciences Médicales"],
+  },
+
+  Belgique: {
+    Bruxelles: [
+      "Université libre de Bruxelles – Faculté de Médecine",
+      "Université catholique de Louvain – Faculté de Médecine",
+    ],
+    Liège: ["Université de Liège – Faculté de Médecine"],
+    Gand: ["Université de Gand – Faculté de Médecine"],
+  },
+
+  Canada: {
+    Montréal: [
+      "Université de Montréal – Faculté de Médecine",
+      "Université McGill – Faculté de Médecine",
+    ],
+    Québec: ["Université Laval – Faculté de Médecine"],
+    Ottawa: ["Université d'Ottawa – Faculté de Médecine"],
+  },
+
+  "États-Unis": {
+    "New York": [
+      "Columbia University – Vagelos College of Physicians and Surgeons",
+      "NYU Grossman School of Medicine",
+    ],
+    Boston: [
+      "Harvard Medical School",
+      "Boston University School of Medicine",
+    ],
+    Chicago: [
+      "University of Chicago – Pritzker School of Medicine",
+    ],
+  },
+
+  Royaume_Uni: {
+    Londres: [
+      "King's College London – Faculty of Life Sciences & Medicine",
+      "University College London Medical School",
+      "Imperial College London – Faculty of Medicine",
+    ],
+    Manchester: ["University of Manchester – Faculty of Biology, Medicine and Health"],
+    Édimbourg: ["University of Edinburgh – College of Medicine and Veterinary Medicine"],
+  },
 };
-
-// const specialites = [
-//     "Médecine générale",
-//     "Cardiologie",
-//     "Neurologie",
-//     "Pédiatrie",
-//     "Gynécologie",
-//     "Chirurgie",
-//     "Psychiatrie",
-//     "Dermatologie",
-//     "Ophtalmologie",
-//     "ORL",
-//     "Radiologie",
-//     "Anesthésiologie",
-//     "Oncologie",
-//     "Endocrinologie",
-//     "Gastro-entérologie",
-//     "Néphrologie",
-//     "Rhumatologie",
-//     "Hématologie",
-//     "Infectiologie",
-//     "Médecine du travail",
-//     "Médecine légale",
-//     "Médecine d'urgence",
-//     "Médecine sportive",
-//     "Médecine palliative",
-//     "Médecine nucléaire",
-//     "Médecine physique et de réadaptation",
-//     "Médecine tropicale",
-//     "Médecine vasculaire",
-//     "Médecine aéronautique",
-//     "Médecine spatiale",
-//     "Médecine maritime",
-//     "Médecine rurale",
-//     "Médecine communautaire",
-//     "Médecine de famille",
-//     "Médecine interne",
-//     "Médecine préventive",
-//     "Médecine alternative",
-//     "Autre"
-// ];
-// const sousSpecialites = [
-//     "Cardiologie interventionnelle",
-//     "Electrophysiologie",
-//     "Neurologie clinique",
-//     "Pédiatrie néonatale",
-//     "Gynécologie obstétricale",
-//     "Chirurgie générale",
-//     "Psychiatrie de l'enfant",
-//     "Dermatologie cutanée",
-//     "Ophtalmologie chirurgicale",
-//     "ORL pédiatrique",
-//     "Radiologie interventionnelle",
-//     "Anesthésiologie réanimation",
-//     "Oncologie médicale",
-//     "Endocrinologie diabétologie",
-//     "Gastro-entérologie hépatologie",
-//     "Néphrologie transplantation",
-//     "Rhumatologie pédiatrique",
-//     "Hématologie clinique",
-//     "Infectiologie tropicale",
-//     "Médecine du travail en milieu industriel",
-//     "Médecine légale et expertise médicale",
-//     "Médecine d'urgence préhospitalière",
-//     "Médecine sportive de haut niveau",
-//     "Médecine palliative et soins de support",
-//     "Médecine nucléaire et imagerie moléculaire",
-//     "Médecine physique et de réadaptation neurologique",
-//     "Médecine tropicale et maladies infectieuses",
-//     "Médecine vasculaire et endovasculaire",
-//     "Médecine aéronautique et spatiale",
-//     "Médecine maritime et navale",
-//     "Médecine rurale et de santé publique",
-//     "Médecine communautaire et de santé globale",
-//     "Médecine de famille et de proximité",
-//     "Médecine interne et de spécialité",
-//     "Médecine préventive et santé publique",
-//     "Médecine alternative et complémentaire",
-//     "Autre"
-// ];
-
-// const pays = [
-//     "Mauritanie",
-//     "Sénégal",
-//     "Côte d'Ivoire",
-//     "Bénin",
-//     "Niger",
-//     "Togo",
-//     "Burkina Faso",
-//     "Mali",
-//     "Guinée",
-//     "Sierra Leone",
-//     "Liberia",
-//     "Ghana",
-//     "Nigeria",
-//     "Cameroon",
-//     "Chad",
-//     "Sudan",
-//     "Éthiopie",
-//     "Kenya",
-//     "Tanzanie",
-//     "Uganda"
-// ];
-// const villes = [
-//     "Nouakchott",
-//     "Nouadhibou",
-//     "Ouagadougou",
-//     "Cotonou",
-//     "Niamey",
-//     "Lomé",
-//     "Ouagadougouu",
-//     "Bamako",
-//     "Conakry",
-//     "Freetown",
-//     "Monrovia",
-//     "Accra",
-//     "Lagos",
-//     "Yaoundé",
-//     "N'Djamena",
-//     "Khartoum",
-//     "Addis-Abeba",
-//     "Nairobi",
-//     "Dodoma",
-//     "Kampala"
-// ];
-
-// const universites = [
-//     "Université de Nouakchott",
-//     "Université de Nouadhibou",
-//     "Université de Ouagadougou",
-//     "Université de Cotonou",
-//     "Université de Niamey",
-//     "Université de Lomé",
-//     "Université de Bamako",
-//     "Université de Conakry",
-//     "Université de Freetown",
-//     "Université de Monrovia",
-//     "Université de Accra",
-//     "Université de Lagos",
-//     "Université de Yaoundé",
-//     "Université de N'Djamena",
-//     "Université de Khartoum",
-//     "Université de Addis-Abeba",
-//     "Université de Nairobi",
-//     "Université de Dodoma",
-//     "Université de Kampala"
-// ];

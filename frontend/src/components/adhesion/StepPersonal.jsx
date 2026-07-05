@@ -50,11 +50,11 @@ function StepPersonal({ nextStep }) {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(personalSchema),
-    defaultValues: formData.personal || {},
+    defaultValues: { sexe: "", nationalite: "", ...formData.personal },
   });
 
   useEffect(() => {
-    reset(formData.personal || {});
+    reset({ sexe: "", nationalite: "", ...formData.personal });
   }, [formData.personal, reset]);
 
   const nni = watch("nni");
@@ -113,11 +113,44 @@ function StepPersonal({ nextStep }) {
           {...register("nationalite")}
           className={inputCls(Boolean(errors.nationalite))}
         >
-          <option value="" disabled>Mauritanie</option>
+          <option value="" disabled>Nationalité</option>
           <option value="Mauritanienne">Mauritanienne</option>
-          <option value="Sénégalaise">Sénégalaise</option>
-          <option value="Marocaine">Marocaine</option>
+          <option value="Algérienne">Algérienne</option>
+          <option value="Angolaise">Angolaise</option>
+          <option value="Béninoise">Béninoise</option>
+          <option value="Belge">Belge</option>
+          <option value="Britannique">Britannique</option>
+          <option value="Burkinabè">Burkinabè</option>
+          <option value="Camerounaise">Camerounaise</option>
+          <option value="Canadienne">Canadienne</option>
+          <option value="Congolaise (RDC)">Congolaise (RDC)</option>
+          <option value="Côte d'Ivoirienne">Côte d'Ivoirienne</option>
+          <option value="Égyptienne">Égyptienne</option>
+          <option value="Espagnole">Espagnole</option>
+          <option value="Éthiopienne">Éthiopienne</option>
           <option value="Française">Française</option>
+          <option value="Gabonaise">Gabonaise</option>
+          <option value="Gambienne">Gambienne</option>
+          <option value="Ghanéenne">Ghanéenne</option>
+          <option value="Guinéenne">Guinéenne</option>
+          <option value="Italienne">Italienne</option>
+          <option value="Kényane">Kényane</option>
+          <option value="Libyenne">Libyenne</option>
+          <option value="Libérienne">Libérienne</option>
+          <option value="Malienne">Malienne</option>
+          <option value="Marocaine">Marocaine</option>
+          <option value="Nigériane">Nigériane</option>
+          <option value="Nigérienne">Nigérienne</option>
+          <option value="Portugaise">Portugaise</option>
+          <option value="Rwandaise">Rwandaise</option>
+          <option value="Sénégalaise">Sénégalaise</option>
+          <option value="Sierra-léonaise">Sierra-léonaise</option>
+          <option value="Soudanaise">Soudanaise</option>
+          <option value="Suisse">Suisse</option>
+          <option value="Tchadienne">Tchadienne</option>
+          <option value="Togolaise">Togolaise</option>
+          <option value="Tunisienne">Tunisienne</option>
+          <option value="Américaine">Américaine</option>
           <option value="Autre">Autre</option>
         </select>
       </Field>
