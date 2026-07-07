@@ -1,0 +1,3725 @@
+﻿\documentclass[12pt,a4paper]{report}
+
+% ============================================================
+% MISE EN PAGE
+% ============================================================
+\usepackage[
+a4paper,
+top=2.5cm,
+bottom=2.5cm,
+left=2.5cm,
+right=2.5cm
+]{geometry}
+
+% ============================================================
+% LANGUES + POLICES
+% ============================================================
+\usepackage{fontspec}
+\usepackage{polyglossia}
+
+\setmainlanguage{french}
+\setotherlanguage{arabic}
+
+\setmainfont{Latin Modern Roman}
+\newfontfamily\arabicfont[Script=Arabic]{Amiri}
+
+% ============================================================
+% TABLEAUX
+% ============================================================
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{array}
+
+% ============================================================
+% GRAPHIQUES ET FIGURES
+% ============================================================
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+
+\captionsetup{
+font=small,
+labelfont=bf
+}
+
+\usepackage{enumitem}
+
+% À mettre dans le préambule
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{needspace}
+\usepackage{placeins}
+
+\setlength{\parskip}{4pt}
+
+\newcommand{\interfaceScreen}[3]{%
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\textwidth,height=0.46\textheight,keepaspectratio]{#1}
+\caption{#2}
+\label{#3}
+\end{figure}
+}
+% ============================================================
+% ESPACEMENT
+% ============================================================
+\usepackage{setspace}
+\onehalfspacing
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\setlist[itemize]{
+label=---,
+leftmargin=1.2cm,
+itemsep=2pt,
+topsep=4pt
+}
+
+% ============================================================
+% ALIGNEMENT
+% ============================================================
+\usepackage{ragged2e}
+
+% ============================================================
+% TIKZ + CADRE DES PAGES
+% ============================================================
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{eso-pic}
+
+% \usetikzlibrary{shadows}  % supprimé : ombres TikZ trop lentes à compiler
+\definecolor{onmmgreen}{HTML}{16A34A}
+
+
+\newcommand{\PageFrame}{
+\begin{tikzpicture}[remember picture,overlay]
+
+\draw[line width=0.8pt]
+($(current page.north west)+(0.8cm,-0.8cm)$)
+rectangle
+($(current page.south east)+(-0.8cm,0.8cm)$);
+
+\draw[line width=0.4pt]
+($(current page.north west)+(1.1cm,-1.1cm)$)
+rectangle
+($(current page.south east)+(-1.1cm,1.1cm)$);
+
+\end{tikzpicture}
+}
+
+\AddToShipoutPictureBG{\PageFrame}
+
+% ============================================================
+% TITRES
+% ============================================================
+\usepackage{titlesec}
+
+% Sections (géré par titlesec — fonctionne)
+\titleformat{\section}
+{\normalfont\LARGE\bfseries}
+{\thesection}
+{1em}
+{}
+
+\titleformat{\subsection}
+{\normalfont\Large\bfseries}
+{\thesubsection}
+{1em}
+{}
+
+\titleformat{\subsubsection}
+{\normalfont\normalsize\bfseries}
+{\thesubsubsection}
+{1em}
+{}
+
+\titlespacing*{\section}{0pt}{14pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\titlespacing*{\subsubsection}{0pt}{10pt}{4pt}
+
+% --- Chapitres : \AtBeginDocument pour contourner le conflit bidi/titlesec ---
+\AtBeginDocument{%
+  \titleformat{\chapter}[block]
+    {\normalfont\Huge\bfseries\centering}
+    {Chapitre~\Roman{chapter}~:~}
+    {0pt}
+    {}%
+  \titleformat{name=\chapter,numberless}
+    {\normalfont\Huge\bfseries\centering}
+    {}
+    {0pt}
+    {}%
+  \titlespacing*{\chapter}{0pt}{50pt}{30pt}%
+  \titlespacing*{name=\chapter,numberless}{0pt}{50pt}{30pt}%
+}
+
+
+
+
+
+% Sections
+\titleformat{\section}
+{\normalfont\LARGE\bfseries}
+{\thesection}
+{1em}
+{}
+
+\titleformat{\subsection}
+{\normalfont\Large\bfseries}
+{\thesubsection}
+{1em}
+{}
+
+\titleformat{\subsubsection}
+{\normalfont\normalsize\bfseries}
+{\thesubsubsection}
+{1em}
+{}
+
+\titlespacing*{\section}{0pt}{14pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\titlespacing*{\subsubsection}{0pt}{10pt}{4pt}
+
+% ============================================================
+% HEADER / FOOTER
+% ============================================================
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\fancypagestyle{plain}{
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+}
+
+% ============================================================
+% TABLE DES MATIÈRES
+% ============================================================
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+% ============================================================
+% LIENS
+% ============================================================
+\usepackage[hidelinks]{hyperref}
+\usepackage{bookmark}
+\usepackage{cite}
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+\sloppy
+\begin{document}
+\raggedbottom
+\justifying
+
+
+                
+% ============================================================
+% PAGE DE GARDE
+% ============================================================
+\begin{titlepage}
+\thispagestyle{empty}
+
+\begin{center}
+\vspace*{0.2cm}
+
+{\large\textbf{RÉPUBLIQUE ISLAMIQUE DE LA MAURITANIE}}\\
+{\small\textbf{MINISTÈRE DE L’ENSEIGNEMENT SUPÉRIEUR ET DE LA RECHERCHE}}\\
+{\small\textbf{SCIENTIFIQUE}}\\
+{\small\textbf{UNIVERSITÉ DE NOUAKCHOTT}}\\
+{\small\textbf{FACULTÉ DES SCIENCES ET TECHNIQUES}}\\
+{\small\textbf{DÉPARTEMENT D’INFORMATIQUE}}\\[0.35cm]
+
+\includegraphics[width=0.55\textwidth,
+                trim=0cm 3.2cm 0cm 3.2cm,
+                clip]{images/fst_arabic_block.png}
+
+{\Large\textbf{MÉMOIRE DE FIN D’ÉTUDES}}\\[0.25cm]
+
+{\small En vue de l’obtention de la Licence en \textbf{Développement, Administration}}\\
+{\small \textbf{d’Internet et d’Intranet (DAII)}}\\[0.25cm]
+
+{\normalsize\textbf{Sujet :}}\\[0.15cm]
+
+\begin{tikzpicture}
+\node[
+draw=gray,
+fill=green!18,
+rounded corners=12pt,
+line width=0.8pt,
+text width=0.78\textwidth,
+minimum height=2.5cm,
+align=center,
+inner sep=10pt
+]
+{
+{\Large\textbf{Conception et Développement}}\\[0.35cm]
+{\Large\textbf{d’une Application Web}}\\[0.35cm]
+{\Large\textbf{pour l’Ordre National des Médecins}}
+};
+\end{tikzpicture}
+
+\vspace{0.35cm}
+
+\includegraphics[width=0.22\textwidth,
+                trim=0cm 2cm 0cm 2cm,
+                clip]{images/onmm_logo.png}
+
+\vspace{0.35cm}
+
+\begin{minipage}{0.42\textwidth}
+\centering
+\textbf{Présenté par :}\\[0.12cm]
+
+\begin{tikzpicture}
+\node[
+draw=gray,
+dashed,
+rounded corners=6pt,
+text width=0.9\linewidth,
+minimum height=1.5cm,
+align=center,
+inner sep=6pt
+]
+{
+\textbf{Mohamed Sidi Mohamed}\\
+\textbf{Mohamed Salem}\\
+\textbf{Matricule : C23282}
+};
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.42\textwidth}
+\centering
+\textbf{Encadré par :}\\[0.12cm]
+
+\begin{tikzpicture}
+\node[
+draw=gray,
+dashed,
+rounded corners=6pt,
+text width=0.9\linewidth,
+minimum height=1.5cm,
+align=center,
+inner sep=6pt
+]
+{
+\textbf{Dr. Ahmed Sejad}\\
+\textbf{Ing. Mohamed Saleck Elbechir}
+};
+\end{tikzpicture}
+\end{minipage}
+
+\vspace{0.45cm}
+
+\begin{flushright}
+\small\textbf{Date de soutenance :} 11/07/2026
+\end{flushright}
+
+\vspace{0.1cm}
+\hrule
+\vspace{0.1cm}
+
+\begin{flushleft}
+\small
+\textbf{Membre de Jury :}\\
+\textit{Président :} \dotfill\\[0.08cm]
+\textit{Membre :} \dotfill\\[0.08cm]
+\textit{Encadrant Pédagogique :} \dotfill\\[0.08cm]
+\textit{Encadrant Externe :} \dotfill
+\end{flushleft}
+
+\vspace{0.1cm}
+\hrule
+
+\vfill
+
+{\small\textbf{Année universitaire :}}\\
+{\small\textbf{2025 -- 2026}}
+
+\end{center}
+\end{titlepage}
+
+% ============================================================
+% PAGES LIMINAIRES (numérotation romaine)
+% ============================================================
+\pagenumbering{roman}
+
+% ---- DÉDICACE ----
+\chapter*{Dédicaces}
+\addcontentsline{toc}{chapter}{Dédicace}
+\thispagestyle{empty}
+
+
+\vspace{1.5cm}
+
+{\fontsize{48}{58}\selectfont\textquotedblleft}
+
+\vspace{0.4cm}
+
+\begin{center}
+\begin{minipage}{0.75\textwidth}
+\centering\itshape\large
+
+À mes chers parents,\\[4pt]
+pour leur amour, leur soutien et leurs sacrifices tout au long de mon parcours.
+
+\vspace{0.55cm}
+
+À ma famille,\\[4pt]
+qui m'a toujours encouragé et soutenu dans mes études.
+
+\vspace{0.55cm}
+
+À mes enseignants,\\[4pt]
+pour leurs efforts et leur accompagnement durant ma formation universitaire.
+
+\vspace{0.55cm}
+
+À tous ceux qui ont contribué de près ou de loin à la réalisation de ce travail.
+
+\end{minipage}
+\end{center}
+
+\vspace{0.4cm}
+
+\begin{flushright}
+{\fontsize{48}{58}\selectfont\textquotedblright}
+\end{flushright}
+
+\vspace{1.2cm}
+
+\begin{flushright}
+\large\textbf{Mohamed Sidi Mohamed Mohamed Salem}
+\end{flushright}
+
+% ---- REMERCIEMENTS ----
+
+\chapter*{Remerciements}
+\addcontentsline{toc}{chapter}{Remerciements}
+Avant tout, je remercie Allah le Tout-Puissant de m'avoir donné la force, la patience et la volonté nécessaires pour mener à bien ce travail.
+
+Je tiens à exprimer mes sincères remerciements à mon encadrant pédagogique \textbf{Ahmed Sejad} pour son accompagnement, ses conseils précieux et sa disponibilité tout au long de la réalisation de ce projet.
+
+Je remercie également \textbf{Mohamed Saleck} pour son soutien et ses orientations qui ont contribué à l'amélioration de ce travail.
+
+Mes remerciements s'adressent aussi à tous les enseignants du département d'informatique de la Faculté des Sciences et Techniques de l'Université de Nouakchott pour la qualité de la formation qu'ils nous ont offerte durant nos années d'études.
+
+Je souhaite également remercier l'entreprise \textbf{SMART MS SA} pour m'avoir accueilli durant mon stage et pour m'avoir offert un cadre de travail propice à la réalisation de ce projet.
+
+Enfin, j'exprime ma gratitude envers ma famille et mes proches pour leur soutien moral et leurs encouragements permanents.
+
+\begin{flushright}
+\textit{Mohamed Sidi Mohamed Mohamed Salem}
+\end{flushright}
+
+% ---- RÉSUMÉ ----
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Résumé}
+\thispagestyle{plain}
+
+% =========================
+% RÉSUMÉ ARABE
+% =========================
+
+
+
+% ---- TABLES ----
+\tableofcontents
+\addcontentsline{toc}{chapter}{Table des matières}
+
+\listoffigures
+\addcontentsline{toc}{chapter}{Table des figures}
+
+\listoftables
+\addcontentsline{toc}{chapter}{Liste des tableaux}
+
+\chapter*{Liste des acronymes}
+\addcontentsline{toc}{chapter}{Liste des acronymes}
+
+\begin{description}[style=nextline, leftmargin=3.5cm, labelwidth=3cm]
+\item[API] Application Programming Interface
+\item[CRUD] Create, Read, Update, Delete
+\item[CSS] Cascading Style Sheets
+\item[DAII] Développement, Administration d'Internet et d'Intranet
+\item[HTML] HyperText Markup Language
+\item[HTTP] HyperText Transfer Protocol
+\item[HTTPS] HyperText Transfer Protocol Secure
+\item[JWT] JSON Web Token
+\item[MCD] Modèle Conceptuel de Données
+\item[MLD] Modèle Logique de Données
+\item[MVC] Model--View--Controller
+\item[ONMM] Ordre National des Médecins de Mauritanie
+\item[RBAC] Role-Based Access Control
+\item[REST] Representational State Transfer
+\item[SPA] Single Page Application
+\item[SQL] Structured Query Language
+\item[UI] User Interface
+\item[UML] Unified Modeling Language
+\item[UX] User Experience
+\end{description}
+\vspace{0.5cm}
+\begin{center}
+{\LARGE\bfseries \textarabic{ملخص}}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{Arabic}
+\begin{flushright}
+
+يعرض هذا التقرير تصميم وتطوير تطبيق ويب موجه إلى الهيئة الوطنية للأطباء في
+موريتانيا. يهدف المشروع إلى رقمنة أهم الخدمات الإدارية للهيئة، خاصة إدارة
+طلبات الانتساب، سجل الأطباء، الشكاوى، الإعلانات، الاستبيانات والانتخابات.
+
+اعتمدت منهجية العمل على دراسة النظام الحالي، وتحديد المتطلبات الوظيفية وغير
+الوظيفية، ثم نمذجة النظام باستعمال لغة UML، قبل إنجاز الحل التقني اعتمادا على
+React و Spring Boot و PostgreSQL.
+
+وقد مكنت النتائج المتحصل عليها من إنشاء منصة مركزية وآمنة وسهلة الاستخدام،
+تساعد على متابعة الإجراءات الإدارية وتحسين تتبع التبادلات بين الهيئة والأطباء
+والجمهور.
+
+\textbf{الكلمات المفتاحية:}
+الهيئة الوطنية للأطباء، تطبيق ويب، الرقمنة،
+React, Spring Boot, PostgreSQL, UML.
+
+\end{flushright}
+\end{Arabic}
+
+\vspace{1cm}
+
+% =========================
+% RÉSUMÉ FRANÇAIS
+% =========================
+
+\begin{center}
+{\LARGE\bfseries Résumé}
+\end{center}
+
+\vspace{0.5cm}
+
+Ce mémoire présente la conception et le développement d’une application web
+destinée à l’Ordre National des Médecins de Mauritanie (ONMM). L’objectif du
+projet est de digitaliser les principaux services administratifs de l’Ordre,
+notamment la gestion des demandes d’adhésion, le registre des médecins, les
+réclamations, les annonces, les questionnaires et les élections.
+
+La méthodologie adoptée repose sur une analyse de l’existant, la spécification
+des besoins fonctionnels et non fonctionnels, la modélisation UML et la
+réalisation d’une solution web basée sur React, Spring Boot et PostgreSQL.
+
+Les résultats obtenus ont permis de mettre en place une plateforme centralisée,
+sécurisée et accessible, facilitant le suivi des démarches administratives et
+améliorant la traçabilité des échanges entre l’ONMM, les médecins et le public.
+
+\textbf{Mots-clés :}
+ONMM, application web, digitalisation,
+React, Spring Boot, PostgreSQL, UML.
+
+\newpage
+
+% =========================
+% ABSTRACT (ANGLAIS)
+% =========================
+
+\begin{center}
+{\LARGE\bfseries Abstract}
+\end{center}
+
+\vspace{0.5cm}
+
+This thesis presents the design and development of a web application for the
+National Order of Physicians of Mauritania (ONMM). The aim of the project is to
+digitalize the main administrative services of the Order, including membership
+request management, the physicians' register, complaints, announcements, surveys
+and elections.
+
+The methodology adopted is based on an analysis of the existing system, the
+specification of functional and non-functional requirements, UML modeling, and the
+implementation of a web solution based on React, Spring Boot and PostgreSQL.
+
+The results led to the establishment of a centralized, secure and accessible
+platform, facilitating the monitoring of administrative procedures and improving
+the traceability of exchanges between the ONMM, physicians and the public.
+
+\textbf{Keywords:}
+ONMM, web application, digitalization,
+React, Spring Boot, PostgreSQL, UML.
+% ---- LISTE DES ACRONYMES ----
+
+
+
+% ============================================================
+% CORPS DU MÉMOIRE (numérotation arabe)
+% ============================================================
+\cleardoublepage
+\pagenumbering{arabic}
+
+% ============================================================
+% INTRODUCTION GÉNÉRALE
+% ============================================================
+\chapter*{Introduction générale}
+\addcontentsline{toc}{chapter}{Introduction générale}
+\markboth{Introduction générale}{Introduction générale}
+
+La Mauritanie engage depuis plusieurs années une dynamique de modernisation
+de ses services publics, notamment dans le domaine de la santé. Dans ce cadre,
+la Stratégie Nationale de e-Santé 2024--2030 place la numérisation des services
+médicaux et administratifs parmi les priorités nationales.
+
+C'est dans ce contexte que s'inscrit notre projet de fin d'études, réalisé au
+sein de \textbf{SMART MS SA}, entreprise mauritanienne spécialisée dans le
+développement de solutions logicielles et les projets de digitalisation. Ce
+projet porte sur la conception et le développement d'une application web pour
+l'\textbf{Ordre National des Médecins de Mauritanie (ONMM)}, organisme chargé
+de l'inscription, du suivi administratif et du contrôle déontologique des
+médecins exerçant sur le territoire national.
+
+La phase d'analyse a mis en évidence plusieurs limites dans le fonctionnement actuel de l'ONMM. Les demandes d'adhésion sont encore traitées à partir de dossiers papier, le registre des médecins est tenu sous Excel et les médecins doivent généralement contacter l'Ordre par téléphone, e-mail ou WhatsApp pour connaître l'état de leur dossier. Cette organisation complique le travail de l'administration et rend l'accès aux services moins pratique pour les médecins.
+
+Pour répondre aux besoins actuels de l’ONMM, nous avons conçu et développé une plateforme électronique intuitive et sécurisée visant à numériser les principales procédures administratives, à centraliser les informations et à permettre un suivi transparent des dossiers en ligne. Cette plateforme offre un portail public, un espace dédié aux médecins et un espace administratif. Elle permet aux praticiens de soumettre leurs demandes d’adhésion en ligne avec suivi en temps réel, de déposer des réclamations, de consulter l’annuaire actualisé des médecins, tout en facilitant la diffusion des communiqués officiels ainsi que l’organisation de sondages et d’élections.
+
+La conception et le développement de cette application ont été réalisés selon la méthode Agile Scrum, favorisant une progression itérative et une validation régulière des fonctionnalités. La modélisation du système a été effectuée à l'aide du langage UML. Pour la réalisation de la plateforme, nous avons utilisé React.js pour le développement de l'interface utilisateur, Spring Boot pour le backend et PostgreSQL pour la gestion de la base de données.
+
+Ce rapport est organisé de la manière suivante~:
+
+\begin{itemize}
+    \item Le premier chapitre présente le cadre du stage, l'entreprise
+    SMART MS SA, l'ONMM ainsi que la problématique et la méthodologie adoptée.
+
+    \item Le deuxième chapitre est consacré à l'étude préalable~: analyse
+    du fonctionnement actuel de l'ONMM, ses limites, les solutions similaires
+    existantes et la solution proposée.
+
+    \item Le troisième chapitre détaille les besoins fonctionnels et non
+    fonctionnels ainsi que les acteurs de la plateforme.
+
+    \item Le quatrième chapitre porte sur la conception du système à travers
+    les diagrammes UML de cas d'utilisation, de séquence et de classes.
+
+    \item Le cinquième chapitre présente la réalisation~: choix technologiques,
+    architecture technique, environnement de développement et interfaces
+    graphiques de l'application.
+\end{itemize}
+
+Ce rapport retrace ainsi l'ensemble du processus de développement, depuis
+l'analyse des besoins jusqu'à la réalisation finale de la plateforme.
+
+
+
+% CHAPITRE 1 -- PRÉSENTATION GÉNÉRALE DU PROJET
+% ============================================================
+
+\chapter{Présentation générale}   
+
+
+
+\section{Introduction}
+La présentation générale constitue une étape essentielle pour poser les fondements de ce rapport. Dans ce chapitre, nous commençons par présenter le cadre général du stage. Ensuite, nous décrivons l’organisme d’accueil SMART MS SA, ses activités et ses domaines d’intervention. Nous abordons par la suite le contexte dans lequel s’inscrit notre projet, avant de présenter l’Ordre National des Médecins de Mauritanie (ONMM). Après cela, nous présentons le sujet traité, puis la problématique identifiée. Pour finir, nous expliquons la méthodologie adoptée pour la conception et le développement de la solution proposée.
+
+\section{Cadre général du stage}
+
+Dans le cadre de notre Licence en \textbf{Développement, Administration
+d’Internet et d’Intranet (DAII)}, nous avons effectué un stage de
+quatre mois (du 16/02/2026 au 16/06/2026) au sein de l’entreprise
+\textit{SMART MS SA}, spécialisée dans le développement de solutions
+informatiques et la transformation numérique.
+
+Notre travail a principalement porté sur la conception et le
+développement d’une application web destinée à l’Ordre National des
+Médecins de Mauritanie (ONMM), afin de moderniser et digitaliser
+plusieurs services administratifs de l’institution.
+
+\section{Présentation de l’organisme d’accueil}
+\label{sec:smartmssa}
+
+\textit{SMART MS SA} est une entreprise mauritanienne spécialisée dans
+le développement informatique et les solutions de transformation
+numérique. Fondée en \textbf{2016} à Nouakchott, elle accompagne plusieurs institutions
+publiques et privées dans la mise en place de solutions technologiques
+adaptées à leurs besoins.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.28\textwidth]{images/onmm_logo.png}
+%     \caption{Logo de SMART MS SA}
+% \end{figure}
+
+\subsection{Activités et domaines d'expertise}
+
+SMART MS SA intervient sur un spectre large de solutions numériques,
+structurées autour de plusieurs domaines d'expertise~:
+
+\begin{itemize}
+    \item \textbf{Intégration de systèmes d'entreprise (ERP)} : mise en
+    place et paramétrage de solutions telles qu'Odoo, SAP et Microsoft.
+    L'entreprise est \textbf{Odoo Gold Partner}, ce qui témoigne de son
+    niveau d'expertise dans l'intégration de ces solutions.
+
+    \item \textbf{Digitalisation des services publics} : développement
+    d'applications pour la transformation numérique d'institutions
+    gouvernementales et professionnelles, dans une logique de
+    dématérialisation et de modernisation administrative.
+
+    \item \textbf{e-Santé} : conception de plateformes numériques pour
+    le secteur médical, notamment des solutions de gestion de dossiers
+    médicaux, de prise de rendez-vous et de télémédecine. SMART MS SA
+    participe activement à des événements sectoriels liés à la santé
+    numérique en Mauritanie.
+
+    \item \textbf{Cloud, infrastructure et cybersécurité} : déploiement
+    d'infrastructures cloud, gestion de centres de données et mise en
+    place de solutions de sécurité informatique.
+
+    \item \textbf{Développement d'applications} : développement web,
+    mobile et IoT, adapté aux besoins des secteurs public et privé.
+\end{itemize}
+
+\noindent
+Cette expertise en digitalisation des services publics et en e-santé
+place SMART MS SA dans une position particulièrement adaptée pour
+accompagner l'ONMM dans la modernisation de ses services administratifs.
+
+
+\subsection{Mon intégration}
+
+Durant ce stage, nous avons intégré le département de développement
+informatique, où nous avons participé à la conception et au
+développement d’une plateforme web destinée à l’Ordre National des
+Médecins de Mauritanie (ONMM).
+
+Cette expérience nous a permis de travailler dans un environnement
+professionnel réel et d’appliquer les connaissances acquises durant
+notre formation, notamment dans les domaines du développement web, de la
+conception logicielle et de la gestion de projet.
+
+% \section{Contexte du projet}
+% \label{sec:contexte}
+
+% \subsection{Transformation numérique des administrations}
+
+% Avec l’évolution des technologies numériques, plusieurs administrations
+% et institutions professionnelles cherchent aujourd’hui à moderniser leurs
+% services afin d’améliorer leur efficacité et de faciliter l’accès aux
+% procédures administratives. En Mauritanie, cette transformation concerne
+% également les secteurs liés à la santé et aux organisations
+% professionnelles.
+
+% La digitalisation permet notamment de réduire les procédures manuelles,
+% d’améliorer le suivi des dossiers et de renforcer la qualité des services
+% offerts aux citoyens et aux professionnels. Dans ce contexte, les ordres
+% professionnels ont besoin de plateformes numériques capables de gérer
+% leurs activités administratives de manière centralisée et sécurisée.
+
+% \subsection{Limites des systèmes traditionnels}
+
+% Malgré cette évolution, plusieurs institutions continuent d’utiliser des
+% méthodes de gestion traditionnelles basées sur les dossiers papier,
+% les fichiers Excel et les échanges par téléphone ou courrier électronique.
+% C’est notamment le cas de l’Ordre National des Médecins de Mauritanie
+% (ONMM).
+
+% Les procédures liées aux demandes d’adhésion, à la gestion du registre
+% des médecins, aux réclamations et aux élections restent principalement
+% manuelles, ce qui entraîne plusieurs difficultés telles que les retards
+% de traitement, le manque de traçabilité des dossiers, les risques de perte
+% de documents ainsi que les déplacements fréquents des médecins pour le
+% suivi de leurs demandes.
+
+% Face à ces limites, la mise en place d’une plateforme web centralisée et
+% sécurisée apparaît comme une solution nécessaire pour moderniser le
+% fonctionnement de l’ONMM et améliorer la gestion de ses services.
+
+\section{Contexte du projet}
+\label{sec:contexte}
+
+L'\textbf{Ordre National des Médecins de Mauritanie (ONMM)} est l'organisme
+chargé de l'inscription, du suivi administratif et du contrôle déontologique
+des médecins exerçant sur le territoire national. Créé en 2019 par le décret
+n\textsuperscript{o}~2019-077, il regroupe près de 1~028 praticiens inscrits.
+Toute inscription à l'Ordre conditionne l'exercice légal de la médecine en
+Mauritanie, ce qui confère à l'ONMM un rôle central dans la régulation de
+la profession médicale.
+
+Bien qu'elle ait été créée en 2019, l'Organisation nationale de la médecine numérique (ONMM) en est encore à une phase active de mise en place
+de ses processus et de ses outils. Son premier congrès national, qui s'est tenu en janvier 2024,
+a reflété une volonté institutionnelle claire de s'organiser et de se moderniser. Cette démarche
+s'inscrit dans un contexte national favorable, soutenu par la Stratégie nationale de santé en ligne
+2024–2030, qui place la numérisation des services médicaux parmi les priorités du secteur.
+Cependant, lors de la phase d’analyse, les informations recueillies ont révélé que ces tâches sont exécutées en l’absence d’une plateforme
+numérique dédiée à la gestion de ses activités. Les demandes d’adhésion se font par le biais de
+dossiers papier, la vérification des diplômes nécessitant la présentation
+des originaux en personne. Le registre des médecins inscrits est conservé sous forme de fichier
+Excel, et les plaintes sont reçues par courrier et conservées dans des dossiers papier
+individuels. Le médecin qui souhaite connaître l’état d’avancement de son dossier n’a d’autre choix que de
+se rendre au siège à Nouakchott, de contacter le secrétariat ou d’envoyer un message via
+WhatsApp.
+
+
+
+Cette organisation a des conséquences concrètes sur chaque acteur de
+l'institution. Pour les médecins, notamment ceux exerçant dans les régions
+éloignées de Nouakchott, toute démarche implique un déplacement physique au
+siège de l'Ordre. Pour l'administration, le traitement des demandes reste
+dispersé entre plusieurs supports non reliés entre eux. Pour le public,
+l'accès aux informations sur les médecins en exercice ne dispose pas encore
+d'un outil numérique interactif permettant une consultation directe et à jour.
+
+Ces constats illustrent l'écart entre les missions de l'ONMM et les moyens
+dont il dispose pour les assurer, à un moment où l'institution elle-même
+amorce une phase de structuration et de modernisation.
+
+
+
+
+\section{Présentation de l'Ordre National des Médecins de Mauritanie}
+\label{sec:onmm}
+
+L'Ordre National des Médecins de Mauritanie (ONMM) est une institution
+professionnelle créée par le \textbf{décret n\textsuperscript{o}~2019-077
+du 25 avril 2019}. Il est reconnu comme un organisme d'utilité publique,
+doté de la personnalité morale et de l'autonomie financière. Ses missions
+relèvent du service public et son siège est situé à Nouakchott.
+L'adhésion à l'Ordre est obligatoire pour tout médecin souhaitant exercer
+légalement en Mauritanie.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.18\textwidth]{images/onmm.jpeg}
+  \caption{Logo de l'ONMM}
+  \label{fig:logo-onmm}
+\end{figure}
+
+\subsection{Missions de l'ONMM}
+
+L'ONMM est chargé de l'inscription des médecins, du suivi de leurs dossiers
+administratifs et du contrôle du respect des règles déontologiques et
+professionnelles régissant la profession médicale en Mauritanie.
+
+Il assure la défense de l'honneur et de l'indépendance de la profession,
+intervient dans les demandes d'autorisation d'exercice à titre privé et
+d'ouverture d'établissements médicaux, et donne son avis aux pouvoirs publics
+sur les questions de santé publique et de réglementation médicale.
+
+L'Ordre dispose également d'un pouvoir disciplinaire, exercé par son conseil
+de discipline, qui traite les manquements à l'éthique professionnelle et au
+code de déontologie.
+
+\subsection{Organisation de l'ONMM}
+
+L'organisation de l'ONMM repose sur cinq organes principaux~: l'Assemblée
+Générale des médecins inscrits, le Conseil National de l'Ordre, le Bureau
+Exécutif, les Conseils de section et le Conseil de discipline. Le
+secrétariat permanent assure quant à lui le traitement opérationnel des
+dossiers d'inscription, des réclamations et des demandes administratives
+au quotidien.
+
+L'ONMM comprend trois sections regroupant les médecins selon leur
+spécialité~:
+
+\begin{itemize}
+    \item la section~A, regroupant les médecins généralistes ;
+    \item la section~B, regroupant les médecins spécialistes ;
+    \item la section~C, regroupant les médecins enseignants-chercheurs.
+\end{itemize}
+
+Le Conseil National constitue l'instance décisionnelle principale de
+l'Ordre. Il est composé de \textbf{25 membres élus}, représentant les
+différentes catégories de médecins et les régions du territoire national,
+répartis comme suit~:
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{0.82\textwidth}{|X|c|}
+\hline
+\textbf{Représentation} & \textbf{Membres} \\
+\hline
+Section~A — Médecins généralistes & 10 \\
+\hline
+Section~B — Médecins spécialistes & 6 \\
+\hline
+Section~C — Médecins enseignants-chercheurs & 6 \\
+\hline
+Régions de l'intérieur & 3 \\
+\hline
+\textbf{Total} & \textbf{25} \\
+\hline
+\end{tabularx}
+\caption{Composition du Conseil National de l'Ordre}
+\label{tab:conseil-national}
+\end{table}
+
+Le Conseil National est dirigé par un Bureau Exécutif comprenant un président,
+un vice-président, un secrétaire général, un secrétaire général adjoint, un
+trésorier, un trésorier adjoint et deux assesseurs, tous élus par et parmi
+les membres du conseil pour un mandat de quatre ans renouvelable.
+
+\section{Présentation du sujet}
+
+Notre projet porte sur la conception et le développement d'une application
+web destinée à centraliser les services administratifs de l'ONMM, à
+l'intention des \textbf{médecins}, des \textbf{administrateurs de l'Ordre}
+et du \textbf{grand public}.
+
+L'objectif principal est de simplifier les démarches administratives,
+d'améliorer le suivi des dossiers et de réduire la nécessité de
+déplacements physiques au siège de l'Ordre.
+
+La plateforme est organisée autour de trois espaces distincts~: un espace
+public permettant la consultation de l'annuaire des médecins et des
+informations officielles, un espace médecin pour la réalisation des
+démarches en ligne et le suivi des dossiers, et un espace administrateur
+pour la gestion et le suivi de l'ensemble des services proposés par
+l'Ordre.
+
+Elle intègre les modules de gestion des demandes d'adhésion, de traitement
+des réclamations, de publication des annonces, d'organisation des sondages
+et des élections des instances représentatives, ainsi que la consultation
+d'un annuaire des médecins inscrits. L'ensemble de ces services vise à
+offrir à chaque acteur un accès simplifié aux procédures administratives
+de l'Ordre.
+
+
+\section{Problématique}
+
+Créé en 2019, l’Ordre National des Médecins de Mauritanie (ONMM) joue un rôle central dans l’organisation et la régulation de la profession médicale. Cette mission s’inscrit aujourd’hui dans un contexte favorable à la modernisation. D’une part, la Stratégie nationale de santé en ligne 2024‑2030 fait de la numérisation des services médicaux une priorité. D’autre part, l’institution elle‑même a affirmé sa volonté de modernisation lors de son premier congrès national en janvier 2024.
+
+Pourtant, le fonctionnement quotidien de l’ONMM repose encore principalement sur des procédures manuelles et fragmentées. Les inscriptions des médecins sont traitées sur dossier papier, la vérification des diplômes s’effectue en présentiel, le registre des praticiens est tenu dans un simple fichier Excel, les réclamations sont archivées physiquement et le suivi des demandes passe par des appels téléphoniques ou des messageries instantanées. Cette dépendance aux procédures manuelles limite fortement la traçabilité des opérations et prive les médecins, en particulier ceux exerçant dans les régions éloignées, d’un espace numérique dédié pour consulter leurs dossiers ou participer aux élections professionnelles.
+
+Ces limites ne se traduisent pas seulement par des lenteurs administratives. L’absence de système d’information centralisé rend le suivi des demandes peu lisible, aussi bien pour l’administration que pour les médecins, et expose l’Ordre à des risques opérationnels et organisationnels : les données sensibles ne bénéficient ni de contrôle d’accès ni d’historisation, ce qui rend les erreurs difficiles à corriger et complique le contrôle et la vérification des traitements réalisés. De fait, l’institution peine à assurer un suivi efficace des dossiers, à centraliser les informations administratives et à offrir aux médecins comme au public des services facilement accessibles.
+
+Ainsi, la problématique centrale de ce projet consiste à concevoir et développer une appli-
+cation web centralisée, sécurisée et accessible, capable d’améliorer la gestion des services
+de l’Ordre National des Médecins de Mauritanie. Cette solution doit permettre de struc-
+turer les principales démarches administratives, d’assurer un meilleur suivi des dossiers,
+de renforcer la traçabilité des traitements et de faciliter la communication entre l’ad-
+ministration, les médecins et le public, tout en tenant compte des contraintes liées à la
+confidentialité des données, à la diversité des profils utilisateurs et à la simplicité d’utili-
+sation de la plateforme.
+
+\section{Méthodologie adoptée}
+
+Pour ce projet, notre méthodologie repose sur deux éléments clés :UML(Langage de
+Modélisation Unifié)pour la modélisation et l'approche Agile pour le développement.Les
+sections suivantes détailleront leur mise en œuvre.
+
+\subsection{Utilisation d’UML}
+
+L’UML (\textit{Unified Modeling Language}) est un langage de modélisation
+graphique utilisé en génie logiciel pour représenter la structure et le
+comportement d’un système. Il permet de décrire les fonctionnalités
+attendues, les interactions entre les acteurs et les composants, ainsi que
+l’organisation des données manipulées par l’application.
+
+UML repose sur plusieurs types de diagrammes, chacun répondant à un objectif
+précis. Certains diagrammes décrivent la structure du système, tandis que
+d’autres permettent de représenter son comportement et les échanges entre
+ses différentes parties.
+
+Comme le montre l’illustration ci-dessous, UML se distingue par la richesse
+et la diversité de ses diagrammes.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=1\textwidth]{images/uml_diagram.jpeg}
+  \caption{Diagrammes UML}
+  \label{fig:diagrammes-uml}
+\end{figure}
+
+Dans ce projet, nous avons choisi d’utiliser uniquement les diagrammes UML
+les plus adaptés au périmètre de la plateforme ONMM. Ce choix permet de
+présenter clairement la logique fonctionnelle du système, les interactions
+entre les principaux acteurs ainsi que la structure générale des données.
+
+Les acteurs concernés sont principalement le visiteur public, le médecin, et l’administrateur de l’ONMM. Cette sélection de
+diagrammes permet d’éviter une surcharge d’informations et de concentrer
+l’analyse sur les processus essentiels de la plateforme, notamment les
+demandes d’adhésion, la gestion du registre, le traitement des réclamations
+et l’administration des services numériques.
+
+Les diagrammes UML retenus pour ce projet sont les suivants :
+
+\begin{itemize}
+    \item \textbf{Diagramme de cas d’utilisation :} il permet de représenter
+    les fonctionnalités principales offertes par le système ainsi que les
+    interactions entre les acteurs et la plateforme. Dans notre projet, il
+    sert à identifier les actions accessibles au visiteur public, au médecin
+    et à l’administrateur.
+
+    \item \textbf{Diagramme de séquence :} il permet de décrire le déroulement
+    chronologique d’un scénario fonctionnel. Il met en évidence les échanges
+    entre l’utilisateur, l’interface, le backend et la base de données. Dans
+    ce projet, il est utilisé pour modéliser des processus importants comme
+    la soumission d’une demande d’adhésion, son traitement ou la gestion
+    d’une réclamation.
+
+    \item \textbf{Diagramme de classes :} il représente la structure statique
+    du système à travers les principales classes, leurs attributs et les
+    relations qui les relient. Il constitue une base importante pour la
+    conception de la base de données et l’organisation des entités métier de
+    la plateforme.
+\end{itemize}
+\subsection{Approche Agile Scrum}
+
+Dans le cadre de ce projet, nous avons adopté une approche Agile basée sur
+Scrum afin d'organiser le développement de la plateforme web de l'Ordre
+National des Médecins de Mauritanie. Ce choix se justifie par la diversité
+des modules à réaliser, l'évolution possible des besoins fonctionnels et la
+nécessité de produire progressivement des parties exploitables de
+l'application.
+
+Scrum est un cadre de travail agile utilisé en génie logiciel pour organiser
+un projet sous forme d'itérations courtes appelées \textit{sprints}. Chaque
+sprint permet de planifier, développer, tester et améliorer un ensemble
+défini de fonctionnalités. Contrairement aux méthodes linéaires, Scrum
+favorise une progression incrémentale du produit et permet d'adapter les
+priorités en fonction des contraintes rencontrées durant le développement.
+
+Dans notre projet, Scrum a été adapté au contexte d'un développement
+individuel. Les rôles classiques d'une équipe Scrum complète n'ont pas
+été appliqués de manière stricte. Cependant, les principes essentiels ont
+été conservés : organisation du travail en tâches, priorisation des
+fonctionnalités, planification par sprints, suivi régulier de l'avancement
+et validation progressive des modules réalisés.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{images/agile_scrum_diagram.jpeg}
+    \caption{Cycle de développement Agile Scrum}
+    \label{fig:cycle-scrum}
+\end{figure}
+
+\textbf{Fonctionnement de Scrum}
+
+Le fonctionnement de Scrum repose principalement sur trois éléments :
+le \textit{Product Backlog}, le \textit{Sprint Backlog} et l'incrément.
+
+Le \textbf{Product Backlog} représente l'ensemble des fonctionnalités
+attendues de la plateforme. Dans notre cas, il regroupe les modules liés aux
+adhésions, au registre des médecins, aux réclamations, aux notifications,
+aux questionnaires, aux élections et au portail public.
+
+Le \textbf{Sprint Backlog} contient les tâches retenues pour un sprint
+donné. Ces tâches ont été choisies selon leur priorité fonctionnelle, leur
+dépendance technique et leur importance dans l'architecture globale du
+système.
+
+L'\textbf{incrément} correspond au résultat produit à la fin d'un sprint. Il
+peut s'agir d'une interface développée, d'un service backend opérationnel,
+d'une fonctionnalité testée ou d'un module prêt à être intégré.
+
+\textbf{Suivi du projet avec Jira}
+
+Afin d'assurer un suivi structuré du projet, nous avons utilisé l'outil
+\textbf{Jira}. Il a permis d'organiser les fonctionnalités sous forme de
+tickets, de suivre l'état des tâches et de contrôler l'avancement de chaque
+sprint.
+
+Les tâches étaient généralement classées selon quatre états : à faire, en
+cours, en test et terminé. Cette organisation a permis de garder une vision
+claire sur le travail réalisé, les fonctionnalités restantes et les
+corrections à effectuer.
+
+\textbf{Organisation des sprints}
+
+La durée du stage étant de seize semaines, le développement du projet a été
+organisé en huit sprints de deux semaines. Contrairement à une répartition où
+chaque Epic correspondrait à un seul sprint, certains sprints regroupent
+plusieurs Epics complémentaires. Ce choix permet de respecter la durée réelle du
+stage tout en suivant une progression logique : analyse et conception,
+développement des modules de base, ajout des fonctionnalités métier, puis tests
+et finalisation.
+
+Les Epics ont donc été répartis selon trois critères principaux : les
+dépendances techniques, la logique métier et l'ordre réel de développement de
+l'application.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{0.95\textwidth}{|p{2.4cm}|p{3cm}|X|}
+\hline
+\textbf{Sprint} & \textbf{Période} & \textbf{Epics / Objectifs principaux} \\
+\hline
+Sprint 0 & Semaines 1--2 & 
+Élaboration du cahier des charges, analyse des besoins, conception UML. \\
+\hline
+Sprint 1 & Semaines 3--4 & 
+Développement de la validation administrative des demandes, du registre officiel, du profil médecin et de la gestion des spécialités. \\
+\hline
+Sprint 2 & Semaines 5--6 & 
+Mise en place de l'authentification, de la sécurité, de la gestion des rôles et développement du module d'adhésion des médecins.
+\\
+\hline
+Sprint 3 & Semaines 7--8 & 
+Développement des pages publiques, de l'annuaire des médecins, ainsi que des annonces et fonctionnalités de diffusion d'information. \\
+\hline
+Sprint 4 & Semaines 9--10 & 
+Développement des modules de réclamations et de notifications. \\
+\hline
+Sprint 5 & Semaines 11--12 & 
+Développement du module de sondages et questionnaires, incluant la gestion des réponses, l'interface utilisateur et les statistiques. \\
+\hline
+Sprint 6 & Semaines 13--14 & 
+Développement du module des élections et du vote, en tenant compte des règles métier, des différents états du processus électoral et de la sécurité. \\
+\hline
+Sprint 7 & Semaines 15--16 & 
+Intégration finale, tests fonctionnels, corrections, amélioration des interfaces, préparation du déploiement. \\
+\hline
+\end{tabularx}
+\caption{Planification des sprints du projet}
+\label{tab:sprints}
+\end{table}
+
+\textbf{Avantages de Scrum}
+
+L'utilisation de Scrum a permis de mieux maîtriser l'avancement du projet en
+découpant le travail en objectifs courts et mesurables. Cette organisation a
+facilité la priorisation des modules essentiels, notamment
+l'authentification, les adhésions et le registre des médecins.
+
+Elle a également permis de tester les fonctionnalités progressivement, au lieu
+d'attendre la fin du développement. Cette démarche a réduit les risques
+d'erreurs d'intégration et a facilité les ajustements nécessaires au fur et à
+mesure de l'avancement.
+
+\textbf{Limites de l'approche adoptée}
+
+L'application de Scrum dans un projet individuel présente certaines limites.
+L'absence d'une équipe complète ne permet pas de reproduire tous les rôles et
+toutes les cérémonies Scrum de manière stricte, notamment les réunions
+quotidiennes, la répartition des tâches entre développeurs ou les revues
+collectives de sprint.
+
+Cependant, cette adaptation reste pertinente dans le cadre du PFE, car elle a
+fourni un cadre de travail rigoureux pour planifier les tâches, suivre les
+priorités et produire progressivement une plateforme fonctionnelle.
+
+Ainsi, Scrum a constitué une méthodologie adaptée à la réalisation de ce
+projet, en combinant souplesse, organisation et suivi progressif du
+développement.
+
+\section{Conclusion}
+Pour conclure, ce premier chapitre pose les bases de notre rapport en décrivant le cadre général du stage, l’organisme d’accueil SMART MS SA, ainsi que le contexte dans lequel s’inscrit notre projet. Nous avons également présenté l’Ordre National des Médecins de Mauritanie (ONMM), le sujet traité, la problématique identifiée et la méthodologie adoptée pour la conception et le développement de la solution proposée. Ces éléments préparatoires nous permettront d’aborder, dans les prochains chapitres, des analyses plus approfondies.
+% Contenu à rédiger
+
+% ============================================================
+% CHAPITRE 2 -- ÉTUDE PRÉALABLE
+% ============================================================
+\chapter{\'Etude pr\'ealable}
+
+\section{Introduction}
+
+Pour concevoir et développer une plateforme web destinée à l'Ordre
+National des Médecins de Mauritanie (ONMM), il est essentiel de
+commencer par une étude approfondie du fonctionnement actuel des
+processus administratifs et des méthodes de gestion utilisées au sein
+de l'Ordre.
+
+Cette analyse préliminaire permet d'identifier les besoins du système,
+de mettre en évidence les limites de l'existant et de proposer une
+solution adaptée aux exigences de
+l'ONMM.
+
+On peut décomposer cette étude en plusieurs parties : la description du
+système actuel, l'analyse critique de l'existant, l'étude de quelques
+solutions similaires et la présentation de la solution proposée.
+\section{Description du système actuel}
+
+Actuellement, le fonctionnement administratif de l’Ordre National des
+Médecins de Mauritanie (ONMM) repose principalement sur des procédures
+manuelles ainsi que sur l’utilisation d’outils bureautiques classiques.
+Les différentes opérations liées aux adhésions, au suivi des dossiers,
+à la gestion du registre des médecins ou encore au traitement des
+réclamations sont réalisées à travers plusieurs supports et moyens de
+communication distincts.
+
+Le traitement des informations implique plusieurs intervenants,
+notamment le secrétariat, les commissions administratives et le Conseil
+national de l’Ordre. Les échanges s’effectuent principalement sous
+forme de dossiers papier, d’appels téléphoniques, de courriers
+électroniques et d’applications de messagerie.
+
+Comment le système fonctionne-t-il concrètement ?
+
+\begin{itemize}
+
+\item \textbf{Le processus d’adhésion}
+
+L’inscription à l’Ordre des médecins s’effectue actuellement de manière
+physique. Le médecin candidat doit préparer un dossier administratif
+contenant les différentes pièces justificatives demandées avant de le
+déposer au siège de l’ONMM.
+
+Après réception du dossier, le secrétariat procède à une première
+vérification des documents fournis. Le dossier est ensuite transmis à
+la commission des inscriptions afin d’examiner les diplômes et les
+informations administratives du candidat. Selon le profil du médecin,
+la validation finale peut être réalisée par le président de l’Ordre ou
+par le Conseil national.
+
+Le suivi du traitement du dossier s’effectue généralement à travers des
+échanges directs entre le candidat et l’administration.
+
+\item \textbf{La gestion du registre des médecins}
+
+Le registre officiel des médecins inscrits est actuellement conservé à
+l’aide de fichiers bureautiques, principalement sous format Excel. Ces
+fichiers regroupent les informations administratives et professionnelles
+des médecins enregistrés auprès de l’Ordre.
+
+Les opérations de recherche, de consultation ou de mise à jour des
+données sont réalisées manuellement par les responsables administratifs.
+
+\item \textbf{Le suivi des demandes}
+
+Le suivi des demandes administratives repose sur plusieurs moyens de
+communication. Les médecins peuvent contacter l’administration par
+téléphone, par courrier électronique ou directement au siège de
+l’Ordre afin d’obtenir des informations concernant l’état
+d’avancement de leurs dossiers.
+
+Dans certains cas, les échanges sont également réalisés à travers des
+applications de messagerie telles que WhatsApp.
+
+\item \textbf{La gestion des réclamations}
+
+Les plaintes et réclamations adressées à l’Ordre sont généralement
+reçues sous forme de courriers ou de dossiers papier. Après réception,
+les dossiers sont enregistrés puis transmis aux responsables concernés
+pour traitement.
+
+Les documents liés aux réclamations sont ensuite conservés dans des
+archives administratives physiques.
+
+\item \textbf{Les questionnaires et consultations}
+
+Les consultations adressées aux médecins sont actuellement organisées
+de manière traditionnelle à travers des échanges directs, des réunions
+ou des communications diffusées par différents canaux.
+
+La collecte des réponses et des avis s’effectue généralement de manière
+manuelle selon le type de consultation réalisée.
+
+\item \textbf{L’organisation des élections}
+
+Les élections des instances de l’Ordre sont organisées selon des
+procédures administratives classiques. Les informations relatives aux
+candidatures, aux listes électorales et aux résultats sont traitées à
+travers des supports administratifs et des échanges directs entre les
+différents intervenants.
+
+\item \textbf{La communication et la diffusion des informations}
+
+La diffusion des annonces, des documents administratifs et des
+informations officielles de l’ONMM s’effectue principalement à travers
+les réseaux sociaux, les communications directes ainsi que certains
+supports numériques utilisés par l’administration.
+
+Les médecins obtiennent généralement les informations liées aux
+activités de l’Ordre à travers ces différents canaux de communication.
+
+\end{itemize}
+
+Ainsi, le fonctionnement actuel de l’ONMM repose sur plusieurs outils
+et procédures distincts permettant d’assurer les principales activités
+administratives de l’Ordre.
+
+\section{Analyse critique}
+
+L'examen du fonctionnement actuel de l'ONMM révèle des limites
+structurelles qui dépassent de simples lenteurs administratives.
+Ces limites traduisent en grande partie l'absence d'un système
+d'information centralisé — ce qui fragilise la chaîne de traitement
+des dossiers et complique le quotidien aussi bien du personnel
+administratif que des médecins.
+
+\begin{itemize}
+
+\item \textbf{Une dépendance forte aux procédures manuelles}
+
+L'ensemble des opérations est effectué sans recours à un système numérique dédié. Cette situation nécessite des déplacements physiques fréquents, l'utilisation de documents papier et une implication importante du personnel dans des tâches administratives répétitives.
+
+En conséquence, les retards augmentent, le risque d'erreurs de saisie de données s'accroît en raison du traitement manuel de l'information, et le temps du personnel est absorbé par des opérations qui pourraient être largement automatisées.
+
+\item \textbf{Un suivi des dossiers dispersé et illisible}
+
+Le médecin qui souhaite connaître l'état de sa demande n'a
+d'autre choix que d'appeler le secrétariat, d'envoyer un
+e-mail ou de se déplacer physiquement au siège de l'Ordre.
+Ce fonctionnement ne garantit aucun historique des échanges
+ni aucune visibilité cohérente sur l'avancement des dossiers —
+ni pour le médecin, ni pour l'administration elle-même.
+
+\item \textbf{Une gestion des données fragile et non traçable}
+
+Le registre des médecins, conservé dans des fichiers bureautiques,
+n'offre aucune protection contre les suppressions accidentelles,
+aucune historisation des modifications et aucun mécanisme
+de contrôle d'accès. Toute mise à jour est manuelle et
+son auteur ne laisse aucune trace.
+
+Dans une institution qui gère des données à caractère sensible
+engageant sa responsabilité légale, cette absence de traçabilité
+représente un risque concret : une donnée modifiée par erreur
+peut compromettre un dossier sans qu'il soit possible de
+remonter à l'origine du problème.
+
+\item \textbf{Une exploitation difficile des réclamations}
+
+Les réclamations archivées sur papier peuvent à peine être
+traitées au cas par cas — elles ne peuvent pas être exploitées
+collectivement. Il devient difficile de déterminer quels types
+de plaintes reviennent le plus souvent, quels délais de
+traitement sont réellement pratiqués, ou quels dossiers
+restent en suspens depuis trop longtemps.
+
+
+
+
+\item \textbf{Des élections peu adaptées à la réalité du terrain}
+
+L'organisation des scrutins repose entièrement sur des
+procédures manuelles. Or, les médecins exercent dans des
+régions parfois très éloignées de Nouakchott. L'absence d'un
+système de vote en ligne risque de limiter la participation
+des médecins exerçant dans ces régions, tandis que la gestion
+des candidatures et des listes électorales, elle aussi purement
+manuelle, expose le processus à des erreurs et des retards
+évitables.
+
+\end{itemize}
+
+Ces limites ne constituent pas des dysfonctionnements isolés.
+Elles sont le symptôme d'une organisation qui n'a pas intégré
+les outils numériques dans ses processus fondamentaux.
+C'est à ces limites que la solution proposée dans ce projet
+entend répondre.
+\section{Étude de solutions similaires}
+
+Pour situer le projet dans son contexte numérique, trois plateformes
+d'ordres des médecins étrangers ont été consultées. Elles ont été
+retenues en raison de leur appartenance à des institutions ordinales
+exerçant des missions similaires à celles de l'ONMM, et parce qu'elles
+présentent des degrés de maturité numérique différents, permettant
+une lecture progressive des pratiques existantes.
+
+\textbf{Conseil National de l'Ordre des Médecins -- France}
+
+D'après notre consultation du portail, le Conseil National de l'Ordre
+des Médecins de France propose un espace d'accès sécurisé destiné
+aux médecins inscrits, ainsi que l'organisation des élections ordinales
+par vote électronique~\cite{onmmFrance}.
+
+Ce que nous en retenons pour la plateforme ONMM : l'intérêt d'un
+espace authentifié par membre et la faisabilité d'un scrutin
+professionnel dématérialisé, sécurisé et sans déplacement physique.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/benchmark_france.png}
+    \caption{Interface de la plateforme du Conseil National
+    de l'Ordre des Médecins -- France}
+    \label{fig:benchmark-france}
+\end{figure}
+
+\textbf{Conseil National de l'Ordre des Médecins -- Maroc}
+
+Le portail du Conseil National de l'Ordre des Médecins du Maroc
+présente un intérêt particulier pour cette étude en raison de sa
+proximité institutionnelle et géographique avec la Mauritanie. D'après
+les fonctionnalités accessibles lors de notre consultation, il propose,
+outre la diffusion d'informations institutionnelles, un espace médecin,
+un service de réclamation en ligne ainsi que le paiement des
+cotisations~\cite{onmmMaroc}.
+
+Ce que nous en retenons : que la dématérialisation des réclamations et
+la mise à disposition d'un espace personnel pour les médecins sont
+réalisables dans un contexte régional comparable à celui de l'ONMM.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/benchmark_maroc.png}
+    \caption{Plateforme du Conseil National de l'Ordre
+    des Médecins -- Maroc}
+    \label{fig:benchmark-maroc}
+\end{figure}
+
+\textbf{Ordre National des Médecins -- Sénégal}
+
+Le site de l'Ordre National des Médecins du Sénégal est orienté
+principalement vers la communication institutionnelle. Il constitue
+davantage un portail d'information publique, accompagné d'un annuaire
+consultable, qu'un outil de gestion administrative~\cite{onmmSenegal}.
+
+Ce que nous en retenons : que la visibilité numérique d'une institution
+ordinale commence par un portail public clair, et que son absence
+affaiblit la crédibilité de l'Ordre auprès du public et des médecins.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/benchmark_senegal.png}
+    \caption{Site officiel de l'Ordre National des Médecins
+    -- Sénégal}
+    \label{fig:benchmark-senegal}
+\end{figure}
+
+\textbf{Synthèse}
+
+La consultation de ces trois plateformes a permis de valider la
+faisabilité de plusieurs modules envisagés pour l'ONMM : le vote
+électronique aux élections (France), la réclamation en ligne et
+l'espace médecin (Maroc), ainsi que l'annuaire public (Sénégal).
+
+Le tableau~\ref{tab:comparatif-plateformes} ci-dessous présente une
+comparaison structurée des fonctionnalités disponibles sur chacune de
+ces plateformes selon les critères retenus pour la conception de la
+plateforme ONMM.
+
+\begin{table}[H]
+\centering
+\caption{Comparatif des plateformes d'ordres de médecins francophones}
+\label{tab:comparatif-plateformes}
+\begin{tabularx}{\textwidth}{|X|c|c|c|c|}
+\hline
+\textbf{Fonctionnalité} & \textbf{France} & \textbf{Maroc} & \textbf{Sénégal} & \textbf{ONMM (solution proposée)} \\
+\hline
+Espace médecin authentifié & Oui & Oui & Non & Oui \\
+\hline
+Vote électronique & Oui & Non & Non & Oui \\
+\hline
+Réclamation en ligne & Non & Oui & Non & Oui \\
+\hline
+Annuaire public & Oui & Partiel & Oui & Oui \\
+\hline
+Gestion des adhésions & Non & Partiel & Non & Oui \\
+\hline
+Sondages professionnels & Non & Non & Non & Oui \\
+\hline
+Plateforme entièrement intégrée & Non & Non & Non & Oui \\
+\hline
+\end{tabularx}
+\end{table}
+
+Ce tableau met en évidence que chacune de ces institutions n'a
+digitalisé qu'une partie de ses services, sans qu'aucune ne les
+réunisse au sein d'une plateforme unique et intégrée. La solution
+développée pour l'ONMM s'appuie sur ces observations pour consolider
+ces différentes fonctionnalités dans un outil unifié, adapté aux
+besoins spécifiques de l'Ordre mis en évidence dans l'analyse du
+système actuel. Elle y ajoute un module de sondages professionnels,
+non identifié lors de notre consultation de ces plateformes.
+\section{La solution proposée}
+
+Afin de répondre aux limites identifiées lors de l'analyse du système
+actuel, nous avons conçu et développé une plateforme web centralisée
+s'adressant à trois profils d'utilisateurs : l'administration de
+l'Ordre, qui dispose d'un accès complet aux outils de gestion, les
+médecins inscrits, qui bénéficient d'un espace personnel pour suivre
+leurs démarches et interagir avec l'Ordre, et le public, qui accède
+aux informations institutionnelles et à l'annuaire des médecins en
+exercice.
+
+Sur la base des besoins identifiés lors de l'analyse et des
+enseignements tirés de l'étude des solutions similaires, la
+plateforme intègre les fonctionnalités suivantes :
+
+\begin{itemize}
+
+\item la dématérialisation des demandes d'adhésion, avec dépôt
+des pièces justificatives en ligne et suivi de l'état du dossier
+par le médecin ;
+
+\item la gestion centralisée du registre des médecins à travers
+une base de données structurée et traçable ;
+
+\item un espace personnel permettant à chaque médecin de consulter
+l'avancement de ses demandes et de recevoir des notifications
+lors des changements de statut ;
+
+\item la gestion numérique des réclamations, avec suivi des
+traitements par l'administration ;
+
+\item un portail public regroupant les informations institutionnelles,
+les documents officiels et un annuaire consultable des médecins
+inscrits à l'Ordre ;
+
+\item la gestion des sondages professionnels et l'organisation
+des élections en ligne.
+
+\end{itemize}
+
+Cette solution vise à centraliser les différents services de l'Ordre
+au sein d'une plateforme unique, à améliorer la qualité du suivi
+administratif et à faciliter les échanges entre les médecins,
+l'administration et le public.
+
+% \section{L’intérêt de l’application}
+
+% La plateforme développée apporte plusieurs avantages importants pour
+% l’ONMM ainsi que pour les médecins utilisant les services de l’Ordre.
+
+% \begin{itemize}
+
+% \item \textbf{Simplification des procédures administratives}
+
+% La dématérialisation des demandes d’adhésion et des réclamations permet
+% de réduire les échanges papier et les déplacements nécessaires au suivi
+% des dossiers. Cette approche facilite le traitement administratif et
+% rend les différentes procédures plus accessibles aux médecins,
+% notamment ceux exerçant en dehors de Nouakchott.
+
+% \item \textbf{Amélioration du suivi et de la transparence}
+
+% Grâce à l’espace personnel et au système de notifications, les médecins
+% peuvent suivre l’évolution de leurs demandes de manière plus claire et
+% plus rapide. Cela permet de limiter les échanges informels et d’assurer
+% une meilleure visibilité sur l’état des traitements en cours.
+
+% \item \textbf{Centralisation et fiabilité des données}
+
+% Le remplacement du système actuel basé sur des documents papier et des
+% fichiers Excel par une plateforme centralisée améliore l’organisation
+% des informations et facilite leur exploitation. Cette centralisation
+% permet également d’assurer une meilleure traçabilité des opérations et
+% de réduire les risques liés à la perte ou à la duplication des données.
+
+% \item \textbf{Modernisation des services de l’ONMM}
+
+% La mise en place d’une plateforme web contribue à moderniser le
+% fonctionnement de l’Ordre et à améliorer la qualité des services
+% proposés aux médecins. Elle constitue également une première étape vers
+% une transformation numérique plus large des services administratifs liés
+% au secteur de la santé.
+
+% \end{itemize}
+
+\section{Conclusion}
+
+Ce chapitre a permis de dresser un état des lieux du fonctionnement
+actuel de l'ONMM, d'identifier ses principales limites et d'examiner
+les pratiques numériques adoptées par des institutions ordinales
+comparables.
+
+Sur la base de cette analyse, nous avons conçu et développé une
+plateforme web centralisée répondant aux besoins identifiés :
+dématérialisation des demandes d'adhésion, gestion numérique des
+réclamations, espace personnel pour les médecins, annuaire public
+et organisation des élections en ligne.
+
+Le chapitre suivant présente la conception de cette plateforme,
+à travers la modélisation des besoins fonctionnels et la définition
+de l'architecture retenue.
+
+% ============================================================
+% CHAPITRE 3 -- SPÉCIFICATION DES BESOINS
+% ============================================================
+\chapter{Sp\'ecification des besoins}
+
+\section{Introduction}
+
+La première étape de notre processus de développement consiste à spécifier les besoins
+du système. Cette phase est cruciale,car elle permet de définir l’étude fonctionnelle et de
+clarifier ce que le système devra accomplir en termes métier(son comportement attendu).
+Dans ce chapitre, nous allons identifier les besoins fonctionnels et non fonctionnels de
+l’application,mais aussi les différents acteurs impliqués.
+\section{Besoins fonctionnels}
+
+Les besoins fonctionnels décrivent les actions que la plateforme doit
+permettre aux utilisateurs de réaliser, sans entrer dans les détails
+techniques de son implémentation. Ils traduisent les services attendus
+de l’application à partir des limites relevées lors de l’étude préalable
+du fonctionnement actuel de l’ONMM.
+
+Dans le cadre de ce projet, le système à développer doit permettre les
+fonctionnalités suivantes :
+
+\begin{itemize}
+
+\item \textbf{Gérer le portail public :}
+permettre la publication des annonces, des informations institutionnelles
+et des documents officiels de l’ONMM afin de faciliter l’accès du public
+et des médecins aux informations importantes.
+
+\item \textbf{Gérer les demandes d’adhésion :}
+permettre aux médecins candidats de créer un compte, de remplir une
+demande d’inscription, de téléverser les pièces justificatives et de
+soumettre leur dossier en ligne pour traitement.
+
+\item \textbf{Traiter les demandes d'adhésion :}
+permettre à l'administration de consulter les dossiers reçus, de vérifier
+les informations fournies, puis de valider ou de rejeter la demande selon
+le cas.
+
+
+\item \textbf{Gérer le registre officiel des médecins :}
+permettre l’enregistrement des médecins validés dans une base de données
+centralisée, ainsi que la recherche, la consultation et la mise à jour
+des informations administratives et professionnelles.
+
+\item \textbf{Consulter l’annuaire public :}
+permettre au public de rechercher un médecin inscrit à l’Ordre à partir
+des informations autorisées, telles que le nom, la spécialité ou la
+région d’exercice.
+
+\item \textbf{Gérer les réclamations :}
+permettre le dépôt des plaintes et réclamations, l'ajout de pièces
+justificatives, le suivi de l'état du dossier, son traitement par les
+responsables concernés ainsi que sa clôture avec enregistrement de la
+résolution.
+
+
+\item \textbf{Gérer les questionnaires et sondages :}
+permettre à l’ONMM de créer des questionnaires destinés aux médecins,
+de définir une période de participation, de collecter les réponses et
+de consulter les résultats obtenus.
+
+\item \textbf{Gérer les élections en ligne :}
+permettre la configuration des élections, l’enregistrement des
+candidatures, la gestion des électeurs autorisés, le vote en ligne,
+la clôture du scrutin et la publication des résultats.
+
+\item \textbf{Gérer les spécialités médicales :}
+permettre à l'administrateur de créer, modifier, activer ou désactiver
+les spécialités et sous-spécialités médicales utilisées dans le registre
+et l'annuaire des médecins.
+
+
+\item \textbf{Gérer les notifications :}
+informer les utilisateurs des événements importants liés à leurs
+activités sur la plateforme, notamment les changements d’état des
+demandes, les réclamations, les sondages ou les élections.
+
+% \item \textbf{Assurer le suivi des actions :}
+% conserver l'historique des opérations effectuées lors des élections afin
+% de garantir la traçabilité du processus électoral.
+
+
+\end{itemize}
+
+\section{Besoins non fonctionnels}
+
+Les besoins non fonctionnels représentent les contraintes que la
+plateforme doit respecter afin d’assurer une utilisation fiable,
+sécurisée et adaptée aux attentes de l’ONMM. Contrairement aux besoins
+fonctionnels, ils ne décrivent pas ce que le système doit faire, mais
+plutôt les conditions dans lesquelles il doit fonctionner.
+
+La plateforme doit garantir les exigences suivantes :
+
+\begin{itemize}
+
+\item \textbf{Sécurité :}
+l’application doit protéger les données personnelles et professionnelles
+des médecins. L’accès aux espaces privés doit être assuré par une
+authentification sécurisée et par une gestion des droits selon les rôles
+des utilisateurs.
+
+\item \textbf{Performance :}
+le système doit offrir des temps de réponse acceptables lors des
+opérations courantes, notamment la consultation du registre, le dépôt des
+demandes, le traitement des réclamations et l’accès aux espaces
+utilisateurs.
+
+\item \textbf{Disponibilité :}
+la plateforme doit rester accessible aux utilisateurs autorisés afin
+d’assurer la continuité des services administratifs de l’ONMM.
+
+\item \textbf{Traçabilité :}
+les opérations liées aux élections doivent être enregistrées afin de
+garantir la traçabilité du processus électoral et de permettre le
+contrôle des opérations de vote et de dépouillement.
+
+\item \textbf{Compatibilité :}
+l’application doit fonctionner correctement sur les navigateurs modernes
+et s’adapter aux différents types d’appareils : ordinateur, tablette et
+smartphone.
+
+\item \textbf{Maintenabilité :}
+le code et l’architecture doivent être structurés de manière modulaire
+afin de faciliter les corrections, les mises à jour et les évolutions
+futures.
+
+
+
+\end{itemize}
+
+\section{Identification des acteurs}
+
+Dans cette section, nous identifions les différents acteurs qui
+interagissent directement avec la plateforme de l’Ordre National des
+Médecins de Mauritanie.
+
+Avant de les présenter, rappelons qu’un acteur représente une entité
+(utilisateur ou système) qui interagit avec l’application en jouant
+un rôle spécifique.
+
+Le fonctionnement global du système repose principalement sur trois
+types d’acteurs : le visiteur public, le médecin et l’administrateur.
+
+\subsection{Visiteur public}
+
+Le visiteur public représente tout utilisateur non authentifié
+accédant à la partie publique de la plateforme. Il peut consulter
+les informations officielles de l’ONMM ainsi que certains services
+accessibles au public.
+
+Ses principales fonctionnalités sont :
+
+\begin{itemize}
+
+\item consulter les annonces et actualités publiées par l’ONMM ;
+
+% \item consulter et télécharger les documents officiels ;
+
+\item rechercher un médecin dans l’annuaire public ;
+
+\item vérifier l’inscription d’un médecin au tableau de l’Ordre ;
+
+\item déposer une réclamation via un formulaire public.
+
+\end{itemize}
+
+\subsection{Médecin}
+
+Le médecin représente un utilisateur disposant d’un compte sur la
+plateforme. Il utilise son espace personnel afin d’effectuer ses
+démarches administratives et d’accéder aux différents services
+numériques proposés par l’ONMM.
+
+Ses principales fonctionnalités sont :
+
+\begin{itemize}
+
+\item créer un compte et s’authentifier ;
+
+\item gérer et mettre à jour son profil professionnel ;
+
+\item soumettre une demande d’adhésion avec les pièces justificatives ;
+
+\item suivre l’état d’avancement de ses demandes ;
+
+\item consulter les notifications reçues ;
+
+\item répondre aux questionnaires et sondages ;
+
+\item participer aux élections organisées par l’Ordre ;
+
+\item réinitialiser son mot de passe ;
+
+\item se déconnecter.
+
+\end{itemize}
+
+\subsection{Administrateur}
+
+L'administrateur représente le personnel autorisé de l'ONMM chargé
+de la gestion et de la supervision de la plateforme.
+
+Ses principales fonctionnalités sont :
+
+\begin{itemize}
+
+\item s'authentifier de manière sécurisée ;
+
+\item accéder au tableau de bord administratif ;
+
+\item traiter les demandes d'adhésion ;
+
+\item gérer le registre officiel des médecins ;
+
+\item traiter les réclamations et plaintes ;
+
+\item publier les annonces et documents officiels ;
+
+\item gérer les questionnaires et consultations ;
+
+\item organiser et superviser les élections ;
+
+\item gérer les spécialités et sous-spécialités médicales ;
+
+\item modifier son mot de passe ;
+
+\item se déconnecter.
+
+\end{itemize}
+
+\section{Conclusion}
+Ce chapitre marque une étape clé dans le développement de notre application.
+Après avoir analysé les exigences,nous avons pu établir une liste détaillée des besoins
+fonctionnels et non fonctionnels, tout en identifiant les acteurs concernés.
+La prochaine partie sera consacrée à la conception. Nous y aborderons notamment
+le diagramme de cas d’utilisation, ainsi que les diagrammes de séquence et le
+diagramme de classe, qui permettront de structurer notre solution de manière plus
+concrète.
+
+% ============================================================
+% CHAPITRE 4 -- CONCEPTION DU SYSTÈME
+% ============================================================
+\chapter{Conception du système}
+
+\section{Introduction}
+
+La conception est une étape clé dans le développement d’un projet
+logiciel. C’est là qu’on définit précisément l’architecture du
+système, comment les différents éléments interagissent, et comment
+l’application doit se comporter globalement.
+
+Dans cette partie, on va utiliser UML (Unified Modeling Language)
+pour modéliser notre plateforme web de gestion de l’Ordre National
+des Médecins de Mauritanie. L’idée, c’est de visualiser à la fois
+la structure et le comportement du système, afin de mieux comprendre
+le fonctionnement des différents services proposés par la plateforme.
+
+% \begin{figure}[H]
+%     \centering
+%     \fbox{
+%         \parbox[c][7cm][c]{0.85\textwidth}{
+%             \centering
+%             Emplacement de l'image d'introduction
+%         }
+%     }
+%     \caption{Vue introductive de la conception du système}
+%     \label{fig:introduction-conception}
+% \end{figure}
+
+
+% \section{Architecture globale}
+
+% L’architecture globale du système repose sur une architecture web en trois couches. 
+% La première couche est l’interface utilisateur développée avec React. 
+% Elle permet aux utilisateurs publics, aux médecins et aux administrateurs d’interagir avec le système.
+
+% La deuxième couche est le backend développé avec Spring Boot. 
+% Il assure le traitement des requêtes, la gestion de la logique métier, la sécurité et l’exposition des API REST.
+
+% La troisième couche est la base de données PostgreSQL. 
+% Elle permet de stocker et de gérer les données de l’application.
+
+% \begin{figure}[H]
+%     \centering
+%     \fbox{
+%         \parbox[c][8cm][c]{0.9\textwidth}{
+%             \centering
+%             Emplacement du schéma de l'architecture globale\\[0.3cm]
+%             React $\longrightarrow$ Spring Boot $\longrightarrow$ PostgreSQL
+%         }
+%     }
+%     \caption{Architecture globale du système}
+%     \label{fig:architecture-globale}
+% \end{figure}
+
+
+\section{Diagrammes de cas d’utilisation}
+
+% Les diagrammes de cas d’utilisation permettent de représenter les interactions entre les différents acteurs et le système. 
+% Ils montrent les fonctionnalités accessibles à chaque type d’utilisateur.
+
+% \begin{figure}[H]
+%     \centering
+%     \fbox{
+%         \parbox[c][7cm][c]{0.85\textwidth}{
+%             \centering
+%             Emplacement du diagramme général des cas d'utilisation
+%         }
+%     }
+%     \caption{Diagramme général des cas d’utilisation}
+%     \label{fig:cas-utilisation-general}
+% \end{figure}
+
+
+\subsection{Diagramme de cas d’utilisation pour l’utilisateur public}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/Diagramme-cas-d'utilisation-OM-Page-5.drawio.png}
+    \caption{Diagramme de cas d’utilisation pour l’utilisateur public}
+    \label{fig:cas-utilisation-public}
+\end{figure}
+
+
+\subsection{Diagramme de cas d’utilisation pour le médecin}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/Diagramme-cas-d'utilisation-OM-Page-6.drawio.png}
+    \caption{Diagramme de cas d’utilisation pour le médecin}
+    \label{fig:cas-utilisation-medecin}
+\end{figure}
+
+
+\subsection{Diagramme de cas d’utilisation pour l’administrateur}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/Diagramme-cas-d'utilisation-OM-Page-7.drawio.png}
+    \caption{Diagramme de cas d’utilisation pour l’administrateur}
+    \label{fig:cas-utilisation-admin}
+\end{figure}
+
+
+\section{Diagrammes de séquence}
+
+% Les diagrammes de séquence décrivent l’ordre chronologique des échanges entre les acteurs, l’interface utilisateur, le backend et la base de données.
+
+
+
+
+\subsection{Diagramme de séquence pour l’authentification}
+
+\begin{figure}[H]
+    
+    \centering
+           \includegraphics[width=0.9\textwidth]{images/Diagramme-sequence-OM-sequence1.drawio.png}
+        
+    \caption{Diagramme de séquence pour l’authentification}
+    \label{fig:sequence-authentification}
+\end{figure}
+
+
+\subsection{Diagramme de séquence pour la soumission d’une demande d’adhésion}
+
+\begin{figure}[H]
+    \centering
+    
+           \includegraphics[width=1\textwidth]{images/Diagramme-sequence-OM-5.drawio.png}
+        
+    \caption{Diagramme de séquence pour la soumission d’une demande d’adhésion}
+    \label{fig:sequence-demande-adhesion}
+\end{figure}
+
+
+\subsection{Diagramme de séquence pour la validation d’adhésion et l’activation du compte médecin}
+
+\begin{figure}[H]
+   
+    \centering
+           \includegraphics[width=0.9\textwidth]{images/Diagramme-sequence-OM-6.drawio.png}
+        
+    \caption{Diagramme de séquence pour la validation d’adhésion et l’activation du compte médecin}
+    \label{fig:sequence-validation-adhesion}
+\end{figure}
+
+
+\subsection{Diagramme de séquence pour le rejet d’une demande d’adhésion}
+
+\begin{figure}[H]
+   
+    \centering
+           \includegraphics[width=0.9\textwidth]{images/Diagramme-sequence-OM-Page-7.drawio.png}
+        
+    \caption{Diagramme de séquence pour le rejet d’une demande d’adhésion}
+    \label{fig:sequence-rejet-adhesion}
+\end{figure}
+
+
+\subsection{Diagramme de séquence pour le traitement d’une réclamation}
+
+\begin{figure}[H]
+    
+    \centering
+           \includegraphics[width=0.9\textwidth]{images/Diagramme-sequence-OM-8.drawio.png}
+        
+    \caption{Diagramme de séquence pour le traitement d’une réclamation}
+    \label{fig:sequence-reclamation}
+\end{figure}
+
+
+% \subsection{Diagramme de séquence pour voter aux élections}
+
+% \begin{figure}[H]
+%     \centering
+%     \fbox{
+%         \parbox[c][7cm][c]{0.85\textwidth}{
+%             \centering
+%             Emplacement du diagramme de séquence\\
+%             pour le vote aux élections
+%         }
+%     }
+%     \caption{Diagramme de séquence pour le vote aux élections}
+%     \label{fig:sequence-vote}
+% \end{figure}
+
+\section{Diagramme de classes}
+
+% Le diagramme de classes présente la structure statique du système. Il
+% met en évidence les principales entités manipulées par la plateforme,
+% leurs attributs ainsi que les relations entre elles.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{images/Diagramme-classes-OM-Page-2.drawio.png}
+    \caption{Diagramme de classes}
+    \label{fig:diagramme-classes}
+\end{figure}
+% Contenu à rédiger
+
+\section{Conclusion}
+Dans ce chapitre,nous avons décrit les diagrammes de cas d’utilisation, de classe et de
+séquence, a fin de préparer un terrain favorable pour la prochaine étape.
+Maintenant, notre application est prête à être codée. Dans le chapitre suivant, nous pas
+serons à la dernière phase du cycle de vie de notre application: la réalisation.
+% Contenu à rédiger
+
+% ============================================================
+% CHAPITRE 5 -- RÉALISATION
+% ============================================================
+
+\chapter{Réalisation}
+
+\section{Introduction}
+
+Dans le chapitre précédent, nous avons présenté la phase de conception de
+la plateforme web destinée à l'Ordre National des Médecins de Mauritanie
+(ONMM). Cette phase a permis de modéliser le système à travers les
+diagrammes UML, notamment le diagramme de cas d'utilisation, les
+diagrammes de séquence ainsi que le diagramme de classes.
+
+Ce chapitre est consacré à la mise en œuvre concrète de l'application. Il
+présente les conditions dans lesquelles le projet a été réalisé, les outils
+utilisés durant le développement ainsi que les principales technologies
+adoptées pour construire la plateforme.
+
+Dans un premier temps, nous décrirons l'environnement de développement,
+en précisant l'environnement matériel et logiciel utilisé. Ensuite, nous
+présenterons les choix technologiques retenus et l'architecture technique
+de l'application. Enfin, nous illustrerons les principales fonctionnalités
+développées à travers des captures d'écran représentant les différents
+espaces de la plateforme.
+
+\section{Environnement de développement}
+
+Dans cette section, nous présentons l'environnement de développement de
+l'application, en détaillant les configurations matérielles et logicielles
+utilisées tout au long de la réalisation du projet.
+
+\subsection{Environnement matériel}
+
+Pour donner une meilleure idée des conditions de travail, il est nécessaire
+de préciser les caractéristiques techniques de la machine utilisée pour le
+développement de l'application. Le projet a été réalisé sur un ordinateur
+portable permettant d'exécuter simultanément le serveur frontend, le backend,
+la base de données ainsi que les outils de test et de conception.
+
+Les principales caractéristiques de cette machine sont les suivantes :
+
+\begin{itemize}
+    \item \textbf{Processeur :} Intel Core i5 ;
+    \item \textbf{Mémoire vive :} 16 Go RAM ;
+    \item \textbf{Stockage :} SSD ;
+    \item \textbf{Système d'exploitation :} Windows 10, 64 bits.
+\end{itemize}
+
+Cette configuration a permis de travailler dans de bonnes conditions,
+notamment lors de l'exécution parallèle de l'application React, du serveur
+Spring Boot et de la base de données PostgreSQL.
+
+\subsection{Environnement logiciel}
+
+Dans cette section, nous présentons les principaux outils logiciels utilisés
+durant la réalisation du projet. Ces outils ont servi à la modélisation, au
+développement, au test des API, à la gestion de la base de données, au suivi
+du projet et à la rédaction du rapport.
+
+% ============================================================
+% COMMANDE POUR AFFICHER UN OUTIL AVEC LOGO + DESCRIPTION
+% ============================================================
+
+\newcommand{\outil}[4]{
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.28\textwidth}
+    \centering
+    \includegraphics[width=0.85\linewidth]{#1}
+\end{minipage}
+\hfill
+\begin{minipage}{0.62\textwidth}
+    \textbf{#2} #3
+
+    \vspace{0.15cm}
+    \rule{0.55\linewidth}{0.4pt}
+
+    \small{\texttt{#4}}
+\end{minipage}
+\end{figure}
+\vspace{0.3cm}
+}
+
+% ============================================================
+% OUTILS LOGICIELS
+% ============================================================
+
+\outil
+{images/vscode-logo.png}
+{Visual Studio Code}
+{est un éditeur de code source léger et puissant. Dans ce projet, il a été
+utilisé principalement pour le développement de la partie frontend de
+l'application avec React.js. Il a facilité l'organisation des composants,
+la gestion des fichiers et l'utilisation des extensions nécessaires au
+développement web~\cite{vscodeDocs}.}
+{https://code.visualstudio.com/}
+
+\outil
+{images/intellij-logo.png}
+{IntelliJ IDEA}
+{est un environnement de développement intégré destiné principalement au
+développement Java. Il a été utilisé pour la réalisation du backend de la
+plateforme avec Spring Boot, notamment pour l'écriture du code, la gestion
+des dépendances Maven, l'exécution du serveur et le débogage de
+l'application~\cite{intellijDocs}.}
+{https://www.jetbrains.com/idea/}
+
+\outil
+{images/postman-logo.png}
+{Postman}
+{est un outil de test et de documentation des API. Dans le cadre de ce
+projet, il a permis de vérifier le fonctionnement des services REST
+développés avec Spring Boot, de tester les requêtes HTTP et de valider les
+réponses échangées entre le frontend et le backend~\cite{postmanDocs}.}
+{https://www.postman.com/}
+
+\outil
+{images/pgadmin-logo.png}
+{pgAdmin}
+{est un outil d'administration graphique pour PostgreSQL. Il a été utilisé
+pour consulter les tables de la base de données, vérifier les relations,
+contrôler les données enregistrées et faciliter certaines opérations de
+maintenance durant les tests~\cite{pgadminDocs}.}
+{https://www.pgadmin.org/}
+
+\outil
+{images/github-logo.png}
+{Git et GitHub}
+{sont utilisés pour la gestion et l'hébergement du code source. Git a permis
+de suivre l'historique des modifications, tandis que GitHub a servi à
+sauvegarder le projet et à organiser les différentes versions du code
+développé~\cite{githubDocs}.}
+{https://github.com/}
+
+\outil
+{images/drawio-logo.png}
+{Draw.io}
+{est un outil de modélisation graphique utilisé pour réaliser les diagrammes
+UML du projet. Il a permis de concevoir les diagrammes de cas d'utilisation,
+les diagrammes de séquence ainsi que le diagramme de classes présentés dans
+le chapitre de conception~\cite{drawioDocs}.}
+{https://www.drawio.com/}
+
+\outil
+{images/jira-logo.png}
+{Jira}
+{est un outil de gestion de projet utilisé pour organiser le travail sous
+forme de tâches et de sprints. Dans ce projet, il a permis de suivre
+l'avancement des fonctionnalités, de structurer le Product Backlog et de
+contrôler la progression durant les quatre mois de stage~\cite{jiraDocs}.}
+{https://www.atlassian.com/software/jira}
+
+\outil
+{images/overleaf-logo.png}
+{Overleaf}
+{est une plateforme en ligne permettant la rédaction de documents en
+\LaTeX. Elle a été utilisée pour structurer le rapport de PFE, gérer la mise
+en page, intégrer les figures et produire un document final conforme aux
+exigences académiques~\cite{overleafDocs}.}
+{https://www.overleaf.com/}
+\section{Choix technologiques et architecture}
+\section{Choix technologiques}
+
+Le choix des technologies constitue une étape importante dans la réalisation
+d'une application web. Il ne s'agit pas seulement de sélectionner des outils
+populaires, mais de retenir des solutions cohérentes avec les besoins du
+projet, la nature des données traitées, les exigences de sécurité et les
+possibilités d'évolution future.
+
+Dans le cadre de la plateforme web de l'Ordre National des Médecins de
+Mauritanie, les choix technologiques ont été orientés vers une architecture
+web moderne séparant la partie cliente, la partie serveur et la couche de
+persistance des données. Cette séparation permet de mieux organiser le code,
+de faciliter la maintenance et de renforcer la sécurité globale de
+l'application.
+
+\subsection{Langages de programmation}
+
+Les langages utilisés dans ce projet ont été choisis en fonction des couches
+techniques de l'application. Java a été utilisé pour le développement du
+backend, tandis que JavaScript a été utilisé pour la partie frontend.
+
+% ============================================================
+% COMMANDE POUR LES TECHNOLOGIES
+% ============================================================
+
+\newcommand{\techno}[4]{
+\vspace{0.4cm}
+\noindent
+\begin{minipage}{0.28\textwidth}
+    \centering
+    \includegraphics[width=0.85\linewidth]{#1}
+\end{minipage}
+\hfill
+\begin{minipage}{0.64\textwidth}
+    \textbf{#2} #3
+
+    \vspace{0.15cm}
+    \rule{0.55\linewidth}{0.4pt}
+
+    \small{\url{#4}}
+\end{minipage}
+\vspace{0.45cm}
+}
+
+\techno
+{images/java-logo.png}
+{Java}
+{est un langage de programmation orienté objet largement utilisé pour le
+développement d'applications professionnelles et de services backend. Il est
+reconnu pour sa portabilité, sa robustesse et son intégration avec de nombreux
+frameworks d'entreprise. Dans ce projet, Java a été utilisé à travers Spring
+Boot pour développer la logique métier, les services REST et les traitements
+liés aux différents modules de la plateforme \cite{javaDocs}.}
+{https://www.java.com/}
+
+\techno
+{images/javascript-logo.png}
+{JavaScript}
+{est un langage de programmation principalement utilisé pour rendre les
+interfaces web dynamiques et interactives. Il constitue l'un des langages de
+base du développement web moderne. Dans le cadre de ce projet, JavaScript a
+été utilisé avec React.js pour construire les interfaces du portail public, de
+l'espace médecin et de l'espace administrateur \cite{javascriptMDN}.}
+{https://developer.mozilla.org/fr/docs/Web/JavaScript}
+
+\subsection{Frameworks et bibliothèques frontend}
+
+La partie frontend correspond à la couche visible par l'utilisateur. Elle
+permet aux visiteurs, aux médecins et aux administrateurs d'interagir avec la
+plateforme. Les technologies frontend retenues visent à assurer une navigation
+fluide, une interface claire et une meilleure organisation du code.
+
+\techno
+{images/react_logo.png}
+{React.js}
+{est une bibliothèque JavaScript destinée à la création d'interfaces
+utilisateur basées sur des composants. Cette approche permet de diviser
+l'interface en éléments réutilisables, ce qui facilite le développement et la
+maintenance. Dans notre projet, React.js a été utilisé pour développer les
+principales interfaces de la plateforme, notamment le portail public, l'espace
+médecin et l'espace administrateur \cite{reactDocs}.}
+{https://react.dev/}
+
+\techno
+{images/react-router-logo.png}
+{React Router}
+{est une bibliothèque de routage utilisée dans les applications React. Elle
+permet de gérer la navigation entre les différentes pages sans rechargement
+complet de l'application. Dans ce projet, React Router a été utilisé pour
+organiser les routes du portail public, de l'espace médecin et de l'espace
+administrateur \cite{reactRouterDocs}.}
+{https://reactrouter.com/}
+
+\techno
+{images/axios-logo.png}
+{Axios}
+{est une bibliothèque JavaScript permettant d'envoyer des requêtes HTTP vers
+des API. Elle facilite la communication entre la partie frontend et le backend.
+Dans la plateforme ONMM, Axios a été utilisé pour consommer les services REST
+développés avec Spring Boot, notamment pour l'authentification, la gestion des
+demandes d'adhésion, les réclamations, les notifications et le registre des
+médecins \cite{axiosDocs}.}
+{https://axios-http.com/}
+
+\techno
+{images/tailwind-logo.png}
+{Tailwind CSS}
+{est un framework CSS utilitaire permettant de concevoir rapidement des
+interfaces responsives et cohérentes. Contrairement aux frameworks basés sur
+des composants prêts à l'emploi, Tailwind CSS permet une personnalisation
+fine de l'apparence des pages. Il a été utilisé dans ce projet pour améliorer
+la présentation graphique des interfaces et assurer leur adaptation aux
+différents types d'écrans \cite{tailwindDocs}.}
+{https://tailwindcss.com/}
+
+% \techno
+% {images/reacthookform-logo.png}
+% {React Hook Form}
+% {est une bibliothèque React dédiée à la gestion des formulaires. Elle permet
+% de simplifier le traitement des champs, la validation des entrées et la
+% gestion des erreurs. Dans ce projet, elle a été utilisée pour les formulaires
+% importants, notamment les demandes d'adhésion, les réclamations et certaines
+% interfaces d'administration \cite{reactHookFormDocs}.}
+% {https://react-hook-form.com/}
+
+% \techno
+% {images/zod-logo.png}
+% {Zod}
+% {est une bibliothèque de validation de schémas utilisée pour contrôler les
+% données saisies avant leur envoi vers le backend. Elle permet de définir des
+% règles de validation claires et de réduire les risques d'erreurs dans les
+% formulaires. Dans notre projet, Zod a été utilisé conjointement avec React
+% Hook Form afin de renforcer la fiabilité des données saisies par les
+% utilisateurs \cite{zodDocs}.}
+% {https://zod.dev/}
+
+\subsection{Frameworks et bibliothèques backend}
+
+La partie backend assure le traitement des requêtes, l'application des règles
+métier, la gestion de la sécurité et la communication avec la base de données.
+Elle constitue le cœur logique de la plateforme.
+
+\techno
+{images/springboot_logo.jpeg}
+{Spring Boot}
+{est un framework Java basé sur l'écosystème Spring. Il facilite le
+développement d'applications web et d'API REST en réduisant la configuration
+nécessaire. Dans ce projet, Spring Boot a été utilisé pour développer le
+backend de la plateforme, gérer les services métier, exposer les API REST et
+assurer la communication avec la base de données PostgreSQL \cite{springBootDocs}.}
+{https://spring.io/projects/spring-boot}
+
+% \techno
+% {images/spring-security-logo.png}
+% {Spring Security}
+% {est un module de l'écosystème Spring destiné à la sécurisation des
+% applications Java. Il permet de gérer l'authentification, l'autorisation et la
+% protection des ressources sensibles. Dans la plateforme ONMM, Spring Security
+% a été utilisé pour protéger les API et contrôler l'accès aux fonctionnalités
+% selon les rôles des utilisateurs \cite{springSecurityDocs}.}
+% {https://spring.io/projects/spring-security}
+
+\subsection{Stockage des données}
+
+La plateforme manipule plusieurs types de données : utilisateurs, médecins,
+demandes d'adhésion, réclamations, élections, notifications et documents. Le
+choix d'une base de données relationnelle s'explique donc par la présence de
+nombreuses relations entre les entités du système.
+
+\techno
+{images/postgresql_logo.jpeg}
+{PostgreSQL}
+{est un système de gestion de base de données relationnelle open source
+reconnu pour sa robustesse, sa stabilité et son respect des contraintes
+d'intégrité. Dans ce projet, PostgreSQL a été utilisé pour stocker de manière
+structurée les données de la plateforme. Son modèle relationnel est adapté aux
+relations existant entre les médecins, les demandes, les réclamations, les
+élections et les utilisateurs \cite{postgresDocs}.}
+{https://www.postgresql.org/}
+
+
+\subsection{Sécurité de l'application}
+
+La sécurité constitue un aspect fondamental de la plateforme développée pour
+l’Ordre National des Médecins, dans la mesure où celle-ci manipule des données
+sensibles relatives aux professionnels de santé ainsi que des opérations
+critiques telles que le vote électronique. L’objectif principal est de garantir
+la protection des comptes utilisateurs, le contrôle des accès, la
+confidentialité des informations échangées ainsi que la sécurité du processus
+électoral.
+
+\subsubsection{Authentification et contrôle d'accès}
+
+Afin de sécuriser l’accès à la plateforme, le système repose sur un mécanisme
+d’authentification basé sur JWT (\textit{JSON Web Token}).
+
+\techno
+{images/jwt_logo.jpeg}
+{JWT}
+{JWT (\textit{JSON Web Token}) est un standard permettant d’échanger des
+informations sécurisées sous forme d’un jeton signé numériquement. Dans notre
+application, après authentification, le serveur génère un jeton transmis au
+frontend React. Ce jeton accompagne ensuite chaque requête protégée afin de
+permettre au backend Spring Boot de vérifier l’identité de l’utilisateur et
+ses autorisations d’accès \cite{jwtRFC}.}
+{https://jwt.io/}
+
+La gestion de la sécurité des routes et des permissions est assurée par Spring
+Security. Le système applique une politique \textit{stateless}, ce qui signifie
+qu’aucune session utilisateur n’est conservée côté serveur. Chaque requête est
+validée indépendamment à l’aide du jeton JWT.
+
+\techno
+{images/spring_security_logo.png}
+{Spring Security}
+{Spring Security est le framework de sécurité utilisé dans l’écosystème Spring
+pour gérer l’authentification et l’autorisation. Dans ce projet, il permet de
+contrôler l’accès aux ressources selon les rôles définis dans le système,
+principalement \textit{ADMIN} et \textit{MEDECIN}, garantissant ainsi qu’un
+utilisateur n’accède qu’aux fonctionnalités qui lui sont autorisées
+\cite{springSecurityDocs}.}
+{https://spring.io/projects/spring-security}
+
+\subsubsection{Protection des mots de passe}
+
+Les mots de passe des utilisateurs représentent des données particulièrement
+sensibles. Pour éviter tout stockage en clair dans la base de données, le
+système utilise l’algorithme BCrypt.
+
+\techno
+{images/bcrypt_logo.png}
+{BCrypt}
+{BCrypt est une fonction de hachage sécurisée spécialement conçue pour le
+stockage des mots de passe. Elle applique automatiquement un sel aléatoire
+(\textit{Salt}) à chaque mot de passe avant de générer son empreinte
+cryptographique. Ainsi, même si deux utilisateurs possèdent le même mot de
+passe, les valeurs enregistrées dans la base seront différentes. Cette approche
+renforce la résistance contre les attaques par force brute ou en cas de fuite
+de la base de données \cite{bcryptPaper}.}
+{https://en.wikipedia.org/wiki/Bcrypt}
+
+\subsubsection{Sécurisation du vote électronique}
+
+Le vote électronique constitue l’opération la plus critique de la plateforme.
+Le système de sécurité mis en place a pour objectif de garantir quatre
+propriétés essentielles :
+
+\begin{itemize}
+\item La confidentialité du bulletin de vote ;
+\item L’anonymat de l’électeur ;
+\item L’intégrité des données enregistrées ;
+\item L’authenticité des résultats publiés.
+\end{itemize}
+
+Pour atteindre ces objectifs, une architecture cryptographique combinant
+plusieurs mécanismes complémentaires a été mise en œuvre.
+
+\subsubsection{Anonymisation de l’électeur}
+
+Afin de préserver la confidentialité de l’identité du votant, le système ne
+stocke jamais directement l’identifiant réel du médecin dans la table des votes.
+
+Un identifiant anonyme est généré à l’aide d’un mécanisme HMAC-SHA256
+(\textit{Hash-based Message Authentication Code}).
+
+Avant l’enregistrement du vote, le système combine un secret interne, l’identifiant
+de l’élection ainsi que l’identifiant du médecin afin de produire une empreinte
+cryptographique unique appelée \textit{Voter Token}.
+
+Ce mécanisme permet de vérifier qu’un électeur ne vote qu’une seule fois tout
+en empêchant la divulgation de son identité réelle dans la base de données.
+
+\subsubsection{Confidentialité du bulletin de vote}
+
+Le contenu du vote constitue une information strictement confidentielle qui ne
+doit être accessible à aucun administrateur tant que l’élection est en cours.
+
+Pour protéger cette information, nous utilisons l’algorithme AES-256-GCM.
+
+\techno
+{images/aes_logo.png}
+{AES-256-GCM}
+{AES (\textit{Advanced Encryption Standard}) est un algorithme de chiffrement
+symétrique largement utilisé pour protéger les données sensibles. Dans notre
+système, une clé symétrique aléatoire est générée pour chaque bulletin de vote.
+Cette clé sert à chiffrer le choix de l’électeur avant son enregistrement dans
+la base de données. Ainsi, même en cas d’accès non autorisé à la base, le vote
+reste illisible sans la clé correspondante \cite{nistAesGcm}.}
+{https://csrc.nist.gov/publications/detail/sp/800-38d/final}
+
+Chaque vote possède ainsi sa propre clé de chiffrement indépendante, ce qui
+renforce la sécurité globale du système.
+
+\subsubsection{Protection des clés de chiffrement}
+
+La clé AES utilisée pour chiffrer le bulletin ne doit jamais être stockée
+directement en clair dans la base de données.
+
+Pour résoudre ce problème, nous utilisons un mécanisme de chiffrement
+asymétrique basé sur RSA.
+
+Chaque élection possède une paire de clés cryptographiques :
+
+\begin{itemize}
+\item Une clé publique ;
+\item Une clé privée.
+\end{itemize}
+
+La clé publique sert à chiffrer la clé AES associée au vote. La clé privée,
+quant à elle, permet de récupérer cette clé uniquement lors de la phase de
+dépouillement.
+
+Ce mécanisme permet d’empêcher toute lecture prématurée des bulletins avant la
+fin officielle du scrutin.
+
+\subsubsection{Vérification d’intégrité du bulletin}
+
+Après le chiffrement du vote, le système calcule une empreinte cryptographique
+du bulletin à l’aide de l’algorithme SHA-256.
+
+Cette empreinte, appelée \textit{Vote Hash}, permet de vérifier que les données
+stockées dans la base n’ont subi aucune modification non autorisée.
+
+Toute altération du contenu enregistré entraînerait automatiquement une
+modification de cette empreinte, permettant ainsi de détecter une corruption ou
+une tentative de manipulation.
+
+Ce mécanisme joue également un rôle important dans l’audit interne du système.
+
+\subsubsection{Signature numérique des résultats}
+
+Une fois la phase de vote terminée et le dépouillement effectué, le système
+génère une signature numérique associée aux résultats finaux de l’élection.
+
+L’objectif est de garantir l’authenticité des résultats publiés.
+
+Cette signature repose sur un mécanisme de cryptographie asymétrique utilisant
+une paire de clés dédiée à la signature.
+
+Grâce à ce mécanisme, il devient possible de vérifier que les résultats publiés
+proviennent bien du système officiel et qu’aucune modification n’a été réalisée
+après le dépouillement.
+
+
+\subsubsection{Propriétés de sécurité obtenues}
+
+Le tableau suivant résume les principales propriétés de sécurité assurées par
+l’architecture proposée.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{7cm}|p{6cm}|}
+\hline
+\textbf{Propriété de sécurité} & \textbf{Mécanisme utilisé} \\
+\hline
+Authentification utilisateur & JWT + Spring Security \\
+\hline
+Protection des mots de passe & BCrypt + Salt \\
+\hline
+Confidentialité du vote & AES-256-GCM \\
+\hline
+Protection de la clé AES & RSA (clé publique / privée) \\
+\hline
+Intégrité des données & SHA-256 Vote Hash \\
+\hline
+Anonymat de l’électeur & HMAC-SHA256 \\
+\hline
+Authenticité des résultats & Signature numérique \\
+\hline
+Unicité du vote & Vérification backend + contrôle métier \\
+\hline
+\end{tabular}
+\caption{Propriétés de sécurité assurées par le système}
+\end{table}
+
+\subsubsection{Limites et perspectives d’amélioration}
+
+L’architecture proposée permet de répondre aux besoins essentiels de sécurité
+d’un système de vote électronique destiné à une organisation telle que l’Ordre
+National des Médecins.
+
+Cependant, certaines améliorations peuvent être envisagées dans le futur.
+
+Premièrement, l’utilisation d’un équipement matériel spécialisé permettrait de
+renforcer la protection des clés cryptographiques utilisées par le système.
+
+Deuxièmement, un mécanisme d’audit externe indépendant pourrait être mis en
+place afin d’améliorer la transparence du processus électoral.
+
+Enfin, le déploiement sur une architecture distribuée permettrait d’améliorer
+la disponibilité et la tolérance aux pannes du système.
+
+Malgré ces perspectives d’évolution, l’architecture actuelle offre un niveau de
+sécurité suffisant pour garantir la confidentialité, l’intégrité,
+l’authenticité et l’anonymat nécessaires au bon fonctionnement du vote
+électronique au sein de la plateforme ONMM.
+
+% \subsection{Sécurité de l'application}
+
+% La sécurité représente un aspect essentiel dans ce projet, car la plateforme
+% traite des informations administratives et professionnelles liées aux
+% médecins, ainsi que des opérations sensibles comme le vote électronique. Les
+% mécanismes retenus doivent donc permettre de protéger les données,
+% d'identifier les utilisateurs, de limiter l'accès aux fonctionnalités selon
+% les rôles, et de garantir la confidentialité et l'intégrité du processus
+% électoral.
+
+% \techno
+% {images/jwt_logo.jpeg}
+% {JWT}
+% {(\textit{JSON Web Token}) est un standard permettant de transmettre de manière
+% compacte des informations entre deux parties sous forme de jeton signé. Dans
+% la plateforme ONMM, JWT a été utilisé pour sécuriser l'authentification entre
+% le frontend React et le backend Spring Boot. Après connexion, l'utilisateur
+% reçoit un jeton qui est ensuite transmis avec les requêtes protégées afin de
+% vérifier son identité et ses droits d'accès \cite{jwtRFC}.}
+% {https://jwt.io/}
+
+% \techno
+% {images/bcrypt_logo.png}
+% {BCrypt}
+% {est une fonction de hachage adaptative conçue pour le stockage sécurisé des
+% mots de passe. Elle intègre un sel généré aléatoirement et un facteur de coût
+% configurable, ce qui la rend résistante aux attaques par force brute même en
+% cas de fuite de la base de données. Dans la plateforme ONMM, les mots de passe
+% des utilisateurs sont hachés avec BCrypt (facteur de coût 12) avant leur
+% enregistrement, et ne sont jamais stockés ni transmis en clair \cite{bcryptPaper}.}
+% {https://en.wikipedia.org/wiki/Bcrypt}
+
+% \techno
+% {images/spring_security_logo.png}
+% {Spring Security}
+% {est le module de sécurité de l'écosystème Spring, utilisé pour gérer
+% l'authentification et le contrôle d'accès aux ressources de l'API. La
+% plateforme ONMM repose sur une politique de session \textit{stateless} (sans
+% état côté serveur), un contrôle d'accès basé sur les rôles (\textit{ADMIN} et
+% \textit{MEDECIN}) appliqué au niveau des routes de l'API, ainsi qu'une
+% configuration CORS restreignant les origines autorisées. Un filtre de
+% limitation du débit (\textit{rate limiting}) est également appliqué sur les
+% points d'entrée sensibles (connexion, mot de passe oublié) afin de limiter les
+% tentatives répétées et les attaques par force brute \cite{springSecurityDocs}.}
+% {https://spring.io/projects/spring-security}
+
+% \techno
+% {images/aes_logo.png}
+% {AES-256-GCM}
+% {(\textit{Advanced Encryption Standard} en mode \textit{Galois/Counter Mode})
+% est un algorithme de chiffrement symétrique authentifié, garantissant à la
+% fois la confidentialité et l'intégrité des données chiffrées. Dans le module
+% Élections de la plateforme ONMM, le choix de vote de chaque électeur est
+% chiffré avec AES-256-GCM à l'aide d'une clé symétrique générée aléatoirement
+% pour chaque bulletin (\textit{Data Encryption Key}, ou DEK). Cette clé n'est
+% jamais stockée en clair : elle est elle-même protégée par chiffrement
+% asymétrique RSA (voir ci-dessous), selon un schéma de chiffrement hybride.
+% Le mode GCM fournit également un tag d'authentification : toute tentative de
+% modifier un bulletin chiffré directement en base le rend impossible à
+% déchiffrer, ce qui permet de détecter immédiatement une altération
+% individuelle \cite{nistAesGcm}.}
+% {https://csrc.nist.gov/publications/detail/sp/800-38d/final}
+
+% \techno
+% % {images/rsa_logo.png}
+% % {RSA-4096-OAEP}
+% % {est un algorithme de chiffrement asymétrique, utilisé ici selon le principe
+% % du \textit{RSA Key Encapsulation Mechanism} (RSA-KEM) : plutôt que de
+% % chiffrer directement le bulletin -- trop volumineux et trop lent pour RSA --
+% % la clé AES (DEK) générée pour chaque vote est elle-même chiffrée
+% % (\textit{enveloppée}) avec la clé publique RSA-4096 de l'élection, selon le
+% % schéma de remplissage OAEP-SHA256. Seule la clé privée RSA, inaccessible
+% % pendant la phase de vote (voir le coffre logiciel ci-dessous), permet de
+% % désenvelopper cette clé et de déchiffrer les bulletins au moment du
+% % dépouillement. Ce chiffrement hybride AES+RSA est une construction standard,
+% % documentée notamment dans la norme NIST SP 800-56B et largement utilisée dans
+% % la littérature académique du vote électronique \cite{rsaKem}.}
+% % {https://csrc.nist.gov/publications/detail/sp/800-56b/rev-2/final}
+
+% \techno
+% % {images/ed25519_logo.png}
+% % {Ed25519}
+% % {est un schéma de signature numérique basé sur les courbes elliptiques
+% % d'Edwards, reconnu pour sa rapidité et sa résistance à plusieurs classes
+% % d'attaques. Dans la plateforme ONMM, chaque bulletin est signé par la clé
+% % privée Ed25519 de l'élection au moment du passage en phase de dépouillement,
+% % à partir d'une empreinte SHA-256 calculée sur l'identifiant de l'élection, le
+% % numéro de séquence du bulletin, son contenu chiffré et son empreinte
+% % d'intégrité. Cette signature permet à tout observateur disposant de la clé
+% % publique de vérifier que le bulletin a réellement été produit par le système
+% % et n'a pas été modifié après le vote, apportant une garantie
+% % d'\textbf{authenticité} complémentaire à celle fournie par AES-GCM
+% % \cite{ed25519Rfc}.}
+% % {https://datatracker.ietf.org/doc/html/rfc8032}
+
+
+% % \techno
+% % % {images/merkletree_logo.png}
+% % {Arbre de Merkle}
+% % {est une structure de données arborescente où chaque nœud est le hash de ses
+% % deux enfants, permettant de condenser un grand nombre d'éléments en une seule
+% % empreinte racine et de prouver l'appartenance d'un élément à l'ensemble sans
+% % avoir à révéler les autres éléments. Dans le module Élections, un arbre de
+% % Merkle est construit au moment du dépouillement à partir des empreintes
+% % (\textit{vote hash}) de tous les bulletins d'une élection, et sa racine est
+% % conservée dans l'état d'intégrité de l'élection. Cette structure permet de
+% % générer, pour chaque \textit{Receipt Code} remis à l'électeur, une preuve
+% % d'inclusion (\textit{Merkle proof}) que celui-ci peut faire recalculer
+% % indépendamment pour vérifier que son bulletin fait bien partie de l'ensemble
+% % dépouillé, sans révéler son contenu \cite{merkleTreePaper}.}
+% % {https://en.wikipedia.org/wiki/Merkle_tree}
+
+% \techno
+% % {images/hsm_logo.png}
+% {HSM simulé}
+% {(\textit{Hardware Security Module}) désigne, dans son acception classique,
+% un boîtier matériel dédié qui génère et conserve des clés cryptographiques
+% sans jamais les laisser sortir en clair, même en cas de compromission du
+% serveur applicatif. Ne disposant pas d'un tel équipement pour ce projet, un
+% mécanisme logiciel reproduisant ses principales garanties d'usage a été mis
+% en place~: les clés privées RSA et Ed25519 de chaque élection sont chiffrées
+% avec une clé dérivée par PBKDF2-HMAC-SHA256 à partir d'un secret applicatif,
+% stockées hors base de données, et leur accès en déchiffrement est
+% explicitement bloqué par le code tant que le statut de l'élection est
+% \textit{VOTE\_EN\_COURS}. Ce mécanisme garantit qu'aucune clé privée ne peut
+% être utilisée pour déchiffrer un bulletin pendant que le scrutin est encore
+% ouvert \cite{fips140}.}
+% {https://csrc.nist.gov/publications/detail/fips/140/3/final}
+
+% \paragraph*{Intégrité et anonymat du vote électronique}
+
+% Au-delà du chiffrement hybride AES+RSA du contenu des bulletins, le module
+% Élections met en œuvre plusieurs mécanismes complémentaires de hachage, de
+% signature et de structuration cryptographique, permettant de garantir à la
+% fois l'\textbf{anonymat des électeurs}, l'\textbf{authenticité des bulletins}
+% et l'\textbf{intégrité de l'ensemble des votes} exprimés.
+
+% \begin{itemize}
+%     \item \textbf{Anonymisation par HMAC-SHA256 :} l'identité de chaque
+%     médecin est transformée, à l'aide d'une clé secrète et de l'algorithme
+%     HMAC-SHA256, en une empreinte unique (\textit{voter key hash}). Contrairement
+%     à un simple SHA-256 de l'identifiant — recalculable par force brute par
+%     quiconque connaît la plage des identifiants possibles — l'utilisation
+%     d'une clé secrète rend cette empreinte impossible à reproduire sans
+%     connaître la clé. Elle permet de vérifier qu'un électeur n'a pas déjà voté
+%     pour une élection ou un poste donné, sans qu'il soit possible de remonter
+%     à son identité réelle à partir du bulletin enregistré.
+
+%     \item \textbf{Chaînage des bulletins par SHA-256 :} chaque vote enregistré
+%     génère une empreinte (\textit{vote hash}) calculée à partir de l'élection,
+%     du poste, du choix exprimé et de l'empreinte de l'électeur. Cette empreinte
+%     intègre également le hash du bulletin précédent (\textit{prev hash}) et un
+%     numéro de séquence, formant ainsi une chaîne de hachage similaire au
+%     principe d'un registre en chaîne (\textit{append-only log}). L'état courant
+%     de cette chaîne (dernier hash, nombre de votes attendus) est conservé pour
+%     chaque élection dans une table dédiée d'intégrité.
+
+%     \item \textbf{Vérification complète de la chaîne :} le service de
+%     vérification ne se contente pas de recalculer le hash de chaque bulletin
+%     individuellement — il reconstruit l'intégralité de la chaîne à partir d'un
+%     hash d'origine propre à chaque élection, en parcourant les bulletins dans
+%     l'ordre de leur numéro de séquence, et compare le hash final obtenu à celui
+%     conservé dans l'état d'intégrité. Toute suppression, insertion ou
+%     réordonnancement de bulletins — même si chaque hash individuel reste
+%     cohérent — rompt cette chaîne reconstruite et est immédiatement détectée.
+%     Un bulletin dont le contenu chiffré aurait été corrompu (échec du tag
+%     d'authentification AES-GCM) est quant à lui automatiquement comptabilisé
+%     comme altéré, sans interrompre la génération du rapport.
+
+%     \item \textbf{Protection contre la rotation de la clé secrète :} la clé
+%     utilisée pour le calcul du \textit{voter key hash} est associée, dès
+%     l'ouverture du scrutin, à une empreinte enregistrée dans l'état d'intégrité
+%     de l'élection. Si cette clé venait à être modifiée pendant qu'un scrutin est
+%     en cours — ce qui rendrait les empreintes des électeurs incohérentes et
+%     ouvrirait la voie à un double vote silencieux — toute tentative de vote est
+%     bloquée et signalée comme une anomalie de sécurité.
+
+%     \item \textbf{Unicité du vote au niveau base de données :} une contrainte
+%     d'unicité applicative est complétée par un index unique au niveau de la
+%     base de données. Pour les élections comportant des postes électoraux
+%     distincts, l'unicité porte sur le triplet (élection, poste, empreinte de
+%     l'électeur) ; pour les élections sans poste, un index unique partiel
+%     dédié garantit qu'un même électeur ne peut voter qu'une seule fois, la
+%     sémantique des valeurs \texttt{NULL} dans les contraintes \texttt{UNIQUE}
+%     de PostgreSQL ne l'assurant pas par défaut.
+
+%     \item \textbf{Signature Ed25519 des bulletins :} au moment du passage en
+%     phase de dépouillement, l'ensemble des bulletins d'une élection est signé
+%     par lots avec la clé privée Ed25519 de l'élection. Cette signature porte
+%     sur le numéro de séquence, le contenu chiffré et l'empreinte de chaque
+%     bulletin : elle garantit que les bulletins effectivement dépouillés sont
+%     bien ceux produits par le système au moment du vote, et fournit une base
+%     de non-répudiation vérifiable par tout observateur disposant de la clé
+%     publique de l'élection.
+
+%     \item \textbf{Arbre de Merkle et Receipt Code :} toujours au moment du
+%     dépouillement, les empreintes de tous les bulletins d'une élection sont
+%     organisées en arbre de Merkle, dont la racine est conservée dans l'état
+%     d'intégrité de l'élection. Chaque électeur reçoit, au moment de son vote,
+%     un \textit{Receipt Code} lui permettant ultérieurement de demander une
+%     preuve d'inclusion (\textit{Merkle proof}) : il peut ainsi vérifier de
+%     façon indépendante que son bulletin fait bien partie de l'ensemble
+%     dépouillé, sans que cela révèle son choix de vote.
+% \end{itemize}
+
+% Cette combinaison — chiffrement hybride AES-256-GCM/RSA-4096-OAEP du contenu,
+% anonymisation par HMAC-SHA256, chaînage des empreintes par SHA-256, signature
+% Ed25519 des bulletins et arbre de Merkle — contribue à répondre aux
+% principales exigences de sécurité du vote électronique en assurant la
+% confidentialité des bulletins, la pseudonymisation des électeurs,
+% l'authenticité et la non-répudiation des bulletins, l'unicité du vote, ainsi
+% que la détection de toute altération, suppression ou réordonnancement des
+% données enregistrées, et une vérifiabilité d'inclusion pour l'électeur.
+
+% \paragraph*{Limites de l'approche et axes d'amélioration}
+
+% Il convient de souligner qu'aucune combinaison d'algorithmes cryptographiques
+% ne peut, à elle seule, « garantir » la sécurité d'un scrutin électronique dans
+% l'absolu : elle ne fait qu'assurer certaines propriétés, dans un périmètre
+% défini. Le tableau \ref{tab:securite-vote-proprietes} résume les propriétés
+% couvertes par l'implémentation actuelle.
+
+% \begin{table}[H]
+% \centering
+% \begin{tabular}{|p{9cm}|c|}
+% \hline
+% \textbf{Propriété de sécurité} & \textbf{Couverte} \\
+% \hline
+% Confidentialité du choix de vote & Oui \\
+% Authenticité et non-répudiation des bulletins (signature numérique) & Oui \\
+% Détection d'altération d'un bulletin individuel & Oui \\
+% Détection de suppression / insertion / réordonnancement & Oui \\
+% Unicité du vote par électeur & Oui \\
+% Pseudonymisation de l'électeur & Oui \\
+% Vérifiabilité d'inclusion par l'électeur (\textit{Receipt Code} + preuve de Merkle) & Partielle \\
+% Protection des clés privées hors d'un HSM matériel certifié & Partielle \\
+% Résistance à un administrateur disposant du secret racine du coffre logiciel & Non \\
+% Séparation des pouvoirs entre plusieurs autorités de déchiffrement & Non \\
+% Vérifiabilité complète du résultat (\textit{end-to-end verifiability} façon Helios/Belenios) & Non \\
+% Sécurité du serveur applicatif et des postes clients & Non \\
+% \hline
+% \end{tabular}
+% \caption{Propriétés de sécurité couvertes par le module Élections}
+% \label{tab:securite-vote-proprietes}
+% \end{table}
+
+% La vérifiabilité d'inclusion et la protection des clés privées sont qualifiées
+% de \textit{partielles} : le \textit{Receipt Code} et la preuve de Merkle
+% permettent à l'électeur de vérifier que son bulletin fait bien partie de
+% l'ensemble dépouillé, mais sans lui permettre de vérifier de façon autonome
+% le résultat global de l'élection, contrairement à des systèmes académiques
+% comme Helios ou Belenios, fondés sur le chiffrement homomorphe et des preuves
+% à divulgation nulle de connaissance. De même, le coffre logiciel protège les
+% clés privées au repos et bloque leur usage pendant le vote, mais repose sur
+% un secret applicatif unique : il ne procure pas l'isolation matérielle d'un
+% véritable HSM certifié, et quiconque dispose à la fois de ce secret et des
+% fichiers de clés pourrait contourner les garanties applicatives.
+
+% Le chaînage SHA-256 et l'arbre de Merkle mis en place ne constituent pas une
+% \textit{blockchain} au sens strict : il n'y a ni décentralisation ni
+% consensus entre plusieurs nœuds indépendants, et ces structures résident dans
+% la même base de données que les bulletins qu'elles protègent. Un attaquant
+% disposant à la fois de la base de données, du code de l'application et du
+% secret racine du coffre logiciel pourrait théoriquement reconstruire une
+% chaîne et un arbre cohérents. Il s'agit donc d'un mécanisme
+% d'\textbf{auditabilité interne renforcé}, qui complète la détection
+% d'altération individuelle déjà assurée par AES-GCM en couvrant les cas de
+% suppression, d'insertion et de réordonnancement de bulletins, sans offrir les
+% garanties d'un registre décentralisé.
+
+% Plusieurs dispositifs initialement envisagés comme perspectives d'évolution
+% ont depuis été intégrés au système : chiffrement hybride AES-RSA (RSA-KEM),
+% signature numérique Ed25519 des bulletins et coffre logiciel protégeant les
+% clés privées. Pour autant, un déploiement à l'échelle d'un système de vote
+% national irait au-delà du périmètre couvert par ce projet, notamment sur les
+% points suivants : un module de sécurité matériel (HSM) certifié, qui
+% remplacerait le coffre logiciel actuel sans modifier le reste de
+% l'architecture ; une séparation des pouvoirs de déchiffrement entre
+% plusieurs autorités indépendantes (secret partagé ou cryptographie à seuil),
+% afin qu'aucune entité unique ne puisse à elle seule accéder aux clés
+% privées ; et une vérifiabilité de bout en bout du résultat, à la manière des
+% systèmes académiques Helios ou Belenios, permettant à un observateur externe
+% de vérifier le résultat final sans faire confiance au serveur de
+% dépouillement. Ces aspects dépassent le périmètre du présent projet, dont le
+% modèle de menace vise principalement la confidentialité contre une fuite de
+% base de données et la détection d'altération, mais constituent des
+% perspectives d'évolution pertinentes pour une généralisation à un contexte
+% national.
+
+% \paragraph*{Comparaison avec les systèmes de vote électronique de référence}
+
+% Helios \cite{heliosSystem}, Belenios \cite{beleniosPaper} et ElectionGuard
+% \cite{electionGuard} constituent des références établies en matière de
+% vérifiabilité électorale~: Helios et Belenios sont des systèmes réels,
+% utilisés en production par des universités et plusieurs organisations,
+% tandis qu'ElectionGuard est un framework industriel publié par Microsoft. Il
+% ne s'agit donc pas seulement de références académiques théoriques, mais de
+% systèmes effectivement déployés. Comparer le module Élections de l'ONMM à
+% ces architectures permet d'évaluer objectivement son niveau de maturité,
+% sans prétendre les reproduire.
+
+% \begin{verbatim}
+% Helios / Belenios / ElectionGuard
+%                |
+%   -----------------------------------------------
+%   |                  |                          |
+% Bulletin Board   Auditabilité              Vérifiabilité
+%   |                  |                          |
+%   v                  v                          v
+% ObservateurElectionController   ElectionAuditService   Receipt Code + MerkleProofDto
+%                |
+%                v
+%         Architecture ONMM
+% \end{verbatim}
+
+% \begin{table}[H]
+% \centering
+% \renewcommand{\arraystretch}{1.3}
+% \begin{tabularx}{\textwidth}{|X|c|X|}
+% \hline
+% \textbf{Fonction de sécurité} & \textbf{Helios / Belenios / ElectionGuard} & \textbf{ONMM} \\
+% \hline
+% Bulletin Board (public) & Oui & Restreint --- \texttt{ObservateurElectionController} (accès observateur accrédité, authentifié) \\
+% \hline
+% Audit Trail & Oui & Oui --- \texttt{ElectionAuditService} / \texttt{ElectionAuditLog} \\
+% \hline
+% Receipt Verification & Oui & Oui --- \texttt{VoteReceiptDto} + \texttt{MerkleProofDto} \\
+% \hline
+% Merkle Integrity & Variable (non systématique chez Belenios) & Oui --- \texttt{MerkleTreeService} \\
+% \hline
+% HSM / stockage des clés & Variable selon déploiement & Oui (simulé) --- \texttt{KeystoreService} \\
+% \hline
+% Threshold Trustees (déchiffrement à seuil) & Oui & Non \\
+% \hline
+% Tally homomorphe & Oui & Non (AES+RSA classique) \\
+% \hline
+% Preuves à divulgation nulle de connaissance (ZKP) & Oui & Non \\
+% \hline
+% \end{tabularx}
+% \caption{Comparaison des fonctions de sécurité entre les systèmes de référence et le module Élections de l'ONMM}
+% \label{tab:comparaison-systemes-reference}
+% \end{table}
+
+% Sur la ligne \textit{Bulletin Board}, la nuance est importante~: chez Helios,
+% le tableau d'affichage est public, anonyme et consultable de façon
+% universelle par n'importe qui, sans authentification. Dans le module
+% Élections de l'ONMM, la fonction analogue assurée par
+% \texttt{ObservateurElectionController} est restreinte~: l'accès est réservé
+% à des observateurs accrédités et authentifiés. Cette différence n'est pas
+% un détail d'implémentation mais une garantie de vérifiabilité plus faible
+% que celle d'un véritable bulletin board public.
+
+% \paragraph*{Modèle de menace retenu}
+
+% Le système ONMM a été conçu pour protéger la confidentialité des bulletins,
+% détecter les altérations, garantir l'unicité du vote et assurer
+% l'auditabilité. Il n'a pas pour objectif de résister à une compromission
+% simultanée de tous les administrateurs disposant des clés applicatives,
+% contrairement aux architectures de type Helios/Belenios/ElectionGuard,
+% conçues pour des contextes nécessitant une vérifiabilité de bout en bout et
+% une séparation forte des pouvoirs. Ce choix rejoint les lignes
+% correspondantes déjà identifiées dans le tableau
+% \ref{tab:securite-vote-proprietes} (\textit{vérifiabilité complète du
+% résultat} et \textit{séparation des pouvoirs entre plusieurs autorités de
+% déchiffrement}, toutes deux non couvertes).
+
+% Le système ONMM n'a pas vocation à reproduire intégralement les
+% architectures Helios, Belenios ou ElectionGuard, mais s'inspire de
+% plusieurs de leurs principes fondamentaux afin de fournir un niveau de
+% sécurité et d'auditabilité adapté au contexte des élections ordinales. Les
+% mécanismes plus avancés, tels que le chiffrement homomorphe, les preuves à
+% divulgation nulle de connaissance et le déchiffrement distribué à seuil,
+% constituent des perspectives d'évolution vers une architecture de niveau
+% national.
+
+\subsection{Architecture technique proposée}
+
+L'architecture technique de la plateforme ONMM a été conçue pour assurer une
+gestion centralisée, sécurisée et fluide des services proposés par l'Ordre
+National des Médecins de Mauritanie. Cette architecture repose sur une
+organisation en couches, séparant l'interface utilisateur, le serveur
+d'application, la logique métier et la base de données. Cette séparation permet
+de faciliter la maintenance du système, d'améliorer sa sécurité et de rendre son
+évolution plus simple.
+
+Le système se compose de trois couches principales :
+
+\begin{itemize}
+    \item \textbf{Interface utilisateur (Front-end) :} développée avec React,
+    elle permet aux différents utilisateurs, notamment les visiteurs publics,
+    les médecins et les administrateurs, d'accéder aux fonctionnalités de la
+    plateforme à travers une interface web claire et interactive. Elle permet
+    par exemple de consulter les informations publiques, soumettre des demandes,
+    suivre certains dossiers, gérer les réclamations ou accéder aux services
+    réservés selon le profil de l'utilisateur.
+
+    \item \textbf{Serveur d'application (Back-end) :} développé avec Spring
+    Boot, il assure le traitement des requêtes envoyées par l'interface
+    utilisateur. Il contient la logique métier de l'application, gère les règles
+    de validation, le contrôle des accès, la communication avec la base de
+    données et l'exposition des services sous forme d'API REST.
+
+    \item \textbf{Base de données :} mise en place avec PostgreSQL, elle permet
+    de stocker les informations nécessaires au fonctionnement de la plateforme,
+    notamment les données des utilisateurs, les profils des médecins, les
+    demandes d'adhésion, les réclamations, les publications, les sondages, les
+    élections et les différentes opérations réalisées dans le système.
+\end{itemize}
+
+
+% \section{Conclusion}
+
+% ============================================================
+% 5.X PRÉSENTATION DES INTERFACES GRAPHIQUES
+% ============================================================
+
+% ============================================================
+% INTERFACES GRAPHIQUES — PORTAIL PUBLIC
+% ============================================================
+
+\section{Interfaces graphiques}
+
+L’interface graphique joue un rôle essentiel dans la qualité d’une
+application web, car elle représente le point de contact direct entre
+l’utilisateur et le système. Dans le cas de la plateforme de l’Ordre
+National des Médecins de Mauritanie, les interfaces ont été organisées
+selon les différents profils d’utilisation. Nous présentons dans cette
+partie les principales interfaces du portail public.
+
+% ============================================================
+% COMMANDE POUR AFFICHER UNE CAPTURE
+% ============================================================
+
+
+
+% ============================================================
+% PORTAIL PUBLIC
+% ============================================================
+
+% ============================================================
+% PORTAIL PUBLIC
+% ============================================================
+\renewcommand{\interfaceScreen}[4][]{%
+\begin{figure}[H]
+\centering
+\def\screentitle{#1}\ifx\screentitle\empty\else\noindent\textbf{#1}\par\medskip\fi
+{\setlength{\fboxrule}{0.8pt}\setlength{\fboxsep}{3pt}%
+\fcolorbox{onmmgreen}{white}{\includegraphics[width=0.82\textwidth,height=0.46\textheight,keepaspectratio]{#2}}}
+\caption{#3}
+\label{#4}
+\end{figure}
+}
+
+\newcommand{\interfaceScreenPair}[7][]{%
+\begin{figure}[H]
+    \centering
+    \def\screentitle{#1}\ifx\screentitle\empty\else\noindent\textbf{#1}\par\medskip\fi
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        {\setlength{\fboxrule}{0.8pt}\setlength{\fboxsep}{3pt}%
+        \fcolorbox{onmmgreen}{white}{\includegraphics[width=0.95\linewidth,height=0.36\textheight,keepaspectratio]{#2}}}
+        \captionof{figure}{#3}
+        \label{#4}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        {\setlength{\fboxrule}{0.8pt}\setlength{\fboxsep}{3pt}%
+        \fcolorbox{onmmgreen}{white}{\includegraphics[width=0.95\linewidth,height=0.36\textheight,keepaspectratio]{#5}}}
+        \captionof{figure}{#6}
+        \label{#7}
+    \end{minipage}
+\end{figure}}
+
+
+\subsection{Interfaces du portail public}
+
+Le portail public regroupe les interfaces accessibles aux visiteurs et
+aux médecins avant authentification complète. Il permet de consulter les
+informations générales de l’Ordre, de rechercher un médecin dans
+l’annuaire, de consulter les annonces, et d’effectuer certaines démarches
+en ligne, notamment le dépôt d’une demande d’adhésion, le suivi de son
+état d’avancement et le dépôt d’une réclamation.
+
+\paragraph*{Page d’accueil}
+
+La page d’accueil constitue le point d’entrée principal de la
+plateforme. Elle permet aux visiteurs d’accéder rapidement aux
+principaux services publics proposés par l’ONMM.
+
+\interfaceScreen
+{images/public/page_accueil.png}
+{Page d’accueil de la plateforme}
+{fig:public-accueil}
+
+\interfaceScreen[Annuaire public]
+{images/public/page_annuaire.png}
+{Annuaire public des médecins}
+{fig:public-annuaire}
+
+\interfaceScreen[Page des annonces]
+{images/public/page_annonces.png}
+{Page des annonces}
+{fig:public-annonces}
+
+% ============================================================
+% DEMANDE D'ADHÉSION
+% ============================================================
+
+\paragraph*{Demande d’adhésion}
+
+Le module de demande d’adhésion représente l’une des fonctionnalités les
+plus importantes du portail public. Afin de rendre la saisie plus claire
+et plus progressive, le formulaire a été organisé sous forme
+d’étapes successives. Chaque étape correspond à une catégorie précise
+d’informations, jusqu’à la confirmation finale de la demande.
+
+\interfaceScreen[Étape 1 : Informations personnelles]
+{images/public/adhesion_etape_informations.png}
+{Étape 1 : informations personnelles}
+{fig:adhesion-etape-1}
+
+\interfaceScreenPair[Étape 2 : Formations]
+{images/public/adhesion_formulaire_education.png}
+{Formulaire d’ajout d’une formation}
+{fig:adhesion-etape-2-form}
+{images/public/adhesion_liste_education.png}
+{Liste des formations ajoutées}
+{fig:adhesion-etape-2-list}
+
+\interfaceScreenPair[Étape 3 : Expériences professionnelles]
+{images/public/adhesion_formulaire_experience.png}
+{Formulaire d’ajout d’une expérience professionnelle}
+{fig:adhesion-etape-3-form}
+{images/public/adhesion_liste_experience.png}
+{Liste des expériences professionnelles ajoutées}
+{fig:adhesion-etape-3-list}
+
+\interfaceScreen[Étape 4 : Dépôt des documents justificatifs]
+{images/public/adhesion_documents.png}
+{Étape 4 : dépôt des documents justificatifs}
+{fig:adhesion-etape-4}
+
+\interfaceScreen[Étape 5 : Confirmation de la demande]
+{images/public/adhesion_confirmation.png}
+{Étape 5 : confirmation de la demande}
+{fig:adhesion-etape-5}
+
+% ============================================================
+% SUIVI DE DEMANDE
+% ============================================================
+
+\interfaceScreen[Suivi d’une demande]
+{images/public/suivi_demande_adhesion.png}
+{Page de suivi d’une demande}
+{fig:public-suivi-demande}
+
+% ============================================================
+% ACTIVATION DE COMPTE
+% ============================================================
+
+\paragraph*{Activation du compte et définition du mot de passe}
+
+Une fois la demande d’adhésion approuvée, le médecin reçoit un lien lui
+permettant d’activer son compte et de définir son mot de passe.
+
+\interfaceScreen
+{images/public/activer_compte_definir_password.png}
+{Page d’activation du compte et définition du mot de passe}
+{fig:public-activation-compte}
+
+\interfaceScreenPair
+{images/public/activer_compte_definir_password (2).png}
+{Page pour confirmer l'email}
+{fig:confirmer-email}
+{images/public/activer_compte_definir_password (3).png}
+{Page pour définir le mot de passe}
+{fig:definir-password}
+
+% ============================================================
+% CONNEXION
+% ============================================================
+
+\interfaceScreen[Page de connexion]
+{images/public/page_connexion.png}
+{Page de connexion}
+{fig:public-connexion}
+
+% ============================================================
+% RÉCLAMATION
+% ============================================================
+
+\interfaceScreenPair[Réclamation — étapes 1 et 2]
+{images/public/reclamation_etape_1.png}
+{Réclamation : étape 1}
+{fig:reclamation-etape-1}
+{images/public/reclamation_etape_2.png}
+{Réclamation : étape 2}
+{fig:reclamation-etape-2}
+
+\interfaceScreenPair[Réclamation — étape 3 et confirmation]
+{images/public/reclamation_etape_3.png}
+{Réclamation : étape 3}
+{fig:reclamation-etape-3}
+{images/public/reclamation_confirmation.png}
+{Réclamation : confirmation}
+{fig:reclamation-confirmation}
+
+\subsection{Interfaces de l'espace médecin}
+
+L'espace médecin est réservé aux médecins disposant d'un compte actif sur
+la plateforme. Après authentification, le médecin accède à un tableau de
+bord organisé autour d'un menu latéral et d'une zone principale
+d'affichage.
+
+Le menu latéral regroupe les principaux modules accessibles au médecin :
+tableau de bord, profil, réclamations, notifications, sondages,
+élections et paramètres. Cette structure permet au médecin de naviguer
+rapidement entre les services proposés par l'ONMM à partir d'un espace
+unique.
+
+\interfaceScreen[Tableau de bord médecin]
+{images/medecin/dashboard_medecin.png}
+{Tableau de bord de l'espace médecin}
+{fig:medecin-dashboard}
+
+% ============================================================
+% PROFIL MÉDECIN
+% ============================================================
+
+\interfaceScreen[Profil du médecin]
+{images/medecin/profil_medecin.png}
+{Interface du profil médecin}
+{fig:medecin-profil}
+
+% \paragraph*{Modification du profil}
+
+% \interfaceScreen
+% {images/medecin/modifier_profil_medecin (2).png}
+% {Interface de modification du profil médecin}
+% {fig:medecin-modifier-profil}
+
+% ============================================================
+% RÉCLAMATIONS
+% ============================================================
+
+\interfaceScreen[Réclamations du médecin]
+{images/medecin/reclamations_medecin.png}
+{Liste des réclamations du médecin}
+{fig:medecin-reclamations}
+
+\interfaceScreen[Nouvelle réclamation]
+{images/medecin/formulaire_reclamation_medecin.png}
+{Formulaire de dépôt d'une réclamation}
+{fig:medecin-formulaire-reclamation}
+
+% \paragraph*{Détail d'une réclamation}
+
+% \interfaceScreen
+% {images/medecin/details_reclamation_medecin.png}
+% {Détail d'une réclamation}
+% {fig:medecin-details-reclamation}
+
+% ============================================================
+% NOTIFICATIONS
+% ============================================================
+
+\interfaceScreen[Notifications]
+{images/medecin/notifications_medecin.png}
+{Interface des notifications du médecin}
+{fig:medecin-notifications}
+
+% ============================================================
+% SONDAGES
+% ============================================================
+
+\interfaceScreen[Liste des sondages disponibles]
+{images/medecin/sondages_medecin.png}
+{Liste des sondages disponibles}
+{fig:medecin-sondages}
+
+\interfaceScreen[Participation à un sondage]
+{images/medecin/participation_sondage_medecin.png}
+{Interface de participation à un sondage}
+{fig:medecin-participation-sondage-1}
+
+\interfaceScreen
+{images/medecin/participation_sondage_medecin (2).png}
+{Interface de répondre à une question}
+{fig:medecin-participation-sondage-2}
+
+\interfaceScreen
+{images/medecin/participation_sondage_medecin (3).png}
+{Interface de participation à un sondage}
+{fig:medecin-participation-sondage-3}
+
+\interfaceScreen[Résultats d'un sondage]
+{images/medecin/participation_sondage_medecin (4).png}
+{Interface de résultat d'un sondage}
+{fig:medecin-resultat-sondage}
+
+% ============================================================
+% ÉLECTIONS
+% ============================================================
+
+\interfaceScreen[Liste des élections]
+{images/medecin/elections_medecin.png}
+{Liste des élections}
+{fig:medecin-elections}
+
+\interfaceScreen[Détail d'une élection]
+{images/medecin/details_election_medecin (2).png}
+{Détail d'une élection}
+{fig:medecin-details-election}
+
+\paragraph*{Dépôt d'une candidature}
+
+Le module électoral permet au médecin éligible de déposer une candidature
+à une élection ouverte. Le dépôt est organisé sous forme d'étapes afin de
+renseigner progressivement les informations nécessaires et les documents
+associés.
+
+% \interfaceScreen
+% {images/medecin/candidature_etape_informations.png}
+% {Candidature : informations générales}
+% {fig:medecin-candidature-informations}
+
+\interfaceScreen
+{images/medecin/candidature_etape_documents.png}
+{Candidature : dépôt des documents}
+{fig:medecin-candidature-documents}
+
+\interfaceScreen
+{images/medecin/candidature_confirmation.png}
+{Candidature : confirmation}
+{fig:medecin-candidature-confirmation}
+
+% \paragraph*{Mes candidatures}
+
+% \interfaceScreen
+% {images/medecin/mes_candidatures.png}
+% {Liste des candidatures du médecin}
+% {fig:medecin-mes-candidatures}
+
+\interfaceScreen[Vote électronique]
+{images/medecin/vote_election.png}
+{Interface de vote électronique}
+{fig:medecin-vote-election}
+
+\interfaceScreen[Résultats d'une élection]
+{images/medecin/resultats_elections.png}
+{Résultats d'une élection}
+{fig:medecin-resultats-elections}
+
+% ============================================================
+% ESPACE ADMINISTRATEUR
+% ============================================================
+
+\subsection{Interfaces de l'espace administrateur}
+
+L'espace administrateur constitue le centre de gestion de la plateforme.
+Il est réservé aux utilisateurs autorisés de l'ONMM et permet de
+superviser les principaux modules administratifs du système.
+
+Comme l'espace médecin, l'espace administrateur repose sur un menu latéral
+et une zone principale d'affichage. Le menu regroupe les modules de
+gestion, notamment le tableau de bord, les demandes d'adhésion, les
+médecins, les spécialités, les réclamations, les notifications, les
+sondages, la diffusion d'information, le processus électoral et les
+paramètres.
+
+Cette organisation permet à l'administrateur d'accéder rapidement aux
+fonctionnalités de gestion et d'avoir une vision centralisée sur
+l'activité de la plateforme.
+
+\interfaceScreen[Tableau de bord administrateur]
+{images/admin/dashboard_admin.png}
+{Tableau de bord de l'espace administrateur}
+{fig:admin-dashboard}
+
+% ============================================================
+% GESTION DES DEMANDES
+% ============================================================
+
+\interfaceScreen[Gestion des demandes d'adhésion]
+{images/admin/demandes_adhesion.png}
+{Interface de gestion des demandes d'adhésion}
+{fig:admin-demandes-adhesion}
+
+\interfaceScreen[Détail d'une demande d'adhésion]
+{images/admin/details_demande_adhesion.png}
+{Détail d'une demande d'adhésion}
+{fig:admin-details-demande-adhesion}
+
+% ============================================================
+% GESTION DES MÉDECINS
+% ============================================================
+
+\interfaceScreen[Gestion des médecins]
+{images/admin/gestion_medecins.png}
+{Interface de gestion des médecins}
+{fig:admin-gestion-medecins}
+
+% ============================================================
+% GESTION DES RÉCLAMATIONS
+% ============================================================
+
+\interfaceScreen[Gestion des réclamations]
+{images/admin/gestion_reclamations.png}
+{Interface de gestion des réclamations}
+{fig:admin-gestion-reclamations}
+
+\interfaceScreen[Détail d'une réclamation]
+{images/admin/details_reclamation (2).png}
+{Détail d'une réclamation}
+{fig:admin-details-reclamation}
+
+% ============================================================
+% GESTION DES SONDAGES
+% ============================================================
+
+\interfaceScreen[Gestion des sondages]
+{images/admin/gestion_sondages.png}
+{Interface de gestion des sondages}
+{fig:admin-gestion-sondages}
+
+\interfaceScreen[Création d'un sondage]
+{images/admin/creation_sondage.png}
+{Interface de création d'un sondage}
+{fig:admin-creation-sondage-infos-base}
+
+\interfaceScreen
+{images/admin/question_form_sondage.png}
+{Interface de formulaire d'ajout d'une question}
+{fig:admin-creation-sondage-question-form}
+
+\interfaceScreen[Résultats d'un sondage]
+{images/admin/resultats_sondages.png}
+{Interface de résultat du sondage}
+{fig:admin-resultat-sondages}
+
+% ============================================================
+% DIFFUSION D'INFORMATION
+% ============================================================
+
+\interfaceScreen[Diffusion d'information]
+{images/admin/diffusion_information_listes.png}
+{Interface de diffusion d'information}
+{fig:admin-diffusion-information-listes}
+
+\interfaceScreen[Diffusion d'information 2]
+{images/admin/diffusion_information_listes_2.png}
+{Interface de diffusion d'information 2}
+{fig:admin-diffusion-information-listes-grid}
+
+
+% ============================================================
+% PROCESSUS ÉLECTORAL
+% ============================================================
+
+\interfaceScreen[Gestion des élections]
+{images/admin/gestion_elections.png}
+{Interface de gestion des élections}
+{fig:admin-gestion-elections}
+
+\interfaceScreen[Détail d'une élection]
+{images/admin/details_elections.png}
+{Interface de détails d'une élection}
+{fig:admin-details-election}
+
+\interfaceScreen[Gestion des candidatures]
+{images/admin/gestion_candidatures.png}
+{Interface de gestion des candidatures}
+{fig:admin-gestion-candidatures}
+
+\interfaceScreen[Détail d'une candidature]
+{images/admin/details_candidature.png}
+{Interface de détail d'une candidature}
+{fig:admin-detail-candidature}
+
+% \interfaceScreen
+% {images/admin/resultats_elections.png}
+% {Interface des résultats électoraux}
+% {fig:admin-resultats-elections}
+% ============================================================
+% CONCLUSION GÉNÉRALE
+% ============================================================
+\chapter*{Conclusion et perspectives}
+\addcontentsline{toc}{chapter}{Conclusion et perspectives}
+
+Dans le cadre de notre projet de fin d’études, nous avons eu l’opportunité de concevoir et de développer une application web destinée à l’Ordre National des Médecins de Mauritanie. Ce projet s’inscrit dans une démarche de modernisation des services de l’ONMM, à travers la mise en place d’une plateforme permettant de centraliser plusieurs procédures administratives, de faciliter le suivi des dossiers et d’améliorer la communication entre l’institution, les médecins et le public.
+
+Ce travail nous a permis d’appliquer les connaissances acquises durant notre formation, notamment dans le domaine du développement web, de la conception des systèmes d’information, de la gestion des bases de données et de la sécurisation des accès. La réalisation de cette application nous a également amenés à mieux comprendre les besoins d’une institution professionnelle, ainsi que les contraintes liées à la gestion des données, aux profils utilisateurs et à la traçabilité des opérations.
+
+Sur le plan technique, le projet a été réalisé à travers une architecture basée sur un front-end développé avec React, un back-end conçu avec Spring Boot et une base de données PostgreSQL. Cette organisation permet de séparer les responsabilités entre l’interface utilisateur, la logique métier et la persistance des données, tout en offrant une base solide pour assurer la maintenance et l’évolution future de l’application.
+
+Malgré les difficultés rencontrées au cours de la réalisation, notamment dans l’analyse des besoins, la conception des fonctionnalités, la gestion des rôles et la sécurisation des accès, les objectifs principaux du projet ont été atteints. L’application développée constitue une solution centralisée permettant de répondre aux besoins essentiels de l’ONMM, tout en améliorant l’organisation des services et le suivi des différentes démarches administratives.
+
+Au-delà de ces résultats, ce travail ouvre plusieurs perspectives d’évolution. Parmi elles, on peut citer l’enrichissement des fonctionnalités existantes, l’amélioration de l’expérience utilisateur, l’intégration de notifications avancées, ainsi que la génération de tableaux de bord et de rapports statistiques permettant une meilleure prise de décision au niveau de l’Ordre.
+
+Une perspective particulièrement importante concerne également l’exploitation du registre des médecins comme source officielle de référence. À terme, la plateforme pourrait exposer des services sécurisés permettant la consultation ou la vérification de l’inscription des praticiens via des interfaces dédiées (API). Cette évolution permettrait à d’autres systèmes ou institutions du secteur de la santé de s’appuyer sur des données fiables et centralisées, renforçant ainsi le rôle de l’ONMM comme autorité de référence dans la régulation de la profession médicale.
+
+Enfin, le renforcement des mécanismes de sécurité, de traçabilité et de contrôle d’accès constitue également une piste d’amélioration essentielle afin de garantir la protection des données sensibles et la fiabilité du système dans le temps.
+
+En conclusion, ce projet a constitué une expérience à la fois exigeante et formatrice. Il nous a permis de renforcer nos compétences techniques et organisationnelles, tout en travaillant sur une problématique réelle liée à la digitalisation des services d’une institution professionnelle. Il représente ainsi une étape importante dans notre parcours académique et professionnel, et ouvre la voie à de futures améliorations de la plateforme selon les besoins évolutifs de l’ONMM.
+% ============================================================
+% BIBLIOGRAPHIE
+% ============================================================
+\renewcommand{\bibname}{Références}
+\begin{thebibliography}{23}
+\addcontentsline{toc}{chapter}{Références}
+
+\bibitem{onmmFrance}
+Conseil National de l'Ordre des Médecins --- France.
+\textit{Site officiel du CNOM France}.
+\url{https://www.conseil-national.medecin.fr/}.
+
+\bibitem{onmmMaroc}
+Conseil National de l'Ordre des Médecins du Maroc.
+\textit{Site officiel du CNOM Maroc}.
+\url{https://www.cnom.org.ma/}.
+
+\bibitem{onmmSenegal}
+Ordre National des Médecins du Sénégal.
+\textit{Site officiel de l'ONMS}.
+\url{https://www.onms.sn/}.
+
+\bibitem{vscodeDocs}
+Microsoft Corporation.
+\textit{Visual Studio Code --- Documentation officielle}.
+\url{https://code.visualstudio.com/docs}.
+
+\bibitem{intellijDocs}
+JetBrains s.r.o.
+\textit{IntelliJ IDEA --- Documentation officielle}.
+\url{https://www.jetbrains.com/idea/}.
+
+\bibitem{postmanDocs}
+Postman, Inc.
+\textit{Postman API Platform --- Documentation}.
+\url{https://learning.postman.com/docs/}.
+
+\bibitem{pgadminDocs}
+The pgAdmin Development Team.
+\textit{pgAdmin 4 --- Documentation}.
+\url{https://www.pgadmin.org/docs/}.
+
+\bibitem{githubDocs}
+GitHub, Inc.
+\textit{GitHub --- Plateforme de gestion de code source}.
+\url{https://docs.github.com/}.
+
+\bibitem{drawioDocs}
+JGraph Ltd.
+\textit{draw.io --- Outil de modélisation de diagrammes}.
+\url{https://www.drawio.com/}.
+
+\bibitem{jiraDocs}
+Atlassian Corporation.
+\textit{Jira Software --- Documentation officielle}.
+\url{https://support.atlassian.com/jira-software-cloud/}.
+
+\bibitem{overleafDocs}
+Overleaf Ltd.
+\textit{Overleaf --- Éditeur LaTeX collaboratif en ligne}.
+\url{https://www.overleaf.com/learn}.
+
+\bibitem{javaDocs}
+Oracle Corporation.
+\textit{Java Platform, Standard Edition --- Documentation officielle}.
+\url{https://docs.oracle.com/en/java/}.
+
+\bibitem{javascriptMDN}
+Mozilla Foundation.
+\textit{JavaScript --- MDN Web Docs}.
+\url{https://developer.mozilla.org/fr/docs/Web/JavaScript}.
+
+\bibitem{reactDocs}
+Meta Platforms, Inc.
+\textit{React --- La bibliothèque pour des interfaces utilisateur web et natives}.
+\url{https://react.dev/}.
+
+\bibitem{reactRouterDocs}
+Remix Software, Inc.
+\textit{React Router --- Documentation officielle}.
+\url{https://reactrouter.com/}.
+
+\bibitem{axiosDocs}
+Matt Zabriskie et collaborateurs.
+\textit{Axios --- Client HTTP pour le navigateur et Node.js}.
+\url{https://axios-http.com/docs/intro}.
+
+\bibitem{tailwindDocs}
+Tailwind Labs, Inc.
+\textit{Tailwind CSS --- Documentation officielle}.
+\url{https://tailwindcss.com/docs}.
+
+\bibitem{springBootDocs}
+VMware, Inc. (Broadcom).
+\textit{Spring Boot --- Reference Documentation}.
+\url{https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/}.
+
+\bibitem{postgresDocs}
+The PostgreSQL Global Development Group.
+\textit{PostgreSQL 16 --- Documentation officielle}.
+\url{https://www.postgresql.org/docs/16/}.
+
+\bibitem{springSecurityDocs}
+VMware, Inc. (Broadcom).
+\textit{Spring Security --- Reference Documentation}.
+\url{https://docs.spring.io/spring-security/reference/}.
+
+\bibitem{jwtRFC}
+M.~Jones, J.~Bradley et N.~Sakimura.
+\textit{JSON Web Token (JWT) --- RFC 7519}.
+Internet Engineering Task Force (IETF), mai 2015.
+\url{https://datatracker.ietf.org/doc/html/rfc7519}.
+
+\bibitem{nistAesGcm}
+National Institute of Standards and Technology (NIST).
+\textit{Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC --- Special Publication 800-38D}.
+U.S. Department of Commerce, novembre 2007.
+\url{https://csrc.nist.gov/publications/detail/sp/800-38d/final}.
+
+\bibitem{owaspTop10}
+OWASP Foundation.
+\textit{OWASP Top Ten 2021 --- Les dix risques de sécurité les plus critiques pour les applications web}.
+\url{https://owasp.org/www-project-top-ten/}.
+
+\end{thebibliography}
+
+% ============================================================
+% ANNEXE — MOINUMÉRIQUE
+% ============================================================
+\chapter*{Annexe : MoiNumérique --- Empreinte Professionnelle}
+\addcontentsline{toc}{chapter}{Annexe : MoiNumérique}
+\thispagestyle{fancy}
+
+Cette annexe présente l'empreinte professionnelle numérique constituée au cours de ma formation en
+Licence DA2I à la Faculté des Sciences et Techniques de Nouakchott. Elle regroupe mon identité en ligne,
+mon patrimoine de code, mes certifications, mes participations à des événements professionnels ainsi que
+mon engagement associatif.
+
+% -----------------------------------------------------------------
+\medskip
+\noindent{\large\bfseries A.1 \quad Identité Professionnelle en Ligne}
+\medskip
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Plateforme} & \textbf{Lien} \\
+\hline
+LinkedIn &
+\url{https://www.linkedin.com/in/mohamed-med-salem-47a5bb249} \\
+\hline
+GitHub &
+\url{https://github.com/mohamedsidimed624/} \\
+\hline
+Portfolio &
+\url{https://portfolio-med-onmm.vercel.app/} \\
+\hline
+\end{tabularx}
+
+\smallskip
+{\small\textit{Tableau A.1 --- Profils professionnels en ligne}}
+\end{center}
+
+% -----------------------------------------------------------------
+\medskip
+\noindent{\large\bfseries A.2 \quad Patrimoine Code --- GitHub}
+\medskip
+
+Le dépôt GitHub \url{https://github.com/mohamedsidimed624/} regroupe l'ensemble des travaux
+réalisés durant la formation, organisés de manière structurée :
+
+\begin{itemize}
+    \item \textbf{Projets :} le code source complet de la plateforme ONMM (PFE), versionnée avec Git
+    et hébergée sur GitHub avec un historique de commits documenté.
+    \item \textbf{Travaux pratiques et dirigés :} les exercices et projets des modules étudiés au cours
+    de la licence (développement web, bases de données, algorithmique, réseaux, etc.).
+    \item \textbf{Documentation :} chaque dépôt significatif est accompagné d'un fichier
+    \texttt{README.md} décrivant le contexte, les technologies utilisées et les instructions d'exécution.
+\end{itemize}
+
+% -----------------------------------------------------------------
+\medskip
+\noindent{\large\bfseries A.3 \quad Formations et Certifications}
+\medskip
+
+\noindent\textbf{A.3.1 \quad Bootcamp Intensif --- Intelligence Artificielle}
+
+\begin{itemize}
+    \item \textbf{Intitulé :} « Booster les compétences par l'Intelligence Artificielle »
+    \item \textbf{Thèmes :} Augmentation Cognitive, Autonomie Numérique, Innovation Technologique
+    \item \textbf{Organisateurs :} ICESCO, Faculté des Sciences et Techniques (FST), CNEG'S
+    \item \textbf{Formateurs :} Dr.\ Med Mahmoud EL BENANY (IA et Data Science),
+    Dr.\ Ahmed Mohameden (Deep Learning et Data Visualization)
+    \item \textbf{Lieu et dates :} Annexe de la FST, Nouakchott --- du 3 au 5 février 2026
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=0.82\textwidth]{images/cert_bootcamp_ai.jpg}
+
+\smallskip
+{\small\textit{Attestation de participation --- Bootcamp IA (FST / ICESCO, février 2026)}}
+\end{center}
+
+\bigskip
+\noindent\textbf{A.3.2 \quad Attestation de Stage Professionnel --- SMART-MS-SA}
+
+\begin{itemize}
+    \item \textbf{Entreprise :} SMART-MS-SA, Société Anonyme, Nouakchott
+    \item \textbf{Département :} BU. Digital \& Factory
+    \item \textbf{Période :} du 16 février 2026 au 15 juin 2026
+    \item \textbf{Responsable :} Mohamed El Moctar Hemeldy, D. Exécutif d'Opérations \& Supports
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=0.72\textwidth]{images/attest_stage_smart.jpg}
+
+\smallskip
+{\small\textit{Attestation de stage --- SMART-MS-SA, BU. Digital \& Factory (juin 2026)}}
+\end{center}
+
+% -----------------------------------------------------------------
+\medskip
+\noindent{\large\bfseries A.4 \quad Conférences et Événements Scientifiques}
+\medskip
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|l|X|c|}
+\hline
+\textbf{Événement} & \textbf{Description} & \textbf{Date} \\
+\hline
+I2COMPSAPP 2025 &
+Conférence internationale sur les Applications de l'Intelligence Artificielle et de l'Informatique.
+Participation aux sessions de présentation de travaux de recherche et aux ateliers thématiques. &
+20 octobre 2025 \\
+\hline
+\end{tabularx}
+
+\smallskip
+{\small\textit{Tableau A.2 --- Conférences auxquelles j'ai participé}}
+\end{center}
+
+% -----------------------------------------------------------------
+\medskip
+\noindent{\large\bfseries A.5 \quad Compétitions}
+\medskip
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|l|X|c|}
+\hline
+\textbf{Compétition} & \textbf{Description} & \textbf{Date} \\
+\hline
+La Nuit de l'Info 2025 &
+Compétition nationale de développement informatique en équipe organisée en France et ouverte aux
+équipes internationales. Les équipes disposent d'une nuit entière pour répondre à un défi de
+développement web imposé. Participation à l'édition 2025.
+(\url{https://www.nuitdelinfo.com/}) &
+4--5 décembre 2025 \\
+\hline
+\end{tabularx}
+
+\smallskip
+{\small\textit{Tableau A.3 --- Compétitions}}
+\end{center}
+
+% -----------------------------------------------------------------
+\medskip
+\noindent{\large\bfseries A.6 \quad Engagement Associatif}
+\medskip
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|l|X|l|}
+\hline
+\textbf{Association / Club} & \textbf{Description} & \textbf{Rôle} \\
+\hline
+TechForge FST Club &
+Club technologique de la Faculté des Sciences et Techniques de Nouakchott. Le club a pour mission
+de promouvoir la culture numérique, d'organiser des ateliers de programmation et d'encourager les
+étudiants à s'engager dans des projets innovants. &
+Secrétaire Général \\
+\hline
+\end{tabularx}
+
+\smallskip
+{\small\textit{Tableau A.4 --- Engagement associatif}}
+\end{center}
+
+\end{document}

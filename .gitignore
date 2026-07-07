@@ -1,0 +1,25 @@
+# AI / dev tools
+.refact/
+tmp_analysis/
+extract_slides.py
+slide6_dump.txt
+backend/replay_pid*.log
+
+# Deployment & project config (not needed in public repo)
+CLAUDE.md
+DEPLOIEMENT.md
+render.yaml
+
+# Microsoft Office lock files
+~$*
+
+# Downloads folder
+Téléchargements/
+
+# Other presentations — keep only the final one
+*.pptx
+!Presentation_PFE_C23282.pptx
+
+# Backend uploaded files (runtime data, not source code)
+backend/uploads/*
+!backend/uploads/.gitkeep
