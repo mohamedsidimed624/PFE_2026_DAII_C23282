@@ -1,0 +1,261 @@
+SLIDE 1 — Page de garde
+
+> Bonjour Mesdames et Messieurs les membres du jury.
+
+Je vais vous présenter notre projet de fin d'études intitulé : « Conception et développement d'une plateforme web pour la digitalisation des services de l'Ordre National des Médecins de Mauritanie ».
+
+
+
+
+---
+
+SLIDE 2 — Plan
+
+> Ma présentation est organisée en huit parties : le contexte et la problématique, l'étude de l'existant, la spécification des besoins, la conception, les outils et technologies, la sécurité, la réalisation, puis la conclusion et les perspectives.
+
+
+
+
+---
+
+SLIDE 3 — Introduction
+
+> La transformation numérique est devenue un levier essentiel pour améliorer les services des institutions.
+
+C'est dans cette dynamique que s'inscrit notre projet, réalisé pour l'Ordre National des Médecins de Mauritanie.
+
+
+
+
+---
+
+SLIDE 4 — Présentation de l'ONMM
+
+> L'ONMM est l'organisme chargé de réglementer la profession médicale en Mauritanie.
+
+Créé en 2019, il regroupe aujourd'hui plus de 1 028 médecins et accompagne actuellement la modernisation de ses services.
+
+C'est dans ce contexte qu'est né notre projet.
+
+
+
+
+---
+
+SLIDE 5 — Problématique
+
+> Malgré cette évolution, la gestion des services reste peu centralisée, ce qui ralentit les traitements et complique le suivi des dossiers.
+
+Cette situation s'explique principalement par :
+
+des services dispersés ;
+
+des procédures essentiellement manuelles ;
+
+et l'absence d'un espace numérique unique pour les médecins.
+
+
+
+
+Transition :
+
+> Pour répondre à cette problématique, nous avons conçu la solution suivante.
+
+
+
+
+---
+
+SLIDE 6 — Solution proposée
+
+> Nous proposons une plateforme web centralisant les principaux services de l'ONMM : adhésions, réclamations, annonces, annuaire, sondages, élections et gestion des médecins.
+
+Le public accède aux services ouverts, tandis que les médecins disposent d'un espace sécurisé.
+
+L'administration pilote l'ensemble depuis un tableau de bord dédié.
+
+
+
+
+---
+
+SLIDE 7 — Avant / Après
+
+> Avant, les démarches étaient manuelles et réparties sur plusieurs supports.
+
+Aujourd'hui, elles sont centralisées, dématérialisées et accessibles en ligne.
+
+
+
+
+---
+
+SLIDE 8 — Solutions similaires
+
+> Nous avons étudié trois références :
+
+la France, avec un espace sécurisé réservé aux médecins ; le Maroc, avec un portail de services numériques ; et le Sénégal, avec un portail d'information.
+
+Ces exemples confirment la nécessité de digitaliser les ordres médicaux.
+
+
+
+
+---
+
+SLIDE 9 — Acteurs
+
+> La plateforme comporte trois acteurs :
+
+l'administrateur, le médecin et le visiteur,
+
+chacun disposant de fonctionnalités adaptées à son rôle.
+
+
+
+
+---
+
+SLIDE 10 — Besoins
+
+> Les besoins concernent principalement :
+
+la gestion des adhésions, des médecins, des annonces, des réclamations, des sondages et des élections.
+
+Nous avons également défini des exigences de sécurité, de performance et de disponibilité.
+
+
+
+
+---
+
+SLIDE 11 — Cas d'utilisation
+
+> Ce diagramme résume les interactions entre les différents utilisateurs et les principaux services proposés par la plateforme.
+
+
+
+
+---
+
+SLIDE 12 — Diagramme de classes
+
+> Le diagramme de classes représente la structure de la base de données ainsi que les relations entre les principales entités du système.
+
+
+
+
+---
+
+SLIDE 13 — Outils & Technologies (Titre)
+
+> Passons maintenant aux outils et technologies utilisés pour développer cette plateforme.
+
+
+
+
+---
+
+SLIDE 14 — Frontend & Backend
+
+> Le frontend est développé avec React, Vite et Tailwind CSS.
+
+Le backend repose sur Spring Boot, avec JWT et Spring Security pour sécuriser les accès.
+
+
+
+
+---
+
+SLIDE 15 — Outils & Base de données
+
+> Pour le développement, nous avons utilisé Git, GitHub, VS Code, IntelliJ, Maven et Postman.
+
+Les données sont stockées dans PostgreSQL, administré avec pgAdmin.
+
+
+
+
+---
+
+SLIDE 16 — Architecture technique
+
+> Notre application suit une architecture en trois couches :
+
+React pour l'interface, Spring Boot pour la logique métier et les API REST, puis PostgreSQL pour la persistance des données.
+
+
+
+
+---
+
+SLIDE 17 — Sécurité (Titre)
+
+> La sécurité constitue un aspect essentiel de notre plateforme.
+
+
+
+
+---
+
+SLIDE 18 — Sécurité applicative
+
+> Nous avons mis en œuvre trois mécanismes principaux :
+
+JWT pour authentifier les utilisateurs, Spring Security pour gérer les autorisations selon les rôles, et BCrypt pour protéger les mots de passe.
+
+
+
+
+---
+
+SLIDE 19 — Sécurité du vote
+
+> Le module de vote utilise plusieurs mécanismes cryptographiques :
+
+AES pour chiffrer le bulletin, RSA pour protéger la clé, SHA-256 pour garantir l'intégrité, et Ed25519 pour signer chaque bulletin.
+
+Cela garantit la confidentialité, l'intégrité et l'authenticité des votes.
+
+
+
+
+---
+
+SLIDE 20 — Réalisation
+
+> Passons maintenant à une démonstration de la plateforme afin d'illustrer son fonctionnement.
+
+
+
+
+---
+
+SLIDE 21 — Démonstration
+
+> (Vous réalisez la démonstration.)
+
+
+
+
+---
+
+SLIDE 22 — Conclusion & Perspectives
+
+> En conclusion :
+
+nous avons développé une plateforme web centralisée pour l'ONMM ;
+
+nous avons numérisé les principaux services de l'Ordre ;
+
+et mis en place une architecture moderne et sécurisée.
+
+
+Comme perspectives, nous proposons :
+
+le développement d'une application mobile ;
+
+et l'intégration du paiement en ligne.
+
+
+Je vous remercie de votre attention et je suis prêt à répondre à vos questions.

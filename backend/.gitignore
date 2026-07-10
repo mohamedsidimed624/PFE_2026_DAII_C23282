@@ -38,3 +38,6 @@ hs_err_pid*.log
 # Fichiers de configuration locaux contenant des secrets (ne jamais committer)
 src/main/resources/application-local.properties
 src/main/resources/*.env
+
+# Fichiers temporaires Microsoft Office
+~$*
