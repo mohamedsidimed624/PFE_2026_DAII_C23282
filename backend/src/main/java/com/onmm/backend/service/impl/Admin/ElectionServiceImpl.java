@@ -2215,6 +2215,14 @@ public class ElectionServiceImpl implements ElectionService {
             return medecinRepo.countBySectionOrdreAndStatut(SectionOrdre.SPECIALISTE, StatutMedecin.ACTIF);
         }
 
+        if (e.getCorpsElectoral() == CorpsElectoral.CONSEIL_SECTION_A) {
+            return medecinRepo.countBySectionOrdreAndStatut(SectionOrdre.GENERALISTE, StatutMedecin.ACTIF);
+        }
+
+        if (e.getCorpsElectoral() == CorpsElectoral.CONSEIL_SECTION_C) {
+            return medecinRepo.countBySectionOrdreAndStatut(SectionOrdre.ENSEIGNANT_CHERCHEUR, StatutMedecin.ACTIF);
+        }
+
         return medecinRepo.countElecteursEligiblesTous(StatutMedecin.ACTIF);
     }
 

@@ -24,6 +24,8 @@ public interface ElectionRepository extends JpaRepository<Election, Long> {
     List<Election> findByStatutAndVoteStartDateLessThanEqual(ElectionStatut statut, LocalDateTime date);
     List<Election> findByStatutAndVoteEndDateLessThan(ElectionStatut statut, LocalDateTime date);
 
+    boolean existsByTitre(String titre);
+
     boolean existsByTypeAndStatutNotIn(ElectionType type, List<ElectionStatut> statuts);
     boolean existsByTypeAndRegionIgnoreCaseAndStatutNotIn(ElectionType type, String region, List<ElectionStatut> statuts);
 }
